@@ -51,7 +51,7 @@ export interface WorkspaceState {
 
   loadWorkspaces: (userId: string) => Promise<void>;
   loadMembers: (workspaceId: string) => Promise<void>;
-  selectWorkspace: (workspaceId: string) => Promise<void>;
+  selectWorkspace: (workspaceId: string, userId?: string) => Promise<void>;
   createWorkspace: (
     data: { name: string; description: string; currency: string; icon: string; type: WorkspaceType },
     userId: string
@@ -100,13 +100,18 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     }
   },
 
-  selectWorkspace: async (workspaceId: string) => {
+  selectWorkspace: async (workspaceId: string, userId?: string) => {
     set({ isLoading: true, error: null });
     try {
       const workspace = await getWorkspaceById(workspaceId);
       if (!workspace) throw new Error("Workspace not found");
+      let role: WorkspaceMember["role"] | null = null;
+      if (userId) {
+        const member = await getWorkspaceMember(workspaceId, userId);
+        role = member?.role ?? null;
+      }
       localStorage.setItem("activeWorkspaceId", workspaceId);
-      set({ activeWorkspace: workspace, isLoading: false });
+      set({ activeWorkspace: workspace, activeWorkspaceRole: role, isLoading: false });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : "Failed to select workspace", isLoading: false });
     }

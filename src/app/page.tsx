@@ -368,7 +368,7 @@ export default function Dashboard() {
           <p className="text-sm text-muted-foreground/70 mb-6">Pilih buku untuk melihat dashboard</p>
           <div className="space-y-2">
             {workspaces.map((ws) => (
-              <button key={ws.id} onClick={() => selectWorkspace(ws.id)} className="w-full flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors text-left">
+              <button key={ws.id} onClick={() => selectWorkspace(ws.id, user.id)} className="w-full flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors text-left">
                 <span className="text-xl">{ws.icon}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium">{ws.name}</p>

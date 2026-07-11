@@ -43,9 +43,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     if (user && workspaces.length > 0 && !activeWorkspace) {
       const saved = localStorage.getItem("activeWorkspaceId");
       if (saved && workspaces.some((w) => w.id === saved)) {
-        selectWorkspace(saved);
+        selectWorkspace(saved, user.id);
       } else {
-        selectWorkspace(workspaces[0].id);
+        selectWorkspace(workspaces[0].id, user.id);
       }
     }
   }, [user, workspaces, activeWorkspace, selectWorkspace]);

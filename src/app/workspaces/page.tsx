@@ -78,7 +78,7 @@ export default function WorkspacesPage() {
             <div
               key={ws.id}
               className={`floating-card p-4 cursor-pointer hover:shadow-md transition-all ${activeWorkspace?.id === ws.id ? "ring-2 ring-emerald-500/50" : ""}`}
-              onClick={() => { selectWorkspace(ws.id); router.push("/"); }}
+              onClick={() => { selectWorkspace(ws.id, user.id); router.push("/"); }}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
