@@ -91,7 +91,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         data-sidebar
         className={`transition-all duration-[350ms] ${
           sidebarCollapsed ? 'w-[var(--sidebar-collapsed-width)]' : 'w-[var(--sidebar-width)]'
-        } ${mobileSidebarOpen ? 'open' : ''} max-lg:fixed max-lg:left-0 max-lg:top-0 max-lg:bottom-0 max-lg:z-[55] max-lg:-translate-x-full max-lg:[&.open]:translate-x-0 max-lg:transition-transform max-lg:duration-300`}
+        } ${mobileSidebarOpen ? 'open' : ''} max-lg:fixed max-lg:inset-0 max-lg:z-[55] max-lg:-translate-x-full max-lg:[&.open]:translate-x-0 max-lg:transition-transform max-lg:duration-300`}
       >
         <Sidebar
           collapsed={sidebarCollapsed}
