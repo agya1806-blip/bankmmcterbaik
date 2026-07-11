@@ -324,7 +324,7 @@ let dbPromise: Promise<IDBPDatabase> | null = null;
 function getDb() {
   if (!dbPromise) {
     dbPromise = openDB(DB_NAME, DB_VERSION, {
-      upgrade(db, _oldVersion, _newVersion, transaction) {
+      upgrade(db, _oldVersion, _newVersion, _transaction) {
         if (!db.objectStoreNames.contains("users")) {
           const userStore = db.createObjectStore("users", { keyPath: "id" });
           userStore.createIndex("email", "email", { unique: true });

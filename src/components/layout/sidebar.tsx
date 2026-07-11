@@ -11,7 +11,6 @@ import {
 import { useAuthStore } from "@/engines/identity/auth-store";
 import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
 import { useTranslation } from "@/lib/i18n";
-import type { WorkspaceType } from "@/lib/db";
 
 type NavItem = { href: string; labelKey: string; icon: LucideIcon };
 

@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useAuthStore } from "@/engines/identity/auth-store";
 import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
-import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,8 +21,6 @@ interface QrisItem {
 }
 
 export default function QrisPage() {
-  const { t } = useTranslation();
-  const { user } = useAuthStore();
   const { activeWorkspace } = useWorkspaceStore();
   const qrRef = useRef<HTMLDivElement>(null);
   const [amount, setAmount] = useState("");

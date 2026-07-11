@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/engines/identity/auth-store";
 import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
 import { useOrderStore } from "@/engines/business/order-store";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, Plus, FileText, Filter } from "lucide-react";
+import { Search, Plus, FileText } from "lucide-react";
 
 const TYPE_ICONS: Record<string, string> = {
   print: "📚", laptop: "💻", handphone: "📱", tiktok: "🎵", umum: "📄",

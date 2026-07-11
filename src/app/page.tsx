@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/engines/identity/auth-store";
 import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
@@ -8,10 +8,9 @@ import { useFinancialStore } from "@/engines/financial/financial-store";
 import { useOrderStore } from "@/engines/business/order-store";
 import { Button } from "@/components/ui/button";
 import {
-  Zap, QrCode, FileText, Send, Plus, ArrowUpRight, ArrowDownRight,
-  ArrowLeftRight, Users, ShoppingCart, TrendingUp, TrendingDown, Wallet,
-  ChevronRight, DollarSign, PieChart, CalendarDays, BarChart3, Building2,
-  CreditCard, ArrowLeft, ArrowRight
+  Zap, QrCode, FileText, Plus, ArrowUpRight, ArrowDownRight,
+  ShoppingCart, TrendingUp, TrendingDown,
+  ChevronRight
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
