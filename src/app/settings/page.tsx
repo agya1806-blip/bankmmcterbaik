@@ -49,9 +49,11 @@ import {
   createBranch,
   createPaymentMethod,
   deletePaymentMethod,
+  resetWorkspaceData,
 } from "@/lib/db";
 import { useRecurringStore } from "@/engines/financial/recurring-store";
 import { useTranslation } from "@/lib/i18n";
+import toast from "react-hot-toast";
 import { Trash2 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -78,6 +80,7 @@ export default function SettingsPage() {
   const [wsDescription, setWsDescription] = useState("");
   const [wsCurrency, setWsCurrency] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [resetConfirm, setResetConfirm] = useState("");
   const [profileName, setProfileName] = useState("");
   const [profileEmail, setProfileEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -86,6 +89,8 @@ export default function SettingsPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const [businessName, setBusinessName] = useState("");
   const [businessWhatsapp, setBusinessWhatsapp] = useState("");
@@ -179,6 +184,21 @@ export default function SettingsPage() {
     setRegenerating(true);
     await regenerateInviteCode(activeWorkspace.id);
     setRegenerating(false);
+  };
+
+  const handleReset = async () => {
+    if (!activeWorkspace) return;
+    setResetting(true);
+    try {
+      await resetWorkspaceData(activeWorkspace.id);
+      setShowResetDialog(false);
+      setResetConfirm("");
+      toast.success("Semua data berhasil direset");
+    } catch {
+      toast.error("Gagal mereset data");
+    } finally {
+      setResetting(false);
+    }
   };
 
   const handleDeleteWorkspace = async () => {
@@ -906,6 +926,14 @@ export default function SettingsPage() {
               </div>
             </div>
 
+            <div className="bg-card/80 backdrop-blur-sm border-orange-500/30 rounded-2xl p-6">
+              <h3 className="text-base font-semibold text-orange-600 dark:text-orange-400">Reset Data</h3>
+              <p className="text-xs text-muted-foreground mb-4">Hapus semua data di buku ini (transaksi, akun, kategori, dll). Data tidak bisa dikembalikan.</p>
+              <Button variant="outline" className="border-orange-500/30 text-orange-600 hover:bg-orange-500/10" onClick={() => setShowResetDialog(true)}>
+                <Trash2 className="size-4" /> Reset Data Buku
+              </Button>
+            </div>
+
             <div className="bg-card/80 backdrop-blur-sm border-red-500/30 rounded-2xl p-6">
               <h3 className="text-base font-semibold text-destructive">{t("settings.dangerZone")}</h3>
               <p className="text-xs text-muted-foreground mb-4">{t("settings.dangerDesc")}</p>
@@ -926,6 +954,25 @@ export default function SettingsPage() {
           </>
         )}
       </div>
+
+      <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reset Data Buku</DialogTitle>
+            <DialogDescription>Semua data di buku <strong>{activeWorkspace.name}</strong> akan dihapus permanen: transaksi, akun, kategori, anggaran, pelanggan, supplier, produk, pesanan, inventaris, dan lainnya. Tindakan ini tidak bisa dibatalkan.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <p className="text-sm text-muted-foreground">Ketik <strong>RESET</strong> untuk konfirmasi:</p>
+            <Input value={resetConfirm} onChange={(e) => setResetConfirm(e.target.value)} placeholder="RESET" />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResetDialog(false)}>Batal</Button>
+            <Button variant="destructive" onClick={handleReset} disabled={resetConfirm !== "RESET" || resetting}>
+              {resetting ? "Mereset..." : "Reset Data"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>

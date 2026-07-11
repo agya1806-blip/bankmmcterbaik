@@ -14,56 +14,89 @@ import { useTranslation } from "@/lib/i18n";
 
 type NavItem = { href: string; labelKey: string; icon: LucideIcon };
 
-const ALL_NAV_ITEMS: Record<string, NavItem[]> = {
+interface NavGroup {
+  label?: string;
+  items: NavItem[];
+}
+
+const ALL_NAV_GROUPS: Record<string, NavGroup[]> = {
   pribadi: [
-    { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
-    { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
-    { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
-    { href: "/budgets", labelKey: "nav.budgets", icon: PieChart },
-    { href: "/reports", labelKey: "nav.reports", icon: BarChart3 },
-    { href: "/calendar", labelKey: "nav.calendar", icon: Calendar },
+    { items: [
+      { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
+      { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
+    ]},
+    { label: "Keuangan", items: [
+      { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
+      { href: "/budgets", labelKey: "nav.budgets", icon: PieChart },
+    ]},
+    { label: "Laporan", items: [
+      { href: "/reports", labelKey: "nav.reports", icon: BarChart3 },
+      { href: "/calendar", labelKey: "nav.calendar", icon: Calendar },
+    ]},
   ],
   usaha: [
-    { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
-    { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
-    { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
-    { href: "/orders", labelKey: "nav.orders", icon: ShoppingCart },
-    { href: "/invoices", labelKey: "nav.invoices", icon: FileText },
-    { href: "/customers", labelKey: "nav.customers", icon: Users },
-    { href: "/suppliers", labelKey: "nav.suppliers", icon: Building2 },
-    { href: "/products", labelKey: "nav.products", icon: Tag },
-    { href: "/inventory", labelKey: "nav.inventory", icon: Package },
-    { href: "/ppob", labelKey: "nav.ppob", icon: Zap },
-    { href: "/qris", labelKey: "nav.qris", icon: QrCode },
-    { href: "/budgets", labelKey: "nav.budgets", icon: PieChart },
-    { href: "/projects", labelKey: "nav.projects", icon: FolderKanban },
-    { href: "/debts", labelKey: "nav.debts", icon: ArrowUpDown },
-    { href: "/reports", labelKey: "nav.reports", icon: BarChart3 },
-    { href: "/calendar", labelKey: "nav.calendar", icon: Calendar },
-    { href: "/categories", labelKey: "nav.categories", icon: Tag },
-    { href: "/wallets", labelKey: "nav.wallets", icon: CreditCard },
+    { items: [
+      { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
+      { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
+    ]},
+    { label: "Bisnis", items: [
+      { href: "/orders", labelKey: "nav.orders", icon: ShoppingCart },
+      { href: "/invoices", labelKey: "nav.invoices", icon: FileText },
+      { href: "/customers", labelKey: "nav.customers", icon: Users },
+      { href: "/suppliers", labelKey: "nav.suppliers", icon: Building2 },
+    ]},
+    { label: "Produk", items: [
+      { href: "/products", labelKey: "nav.products", icon: Tag },
+      { href: "/inventory", labelKey: "nav.inventory", icon: Package },
+    ]},
+    { label: "Layanan", items: [
+      { href: "/ppob", labelKey: "nav.ppob", icon: Zap },
+      { href: "/qris", labelKey: "nav.qris", icon: QrCode },
+    ]},
+    { label: "Keuangan", items: [
+      { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
+      { href: "/budgets", labelKey: "nav.budgets", icon: PieChart },
+      { href: "/debts", labelKey: "nav.debts", icon: ArrowUpDown },
+    ]},
+    { label: "Lainnya", items: [
+      { href: "/projects", labelKey: "nav.projects", icon: FolderKanban },
+      { href: "/reports", labelKey: "nav.reports", icon: BarChart3 },
+      { href: "/calendar", labelKey: "nav.calendar", icon: Calendar },
+      { href: "/categories", labelKey: "nav.categories", icon: Tag },
+      { href: "/wallets", labelKey: "nav.wallets", icon: CreditCard },
+    ]},
   ],
   modal: [
-    { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
-    { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
-    { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
-    { href: "/reports", labelKey: "nav.reports", icon: BarChart3 },
+    { items: [
+      { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
+      { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
+      { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
+      { href: "/reports", labelKey: "nav.reports", icon: BarChart3 },
+    ]},
   ],
   toko: [
-    { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
-    { href: "/ppob", labelKey: "nav.ppob", icon: Zap },
-    { href: "/qris", labelKey: "nav.qris", icon: QrCode },
-    { href: "/orders", labelKey: "nav.orders", icon: ShoppingCart },
-    { href: "/products", labelKey: "nav.products", icon: Tag },
-    { href: "/customers", labelKey: "nav.customers", icon: Users },
-    { href: "/inventory", labelKey: "nav.inventory", icon: Package },
-    { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
+    { items: [
+      { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
+    ]},
+    { label: "Layanan", items: [
+      { href: "/ppob", labelKey: "nav.ppob", icon: Zap },
+      { href: "/qris", labelKey: "nav.qris", icon: QrCode },
+    ]},
+    { label: "Bisnis", items: [
+      { href: "/orders", labelKey: "nav.orders", icon: ShoppingCart },
+      { href: "/products", labelKey: "nav.products", icon: Tag },
+      { href: "/customers", labelKey: "nav.customers", icon: Users },
+      { href: "/inventory", labelKey: "nav.inventory", icon: Package },
+      { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
+    ]},
   ],
   hutang: [
-    { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
-    { href: "/debts", labelKey: "nav.debts", icon: ArrowUpDown },
-    { href: "/customers", labelKey: "nav.customers", icon: Users },
-    { href: "/calendar", labelKey: "nav.calendar", icon: Calendar },
+    { items: [
+      { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
+      { href: "/debts", labelKey: "nav.debts", icon: ArrowUpDown },
+      { href: "/customers", labelKey: "nav.customers", icon: Users },
+      { href: "/calendar", labelKey: "nav.calendar", icon: Calendar },
+    ]},
   ],
 };
 
@@ -80,9 +113,9 @@ export default function Sidebar({ collapsed, onToggle, onMobileClose }: SidebarP
   const { logout } = useAuthStore();
   const { activeWorkspace } = useWorkspaceStore();
 
-  const navItems = useMemo(() => {
+  const navGroups = useMemo(() => {
     const type = activeWorkspace?.type || "pribadi";
-    return ALL_NAV_ITEMS[type] || ALL_NAV_ITEMS.pribadi;
+    return ALL_NAV_GROUPS[type] || ALL_NAV_GROUPS.pribadi;
   }, [activeWorkspace?.type]);
 
   const handleNav = useCallback((href: string) => {
@@ -115,17 +148,28 @@ export default function Sidebar({ collapsed, onToggle, onMobileClose }: SidebarP
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto p-3 space-y-0.5 scrollbar-hide">
-        {navItems.map((item) => (
-          <button
-            key={item.href}
-            onClick={() => handleNav(item.href)}
-            className={`w-full nav-item ${isActive(item.href) ? 'nav-item-active' : ''} ${collapsed ? 'justify-center px-0' : ''}`}
-            title={collapsed ? t(item.labelKey) : undefined}
-          >
-            <item.icon className="size-5 shrink-0" />
-            {!collapsed && <span>{t(item.labelKey)}</span>}
-          </button>
+      <nav className="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-hide">
+        {navGroups.map((group, gi) => (
+          <div key={gi}>
+            {group.label && !collapsed && (
+              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted-foreground/50">
+                {group.label}
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {group.items.map((item) => (
+                <button
+                  key={item.href}
+                  onClick={() => handleNav(item.href)}
+                  className={`w-full nav-item ${isActive(item.href) ? 'nav-item-active' : ''} ${collapsed ? 'justify-center px-0' : ''}`}
+                  title={collapsed ? t(item.labelKey) : undefined}
+                >
+                  <item.icon className="size-5 shrink-0" />
+                  {!collapsed && <span>{t(item.labelKey)}</span>}
+                </button>
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
 

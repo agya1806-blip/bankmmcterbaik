@@ -58,7 +58,7 @@ function QuickActions({ type, router }: { type: string; router: ReturnType<typeo
           <button
             key={action.href}
             onClick={() => router.push(action.href)}
-            className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md transition-all active:scale-95"
+            className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md transition-all active:scale-95"
           >
             <div className={`flex items-center justify-center size-10 rounded-xl bg-gradient-to-br ${action.color} shadow-lg`}>
               <action.icon className="size-5 text-white" />
@@ -95,8 +95,7 @@ function PribadiDashboard({ ws, currency }: { ws: { id: string; name: string; cu
 
   return (
     <div className="space-y-5 animate-fade-in max-w-lg mx-auto pb-24">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 p-6 shadow-xl shadow-emerald-500/20">
-        <div className="absolute top-0 right-0 size-40 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4" />
+      <div className="hero-gradient">
         <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1">Total Saldo</p>
         <p className="text-3xl font-bold font-heading text-white mb-2">{currency} {balance.toLocaleString()}</p>
         <div className="flex gap-4">
@@ -106,11 +105,11 @@ function PribadiDashboard({ ws, currency }: { ws: { id: string; name: string; cu
       </div>
       <QuickActions type="pribadi" router={router} />
       <div className="grid grid-cols-2 gap-3">
-        <div className="floating-card p-4"><p className="text-xs text-muted-foreground/60 mb-1">Laba Bersih</p><p className={`text-lg font-bold font-heading ${netP >= 0 ? "text-emerald-600" : "text-red-500"}`}>{currency} {Math.abs(netP).toLocaleString()}</p></div>
-        <div className="floating-card p-4"><p className="text-xs text-muted-foreground/60 mb-1">Anggaran Aktif</p><p className="text-lg font-bold font-heading">{budgets.length}</p></div>
+        <div className="premium-stat"><p className="premium-stat-label">Laba Bersih</p><p className={`premium-stat-value ${netP >= 0 ? "text-emerald-600" : "text-red-500"}`}>{currency} {Math.abs(netP).toLocaleString()}</p></div>
+        <div className="premium-stat"><p className="premium-stat-label">Anggaran Aktif</p><p className="premium-stat-value">{budgets.length}</p></div>
       </div>
       {chartData.some((d) => d.income > 0 || d.expense > 0) && (
-        <div className="floating-card p-4">
+        <div className="premium-card p-4">
           <p className="text-sm font-semibold mb-3">Arus Kas 6 Bulan</p>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={chartData}>
@@ -127,14 +126,14 @@ function PribadiDashboard({ ws, currency }: { ws: { id: string; name: string; cu
       <div>
         <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold">Transaksi Terbaru</h2><button onClick={() => router.push("/transactions")} className="text-xs font-medium text-emerald-600">Lihat Semua</button></div>
         {recent.length === 0 ? (
-          <div className="floating-card p-6 text-center">
+          <div className="premium-card p-6 text-center">
             <p className="text-sm text-muted-foreground/60 mb-3">Belum ada transaksi</p>
             <Button variant="outline" size="sm" onClick={() => router.push("/transactions")}><Plus className="size-3.5" /> Tambah</Button>
           </div>
         ) : (
           <div className="space-y-1">
             {recent.map((tx) => (
-              <div key={tx.id} className="floating-card p-3 flex items-center justify-between cursor-pointer active:scale-[0.99]" onClick={() => router.push("/transactions")}>
+              <div key={tx.id} className="premium-card p-3 flex items-center justify-between cursor-pointer active:scale-[0.99]" onClick={() => router.push("/transactions")}>
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className={`flex items-center justify-center size-8 rounded-lg shrink-0 ${tx.type === "income" ? "bg-emerald-100 dark:bg-emerald-900/20" : "bg-red-100 dark:bg-red-900/20"}`}>
                     {tx.type === "income" ? <ArrowUpRight className="size-3.5 text-emerald-600" /> : <ArrowDownRight className="size-3.5 text-red-500" />}
@@ -196,9 +195,7 @@ function UsahaDashboard({ ws, currency }: { ws: { id: string; name: string; curr
 
   return (
     <div className="space-y-5 animate-fade-in max-w-lg mx-auto pb-24">
-      {/* Saldo & Hero */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 p-6 shadow-xl shadow-emerald-500/20">
-        <div className="absolute top-0 right-0 size-40 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4" />
+      <div className="hero-gradient">
         <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1">Total Saldo Usaha</p>
         <p className="text-3xl font-bold font-heading text-white mb-2">{currency} {balance.toLocaleString()}</p>
         <div className="flex gap-4">
@@ -207,58 +204,53 @@ function UsahaDashboard({ ws, currency }: { ws: { id: string; name: string; curr
         </div>
       </div>
 
-      {/* Quick Actions */}
       <div>
         <h2 className="text-sm font-semibold mb-3">Aksi Cepat</h2>
         <div className="grid grid-cols-4 gap-2">
-          <button onClick={() => router.push("/ppob")} className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg"><Zap className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">PPOB</span></button>
-          <button onClick={() => router.push("/qris")} className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg"><QrCode className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">QRIS</span></button>
-          <button onClick={() => router.push("/orders")} className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 shadow-lg"><ShoppingCart className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">Pesanan</span></button>
-          <button onClick={() => router.push("/invoices")} className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-lg"><FileText className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">Tagih</span></button>
+          <button onClick={() => router.push("/ppob")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg"><Zap className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">PPOB</span></button>
+          <button onClick={() => router.push("/qris")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg"><QrCode className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">QRIS</span></button>
+          <button onClick={() => router.push("/orders")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 shadow-lg"><ShoppingCart className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">Pesanan</span></button>
+          <button onClick={() => router.push("/invoices")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-lg"><FileText className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">Tagih</span></button>
         </div>
       </div>
 
-      {/* Ringkasan Bisnis */}
       <div>
         <h2 className="text-sm font-semibold mb-3">Ringkasan Bisnis</h2>
         <div className="grid grid-cols-2 gap-3">
-          <div className="floating-card p-4"><p className="text-xs text-muted-foreground/60">Laba Bersih</p><p className={`text-lg font-bold font-heading ${netProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>{currency} {Math.abs(netProfit).toLocaleString()}</p></div>
-          <div className="floating-card p-4"><p className="text-xs text-muted-foreground/60">Revenue</p><p className="text-lg font-bold font-heading text-blue-600">{currency} {totalRevenue.toLocaleString()}</p></div>
-          <div className="floating-card p-4"><p className="text-xs text-muted-foreground/60">PPOB Profit</p><p className="text-lg font-bold font-heading text-emerald-600">{currency} {ppobProfit.toLocaleString()}</p></div>
-          <div className="floating-card p-4"><p className="text-xs text-muted-foreground/60">QRIS Terkumpul</p><p className="text-lg font-bold font-heading text-blue-600">{currency} {qrisCollect.toLocaleString()}</p></div>
+          <div className="premium-stat"><p className="premium-stat-label">Laba Bersih</p><p className={`premium-stat-value ${netProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>{currency} {Math.abs(netProfit).toLocaleString()}</p></div>
+          <div className="premium-stat"><p className="premium-stat-label">Revenue</p><p className="premium-stat-value text-blue-600">{currency} {totalRevenue.toLocaleString()}</p></div>
+          <div className="premium-stat"><p className="premium-stat-label">PPOB Profit</p><p className="premium-stat-value text-emerald-600">{currency} {ppobProfit.toLocaleString()}</p></div>
+          <div className="premium-stat"><p className="premium-stat-label">QRIS Terkumpul</p><p className="premium-stat-value text-blue-600">{currency} {qrisCollect.toLocaleString()}</p></div>
         </div>
       </div>
 
-      {/* Pesanan */}
       <div>
         <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold">Pesanan</h2><button onClick={() => router.push("/orders")} className="text-xs font-medium text-emerald-600">Kelola</button></div>
         <div className="grid grid-cols-4 gap-2">
-          <div className="floating-card p-3 text-center"><p className="text-[10px] text-muted-foreground/60">Baru</p><p className="text-lg font-bold font-heading text-blue-600">{baru}</p></div>
-          <div className="floating-card p-3 text-center"><p className="text-[10px] text-muted-foreground/60">Proses</p><p className="text-lg font-bold font-heading text-amber-600">{proses}</p></div>
-          <div className="floating-card p-3 text-center"><p className="text-[10px] text-muted-foreground/60">Selesai</p><p className="text-lg font-bold font-heading text-emerald-600">{selesai}</p></div>
-          <div className="floating-card p-3 text-center"><p className="text-[10px] text-muted-foreground/60">Pelanggan</p><p className="text-lg font-bold font-heading">{customers.length}</p></div>
+          <div className="premium-card p-3 text-center"><p className="premium-stat-label">Baru</p><p className="text-lg font-bold font-heading text-blue-600">{baru}</p></div>
+          <div className="premium-card p-3 text-center"><p className="premium-stat-label">Proses</p><p className="text-lg font-bold font-heading text-amber-600">{proses}</p></div>
+          <div className="premium-card p-3 text-center"><p className="premium-stat-label">Selesai</p><p className="text-lg font-bold font-heading text-emerald-600">{selesai}</p></div>
+          <div className="premium-card p-3 text-center"><p className="premium-stat-label">Pelanggan</p><p className="text-lg font-bold font-heading">{customers.length}</p></div>
         </div>
       </div>
 
-      {/* Info Bisnis */}
       <div>
         <h2 className="text-sm font-semibold mb-3">Info Bisnis</h2>
         <div className="grid grid-cols-3 gap-2">
-          <div onClick={() => router.push("/products")} className="floating-card p-3 text-center cursor-pointer hover:shadow-md active:scale-95"><p className="text-[10px] text-muted-foreground/60">Produk</p><p className="text-lg font-bold font-heading">{products.length}</p></div>
-          <div onClick={() => router.push("/inventory")} className="floating-card p-3 text-center cursor-pointer hover:shadow-md active:scale-95"><p className="text-[10px] text-muted-foreground/60">Stok</p><p className="text-lg font-bold font-heading">{inventory.length}</p>{lowStock > 0 && <p className="text-[8px] text-red-500 font-medium">{lowStock} hampir habis</p>}</div>
-          <div onClick={() => router.push("/suppliers")} className="floating-card p-3 text-center cursor-pointer hover:shadow-md active:scale-95"><p className="text-[10px] text-muted-foreground/60">Supplier</p><p className="text-lg font-bold font-heading">{supplierCount}</p></div>
+          <div onClick={() => router.push("/products")} className="premium-card p-3 text-center cursor-pointer hover:shadow-md active:scale-95"><p className="premium-stat-label">Produk</p><p className="text-lg font-bold font-heading">{products.length}</p></div>
+          <div onClick={() => router.push("/inventory")} className="premium-card p-3 text-center cursor-pointer hover:shadow-md active:scale-95"><p className="premium-stat-label">Stok</p><p className="text-lg font-bold font-heading">{inventory.length}</p>{lowStock > 0 && <p className="text-[8px] text-red-500 font-medium">{lowStock} hampir habis</p>}</div>
+          <div onClick={() => router.push("/suppliers")} className="premium-card p-3 text-center cursor-pointer hover:shadow-md active:scale-95"><p className="premium-stat-label">Supplier</p><p className="text-lg font-bold font-heading">{supplierCount}</p></div>
         </div>
       </div>
 
-      {/* Transaksi Terbaru */}
       <div>
         <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold">Transaksi Terbaru</h2><button onClick={() => router.push("/transactions")} className="text-xs font-medium text-emerald-600">Lihat Semua</button></div>
         {recent.length === 0 ? (
-          <div className="floating-card p-6 text-center"><p className="text-sm text-muted-foreground/60">Belum ada transaksi</p><Button variant="outline" size="sm" className="mt-3" onClick={() => router.push("/transactions")}><Plus className="size-3.5" /> Tambah</Button></div>
+          <div className="premium-card p-6 text-center"><p className="text-sm text-muted-foreground/60">Belum ada transaksi</p><Button variant="outline" size="sm" className="mt-3" onClick={() => router.push("/transactions")}><Plus className="size-3.5" /> Tambah</Button></div>
         ) : (
           <div className="space-y-1">
             {recent.map((tx) => (
-              <div key={tx.id} className="floating-card p-3 flex items-center justify-between cursor-pointer active:scale-[0.99]" onClick={() => router.push("/transactions")}>
+              <div key={tx.id} className="premium-card p-3 flex items-center justify-between cursor-pointer active:scale-[0.99]" onClick={() => router.push("/transactions")}>
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className={`flex items-center justify-center size-8 rounded-lg shrink-0 ${tx.type === "income" ? "bg-emerald-100 dark:bg-emerald-900/20" : "bg-red-100 dark:bg-red-900/20"}`}>
                     {tx.type === "income" ? <ArrowUpRight className="size-3.5 text-emerald-600" /> : <ArrowDownRight className="size-3.5 text-red-500" />}
@@ -285,15 +277,15 @@ function HutangDashboard({ ws, currency }: { ws: { id: string; name: string; cur
   const totalReceivable = receivables.reduce((s, t) => s + t.amount, 0);
   return (
     <div className="space-y-5 animate-fade-in max-w-lg mx-auto pb-24">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 p-6 shadow-xl">
+      <div className="hero-gradient" style={{background: "linear-gradient(135deg, hsl(24 95% 53%), hsl(0 72% 51%))"}}>
         <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1">Buku Hutang</p>
         <p className="text-3xl font-bold font-heading text-white mb-2">{currency} {totalDebt.toLocaleString()}</p>
         <p className="text-white/60 text-xs">Total Hutang</p>
       </div>
       <QuickActions type="hutang" router={router} />
       <div className="grid grid-cols-2 gap-3">
-        <div className="floating-card p-4"><p className="text-xs text-muted-foreground/60 mb-1">Hutang</p><p className="text-xl font-bold font-heading text-red-500">{currency} {totalDebt.toLocaleString()}</p></div>
-        <div className="floating-card p-4"><p className="text-xs text-muted-foreground/60 mb-1">Piutang</p><p className="text-xl font-bold font-heading text-blue-600">{currency} {totalReceivable.toLocaleString()}</p></div>
+        <div className="premium-stat"><p className="premium-stat-label">Hutang</p><p className="premium-stat-value text-red-500">{currency} {totalDebt.toLocaleString()}</p></div>
+        <div className="premium-stat"><p className="premium-stat-label">Piutang</p><p className="premium-stat-value text-blue-600">{currency} {totalReceivable.toLocaleString()}</p></div>
       </div>
     </div>
   );
@@ -308,15 +300,15 @@ function ModalDashboard({ ws, currency }: { ws: { id: string; name: string; curr
   const expense = transactions.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   return (
     <div className="space-y-5 animate-fade-in max-w-lg mx-auto pb-24">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 p-6 shadow-xl">
+      <div className="hero-gradient" style={{background: "linear-gradient(135deg, hsl(270 67% 47%), hsl(300 60% 40%))"}}>
         <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1">Buku Modal</p>
         <p className="text-3xl font-bold font-heading text-white mb-2">{currency} {balance.toLocaleString()}</p>
         <p className="text-white/60 text-xs">Total Modal</p>
       </div>
       <QuickActions type="modal" router={router} />
       <div className="grid grid-cols-2 gap-3">
-        <div className="floating-card p-4"><p className="text-xs text-muted-foreground/60 mb-1">Pemasukan</p><p className="text-xl font-bold font-heading text-emerald-600">{currency} {income.toLocaleString()}</p></div>
-        <div className="floating-card p-4"><p className="text-xs text-muted-foreground/60 mb-1">Pengeluaran</p><p className="text-xl font-bold font-heading text-red-500">{currency} {expense.toLocaleString()}</p></div>
+        <div className="premium-stat"><p className="premium-stat-label">Pemasukan</p><p className="premium-stat-value text-emerald-600">{currency} {income.toLocaleString()}</p></div>
+        <div className="premium-stat"><p className="premium-stat-label">Pengeluaran</p><p className="premium-stat-value text-red-500">{currency} {expense.toLocaleString()}</p></div>
       </div>
     </div>
   );
@@ -331,16 +323,16 @@ function TokoDashboard({ ws, currency }: { ws: { id: string; name: string; curre
   const totalRevenue = orders.filter((o) => o.paymentStatus === "Lunas").reduce((s, o) => s + o.total, 0);
   return (
     <div className="space-y-5 animate-fade-in max-w-lg mx-auto pb-24">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-600 p-6 shadow-xl">
+      <div className="hero-gradient" style={{background: "linear-gradient(135deg, hsl(200 100% 40%), hsl(190 100% 35%))"}}>
         <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1">Toko Online</p>
         <p className="text-3xl font-bold font-heading text-white mb-2">{currency} {totalRevenue.toLocaleString()}</p>
         <p className="text-white/60 text-xs">Total Pendapatan</p>
       </div>
       <QuickActions type="toko" router={router} />
       <div className="grid grid-cols-3 gap-3">
-        <div className="floating-card p-4 text-center"><p className="text-xs text-muted-foreground/60">Pesanan Baru</p><p className="text-xl font-bold font-heading mt-1">{activeOrders}</p></div>
-        <div className="floating-card p-4 text-center"><p className="text-xs text-muted-foreground/60">Selesai</p><p className="text-xl font-bold font-heading text-emerald-600 mt-1">{completedOrders}</p></div>
-        <div className="floating-card p-4 text-center"><p className="text-xs text-muted-foreground/60">Revenue</p><p className="text-sm font-bold font-heading mt-1">{currency} {totalRevenue.toLocaleString()}</p></div>
+        <div className="premium-card p-4 text-center"><p className="premium-stat-label">Pesanan Baru</p><p className="text-xl font-bold font-heading mt-1">{activeOrders}</p></div>
+        <div className="premium-card p-4 text-center"><p className="premium-stat-label">Selesai</p><p className="text-xl font-bold font-heading text-emerald-600 mt-1">{completedOrders}</p></div>
+        <div className="premium-card p-4 text-center"><p className="premium-stat-label">Revenue</p><p className="text-sm font-bold font-heading mt-1">{currency} {totalRevenue.toLocaleString()}</p></div>
       </div>
     </div>
   );
@@ -380,7 +372,7 @@ export default function Dashboard() {
                 <span className="text-xl">{ws.icon}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium">{ws.name}</p>
-                  <p className="text-xs text-muted-foreground/60">{({ pribadi: "Buku Pribadi", usaha: "Buku Usaha", modal: "Buku Modal", toko: "Toko Online", hutang: "Buku Hutang" } as Record<string, string>)[ws.type] || ws.type}</p>
+                  <p className="text-xs text-muted-foreground/60">{[{v:"pribadi",l:"Buku Pribadi"},{v:"usaha",l:"Buku Usaha"},{v:"modal",l:"Buku Modal"},{v:"toko",l:"Toko Online"},{v:"hutang",l:"Buku Hutang"}].find(x=>x.v===ws.type)?.l||ws.type}</p>
                 </div>
                 <ChevronRight className="size-4 text-muted-foreground/40" />
               </button>

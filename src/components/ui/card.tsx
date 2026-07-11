@@ -11,7 +11,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, size = "md", hover = true, ...props }, ref) => (
     <div
       ref={ref}
-      className={`floating-card ${size === "sm" ? "p-4" : "p-5 sm:p-6"} ${hover ? "hover:shadow-lg hover:-translate-y-0.5 cursor-pointer" : ""} ${className ?? ""}`}
+      className={`premium-card ${size === "sm" ? "p-4" : "p-5 sm:p-6"} ${hover ? "hover:shadow-md hover:-translate-y-0.5 cursor-pointer" : ""} ${className ?? ""}`}
       {...props}
     />
   )

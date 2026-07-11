@@ -32,7 +32,6 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
 
   return (
     <header className="fixed top-3 left-3 right-3 z-40 h-14 flex items-center justify-between px-4 rounded-2xl bg-white/80 dark:bg-[var(--card)]/80 backdrop-blur-xl border border-border/50 shadow-glass">
-      {/* Left - Mobile menu + breadcrumb */}
       <div className="flex items-center gap-3">
         <button
           className="lg:hidden flex items-center justify-center size-9 rounded-xl bg-sidebar-muted text-sidebar-foreground hover:bg-sidebar-accent transition-all active:scale-90"
@@ -53,7 +52,6 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
         </div>
       </div>
 
-      {/* Center - Search */}
       <div className="hidden md:flex flex-1 max-w-md mx-4">
         <form onSubmit={handleSearch} className="relative w-full group">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/40 group-focus-within:text-emerald-500 transition-colors" />
@@ -67,9 +65,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
         </form>
       </div>
 
-      {/* Right - Actions */}
       <div className="flex items-center gap-1.5">
-        {/* Search (mobile) */}
         <button
           onClick={() => setSearchOpen(true)}
           className="md:hidden flex items-center justify-center size-9 rounded-xl hover:bg-muted/50 transition-colors text-muted-foreground active:scale-90"
@@ -78,14 +74,12 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
           <Search className="size-4" />
         </button>
 
-        {/* Workspace switcher */}
         {workspaces.length > 1 && (
           <div className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer active:scale-95">
             <span className="text-xs font-semibold text-muted-foreground">{activeWorkspace?.currency}</span>
           </div>
         )}
 
-        {/* Theme toggle */}
         <button
           onClick={toggleTheme}
           className="flex items-center justify-center size-9 rounded-xl hover:bg-muted/50 transition-all text-muted-foreground active:scale-90"
@@ -94,13 +88,11 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
           {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </button>
 
-        {/* Notifications */}
         <button className="relative flex items-center justify-center size-9 rounded-xl hover:bg-muted/50 transition-all text-muted-foreground active:scale-90" aria-label="Notifications">
           <Bell className="size-4" />
           <span className="absolute top-2 right-2 size-1.5 rounded-full bg-danger animate-pulse-soft" />
         </button>
 
-        {/* User */}
         <div className="flex items-center gap-2 pl-2 border-l border-border/50 ml-1">
           <div className="hidden sm:flex flex-col items-end">
             <p className="text-xs font-semibold leading-tight text-foreground">{user?.name || "User"}</p>
@@ -112,7 +104,6 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
         </div>
       </div>
 
-      {/* Mobile search overlay */}
       {searchOpen && (
         <div className="md:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm p-4 pt-16 animate-fade-in">
           <form onSubmit={handleSearch} className="relative">

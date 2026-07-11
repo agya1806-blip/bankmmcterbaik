@@ -1249,3 +1249,43 @@ export async function getQrisPaymentsByStatus(workspaceId: string, status: "paid
   const index = tx.objectStore("qris_payments").index("status");
   return index.getAll(status);
 }
+
+const RESET_TABLES: { name: string; index: string }[] = [
+  { name: "accounts", index: "workspaceId" },
+  { name: "categories", index: "workspaceId" },
+  { name: "transactions", index: "workspaceId" },
+  { name: "budgets", index: "workspaceId" },
+  { name: "customers", index: "workspaceId" },
+  { name: "suppliers", index: "workspaceId" },
+  { name: "inventory_items", index: "workspaceId" },
+  { name: "inventory_mutations", index: "workspaceId" },
+  { name: "payment_methods", index: "workspaceId" },
+  { name: "projects", index: "workspaceId" },
+  { name: "calendar_events", index: "workspaceId" },
+  { name: "recurring_rules", index: "workspaceId" },
+  { name: "products", index: "workspaceId" },
+  { name: "orders", index: "workspaceId" },
+  { name: "branches", index: "workspaceId" },
+  { name: "ppob_categories", index: "workspaceId" },
+  { name: "digital_products", index: "workspaceId" },
+  { name: "ppob_transactions", index: "workspaceId" },
+  { name: "qris_payments", index: "workspaceId" },
+  { name: "audit_logs", index: "workspaceId" },
+];
+
+export async function resetWorkspaceData(workspaceId: string): Promise<void> {
+  const db = await getDb();
+  for (const table of RESET_TABLES) {
+    const ids: string[] = [];
+    const tx = db.transaction(table.name, "readonly");
+    const index = tx.objectStore(table.name).index(table.index);
+    const records = await index.getAllKeys(workspaceId);
+    ids.push(...records.map((k) => String(k)));
+    await tx.done;
+    const tx2 = db.transaction(table.name, "readwrite");
+    for (const id of ids) {
+      await tx2.objectStore(table.name).delete(id);
+    }
+    await tx2.done;
+  }
+}
