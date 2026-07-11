@@ -289,7 +289,7 @@ export default function InventoryPage() {
       </Dialog>
 
       {items.length === 0 && !isLoading && (
-        <Card className="bg-card/80 backdrop-blur-sm border border-white/10 dark:border-white/5 rounded-2xl">
+        <Card className="premium-card">
           <CardContent className="flex flex-col items-center gap-3 py-12">
             <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10">
               <PackageIcon className="size-8 text-primary" />
@@ -301,7 +301,7 @@ export default function InventoryPage() {
 
       <div className="space-y-3">
         {items.map((item) => (
-          <div key={item.id} className="bg-card/80 backdrop-blur-sm border border-white/10 dark:border-white/5 rounded-2xl p-5">
+          <div key={item.id} className="premium-card p-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/10">
@@ -351,7 +351,7 @@ export default function InventoryPage() {
           <h3 className="mb-3 text-lg font-semibold">{t("inventory.mutations")}</h3>
           <div className="space-y-2">
             {mutations.sort((a, b) => b.createdAt - a.createdAt).slice(0, 20).map((m) => (
-              <div key={m.id} className="bg-card/80 backdrop-blur-sm border border-white/10 dark:border-white/5 rounded-2xl p-4">
+              <div key={m.id} className="premium-card p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`flex size-9 items-center justify-center rounded-full ${

@@ -493,7 +493,7 @@ export default function OrdersPage() {
       </div>
 
       {filteredOrders.length === 0 && !isLoading && (
-        <div className="bg-card/80 backdrop-blur-sm border border-white/10 dark:border-white/5 rounded-2xl p-12 text-center">
+        <div className="premium-card p-12 text-center">
           <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5">
             <ShoppingCart className="size-6 text-primary" />
           </div>
@@ -513,7 +513,7 @@ export default function OrdersPage() {
         {filteredOrders.map((o) => (
           <div
             key={o.id}
-            className="bg-card/80 backdrop-blur-sm border border-white/10 dark:border-white/5 rounded-2xl p-5"
+            className="premium-card p-5"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">

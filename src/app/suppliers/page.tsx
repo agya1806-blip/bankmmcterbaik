@@ -149,7 +149,7 @@ export default function SuppliersPage() {
       </Dialog>
 
       {suppliers.length === 0 && !isLoading && (
-        <div className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5 rounded-2xl p-12 text-center">
+        <div className="premium-card p-12 text-center">
           <div className="flex justify-center mb-4">
             <div className="flex items-center justify-center size-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600">
               <StoreIcon className="size-7 text-white" />
@@ -167,7 +167,7 @@ export default function SuppliersPage() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         {suppliers.map((s) => (
-          <div key={s.id} className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5 rounded-2xl p-5">
+          <div key={s.id} className="premium-card p-5">
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-3">
                 <div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shrink-0">

@@ -144,7 +144,7 @@ export default function WalletsPage() {
       </div>
 
       {accounts.length > 0 && (
-        <Card className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5 mb-6">
+        <Card className="premium-card mb-6">
           <CardContent className="py-4">
             <p className="text-sm text-muted-foreground/60">{t("wallets.totalBalance")}</p>
             <p className="text-2xl font-bold font-heading">
@@ -199,7 +199,7 @@ export default function WalletsPage() {
       </Dialog>
 
       {accounts.length === 0 && !isLoading && (
-        <Card className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
+        <Card className="premium-card">
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground/60">{t("wallets.empty")}</p>
           </CardContent>
@@ -208,7 +208,7 @@ export default function WalletsPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {accounts.map((acc) => (
-          <Card key={acc.id} className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
+          <Card key={acc.id} className="premium-card">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="p-2 rounded-lg bg-muted/60">

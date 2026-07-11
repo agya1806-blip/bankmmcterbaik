@@ -122,7 +122,7 @@ export default function DebtsPage() {
           <p className="text-sm text-muted-foreground/60 mt-0.5">{t("transactions.desc")}</p>
         </div>
         <Dialog open={addOpen} onOpenChange={(open) => { setAddOpen(open); if (open) resetForm(); }} trigger={<Button><Plus className="size-4" /> {t("transactions.add")}</Button>}>
-          <DialogContent className="sm:max-w-md bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
+          <DialogContent className="sm:max-w-md premium-card">
             <DialogHeader>
               <DialogTitle>{t("transactions.add")}</DialogTitle>
               <DialogDescription>{t("transactions.add")}</DialogDescription>
@@ -166,7 +166,7 @@ export default function DebtsPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <Card className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
+        <Card className="premium-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               {tab === "debt" ? t("transactions.debt") : t("transactions.receivable")}
@@ -177,7 +177,7 @@ export default function DebtsPage() {
             <p className="text-xs text-muted-foreground mt-1">{filtered.length} {t("transactions.description")}</p>
           </CardContent>
         </Card>
-        <Card className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
+        <Card className="premium-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               {tab === "debt" ? t("transactions.receivable") : t("transactions.debt")}
@@ -200,7 +200,7 @@ export default function DebtsPage() {
       </div>
 
       {filtered.length === 0 && !isLoading && (
-        <Card className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
+        <Card className="premium-card">
           <CardContent className="py-8 text-center text-muted-foreground">
             {t("transactions.empty")}
           </CardContent>
@@ -209,7 +209,7 @@ export default function DebtsPage() {
 
       <div className="space-y-3">
         {filtered.map((tx) => (
-          <Card key={tx.id} className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
+          <Card key={tx.id} className="premium-card">
             <div className="p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
