@@ -230,9 +230,9 @@ export default function OrdersPage() {
     const text = encodeURIComponent(
       `*${t("orders.invoice")} #${order.number}*\n` +
       `${t("orders.status")}: ${t("orders." + order.status)}\n` +
-      `${t("orders.total")}: ${activeWorkspace.currency} ${order.total.toLocaleString()}\n` +
-      `${t("orders.dp")}: ${activeWorkspace.currency} ${order.dp.toLocaleString()}\n` +
-      `${t("orders.remaining")}: ${activeWorkspace.currency} ${order.remaining.toLocaleString()}\n` +
+      `${t("orders.total")}: ${activeWorkspace?.currency ?? "Rp"} ${order.total.toLocaleString()}\n` +
+      `${t("orders.dp")}: ${activeWorkspace?.currency ?? "Rp"} ${order.dp.toLocaleString()}\n` +
+      `${t("orders.remaining")}: ${activeWorkspace?.currency ?? "Rp"} ${order.remaining.toLocaleString()}\n` +
       `${t("orders.notes")}: ${order.notes || "-"}`
     );
     return `https://wa.me/${phone}?text=${text}`;
@@ -243,7 +243,7 @@ export default function OrdersPage() {
       {error && <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</div>}
       <div className="space-y-2">
         <Label>{t("orders.type")}</Label>
-        <Select value={type} onValueChange={(v) => { setType(v); setSpecs({}); }}>
+        <Select value={type} onValueChange={(v) => { setType(v ?? "print"); setSpecs({}); }}>
           <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
           <SelectContent>
             {ORDER_TYPES.map((ot) => (

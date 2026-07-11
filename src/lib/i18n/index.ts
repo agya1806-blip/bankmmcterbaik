@@ -15,11 +15,7 @@ export function useTranslation() {
   useEffect(() => {
     if (!activeWorkspace) return;
     getWorkspaceSettings(activeWorkspace.id).then((s) => {
-      if (s?.language === "en" || s?.language === "id") {
-        setLocale(s.language);
-      } else {
-        setLocale("id");
-      }
+      setLocale("id");
     });
   }, [activeWorkspace]);
 

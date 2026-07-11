@@ -2,7 +2,7 @@
 
 import { type HTMLAttributes } from "react";
 
-type BadgeVariant = "default" | "success" | "warning" | "danger" | "info" | "outline";
+type BadgeVariant = "default" | "secondary" | "destructive" | "success" | "warning" | "danger" | "info" | "outline";
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
@@ -10,6 +10,8 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const variantStyles: Record<string, string> = {
   default: "bg-muted text-muted-foreground",
+  secondary: "bg-secondary text-secondary-foreground",
+  destructive: "bg-destructive text-destructive-foreground",
   success: "bg-emerald-100/80 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
   warning: "bg-amber-100/80 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
   danger: "bg-red-100/80 dark:bg-red-900/30 text-red-600 dark:text-red-400",

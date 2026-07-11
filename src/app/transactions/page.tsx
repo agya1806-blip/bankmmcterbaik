@@ -210,7 +210,7 @@ export default function TransactionsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold font-heading text-foreground">{t("transactions.title")}</h1>
-          <p className="text-sm text-muted-foreground/60 mt-0.5">{t("transactions.description")}</p>
+          <p className="text-sm text-muted-foreground/60 mt-0.5">{t("transactions.desc")}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (open) { setEditingTx(null); resetForm(); } }} trigger={<Button><PlusIcon className="size-4" /> {t("transactions.add")}</Button>}>
           <DialogContent className="sm:max-w-md bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">

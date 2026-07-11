@@ -223,7 +223,6 @@ export default function SettingsPage() {
         suppliers,
         inventory,
         paymentMethods,
-        invoices,
         products,
         orders,
         branches,

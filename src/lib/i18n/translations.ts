@@ -106,7 +106,7 @@ export const id = {
   // Transactions
   transactions: {
     title: "Transaksi",
-    description: "Catat dan kelola semua transaksi keuangan",
+    desc: "Catat dan kelola semua transaksi keuangan",
     add: "Tambah Transaksi",
     edit: "Edit Transaksi",
     saving: "Menyimpan...",
@@ -230,7 +230,6 @@ export const id = {
   invoices: {
     title: "Faktur",
     new: "Faktur Baru",
-    edit: "Edit Faktur",
     search: "Cari faktur berdasarkan nomor, pelanggan, status...",
     loading: "Memuat...",
     loadingInvoices: "Memuat faktur...",
@@ -329,7 +328,7 @@ export const id = {
   // Orders
   orders: {
     title: "Pesanan",
-    description: "Kelola semua pesanan pelanggan",
+    desc: "Kelola semua pesanan pelanggan",
     add: "Tambah Pesanan",
     edit: "Edit Pesanan",
     adding: "Menambahkan...",

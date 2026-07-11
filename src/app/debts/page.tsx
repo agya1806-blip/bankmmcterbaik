@@ -119,7 +119,7 @@ export default function DebtsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold font-heading text-foreground">{t("nav.debts")}</h1>
-          <p className="text-sm text-muted-foreground/60 mt-0.5">{t("transactions.description")}</p>
+          <p className="text-sm text-muted-foreground/60 mt-0.5">{t("transactions.desc")}</p>
         </div>
         <Dialog open={addOpen} onOpenChange={(open) => { setAddOpen(open); if (open) resetForm(); }} trigger={<Button><Plus className="size-4" /> {t("transactions.add")}</Button>}>
           <DialogContent className="sm:max-w-md bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">

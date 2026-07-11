@@ -185,7 +185,7 @@ export default function InvoiceDetailPage() {
 
   const handlePrint = useCallback(() => window.print(), []);
 
-  const paymentStatus = order?.paymentStatus || (order?.dp > 0 ? (order.dp >= order.total ? "Lunas" : "DP") : "Belum Lunas");
+  const paymentStatus = order?.paymentStatus || ((order?.dp ?? 0) > 0 ? ((order?.dp ?? 0) >= (order?.total ?? 0) ? "Lunas" : "DP") : "Belum Lunas");
 
   function renderSpecs() {
     if (!order?.specs || Object.keys(order.specs).length === 0) return null;

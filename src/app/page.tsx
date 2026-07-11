@@ -9,7 +9,8 @@ import { useOrderStore } from "@/engines/business/order-store";
 import { Button } from "@/components/ui/button";
 import {
   Zap, QrCode, FileText, Plus, ArrowUpRight, ArrowDownRight,
-  ShoppingCart, TrendingUp, TrendingDown,
+  ShoppingCart, TrendingUp, TrendingDown, Wallet, PieChart,
+  ArrowLeftRight, Users, CalendarDays, BarChart3,
   ChevronRight
 } from "lucide-react";
 import {
