@@ -56,7 +56,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="size-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-xl shadow-emerald-500/20 animate-float">
+          <div className="size-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-2xl shadow-emerald-500/25 animate-float">
             M
           </div>
           <div className="flex gap-1.5">
@@ -81,16 +81,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background">
       {mobileSidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm lg:hidden animate-fade-in"
+          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
           onClick={() => setMobileSidebarOpen(false)}
+          style={{ animation: "fadeIn 0.2s ease-out" }}
         />
       )}
 
       <div
         data-sidebar
-        className={`fixed inset-y-0 left-3 top-3 bottom-3 z-50 transition-all duration-300 ${
-          sidebarCollapsed ? 'w-sidebar-collapsed' : 'w-sidebar'
-        } ${mobileSidebarOpen ? 'open' : ''} max-lg:fixed max-lg:left-0 max-lg:top-0 max-lg:bottom-0 max-lg:z-50 max-lg:-translate-x-full max-lg:[&.open]:translate-x-0 max-lg:transition-transform max-lg:duration-300`}
+        className={`transition-all duration-[350ms] ${
+          sidebarCollapsed ? 'w-[var(--sidebar-collapsed-width)]' : 'w-[var(--sidebar-width)]'
+        } ${mobileSidebarOpen ? 'open' : ''} max-lg:fixed max-lg:left-0 max-lg:top-0 max-lg:bottom-0 max-lg:z-[55] max-lg:-translate-x-full max-lg:[&.open]:translate-x-0 max-lg:transition-transform max-lg:duration-300`}
       >
         <Sidebar
           collapsed={sidebarCollapsed}
@@ -100,8 +101,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <div
-        className={`transition-all duration-300 ${
-          sidebarCollapsed ? 'lg:pl-[calc(72px+24px)]' : 'lg:pl-[calc(280px+24px)]'
+        className={`transition-all duration-[350ms] ${
+          sidebarCollapsed ? 'lg:ml-[calc(var(--sidebar-collapsed-width)+16px)]' : 'lg:ml-[calc(var(--sidebar-width)+16px)]'
         } pt-[calc(56px+16px)] pb-0 lg:pb-0`}
       >
         <Header onMobileMenuToggle={() => setMobileSidebarOpen(!mobileSidebarOpen)} />
@@ -114,7 +115,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <BottomNav />
 
-      <div className="lg:hidden h-bottom-nav" />
+      <div className="lg:hidden h-[80px]" />
     </div>
   );
 }

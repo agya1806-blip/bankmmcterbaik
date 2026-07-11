@@ -6,7 +6,7 @@ import {
   LayoutDashboard, ArrowLeftRight, Wallet, PieChart, FileText,
   Users, Package, Tag, ShoppingCart, BarChart3, FolderKanban, Calendar,
   Settings, ChevronLeft, Building2, LogOut, Plus, ArrowUpDown, CreditCard,
-  Zap, QrCode, type LucideIcon
+  Zap, QrCode, Search, type LucideIcon
 } from "lucide-react";
 import { useAuthStore } from "@/engines/identity/auth-store";
 import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
@@ -110,9 +110,8 @@ export default function Sidebar({ collapsed, onToggle, onMobileClose }: SidebarP
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useTranslation();
-  const { logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { activeWorkspace } = useWorkspaceStore();
-
   const navGroups = useMemo(() => {
     const type = activeWorkspace?.type || "pribadi";
     return ALL_NAV_GROUPS[type] || ALL_NAV_GROUPS.pribadi;
@@ -133,78 +132,136 @@ export default function Sidebar({ collapsed, onToggle, onMobileClose }: SidebarP
     : "";
 
   return (
-    <aside className={`floating-sidebar flex flex-col ${collapsed ? 'w-sidebar-collapsed' : ''}`}>
-      <div className="flex items-center gap-3 px-4 h-16 shrink-0 border-b border-sidebar-border">
-        <div className="flex items-center justify-center size-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 shrink-0">
-          {activeWorkspace?.icon || "M"}
-        </div>
+    <aside className={`byond-sidebar ${collapsed ? "byond-sidebar-collapsed" : ""}`}>
+      {/* Brand Header */}
+      <div className="byond-sidebar-header">
         {!collapsed && (
-          <div className="flex items-center justify-between flex-1 min-w-0">
-            <div className="min-w-0">
-              <p className="text-sm font-bold text-sidebar-foreground truncate font-heading">{activeWorkspace?.name || "MUGHIS"}</p>
-              <p className="text-[10px] text-sidebar-muted-foreground truncate">{typeLabel}</p>
+          <div className="byond-brand">
+            <div className="byond-brand-icon">
+              {activeWorkspace?.icon || "M"}
+            </div>
+            <div className="byond-brand-text">
+              <p className="byond-brand-name">{activeWorkspace?.name || "MUGHIS"}</p>
+              <p className="byond-brand-type">{typeLabel}</p>
+            </div>
+          </div>
+        )}
+        {collapsed && (
+          <div className="byond-brand byond-brand-collapsed">
+            <div className="byond-brand-icon byond-brand-icon-sm">
+              {activeWorkspace?.icon || "M"}
             </div>
           </div>
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-hide">
+      {/* Search */}
+      {!collapsed && (
+        <div className="byond-search-wrap">
+          <Search className="byond-search-icon" />
+          <input
+            type="text"
+            placeholder="Cari menu..."
+            className="byond-search-input"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.target as HTMLInputElement).value) {
+                router.push(`/transactions?search=${encodeURIComponent((e.target as HTMLInputElement).value)}`);
+              }
+            }}
+          />
+        </div>
+      )}
+
+      {/* Navigation Groups */}
+      <nav className="byond-nav">
         {navGroups.map((group, gi) => (
-          <div key={gi}>
+          <div key={gi} className="byond-nav-group">
             {group.label && !collapsed && (
-              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-muted-foreground/50">
-                {group.label}
-              </p>
+              <p className="byond-nav-label">{group.label}</p>
             )}
-            <div className="space-y-0.5">
-              {group.items.map((item) => (
-                <button
-                  key={item.href}
-                  onClick={() => handleNav(item.href)}
-                  className={`w-full nav-item ${isActive(item.href) ? 'nav-item-active' : ''} ${collapsed ? 'justify-center px-0' : ''}`}
-                  title={collapsed ? t(item.labelKey) : undefined}
-                >
-                  <item.icon className="size-5 shrink-0" />
-                  {!collapsed && <span>{t(item.labelKey)}</span>}
-                </button>
-              ))}
+            <div className="byond-nav-items">
+              {group.items.map((item) => {
+                const active = isActive(item.href);
+                return (
+                  <button
+                    key={item.href}
+                    onClick={() => handleNav(item.href)}
+                    className={`byond-nav-item ${active ? "byond-nav-item-active" : ""} ${collapsed ? "byond-nav-item-collapsed" : ""}`}
+                    title={collapsed ? t(item.labelKey) : undefined}
+                  >
+                    {active && <span className="byond-nav-glow" />}
+                    <div className={`byond-nav-icon-wrap ${active ? "byond-nav-icon-active" : ""}`}>
+                      <item.icon className="byond-nav-icon" />
+                    </div>
+                    {!collapsed && (
+                      <span className="byond-nav-text">{t(item.labelKey)}</span>
+                    )}
+                    {!collapsed && active && (
+                      <span className="byond-nav-indicator" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         ))}
       </nav>
 
-      <div className="p-3 border-t border-sidebar-border space-y-0.5">
+      {/* Bottom Section */}
+      <div className="byond-sidebar-footer">
         <button
           onClick={() => handleNav("/workspaces")}
-          className={`w-full nav-item ${collapsed ? 'justify-center px-0' : ''}`}
+          className={`byond-nav-item ${collapsed ? "byond-nav-item-collapsed" : ""}`}
           title={collapsed ? t("nav.workspaces") : undefined}
         >
-          <Plus className="size-5 shrink-0" />
-          {!collapsed && <span>{t("nav.workspaces")}</span>}
+          <div className="byond-nav-icon-wrap byond-nav-icon-accent">
+            <Plus className="byond-nav-icon" />
+          </div>
+          {!collapsed && <span className="byond-nav-text">{t("nav.workspaces")}</span>}
         </button>
+
         <button
           onClick={() => handleNav("/settings")}
-          className={`w-full nav-item ${isActive("/settings") ? 'nav-item-active' : ''} ${collapsed ? 'justify-center px-0' : ''}`}
+          className={`byond-nav-item ${isActive("/settings") ? "byond-nav-item-active" : ""} ${collapsed ? "byond-nav-item-collapsed" : ""}`}
           title={collapsed ? t("nav.settings") : undefined}
         >
-          <Settings className="size-5 shrink-0" />
-          {!collapsed && <span>{t("nav.settings")}</span>}
+          {isActive("/settings") && <span className="byond-nav-glow" />}
+          <div className={`byond-nav-icon-wrap ${isActive("/settings") ? "byond-nav-icon-active" : ""}`}>
+            <Settings className="byond-nav-icon" />
+          </div>
+          {!collapsed && <span className="byond-nav-text">{t("nav.settings")}</span>}
         </button>
-        <button
-          onClick={logout}
-          className={`w-full nav-item ${collapsed ? 'justify-center px-0' : ''}`}
-          title={collapsed ? t("nav.signOut") : undefined}
-        >
-          <LogOut className="size-5 shrink-0" />
-          {!collapsed && <span>{t("nav.signOut")}</span>}
-        </button>
+
+        {/* Profile Card */}
+        {!collapsed && (
+          <div className="byond-profile-card">
+            <div className="byond-profile-avatar">
+              {user?.name?.charAt(0).toUpperCase() || "U"}
+            </div>
+            <div className="byond-profile-info">
+              <p className="byond-profile-name">{user?.name || "User"}</p>
+              <p className="byond-profile-email">{user?.email}</p>
+            </div>
+            <button
+              onClick={logout}
+              className="byond-logout-btn"
+              title={t("nav.signOut")}
+            >
+              <LogOut className="size-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Collapse Toggle */}
         <button
           onClick={onToggle}
-          className={`w-full nav-item mt-1 ${collapsed ? 'justify-center px-0' : ''}`}
+          className={`byond-nav-item byond-toggle ${collapsed ? "byond-nav-item-collapsed" : ""}`}
           title={collapsed ? t("nav.expand") : t("nav.collapse")}
         >
-          <ChevronLeft className={`size-5 shrink-0 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`} />
-          {!collapsed && <span>{t("nav.collapse")}</span>}
+          <div className="byond-nav-icon-wrap">
+            <ChevronLeft className={`byond-nav-icon byond-toggle-icon ${collapsed ? "rotate-180" : ""}`} />
+          </div>
+          {!collapsed && <span className="byond-nav-text">{t("nav.collapse")}</span>}
         </button>
       </div>
     </aside>

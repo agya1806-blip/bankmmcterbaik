@@ -339,7 +339,10 @@
   .stagger-10 { animation-delay: 450ms; }
 
   .glass-dialog {
-    @apply bg-white/90 dark:bg-[var(--card)]/90 backdrop-blur-2xl border border-border/50 rounded-2xl shadow-2xl;
+    @apply bg-white/90 backdrop-blur-2xl border border-border/50 rounded-2xl shadow-2xl;
+  }
+  .dark .glass-dialog {
+    background: hsl(var(--card) / 0.9);
   }
 
   .bottom-sheet {
@@ -419,6 +422,326 @@
     border-radius: 50%;
     background: hsl(0 0% 100% / 0.04);
     pointer-events: none;
+  }
+
+  /* ========== BYOND SIDEBAR ========== */
+  .byond-sidebar {
+    @apply fixed left-3 top-3 bottom-3 z-50 flex flex-col;
+    @apply bg-white backdrop-blur-2xl border border-white/60 rounded-3xl;
+    @apply shadow-[0_8px_40px_rgba(0,0,0,0.06)];
+    width: var(--sidebar-width);
+    transition: width 0.35s var(--ease-smooth);
+  }
+  .dark .byond-sidebar {
+    background: hsl(var(--card) / 0.95);
+    @apply border-white/[0.08] shadow-[0_8px_40px_rgba(0,0,0,0.2)];
+  }
+  .byond-sidebar-collapsed {
+    width: var(--sidebar-collapsed-width);
+  }
+  .byond-sidebar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, hsl(var(--primary) / 0.04) 0%, transparent 25%, transparent 75%, hsl(var(--primary) / 0.02) 100%);
+    pointer-events: none;
+  }
+
+  /* Sidebar Header */
+  .byond-sidebar-header {
+    @apply px-4 pt-5 pb-3 shrink-0;
+  }
+  .byond-brand {
+    @apply flex items-center gap-3;
+  }
+  .byond-brand-collapsed {
+    @apply justify-center;
+  }
+  .byond-brand-icon {
+    @apply flex items-center justify-center size-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-bold text-base shrink-0;
+    box-shadow: 0 4px 12px hsl(160 84% 39% / 0.25);
+  }
+  .byond-brand-icon-sm {
+    @apply size-10 text-sm;
+  }
+  .byond-brand-text {
+    @apply min-w-0;
+  }
+  .byond-brand-name {
+    @apply text-sm font-bold text-foreground truncate font-heading;
+  }
+  .byond-brand-type {
+    @apply text-[10px] text-muted-foreground/60 font-medium truncate;
+  }
+
+  /* Sidebar Search */
+  .byond-search-wrap {
+    @apply relative mx-4 mb-4;
+  }
+  .byond-search-icon {
+    @apply absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/40;
+  }
+  .byond-search-input {
+    @apply w-full h-9 pl-9 pr-3 rounded-xl bg-muted/40 border border-border/30 text-xs placeholder:text-muted-foreground/40;
+    @apply focus:outline-none focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/10 transition-all;
+  }
+
+  /* Sidebar Navigation */
+  .byond-nav {
+    @apply flex-1 overflow-y-auto px-3 space-y-4 scrollbar-hide;
+  }
+  .byond-nav-group {
+    @apply space-y-1;
+  }
+  .byond-nav-label {
+    @apply px-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40;
+  }
+  .byond-nav-items {
+    @apply space-y-0.5;
+  }
+
+  /* Nav Item */
+  .byond-nav-item {
+    @apply relative w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium;
+    @apply text-muted-foreground/70 hover:text-foreground;
+    @apply transition-all duration-200 ease-out;
+  }
+  .byond-nav-item:active {
+    transform: scale(0.97);
+  }
+  .byond-nav-item-collapsed {
+    @apply justify-center px-0 py-2.5;
+  }
+
+  /* Nav Item Active */
+  .byond-nav-item-active {
+    @apply text-foreground font-semibold;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.08) 0%, hsl(var(--primary) / 0.04) 100%);
+  }
+  .byond-nav-glow {
+    @apply absolute inset-0 rounded-xl pointer-events-none;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.06) 0%, transparent 100%);
+    animation: navGlowPulse 3s ease-in-out infinite;
+  }
+
+  /* Nav Icon */
+  .byond-nav-icon-wrap {
+    @apply flex items-center justify-center size-9 rounded-xl bg-muted/50 shrink-0;
+    @apply transition-all duration-200;
+  }
+  .byond-nav-icon-active {
+    @apply bg-gradient-to-br from-emerald-500 to-emerald-600 text-white;
+    box-shadow: 0 4px 12px hsl(160 84% 39% / 0.2);
+  }
+  .byond-nav-icon-accent {
+    @apply bg-emerald-500/10 text-emerald-600 dark:text-emerald-400;
+  }
+  .byond-nav-icon {
+    @apply size-[18px] relative z-10;
+  }
+  .byond-nav-text {
+    @apply flex-1 text-left truncate;
+  }
+  .byond-nav-indicator {
+    @apply size-1.5 rounded-full bg-emerald-500 shrink-0;
+    box-shadow: 0 0 6px hsl(160 84% 39% / 0.4);
+  }
+
+  /* Sidebar Footer */
+  .byond-sidebar-footer {
+    @apply p-3 border-t border-border/30 space-y-2;
+  }
+
+  /* Profile Card */
+  .byond-profile-card {
+    @apply flex items-center gap-3 p-3 rounded-2xl bg-muted/30 border border-border/20;
+  }
+  .byond-profile-avatar {
+    @apply flex items-center justify-center size-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-white text-sm font-bold shrink-0;
+    box-shadow: 0 2px 8px hsl(160 84% 39% / 0.2);
+  }
+  .byond-profile-info {
+    @apply flex-1 min-w-0;
+  }
+  .byond-profile-name {
+    @apply text-xs font-semibold text-foreground truncate;
+  }
+  .byond-profile-email {
+    @apply text-[10px] text-muted-foreground/60 truncate;
+  }
+  .byond-logout-btn {
+    @apply flex items-center justify-center size-8 rounded-xl text-muted-foreground/50 hover:text-red-500 hover:bg-red-500/10 transition-all;
+  }
+
+  /* Toggle Button */
+  .byond-toggle {
+    @apply mt-1;
+  }
+  .byond-toggle-icon {
+    @apply transition-transform duration-300;
+  }
+
+  /* ========== BYOND BOTTOM NAV ========== */
+  .byond-bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 z-50 lg:hidden;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .byond-bottom-nav-inner {
+    @apply relative flex items-center justify-around mx-3 mb-3 px-2 py-2 rounded-2xl;
+    @apply bg-white backdrop-blur-2xl border border-white/50;
+    @apply shadow-[0_8px_32px_rgba(0,0,0,0.08)];
+  }
+  .dark .byond-bottom-nav-inner {
+    background: hsl(var(--card) / 0.9);
+    @apply border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.25)];
+  }
+  .byond-bottom-nav-inner::before {
+    content: '';
+    @apply absolute inset-0 rounded-2xl pointer-events-none;
+    background: linear-gradient(180deg, hsl(var(--primary) / 0.02) 0%, transparent 100%);
+  }
+
+  .byond-bottom-nav-item {
+    @apply relative flex flex-col items-center gap-1 py-2 px-3 rounded-xl min-w-[52px];
+    @apply transition-all duration-200;
+  }
+  .byond-bottom-nav-item:active {
+    transform: scale(0.88);
+  }
+
+  .byond-bottom-nav-glow {
+    @apply absolute inset-0 rounded-xl pointer-events-none;
+    background: radial-gradient(circle at center, hsl(var(--primary) / 0.12) 0%, transparent 70%);
+    animation: navGlowPulse 3s ease-in-out infinite;
+  }
+
+  .byond-bottom-nav-icon-wrap {
+    @apply flex items-center justify-center size-10 rounded-xl transition-all duration-300;
+  }
+  .byond-bottom-nav-icon-active {
+    @apply bg-gradient-to-br from-emerald-500 to-emerald-600;
+    box-shadow: 0 4px 12px hsl(160 84% 39% / 0.25);
+    transform: translateY(-2px);
+  }
+
+  .byond-bottom-nav-icon {
+    @apply size-5 transition-all duration-200;
+  }
+  .byond-bottom-nav-icon-active-color {
+    @apply text-white;
+  }
+
+  .byond-bottom-nav-label {
+    @apply text-[10px] font-medium text-muted-foreground/60 transition-all duration-200;
+  }
+  .byond-bottom-nav-label-active {
+    @apply text-emerald-600 dark:text-emerald-400 font-semibold;
+  }
+
+  /* ========== BYOND HEADER ========== */
+  .byond-header {
+    @apply fixed top-3 left-3 right-3 z-40 h-14 flex items-center justify-between px-4;
+    @apply bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl;
+    @apply shadow-[0_4px_24px_rgba(0,0,0,0.04)];
+  }
+  .dark .byond-header {
+    background: hsl(var(--card) / 0.8);
+    @apply border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.15)];
+  }
+
+  .byond-header-left {
+    @apply flex items-center gap-3;
+  }
+  .byond-header-menu-btn {
+    @apply lg:hidden flex items-center justify-center size-9 rounded-xl bg-muted/50 text-muted-foreground hover:bg-muted transition-all active:scale-90;
+  }
+  .byond-header-brand {
+    @apply hidden sm:flex items-center gap-2;
+  }
+  .byond-header-sparkle {
+    @apply size-3.5 text-emerald-500;
+  }
+  .byond-header-breadcrumb {
+    @apply flex items-center gap-1.5 text-sm;
+  }
+  .byond-header-breadcrumb-app {
+    @apply text-muted-foreground/50 font-medium;
+  }
+  .byond-header-breadcrumb-sep {
+    @apply size-3 text-muted-foreground/30;
+  }
+  .byond-header-breadcrumb-page {
+    @apply font-semibold text-foreground;
+  }
+
+  .byond-header-center {
+    @apply hidden md:flex flex-1 max-w-md mx-4;
+  }
+  .byond-header-search {
+    @apply relative w-full;
+  }
+  .byond-header-search-icon {
+    @apply absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/40;
+  }
+  .byond-header-search-input {
+    @apply w-full h-9 pl-9 pr-3 rounded-xl bg-muted/40 border border-border/30 text-sm placeholder:text-muted-foreground/40;
+    @apply focus:outline-none focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/10 transition-all;
+  }
+
+  .byond-header-right {
+    @apply flex items-center gap-1.5;
+  }
+  .byond-header-action {
+    @apply flex items-center justify-center size-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all active:scale-90;
+  }
+  .byond-header-notification {
+    @apply relative;
+  }
+  .byond-notification-dot {
+    @apply absolute top-2 right-2 size-1.5 rounded-full bg-red-500;
+    animation: navGlowPulse 2s ease-in-out infinite;
+  }
+  .byond-header-divider {
+    @apply w-px h-6 bg-border/50 mx-1;
+  }
+  .byond-header-user {
+    @apply flex items-center gap-2.5;
+  }
+  .byond-header-user-info {
+    @apply hidden sm:flex flex-col items-end;
+  }
+  .byond-header-greeting {
+    @apply text-[10px] text-muted-foreground/50 font-medium leading-tight;
+  }
+  .byond-header-username {
+    @apply text-xs font-semibold text-foreground leading-tight;
+  }
+  .byond-header-avatar {
+    @apply flex items-center justify-center size-9 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 text-white text-xs font-bold;
+    @apply ring-2 ring-white/30 dark:ring-white/10;
+    box-shadow: 0 2px 8px hsl(160 84% 39% / 0.2);
+  }
+
+  /* Mobile Search Overlay */
+  .byond-search-overlay {
+    @apply fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm;
+    animation: fadeIn 0.2s ease-out;
+  }
+  .byond-search-overlay-content {
+    @apply p-4 pt-20;
+  }
+  .byond-search-overlay-form {
+    @apply relative flex items-center;
+  }
+  .byond-search-overlay-icon {
+    @apply absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground/50;
+  }
+  .byond-search-overlay-input {
+    @apply w-full h-12 pl-12 pr-12 rounded-2xl bg-white dark:bg-card border border-border shadow-lg text-sm focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/15;
+  }
+  .byond-search-overlay-close {
+    @apply absolute right-3 top-1/2 -translate-y-1/2 size-8 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-muted transition-colors;
   }
 }
 
@@ -541,6 +864,16 @@
 @keyframes borderGlow {
   0%, 100% { border-color: hsl(var(--primary) / 0.2); }
   50% { border-color: hsl(var(--primary) / 0.5); }
+}
+
+@keyframes navGlowPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes navSlideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @media print {

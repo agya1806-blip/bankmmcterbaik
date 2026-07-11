@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
   LayoutDashboard, ArrowLeftRight, Wallet, FileText, Settings,
@@ -52,6 +52,7 @@ export default function BottomNav() {
   const pathname = usePathname();
   const { t } = useTranslation();
   const { activeWorkspace } = useWorkspaceStore();
+  const [pressed, setPressed] = useState<string | null>(null);
 
   const items = useMemo(() => {
     const type = activeWorkspace?.type || "pribadi";
@@ -64,24 +65,27 @@ export default function BottomNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden safe-bottom">
-      <div className="relative flex items-center justify-around px-1 py-0.5 bg-white/90 dark:bg-[var(--card)]/90 backdrop-blur-2xl border-t border-border/50 shadow-2xl shadow-black/5">
-        <div className="absolute inset-0 rounded-t-2xl bg-gradient-to-t from-emerald-500/[0.02] to-transparent pointer-events-none" />
+    <nav className="byond-bottom-nav">
+      <div className="byond-bottom-nav-inner">
         {items.map((item) => {
           const active = isActive(item.href);
+          const isPressed = pressed === item.href;
           return (
             <button
               key={item.href}
               onClick={() => router.push(item.href)}
-              className={`relative flex flex-col items-center gap-0.5 py-2 px-3 min-w-[48px] min-h-[48px] rounded-xl transition-all duration-200 ${
-                active ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground hover:text-foreground"
-              }`}
+              onMouseDown={() => setPressed(item.href)}
+              onMouseUp={() => setPressed(null)}
+              onMouseLeave={() => setPressed(null)}
+              className={`byond-bottom-nav-item ${active ? "byond-bottom-nav-active" : ""} ${isPressed ? "scale-90" : ""}`}
             >
-              {active && (
-                <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500 shadow-sm shadow-emerald-500/30" />
-              )}
-              <item.icon className={`size-5 transition-all duration-200 ${active ? 'scale-110 drop-shadow-sm' : ''}`} />
-              <span className={`text-[10px] font-medium transition-all ${active ? 'font-semibold translate-y-0' : ''}`}>{t(item.labelKey)}</span>
+              {active && <span className="byond-bottom-nav-glow" />}
+              <div className={`byond-bottom-nav-icon-wrap ${active ? "byond-bottom-nav-icon-active" : ""}`}>
+                <item.icon className={`byond-bottom-nav-icon ${active ? "byond-bottom-nav-icon-active-color" : ""}`} />
+              </div>
+              <span className={`byond-bottom-nav-label ${active ? "byond-bottom-nav-label-active" : ""}`}>
+                {t(item.labelKey)}
+              </span>
             </button>
           );
         })}
