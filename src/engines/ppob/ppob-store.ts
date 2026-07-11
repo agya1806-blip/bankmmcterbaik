@@ -34,7 +34,7 @@ interface PpobState {
   clearError: () => void;
 }
 
-export const usePpobStore = create<PpobState>((set, get) => ({
+export const usePpobStore = create<PpobState>((set) => ({
   categories: [],
   products: [],
   transactions: [],

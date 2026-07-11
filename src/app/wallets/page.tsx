@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Plus, Wallet, Building, Landmark, Smartphone, CreditCard, Trash2 } from "lucide-react";
+import { Plus, Wallet, Building, Smartphone, CreditCard, Trash2 } from "lucide-react";
 import { createAccount } from "@/lib/db";
 
 const ACCOUNT_TYPES = [

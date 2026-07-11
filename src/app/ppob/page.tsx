@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { useAuthStore } from "@/engines/identity/auth-store";
+import { useEffect, useState } from "react";
 import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
 import { usePpobStore } from "@/engines/ppob/ppob-store";
 import { Button } from "@/components/ui/button";
@@ -141,9 +140,8 @@ interface LocalTx {
 }
 
 export default function PpobPage() {
-  const { user } = useAuthStore();
   const { activeWorkspace } = useWorkspaceStore();
-  const { categories, products, transactions, loadCategories, loadProducts, loadTransactions, addTransaction } = usePpobStore();
+  const { loadCategories, loadProducts, loadTransactions } = usePpobStore();
 
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [customerPhone, setCustomerPhone] = useState("");

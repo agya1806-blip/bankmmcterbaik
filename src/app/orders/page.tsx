@@ -23,7 +23,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Plus, Search, ShoppingCart, Phone, CheckCircle, XCircle, Trash2, Edit2,
@@ -98,6 +97,30 @@ export default function OrdersPage() {
   const total = Math.max(0, subtotal - (parseFloat(discount) || 0));
 
   const remaining = total - (parseFloat(dp) || 0);
+
+  const filteredOrders = useMemo(() => {
+    let result = [...orders];
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter((o) =>
+        o.number.toLowerCase().includes(q) ||
+        o.customerId.toLowerCase().includes(q)
+      );
+    }
+    if (typeFilter !== "all") {
+      result = result.filter((o) => o.type === typeFilter);
+    }
+    if (statusFilter !== "all") {
+      result = result.filter((o) => o.status === statusFilter);
+    }
+    return result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [orders, search, typeFilter, statusFilter]);
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: orders.length, baru: 0, proses: 0, selesai: 0, batal: 0 };
+    orders.forEach((o) => { counts[o.status] = (counts[o.status] || 0) + 1; });
+    return counts;
+  }, [orders]);
 
   function updateItem(id: string, field: string, value: string | number) {
     setItems((prev) =>
@@ -214,30 +237,6 @@ export default function OrdersPage() {
     );
     return `https://wa.me/${phone}?text=${text}`;
   }
-
-  const filteredOrders = useMemo(() => {
-    let result = [...orders];
-    if (search) {
-      const q = search.toLowerCase();
-      result = result.filter((o) =>
-        o.number.toLowerCase().includes(q) ||
-        o.customerId.toLowerCase().includes(q)
-      );
-    }
-    if (typeFilter !== "all") {
-      result = result.filter((o) => o.type === typeFilter);
-    }
-    if (statusFilter !== "all") {
-      result = result.filter((o) => o.status === statusFilter);
-    }
-    return result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [orders, search, typeFilter, statusFilter]);
-
-  const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: orders.length, baru: 0, proses: 0, selesai: 0, batal: 0 };
-    orders.forEach((o) => { counts[o.status] = (counts[o.status] || 0) + 1; });
-    return counts;
-  }, [orders]);
 
   const orderFormContent = (
     <div className="space-y-4 py-4">

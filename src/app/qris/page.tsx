@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { toCanvas } from "qrcode";
 import {
-  Download, Copy, Check, QrCode, Plus, X, Trash2, Search, History
+  Download, Copy, Check, QrCode, Plus, Trash2, Search, History
 } from "lucide-react";
 import toast from "react-hot-toast";
 

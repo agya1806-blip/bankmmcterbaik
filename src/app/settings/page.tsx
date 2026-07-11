@@ -34,7 +34,6 @@ import {
   getSuppliersByWorkspace,
   getInventoryItemsByWorkspace,
   getPaymentMethodsByWorkspace,
-  getInvoicesByWorkspace,
   getProductsByWorkspace,
   getOrdersByWorkspace,
   getBranchesByWorkspace,
@@ -47,7 +46,6 @@ import {
   createSupplier,
   createBudget,
   createInventoryItem,
-  createInvoice,
   createBranch,
   createPaymentMethod,
   deletePaymentMethod,
@@ -194,7 +192,7 @@ export default function SettingsPage() {
     if (!activeWorkspace) return;
     setExporting(true);
     try {
-      const [accounts, categories, transactions, budgets, customers, suppliers, inventory, paymentMethods, invoices, products, orders, branches] =
+      const [accounts, categories, transactions, budgets, customers, suppliers, inventory, paymentMethods, products, orders, branches] =
         await Promise.all([
           getAccountsByWorkspace(activeWorkspace.id),
           getCategoriesByWorkspace(activeWorkspace.id),
@@ -204,7 +202,6 @@ export default function SettingsPage() {
           getSuppliersByWorkspace(activeWorkspace.id),
           getInventoryItemsByWorkspace(activeWorkspace.id),
           getPaymentMethodsByWorkspace(activeWorkspace.id),
-          getInvoicesByWorkspace(activeWorkspace.id),
           getProductsByWorkspace(activeWorkspace.id),
           getOrdersByWorkspace(activeWorkspace.id),
           getBranchesByWorkspace(activeWorkspace.id),
@@ -478,7 +475,6 @@ export default function SettingsPage() {
         }
         if (Array.isArray(data.budgets)) for (const x of data.budgets) await createBudget(x);
         if (Array.isArray(data.inventory)) for (const x of data.inventory) await createInventoryItem(x);
-        if (Array.isArray(data.invoices)) for (const x of data.invoices) await createInvoice(x);
         if (Array.isArray(data.branches)) for (const x of data.branches) await createBranch(x);
       }
     } catch (err) {
@@ -907,32 +903,6 @@ export default function SettingsPage() {
                   {importing ? t("settings.importing") : t("settings.importData")}
                 </Button>
                 <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
-                <Button variant="outline" onClick={async () => {
-                  if (!activeWorkspace) return;
-                  const { getInvoicesByWorkspace, getInvoiceItems, createOrder } = await import("@/lib/db");
-                  const oldInvoices = await getInvoicesByWorkspace(activeWorkspace.id);
-                  if (oldInvoices.length === 0) { alert("Tidak ada faktur lama untuk dimigrasi."); return; }
-                  if (!confirm(`Migrasikan ${oldInvoices.length} faktur lama ke sistem baru?`)) return;
-                  for (const inv of oldInvoices) {
-                    const oldItems = (await getInvoiceItems(inv.id)) || [];
-                    const items = oldItems.map((it: { id: string; description: string; quantity: number; unitPrice: number; total: number }) => ({
-                      id: crypto.randomUUID(), description: it.description, quantity: it.quantity, unitPrice: it.unitPrice, total: it.total,
-                    }));
-                    await createOrder({
-                      id: crypto.randomUUID(), workspaceId: activeWorkspace.id, number: inv.number,
-                      type: (inv.template as "print" | "laptop" | "handphone" | "tiktok" | "umum") || "umum",
-                      status: inv.status === "paid" ? "selesai" : inv.status === "dp" ? "proses" : "baru",
-                      paymentStatus: inv.status === "paid" ? "Lunas" : inv.status === "dp" ? "DP" : "Belum Lunas",
-                      customerId: inv.customerId, customerName: inv.customerId, customerPhone: "", customerAddress: "",
-                      items, subtotal: inv.subtotal, discount: inv.discount, total: inv.total, dp: 0, remaining: inv.total,
-                      walletId: "", specs: {}, notes: inv.notes, date: inv.date, dueDate: inv.dueDate, createdAt: inv.createdAt,
-                    });
-                  }
-                  alert(`✅ ${oldInvoices.length} faktur berhasil dimigrasi!`);
-                  window.location.reload();
-                }}>
-                  Migrasi Faktur Lama
-                </Button>
               </div>
             </div>
 

@@ -40,7 +40,7 @@ export default function InvoiceDetailPage() {
   const { t } = useTranslation();
   const { user, isLoading: authLoading } = useAuthStore();
   const { activeWorkspace, loadWorkspaces } = useWorkspaceStore();
-  const { orders, loadOrders, editOrder, removeOrder } = useOrderStore();
+  const { orders, loadOrders, removeOrder } = useOrderStore();
 
   const qrRef = useRef<HTMLCanvasElement>(null);
   const printRef = useRef<HTMLDivElement>(null);
