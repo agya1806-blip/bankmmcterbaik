@@ -566,6 +566,8 @@ export default function SettingsPage() {
     });
   };
 
+  const [activeTab, setActiveTab] = useState<string>("profile");
+
   if (authLoading || wsLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -593,7 +595,6 @@ export default function SettingsPage() {
     { id: "system", label: "Sistem", icon: "⚙️" },
     { id: "data", label: "Data", icon: "💾" },
   ] as const;
-  const [activeTab, setActiveTab] = useState<string>("profile");
 
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
