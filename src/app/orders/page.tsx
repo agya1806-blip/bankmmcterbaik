@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Plus, Search, ShoppingCart, Phone, CheckCircle, XCircle, Trash2, Edit2,
+  Plus, Search, ShoppingCart, Phone, CheckCircle, XCircle, Trash2, Edit2, FileText,
 } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 
@@ -44,6 +44,21 @@ const STATUS_STYLES: Record<string, string> = {
   proses: "bg-amber-100/80 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
   selesai: "bg-emerald-100/80 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
   batal: "bg-red-100/80 dark:bg-red-900/30 text-red-600 dark:text-red-400",
+};
+
+const TYPE_ICONS: Record<string, string> = {
+  print: "📚", laptop: "💻", handphone: "📱", tiktok: "🎵", umum: "📄",
+};
+
+const TYPE_LABELS: Record<string, string> = {
+  print: "Percetakan", laptop: "Laptop", handphone: "Handphone", tiktok: "TikTok", umum: "Umum",
+};
+
+const PAYMENT_STYLES: Record<string, string> = {
+  "Belum Lunas": "bg-red-100/80 dark:bg-red-900/30 text-red-600",
+  DP: "bg-amber-100/80 dark:bg-amber-900/30 text-amber-600",
+  Lunas: "bg-emerald-100/80 dark:bg-emerald-900/30 text-emerald-600",
+  Batal: "bg-gray-100/80 dark:bg-gray-900/30 text-gray-600",
 };
 
 function generateItemId(): string {
@@ -77,6 +92,9 @@ export default function OrdersPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [orderTab, setOrderTab] = useState<"orders" | "invoices">("orders");
+  const [invoiceFilter, setInvoiceFilter] = useState<"all" | "Belum Lunas" | "DP" | "Lunas">("all");
+  const [invoiceSearch, setInvoiceSearch] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/login");
@@ -121,6 +139,35 @@ export default function OrdersPage() {
     orders.forEach((o) => { counts[o.status] = (counts[o.status] || 0) + 1; });
     return counts;
   }, [orders]);
+
+  const invoiceCounts = useMemo(() => ({
+    all: orders.length,
+    "Belum Lunas": orders.filter((o) => o.paymentStatus === "Belum Lunas").length,
+    DP: orders.filter((o) => o.paymentStatus === "DP").length,
+    Lunas: orders.filter((o) => o.paymentStatus === "Lunas").length,
+  }), [orders]);
+
+  const invoiceFilters = [
+    { key: "all" as const, label: `Semua (${invoiceCounts.all})` },
+    { key: "Belum Lunas" as const, label: `Belum Lunas (${invoiceCounts["Belum Lunas"]})` },
+    { key: "DP" as const, label: `DP (${invoiceCounts.DP})` },
+    { key: "Lunas" as const, label: `Lunas (${invoiceCounts.Lunas})` },
+  ];
+
+  const invoiceFiltered = useMemo(() => {
+    let list = orders;
+    if (invoiceFilter !== "all") list = list.filter((o) => o.paymentStatus === invoiceFilter);
+    if (invoiceSearch.trim()) {
+      const q = invoiceSearch.toLowerCase();
+      list = list.filter(
+        (o) =>
+          o.number.toLowerCase().includes(q) ||
+          (o.customerName || "").toLowerCase().includes(q) ||
+          (o.customerPhone || "").includes(q)
+      );
+    }
+    return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [orders, invoiceFilter, invoiceSearch]);
 
   function updateItem(id: string, field: string, value: string | number) {
     setItems((prev) =>
@@ -437,8 +484,33 @@ export default function OrdersPage() {
             <DialogFooter><Button type="submit">{t("orders.save")}</Button></DialogFooter>
           </form>
         </DialogContent>
-      </Dialog>
+        </Dialog>
 
+      <div className="flex gap-2">
+        <button
+          onClick={() => setOrderTab("orders")}
+          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
+            orderTab === "orders"
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground hover:bg-muted/80"
+          }`}
+        >
+          Pesanan
+        </button>
+        <button
+          onClick={() => setOrderTab("invoices")}
+          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
+            orderTab === "invoices"
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground hover:bg-muted/80"
+          }`}
+        >
+          Faktur
+        </button>
+      </div>
+
+      {orderTab === "orders" ? (
+        <>
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {ORDER_STATUSES.map((status) => (
           <Card key={status} size="sm" className="text-center cursor-pointer hover:ring-1 hover:ring-primary/30 transition-all" onClick={() => setStatusFilter(status === "all" ? "all" : status)}>
@@ -573,6 +645,90 @@ export default function OrdersPage() {
           </div>
         ))}
       </div>
+        </>
+      ) : (
+        <div className="space-y-5">
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
+            {invoiceFilters.map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setInvoiceFilter(f.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                  invoiceFilter === f.key ? "bg-emerald-500 text-white shadow-sm" : "bg-muted/50 text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/40" />
+            <input
+              type="text"
+              placeholder="Cari faktur..."
+              value={invoiceSearch}
+              onChange={(e) => setInvoiceSearch(e.target.value)}
+              className="w-full h-10 pl-9 pr-3 rounded-xl bg-muted/50 border border-border/30 text-sm focus:outline-none focus:border-emerald-500/50"
+            />
+          </div>
+
+          {invoiceFiltered.length === 0 ? (
+            <div className="flex flex-col items-center py-16 text-center">
+              <div className="size-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                <FileText className="size-6 text-muted-foreground/40" />
+              </div>
+              <p className="text-sm font-medium text-foreground/80 mb-1">
+                {invoiceSearch ? "Tidak ditemukan" : "Belum ada faktur"}
+              </p>
+              <p className="text-xs text-muted-foreground/60 mb-4">
+                {invoiceSearch ? "Coba kata kunci lain" : "Buat faktur pertama dari menu Pesanan"}
+              </p>
+              {!invoiceSearch && (
+                <Button variant="outline" onClick={() => router.push("/orders")}>
+                  <Plus className="size-3.5" /> Buat Pesanan
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {invoiceFiltered.map((order) => (
+                <div
+                  key={order.id}
+                  className="floating-card p-4 cursor-pointer hover:shadow-md transition-all active:scale-[0.99]"
+                  onClick={() => router.push(`/invoices/${order.id}`)}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{TYPE_ICONS[order.type] || "📄"}</span>
+                      <div>
+                        <p className="text-sm font-semibold">{order.number}</p>
+                        <p className="text-[10px] text-muted-foreground/60">{TYPE_LABELS[order.type] || order.type}</p>
+                      </div>
+                    </div>
+                    <span className={`text-[10px] font-medium px-2 py-1 rounded-full ${PAYMENT_STYLES[order.paymentStatus] || ""}`}>
+                      {order.paymentStatus}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium truncate">{order.customerName || order.customerId}</p>
+                      <p className="text-[10px] text-muted-foreground/60">{new Date(order.date).toLocaleDateString("id-ID")}</p>
+                    </div>
+                    <p className="text-sm font-bold whitespace-nowrap ml-2">{activeWorkspace.currency} {order.total.toLocaleString()}</p>
+                  </div>
+                  {order.dp > 0 && order.paymentStatus !== "Lunas" && order.paymentStatus !== "Batal" && (
+                    <div className="mt-2 flex items-center gap-2 text-[10px]">
+                      <span className="text-muted-foreground/60">DP: {activeWorkspace.currency} {order.dp.toLocaleString()}</span>
+                      <span className="text-red-500">Sisa: {activeWorkspace.currency} {order.remaining.toLocaleString()}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

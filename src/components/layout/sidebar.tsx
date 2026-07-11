@@ -3,10 +3,10 @@
 import { useCallback, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
-  LayoutDashboard, ArrowLeftRight, Wallet, PieChart, FileText,
-  Users, Package, Tag, ShoppingCart, BarChart3, FolderKanban, Calendar,
-  Settings, ChevronLeft, Building2, LogOut, Plus, ArrowUpDown, CreditCard,
-  Zap, QrCode, Search, type LucideIcon
+  LayoutDashboard, ArrowLeftRight, Wallet, PieChart,
+  Users, Tag, ShoppingCart, BarChart3, Calendar,
+  Settings, ChevronLeft, Building2, LogOut, Plus, ArrowUpDown,
+  QrCode, Search, type LucideIcon
 } from "lucide-react";
 import { useAuthStore } from "@/engines/identity/auth-store";
 import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
@@ -35,23 +35,19 @@ const ALL_NAV_GROUPS: Record<string, NavGroup[]> = {
     ]},
   ],
   usaha: [
-    { items: [
+    { label: "Bisnis", items: [
       { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
       { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
-    ]},
-    { label: "Bisnis", items: [
       { href: "/orders", labelKey: "nav.orders", icon: ShoppingCart },
-      { href: "/invoices", labelKey: "nav.invoices", icon: FileText },
       { href: "/customers", labelKey: "nav.customers", icon: Users },
       { href: "/suppliers", labelKey: "nav.suppliers", icon: Building2 },
     ]},
     { label: "Produk", items: [
       { href: "/products", labelKey: "nav.products", icon: Tag },
-      { href: "/inventory", labelKey: "nav.inventory", icon: Package },
     ]},
-    { label: "Layanan", items: [
-      { href: "/ppob", labelKey: "nav.ppob", icon: Zap },
+    { label: "Pembayaran", items: [
       { href: "/qris", labelKey: "nav.qris", icon: QrCode },
+      { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
     ]},
     { label: "Keuangan", items: [
       { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
@@ -59,11 +55,9 @@ const ALL_NAV_GROUPS: Record<string, NavGroup[]> = {
       { href: "/debts", labelKey: "nav.debts", icon: ArrowUpDown },
     ]},
     { label: "Lainnya", items: [
-      { href: "/projects", labelKey: "nav.projects", icon: FolderKanban },
       { href: "/reports", labelKey: "nav.reports", icon: BarChart3 },
       { href: "/calendar", labelKey: "nav.calendar", icon: Calendar },
       { href: "/categories", labelKey: "nav.categories", icon: Tag },
-      { href: "/wallets", labelKey: "nav.wallets", icon: CreditCard },
     ]},
   ],
   modal: [
@@ -79,14 +73,12 @@ const ALL_NAV_GROUPS: Record<string, NavGroup[]> = {
       { href: "/", labelKey: "nav.dashboard", icon: LayoutDashboard },
     ]},
     { label: "Layanan", items: [
-      { href: "/ppob", labelKey: "nav.ppob", icon: Zap },
       { href: "/qris", labelKey: "nav.qris", icon: QrCode },
     ]},
     { label: "Bisnis", items: [
       { href: "/orders", labelKey: "nav.orders", icon: ShoppingCart },
       { href: "/products", labelKey: "nav.products", icon: Tag },
       { href: "/customers", labelKey: "nav.customers", icon: Users },
-      { href: "/inventory", labelKey: "nav.inventory", icon: Package },
       { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
     ]},
   ],

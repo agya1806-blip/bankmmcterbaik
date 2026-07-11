@@ -3,102 +3,92 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { toCanvas } from "qrcode";
 import {
-  Download, Copy, Check, QrCode, Plus, Trash2, Search, History
+  UploadCloud, QrCode, Trash2, CheckCircle, Search, Plus
 } from "lucide-react";
 import toast from "react-hot-toast";
-
-interface QrisItem {
-  id: string;
-  amount: number;
-  description: string;
-  customerName: string;
-  status: "paid" | "unpaid";
-  createdAt: number;
-}
+import { useTranslation } from "@/lib/i18n";
+import {
+  createQrisPayment,
+  updateQrisPayment,
+  deleteQrisPayment,
+  getQrisPaymentsByWorkspace,
+} from "@/lib/db";
+import type { QrisPayment } from "@/lib/db";
 
 export default function QrisPage() {
+  const { t } = useTranslation();
   const { activeWorkspace } = useWorkspaceStore();
-  const qrRef = useRef<HTMLDivElement>(null);
+  const [tab, setTab] = useState<"saya" | "riwayat">("saya");
+  const [image, setImage] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [customerName, setCustomerName] = useState("");
-  const [history, setHistory] = useState<QrisItem[]>([]);
-  const [showForm, setShowForm] = useState(false);
-  const qrCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [history, setHistory] = useState<QrisPayment[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const qrisData = activeWorkspace
-    ? `QRIS:${activeWorkspace.name}:${amount || "0"}:${description || "Pembayaran"}:${customerName || "Pelanggan"}`
-    : "";
-
-  useEffect(() => {
-    if (qrCanvasRef.current && qrisData) {
-      toCanvas(qrCanvasRef.current, qrisData, { width: 180, margin: 2 });
+  const handleImage = useCallback((file: File) => {
+    if (!file.type.match(/^image\/(png|jpeg|jpg)$/)) {
+      toast.error("Hanya file PNG/JPG yang diperbolehkan");
+      return;
     }
-  }, [qrisData]);
+    const reader = new FileReader();
+    reader.onload = (e) => setImage(e.target?.result as string);
+    reader.readAsDataURL(file);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleImage(file);
+  }, [handleImage]);
+
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setDragging(true); };
+  const handleDragLeave = () => setDragging(false);
 
   useEffect(() => {
     if (activeWorkspace) {
-      const saved = localStorage.getItem(`qris_${activeWorkspace.id}`);
-      if (saved) setHistory(JSON.parse(saved));
+      getQrisPaymentsByWorkspace(activeWorkspace.id).then(setHistory);
     }
   }, [activeWorkspace]);
 
-  const saveHistory = useCallback((items: QrisItem[]) => {
-    if (activeWorkspace) {
-      localStorage.setItem(`qris_${activeWorkspace.id}`, JSON.stringify(items));
-    }
-    setHistory(items);
-  }, [activeWorkspace]);
-
-  const handleDownload = () => {
-    if (!qrCanvasRef.current) return;
-    const canvas = qrCanvasRef.current;
-    const png = canvas.toDataURL("image/png");
-    const a = document.createElement("a");
-    a.download = `qris-${activeWorkspace?.name || "payment"}.png`;
-    a.href = png;
-    a.click();
-  };
-
-  const handleCopy = () => {
-    if (!qrisData) return;
-    navigator.clipboard.writeText(qrisData);
-    setCopied(true);
-    toast.success("QRIS data copied!");
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleAddPayment = () => {
-    if (!amount || !activeWorkspace) return;
-    const item: QrisItem = {
+  const handleSave = async () => {
+    if (!activeWorkspace || !amount) return;
+    const item: QrisPayment = {
       id: Date.now().toString(),
+      workspaceId: activeWorkspace.id,
       amount: Number(amount),
       description: description || "Pembayaran QRIS",
       customerName: customerName || "Pelanggan",
       status: "unpaid",
       createdAt: Date.now(),
     };
-    saveHistory([item, ...history]);
+    await createQrisPayment(item);
+    setHistory((prev) => [item, ...prev]);
     setAmount("");
     setDescription("");
     setCustomerName("");
-    setShowForm(false);
-    toast.success("Payment request created");
+    setImage(null);
+    toast.success("QRIS berhasil disimpan");
   };
 
-  const markPaid = (id: string) => {
-    saveHistory(history.map((h) => (h.id === id ? { ...h, status: "paid" as const } : h)));
-    toast.success("Marked as paid");
+  const markPaid = async (id: string) => {
+    const item = history.find((h) => h.id === id);
+    if (!item) return;
+    const updated = { ...item, status: "paid" as const };
+    await updateQrisPayment(updated);
+    setHistory((prev) => prev.map((h) => (h.id === id ? updated : h)));
+    toast.success("Status diperbarui");
   };
 
-  const deleteItem = (id: string) => {
-    saveHistory(history.filter((h) => h.id !== id));
+  const deleteItem = async (id: string) => {
+    await deleteQrisPayment(id);
+    setHistory((prev) => prev.filter((h) => h.id !== id));
+    toast.success("Dihapus");
   };
 
   const filtered = history.filter(
@@ -114,157 +104,198 @@ export default function QrisPage() {
     <div className="space-y-6 animate-fade-in max-w-lg mx-auto pb-24">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold font-heading">QRIS</h1>
-          <p className="text-sm text-muted-foreground/60">Terima pembayaran QRIS</p>
+          <h1 className="text-xl font-bold font-heading">{t("qris.title") || "QRIS"}</h1>
+          <p className="text-sm text-muted-foreground/60">{t("qris.subtitle") || "Terima pembayaran QRIS"}</p>
         </div>
         <div className="flex items-center justify-center size-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/20">
           <QrCode className="size-6 text-white" />
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="floating-card p-4">
-          <p className="text-xs text-muted-foreground/60 mb-1">Tertagih</p>
-          <p className="text-lg font-bold text-amber-600">
-            {activeWorkspace?.currency || "IDR"} {totalPending.toLocaleString()}
-          </p>
-        </div>
-        <div className="floating-card p-4">
-          <p className="text-xs text-muted-foreground/60 mb-1">Diterima</p>
-          <p className="text-lg font-bold text-emerald-600">
-            {activeWorkspace?.currency || "IDR"} {totalPaid.toLocaleString()}
-          </p>
-        </div>
+      {/* Tabs */}
+      <div className="flex gap-2 bg-muted/40 p-1 rounded-xl">
+        <button
+          onClick={() => setTab("saya")}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+            tab === "saya" ? "bg-white dark:bg-gray-800 shadow-sm" : "text-muted-foreground/60"
+          }`}
+        >
+          {t("qris.myQris") || "QRIS Saya"}
+        </button>
+        <button
+          onClick={() => setTab("riwayat")}
+          className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+            tab === "riwayat" ? "bg-white dark:bg-gray-800 shadow-sm" : "text-muted-foreground/60"
+          }`}
+        >
+          {t("qris.history") || "Riwayat"}
+        </button>
       </div>
 
-      {/* QR Code Display */}
-      {activeWorkspace && (
-        <Card className="overflow-hidden">
-          <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-6 text-center">
-            <p className="text-white/90 text-sm font-medium mb-1">{activeWorkspace.name}</p>
-            <p className="text-white/60 text-xs">QRIS Pembayaran</p>
-          </div>
-          <CardContent className="p-6 flex flex-col items-center">
-            <div ref={qrRef} className="bg-white p-4 rounded-2xl shadow-inner mb-4">
-              {qrisData ? (
-                <canvas ref={qrCanvasRef} width={180} height={180} />
-              ) : (
-                <div className="size-[180px] flex items-center justify-center bg-muted rounded-lg">
-                  <QrCode className="size-12 text-muted-foreground/30" />
+      {/* QRIS Saya Tab */}
+      {tab === "saya" && (
+        <div className="space-y-4">
+          {/* Image Upload / Display */}
+          <div className="premium-card p-4">
+            {image ? (
+              <div className="flex flex-col items-center">
+                <div className="w-full max-w-sm bg-white rounded-2xl p-4 shadow-inner mb-4">
+                  <img src={image} alt="QRIS" className="w-full h-auto rounded-lg" />
                 </div>
-              )}
-            </div>
-            {amount && (
-              <p className="text-2xl font-bold font-heading mb-1">
-                {activeWorkspace.currency} {Number(amount).toLocaleString()}
-              </p>
-            )}
-            {description && <p className="text-sm text-muted-foreground/70 mb-3">{description}</p>}
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleDownload} disabled={!qrisData}>
-                <Download className="size-3.5" /> Simpan
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleCopy} disabled={!qrisData}>
-                {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-                {copied ? "Tersalin" : "Salin"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* New Payment Button */}
-      <Button className="w-full" onClick={() => setShowForm(!showForm)}>
-        <Plus className="size-4" /> {showForm ? "Batal" : "Buat Pembayaran QRIS"}
-      </Button>
-
-      {/* Payment Form */}
-      {showForm && (
-        <div className="floating-card p-4 space-y-3 animate-slide-up">
-          <div>
-            <label className="text-xs font-medium text-muted-foreground/70 mb-1 block">Jumlah</label>
-            <Input
-              type="number"
-              placeholder="0"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="text-xs font-medium text-muted-foreground/70 mb-1 block">Deskripsi</label>
-            <Input
-              placeholder="Pembayaran..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="text-xs font-medium text-muted-foreground/70 mb-1 block">Nama Pelanggan</label>
-            <Input
-              placeholder="Pelanggan"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-            />
-          </div>
-          <Button onClick={handleAddPayment} disabled={!amount} className="w-full">
-            <QrCode className="size-4" /> Generate QRIS
-          </Button>
-        </div>
-      )}
-
-      {/* History */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <History className="size-4 text-muted-foreground/60" />
-          <h2 className="text-sm font-semibold">Riwayat Pembayaran</h2>
-        </div>
-        <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/40" />
-          <input
-            type="text"
-            placeholder="Cari..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-9 pl-9 pr-3 rounded-xl bg-muted/50 border border-border/30 text-sm focus:outline-none focus:border-blue-500/50"
-          />
-        </div>
-        {filtered.length === 0 ? (
-          <div className="flex flex-col items-center py-8 text-center">
-            <div className="size-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
-              <QrCode className="size-5 text-muted-foreground/40" />
-            </div>
-            <p className="text-sm text-muted-foreground/60">Belum ada pembayaran QRIS</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {filtered.map((item) => (
-              <div key={item.id} className="floating-card p-3 flex items-center justify-between">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`status-dot ${item.status === "paid" ? "status-dot-active" : "bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.4)]"}`} />
-                    <p className="text-sm font-medium truncate">{item.customerName}</p>
-                  </div>
-                  <p className="text-xs text-muted-foreground/60 truncate">{item.description}</p>
-                  <p className="text-xs font-semibold mt-0.5">
-                    {activeWorkspace?.currency || "IDR"} {item.amount.toLocaleString()}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 ml-2">
-                  {item.status === "unpaid" && (
-                    <Button variant="outline" size="sm" onClick={() => markPaid(item.id)}>
-                      <Check className="size-3.5" />
-                    </Button>
-                  )}
-                  <Button variant="ghost" size="sm" onClick={() => deleteItem(item.id)}>
-                    <Trash2 className="size-3.5 text-muted-foreground/60" />
-                  </Button>
-                </div>
+                <Button variant="outline" size="sm" onClick={() => setImage(null)}>
+                  {t("qris.changeImage") || "Ganti Gambar"}
+                </Button>
               </div>
-            ))}
+            ) : (
+              <div
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onClick={() => fileRef.current?.click()}
+                className={`flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-2xl cursor-pointer transition-colors ${
+                  dragging
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
+                    : "border-border/40 hover:border-blue-400/50 hover:bg-muted/30"
+                }`}
+              >
+                <UploadCloud className="size-10 text-muted-foreground/40 mb-3" />
+                <p className="text-sm font-medium text-muted-foreground/70">
+                  {t("qris.uploadLabel") || "Upload Gambar QRIS"}
+                </p>
+                <p className="text-xs text-muted-foreground/40 mt-1">
+                  {t("qris.uploadHint") || "PNG / JPG — klik atau drag & drop"}
+                </p>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/png,image/jpeg"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleImage(file);
+                  }}
+                />
+              </div>
+            )}
           </div>
-        )}
-      </div>
+
+          {/* Amount & Description */}
+          <div className="premium-card p-4 space-y-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground/70 mb-1 block">
+                {t("qris.amount") || "Jumlah"}
+              </label>
+              <Input
+                type="number"
+                placeholder="0"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground/70 mb-1 block">
+                {t("qris.description") || "Deskripsi"}
+              </label>
+              <Input
+                placeholder={t("qris.descriptionPlaceholder") || "Pembayaran..."}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground/70 mb-1 block">
+                {t("qris.customerName") || "Nama Pelanggan"}
+              </label>
+              <Input
+                placeholder={t("qris.customerPlaceholder") || "Pelanggan"}
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+              />
+            </div>
+            <Button onClick={handleSave} disabled={!amount || !image} className="w-full">
+              <Plus className="size-4" /> {t("qris.save") || "Simpan"}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Riwayat Tab */}
+      {tab === "riwayat" && (
+        <div className="space-y-4">
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="floating-card p-4">
+              <p className="text-xs text-muted-foreground/60 mb-1">{t("qris.totalPending") || "Tertagih"}</p>
+              <p className="text-lg font-bold text-amber-600">
+                {activeWorkspace?.currency || "IDR"} {totalPending.toLocaleString()}
+              </p>
+            </div>
+            <div className="floating-card p-4">
+              <p className="text-xs text-muted-foreground/60 mb-1">{t("qris.totalPaid") || "Diterima"}</p>
+              <p className="text-lg font-bold text-emerald-600">
+                {activeWorkspace?.currency || "IDR"} {totalPaid.toLocaleString()}
+              </p>
+            </div>
+          </div>
+
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/40" />
+            <input
+              type="text"
+              placeholder={t("qris.search") || "Cari pelanggan atau deskripsi..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-9 pl-9 pr-3 rounded-xl bg-muted/50 border border-border/30 text-sm focus:outline-none focus:border-blue-500/50"
+            />
+          </div>
+
+          {/* List */}
+          {filtered.length === 0 ? (
+            <div className="flex flex-col items-center py-8 text-center">
+              <div className="size-12 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                <QrCode className="size-5 text-muted-foreground/40" />
+              </div>
+              <p className="text-sm text-muted-foreground/60">
+                {t("qris.noHistory") || "Belum ada pembayaran QRIS"}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filtered.map((item) => (
+                <div key={item.id} className="floating-card p-3 flex items-center justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`status-dot ${
+                          item.status === "paid"
+                            ? "status-dot-active"
+                            : "bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.4)]"
+                        }`}
+                      />
+                      <p className="text-sm font-medium truncate">{item.customerName}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground/60 truncate">{item.description}</p>
+                    <p className="text-xs font-semibold mt-0.5">
+                      {activeWorkspace?.currency || "IDR"} {item.amount.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 ml-2">
+                    {item.status === "unpaid" && (
+                      <Button variant="outline" size="sm" onClick={() => markPaid(item.id)}>
+                        <CheckCircle className="size-3.5" />
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="sm" onClick={() => deleteItem(item.id)}>
+                      <Trash2 className="size-3.5 text-muted-foreground/60" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

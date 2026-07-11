@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
   LayoutDashboard, ArrowLeftRight, Wallet, FileText, Settings,
-  Zap, ShoppingCart, ArrowUpDown, type LucideIcon
+  ShoppingCart, ArrowUpDown, type LucideIcon
 } from "lucide-react";
 import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
 import { useTranslation } from "@/lib/i18n";
@@ -21,7 +21,7 @@ const NAV_MAP: Record<string, { href: string; labelKey: string; icon: LucideIcon
     { href: "/", labelKey: "nav.home", icon: LayoutDashboard },
     { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
     { href: "/orders", labelKey: "nav.orders", icon: ShoppingCart },
-    { href: "/invoices", labelKey: "nav.invoices", icon: FileText },
+    { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
     { href: "/settings", labelKey: "nav.settings", icon: Settings },
   ],
   modal: [
@@ -33,9 +33,9 @@ const NAV_MAP: Record<string, { href: string; labelKey: string; icon: LucideIcon
   ],
   toko: [
     { href: "/", labelKey: "nav.home", icon: LayoutDashboard },
-    { href: "/ppob", labelKey: "nav.ppob", icon: Zap },
     { href: "/orders", labelKey: "nav.orders", icon: ShoppingCart },
     { href: "/products", labelKey: "nav.products", icon: Wallet },
+    { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
     { href: "/settings", labelKey: "nav.settings", icon: Settings },
   ],
   hutang: [

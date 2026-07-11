@@ -31,7 +31,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { PencilIcon, Trash2Icon, Plus } from "lucide-react";
+import { PencilIcon, Trash2Icon, Plus, Wallet, Landmark, Smartphone, CreditCard } from "lucide-react";
 
 const ACCOUNT_TYPES = [
   { value: "bank", labelKey: "accounts.bank" },
@@ -47,6 +47,14 @@ const TYPE_BADGE_VARIANT: Record<string, "default" | "success" | "secondary" | "
   ewallet: "secondary",
   qris: "warning",
   custom: "outline",
+};
+
+const TYPE_ICON: Record<string, React.ElementType> = {
+  bank: Landmark,
+  cash: Wallet,
+  ewallet: Smartphone,
+  qris: CreditCard,
+  custom: Wallet,
 };
 
 export default function AccountsPage() {
@@ -67,6 +75,9 @@ export default function AccountsPage() {
 
   const [addOpen, setAddOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<{ id: string; name: string; type: string; balance: number; currency: string } | null>(null);
+  const [accountsTab, setAccountsTab] = useState<"grid" | "list">("grid");
+
+  const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0);
 
   const [name, setName] = useState("");
   const [type, setType] = useState<string>("bank");
@@ -194,6 +205,40 @@ export default function AccountsPage() {
         </Dialog>
       </div>
 
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setAccountsTab("grid")}
+          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
+            accountsTab === "grid"
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground hover:bg-muted/80"
+          }`}
+        >
+          Akun Saya
+        </button>
+        <button
+          onClick={() => setAccountsTab("list")}
+          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${
+            accountsTab === "list"
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground hover:bg-muted/80"
+          }`}
+        >
+          Semua Akun
+        </button>
+      </div>
+
+      <div className="mb-6">
+        <Card className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">{t("wallets.totalBalance")}</span>
+              <span className="text-xl font-bold font-heading">{activeWorkspace.currency} {totalBalance.toLocaleString()}</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Dialog open={!!editTarget} onOpenChange={(o) => { if (!o) setEditTarget(null); }}>
         <DialogContent>
           <DialogHeader>
@@ -233,35 +278,22 @@ export default function AccountsPage() {
         </DialogContent>
       </Dialog>
 
-      {accounts.length === 0 && !isLoading && (
+      {accounts.length === 0 && !isLoading ? (
         <Card className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground/60">{t("accounts.empty")}</p>
           </CardContent>
         </Card>
-      )}
-
-      <div className="space-y-3">
-        {accounts.map((acc) => (
-          <Card key={acc.id} className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-base font-bold">{acc.name}</CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={TYPE_BADGE_VARIANT[acc.type] ?? "default"} className="capitalize text-[10px] px-2 py-0.5">
-                      {t("accounts." + acc.type)}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground/60">{acc.currency}</span>
+      ) : accountsTab === "grid" ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {accounts.map((acc) => {
+            const IconComponent = TYPE_ICON[acc.type] ?? Wallet;
+            return (
+              <div key={acc.id} className="premium-card p-4 rounded-xl border border-white/10 dark:border-white/5 bg-card/80 backdrop-blur-sm">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="size-10 rounded-lg bg-muted flex items-center justify-center">
+                    <IconComponent className="size-5" />
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-lg font-bold font-heading">
-                    {acc.currency} {acc.balance.toLocaleString()}
-                  </span>
-                  <Button variant="ghost" size="icon-sm" onClick={() => openEdit(acc)}>
-                    <PencilIcon className="size-4" />
-                  </Button>
                   <Button variant="ghost" size="icon-sm" onClick={() => {
                     if (confirm(t("accounts.deleteConfirm"))) {
                       removeAccount(acc.id);
@@ -270,11 +302,51 @@ export default function AccountsPage() {
                     <Trash2Icon className="size-4 text-destructive" />
                   </Button>
                 </div>
+                <p className="font-medium text-sm text-foreground mb-1">{acc.name}</p>
+                <p className="text-lg font-bold font-heading mb-2">{acc.currency} {acc.balance.toLocaleString()}</p>
+                <Badge variant={TYPE_BADGE_VARIANT[acc.type] ?? "default"} className="capitalize text-[10px] px-2 py-0.5">
+                  {t("accounts." + acc.type)}
+                </Badge>
               </div>
-            </CardHeader>
-          </Card>
-        ))}
-      </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {accounts.map((acc) => (
+            <Card key={acc.id} className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="text-base font-bold">{acc.name}</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={TYPE_BADGE_VARIANT[acc.type] ?? "default"} className="capitalize text-[10px] px-2 py-0.5">
+                        {t("accounts." + acc.type)}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground/60">{acc.currency}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-lg font-bold font-heading">
+                      {acc.currency} {acc.balance.toLocaleString()}
+                    </span>
+                    <Button variant="ghost" size="icon-sm" onClick={() => openEdit(acc)}>
+                      <PencilIcon className="size-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon-sm" onClick={() => {
+                      if (confirm(t("accounts.deleteConfirm"))) {
+                        removeAccount(acc.id);
+                      }
+                    }}>
+                      <Trash2Icon className="size-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1250,6 +1250,11 @@ export async function getQrisPaymentsByStatus(workspaceId: string, status: "paid
   return index.getAll(status);
 }
 
+export async function deleteQrisPayment(id: string): Promise<void> {
+  const db = await getDb();
+  await db.delete("qris_payments", id);
+}
+
 const RESET_TABLES: { name: string; index: string }[] = [
   { name: "accounts", index: "workspaceId" },
   { name: "categories", index: "workspaceId" },
