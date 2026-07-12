@@ -77,6 +77,8 @@ function QuickActions({ type, router }: { type: string; router: ReturnType<typeo
 function PribadiDashboard({ ws, currency }: { ws: { id: string; name: string; currency: string }; currency: string }) {
   const router = useRouter();
   const { accounts, transactions, budgets, loadAccounts, loadCategories, loadTransactions, loadBudgets } = useFinancialStore();
+  const [activeWidgets, setActiveWidgets] = useState<string[]>([]);
+  useEffect(() => { import("@/lib/widgets").then((m) => setActiveWidgets(m.getWidgets())); }, []);
 
   useEffect(() => {
     if (ws) {
@@ -107,11 +109,11 @@ function PribadiDashboard({ ws, currency }: { ws: { id: string; name: string; cu
         </div>
       </div>
       <QuickActions type="pribadi" router={router} />
-      <div className="grid grid-cols-2 gap-3">
+      {activeWidgets.includes("balance") && <div className="grid grid-cols-2 gap-3">
         <div className="premium-stat"><p className="premium-stat-label">Laba Bersih</p><p className={`premium-stat-value ${netP >= 0 ? "text-emerald-600" : "text-red-500"}`}>{currency} {Math.abs(netP).toLocaleString()}</p></div>
         <div className="premium-stat"><p className="premium-stat-label">Anggaran Aktif</p><p className="premium-stat-value">{budgets.length}</p></div>
-      </div>
-      {chartData.some((d) => d.income > 0 || d.expense > 0) && (
+      </div>}
+      {activeWidgets.includes("balance") && chartData.some((d) => d.income > 0 || d.expense > 0) && (
         <div className="premium-card p-4">
           <p className="text-sm font-semibold mb-3">Arus Kas 6 Bulan</p>
           <ResponsiveContainer width="100%" height={140}>
@@ -126,7 +128,7 @@ function PribadiDashboard({ ws, currency }: { ws: { id: string; name: string; cu
           </ResponsiveContainer>
         </div>
       )}
-      <div>
+      {activeWidgets.includes("recent-transactions") && <div>
         <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold">Transaksi Terbaru</h2><button onClick={() => router.push("/transactions")} className="text-xs font-medium text-emerald-600">Lihat Semua</button></div>
         {recent.length === 0 ? (
           <div className="premium-card p-6 text-center">
@@ -153,7 +155,7 @@ function PribadiDashboard({ ws, currency }: { ws: { id: string; name: string; cu
             ))}
           </div>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

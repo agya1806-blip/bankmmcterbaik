@@ -98,6 +98,9 @@ export default function SettingsPage() {
   const [activityLogs, setActivityLogs] = useState<AuditLogView[]>([]);
   const [logsLoading, setLogsLoading] = useState(true);
   const [branches, setBranches] = useState<import("@/lib/db").Branch[]>([]);
+  const [widgetIds, setWidgetIds] = useState<import("@/lib/widgets").WidgetId[]>([]);
+  type WidgetDef = { id: import("@/lib/widgets").WidgetId; label: string; default: boolean };
+  const [allWidgetDefs, setAllWidgetDefs] = useState<WidgetDef[]>([]);
   const [branchName, setBranchName] = useState("");
   const [branchAddress, setBranchAddress] = useState("");
   const [paymentMethods, setPaymentMethods] = useState<import("@/lib/db").PaymentMethod[]>([]);
@@ -165,6 +168,10 @@ export default function SettingsPage() {
     if (savedTypes) try { setInvoiceTypes(JSON.parse(savedTypes)); } catch {}
     const savedShortcuts = localStorage.getItem("mmcbank-shortcuts");
     if (savedShortcuts) try { setShortcuts(JSON.parse(savedShortcuts)); } catch {}
+    import("@/lib/widgets").then((m) => {
+      setWidgetIds(m.getWidgets());
+      setAllWidgetDefs(Array.from(m.ALL_WIDGETS) as WidgetDef[]);
+    });
   }, []);
 
   const handleSaveGlobal = async () => {
@@ -892,6 +899,24 @@ export default function SettingsPage() {
                   {importing ? t("settings.importing") : t("settings.importData")}
                 </Button>
                 <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
+              </div>
+            </div>
+
+            <div className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5 rounded-2xl p-6">
+              <h3 className="text-base font-semibold">Widget Dashboard</h3>
+              <p className="text-xs text-muted-foreground mb-4">Pilih widget yang tampil di halaman utama</p>
+              <div className="space-y-2">
+                {allWidgetDefs.map((w) => (
+                  <div key={w.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+                    <span className="text-sm font-medium">{w.label}</span>
+                    <Switch checked={widgetIds.includes(w.id)} onCheckedChange={async (v: boolean) => {
+                      const { saveWidgets } = await import("@/lib/widgets");
+                      const next = v ? [...widgetIds, w.id] : widgetIds.filter((id) => id !== w.id);
+                      setWidgetIds(next);
+                      saveWidgets(next);
+                    }} />
+                  </div>
+                ))}
               </div>
             </div>
 
