@@ -1,24 +1,28 @@
-import { createAuditLog, type AuditLog } from "@/lib/db";
+import { createAuditLog, getAuditLogsByWorkspace, type AuditLog } from "@/lib/db";
 
-export async function audit(opts: {
-  workspaceId: string;
-  userId: string;
-  action: AuditLog["action"];
-  entity: string;
-  entityId: string;
-  before?: unknown;
-  after?: unknown;
-}) {
-  const log: AuditLog = {
+export async function logAction(
+  workspaceId: string,
+  userId: string,
+  action: AuditLog["action"],
+  entity: string,
+  entityId: string,
+  before?: unknown,
+  after?: unknown
+) {
+  await createAuditLog({
     id: crypto.randomUUID(),
-    workspaceId: opts.workspaceId,
-    userId: opts.userId,
-    action: opts.action,
-    entity: opts.entity,
-    entityId: opts.entityId,
-    before: opts.before ? JSON.stringify(opts.before) : undefined,
-    after: opts.after ? JSON.stringify(opts.after) : undefined,
+    workspaceId,
+    userId,
+    action,
+    entity,
+    entityId,
+    before: before ? JSON.stringify(before) : undefined,
+    after: after ? JSON.stringify(after) : undefined,
     createdAt: Date.now(),
-  };
-  await createAuditLog(log);
+  });
+}
+
+export async function getLogs(workspaceId: string): Promise<AuditLog[]> {
+  const logs = await getAuditLogsByWorkspace(workspaceId);
+  return logs.sort((a, b) => b.createdAt - a.createdAt);
 }

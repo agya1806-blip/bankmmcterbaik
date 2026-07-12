@@ -192,6 +192,27 @@ export default function ReportsPage() {
     URL.revokeObjectURL(url);
   }
 
+  function handleExportCSV() {
+    const header = "Tanggal,Tipe,Kategori,Akun,Deskripsi,Jumlah,Mata Uang";
+    const rows = filteredTransactions.map((tx) => [
+      tx.date,
+      tx.type,
+      categoryMap.get(tx.categoryId || "") || "",
+      accountMap.get(tx.accountId) || "",
+      `"${(tx.description || "").replace(/"/g, '""')}"`,
+      tx.amount,
+      activeWorkspace?.currency || "Rp",
+    ].join(","));
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;bom" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `report-${fromDate}-to-${toDate}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   const typeColorMap: Record<string, string> = {
     income: "bg-emerald-100/80 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
     expense: "bg-red-100/80 dark:bg-red-900/30 text-red-600 dark:text-red-400",
@@ -210,10 +231,10 @@ export default function ReportsPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleExportJSON}>
-            <Download className="size-4" /> {t("reports.exportPdf")}
+            <Download className="size-4" /> JSON
           </Button>
-          <Button variant="outline" size="sm" onClick={handleExportJSON}>
-            <FileSpreadsheet className="size-4" /> {t("reports.exportExcel")}
+          <Button variant="outline" size="sm" onClick={handleExportCSV}>
+            <FileSpreadsheet className="size-4" /> CSV
           </Button>
         </div>
       </div>

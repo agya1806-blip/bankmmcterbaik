@@ -46,6 +46,13 @@ import { useTranslation } from "@/lib/i18n";
 import toast from "react-hot-toast";
 import { Trash2 } from "lucide-react";
 
+interface AuditLogView {
+  id: string;
+  action: string;
+  entity: string;
+  createdAt: number;
+}
+
 export default function SettingsPage() {
   const router = useRouter();
   const { t } = useTranslation();
@@ -88,6 +95,8 @@ export default function SettingsPage() {
   const [pinValue, setPinValue] = useState("");
   const [pinConfirm, setPinConfirm] = useState("");
   const [pinError, setPinError] = useState("");
+  const [activityLogs, setActivityLogs] = useState<AuditLogView[]>([]);
+  const [logsLoading, setLogsLoading] = useState(true);
   const [branches, setBranches] = useState<import("@/lib/db").Branch[]>([]);
   const [branchName, setBranchName] = useState("");
   const [branchAddress, setBranchAddress] = useState("");
@@ -133,12 +142,20 @@ export default function SettingsPage() {
       };
       loadBranches();
     };
-    loadSettings();
-  }, [activeWorkspace]);
+     loadSettings();
+   }, [activeWorkspace]);
 
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-  }, [theme]);
+   useEffect(() => {
+     if (!activeWorkspace) return;
+     setLogsLoading(true);
+     import("@/lib/audit").then(({ getLogs }) =>
+       getLogs(activeWorkspace.id).then(setActivityLogs).finally(() => setLogsLoading(false))
+     );
+   }, [activeWorkspace]);
+
+   useEffect(() => {
+     document.documentElement.classList.toggle("dark", theme === "dark");
+   }, [theme]);
 
   useEffect(() => {
     setBusinessName(localStorage.getItem("mmcbank-business-name") || "");
@@ -176,10 +193,12 @@ export default function SettingsPage() {
   };
 
   const handleReset = async () => {
-    if (!activeWorkspace) return;
+    if (!activeWorkspace || !user) return;
     setResetting(true);
     try {
       await resetWorkspaceData(activeWorkspace.id);
+      const { logAction } = await import("@/lib/audit");
+      await logAction(activeWorkspace.id, user.id, "delete", "workspace_data", activeWorkspace.id);
       setShowResetDialog(false);
       setResetConfirm("");
       toast.success("Semua data berhasil direset");
@@ -191,7 +210,9 @@ export default function SettingsPage() {
   };
 
   const handleDeleteWorkspace = async () => {
-    if (!activeWorkspace) return;
+    if (!activeWorkspace || !user) return;
+    const { logAction } = await import("@/lib/audit");
+    await logAction(activeWorkspace.id, user.id, "delete", "workspace", activeWorkspace.id);
     await deleteWorkspace(activeWorkspace.id);
     setShowDeleteDialog(false);
     router.push("/workspaces");
@@ -880,6 +901,32 @@ export default function SettingsPage() {
               <Button variant="outline" className="border-orange-500/30 text-orange-600 hover:bg-orange-500/10" onClick={() => setShowResetDialog(true)}>
                 <Trash2 className="size-4" /> Reset Data Buku
               </Button>
+            </div>
+
+            <div className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5 rounded-2xl p-6">
+              <h3 className="text-base font-semibold">Riwayat Aktivitas</h3>
+              <p className="text-xs text-muted-foreground mb-4">Catatan perubahan penting di buku ini</p>
+              {logsLoading ? (
+                <p className="text-sm text-muted-foreground">Memuat...</p>
+              ) : activityLogs.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Belum ada aktivitas</p>
+              ) : (
+                <div className="space-y-1.5 max-h-60 overflow-y-auto">
+                  {activityLogs.slice(0, 50).map((log) => (
+                    <div key={log.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30 text-sm">
+                      <span className={`size-2 rounded-full shrink-0 ${
+                        log.action === "create" ? "bg-emerald-500" :
+                        log.action === "delete" ? "bg-red-500" : "bg-amber-500"
+                      }`} />
+                      <span className="capitalize text-muted-foreground">{log.action}</span>
+                      <span className="font-medium truncate">{log.entity}</span>
+                      <span className="text-xs text-muted-foreground ml-auto shrink-0">
+                        {new Date(log.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="bg-card/80 backdrop-blur-sm border-red-500/30 rounded-2xl p-6">
