@@ -13,7 +13,8 @@ import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
 import { useTranslation } from "@/lib/i18n";
-import type { WorkspaceType } from "@/lib/db";
+import { BUSINESS_TYPES, getBusinessConfig } from "@/config/business-types";
+import type { WorkspaceType, BusinessSubType } from "@/lib/db";
 
 const getIcon = (type: WorkspaceType) => WORKSPACE_TYPES.find((w) => w.type === type)?.icon || "📒";
 
@@ -26,6 +27,7 @@ export default function WorkspacesPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newType, setNewType] = useState<WorkspaceType>("pribadi");
+  const [newSubType, setNewSubType] = useState<BusinessSubType>("general");
   const [newCurrency, setNewCurrency] = useState("IDR");
 
   useEffect(() => {
@@ -43,10 +45,13 @@ export default function WorkspacesPage() {
     e.preventDefault();
     if (!user) return;
     try {
-      await createWorkspace({ name: newName, description: WORKSPACE_TYPES.find((w) => w.type === newType)?.desc || "", currency: newCurrency, icon: getIcon(newType), type: newType }, user.id);
+      const wsData: any = { name: newName, description: WORKSPACE_TYPES.find((w) => w.type === newType)?.desc || "", currency: newCurrency, icon: getIcon(newType), type: newType };
+      if (newType === "usaha") wsData.businessSubType = newSubType;
+      await createWorkspace(wsData, user.id);
       setCreateOpen(false);
       setNewName("");
       setNewType("pribadi");
+      setNewSubType("general");
       setNewCurrency("IDR");
       router.push("/");
     } catch { setCreateOpen(false); }
@@ -74,6 +79,7 @@ export default function WorkspacesPage() {
 
         {workspaces.map((ws) => {
           const typeInfo = WORKSPACE_TYPES.find((w) => w.type === ws.type);
+          const bizInfo = ws.type === "usaha" && ws.businessSubType ? getBusinessConfig(ws.businessSubType) : null;
           return (
             <div
               key={ws.id}
@@ -87,7 +93,7 @@ export default function WorkspacesPage() {
                   </div>
                   <div>
                     <p className="font-semibold">{ws.name}</p>
-                    <p className="text-xs text-muted-foreground">{typeInfo?.label || ws.type} &middot; {ws.currency}</p>
+                    <p className="text-xs text-muted-foreground">{bizInfo ? bizInfo.label : typeInfo?.label || ws.type} &middot; {ws.currency}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -136,6 +142,29 @@ export default function WorkspacesPage() {
                   ))}
                 </div>
               </div>
+              {newType === "usaha" && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Jenis Usaha</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {BUSINESS_TYPES.map((bt) => (
+                      <button
+                        key={bt.value}
+                        type="button"
+                        onClick={() => setNewSubType(bt.value)}
+                        className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all ${
+                          newSubType === bt.value ? "border-amber-500 bg-amber-50 dark:bg-amber-900/10" : "border-border/50 hover:border-muted-foreground/30"
+                        }`}
+                      >
+                        <span className="text-xl">{bt.icon}</span>
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold">{bt.label}</p>
+                        </div>
+                        {newSubType === bt.value && <span className="ml-auto size-1.5 rounded-full bg-amber-500 shrink-0" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div className="space-y-2">
                 <label className="text-sm font-medium">Mata Uang</label>
                 <Select value={newCurrency} onValueChange={(v) => v && setNewCurrency(v)}>

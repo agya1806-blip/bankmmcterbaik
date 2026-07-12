@@ -66,6 +66,7 @@ export interface FinancialState {
     categoryId?: string;
     description: string;
     date: string;
+    costCategory?: Transaction["costCategory"];
   }) => Promise<void>;
   editTransaction: (id: string, data: {
     type?: Transaction["type"];
@@ -75,6 +76,7 @@ export interface FinancialState {
     categoryId?: string;
     description?: string;
     date?: string;
+    costCategory?: Transaction["costCategory"];
   }) => Promise<void>;
   removeTransaction: (id: string) => Promise<void>;
   addBudget: (data: {

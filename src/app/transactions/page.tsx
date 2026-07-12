@@ -64,6 +64,14 @@ export default function TransactionsPage() {
   const [categoryId, setCategoryId] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [costCategory, setCostCategory] = useState<string>("");
+
+  const COST_CATEGORIES = [
+    { value: "modal_produk", label: "Modal Produk" },
+    { value: "gaji_karyawan", label: "Gaji Karyawan" },
+    { value: "biaya_operasional", label: "Biaya Operasional" },
+    { value: "biaya_transportasi", label: "Biaya Transportasi" },
+  ];
 
   const {
     rules: recurringRules, loadRules: loadRecurringRules,
@@ -152,6 +160,7 @@ export default function TransactionsPage() {
     setCategoryId("");
     setDescription("");
     setDate(new Date().toISOString().split("T")[0]);
+    setCostCategory("");
   }
 
   async function handleAdd(e: React.FormEvent) {
@@ -169,6 +178,7 @@ export default function TransactionsPage() {
         categoryId: (type === "income" || type === "expense") ? categoryId : undefined,
         description,
         date,
+        costCategory: (type === "expense" && activeWorkspace?.type === "usaha" && costCategory) ? costCategory as any : undefined,
       });
     } else {
       await addTransaction({
@@ -180,6 +190,7 @@ export default function TransactionsPage() {
         categoryId: (type === "income" || type === "expense") ? categoryId : undefined,
         description,
         date,
+        costCategory: (type === "expense" && activeWorkspace?.type === "usaha" && costCategory) ? costCategory as any : undefined,
       });
     }
     setDialogOpen(false);
@@ -196,6 +207,7 @@ export default function TransactionsPage() {
     setCategoryId(tx.categoryId || "");
     setDescription(tx.description);
     setDate(tx.date);
+    setCostCategory((tx as any).costCategory || "");
     setDialogOpen(true);
   }
 
@@ -278,6 +290,19 @@ export default function TransactionsPage() {
                               {c.name}
                             </span>
                           </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                {type === "expense" && activeWorkspace?.type === "usaha" && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Jenis Biaya</label>
+                    <Select value={costCategory} onValueChange={(v) => v && setCostCategory(v)}>
+                      <SelectTrigger className="w-full"><SelectValue placeholder="Pilih jenis biaya" /></SelectTrigger>
+                      <SelectContent>
+                        {COST_CATEGORIES.map((cc) => (
+                          <SelectItem key={cc.value} value={cc.value}>{cc.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

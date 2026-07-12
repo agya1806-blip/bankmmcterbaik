@@ -10,12 +10,14 @@ import { Button } from "@/components/ui/button";
 import {
   Zap, QrCode, FileText, Plus, ArrowUpRight, ArrowDownRight,
   ShoppingCart, TrendingUp, TrendingDown, Wallet, PieChart,
-  ArrowLeftRight, Users, CalendarDays, BarChart3,
+  ArrowLeftRight, Users, CalendarDays, BarChart3, Package,
   ChevronRight
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from "recharts";
+import { getBusinessConfig } from "@/config/business-types";
+import type { BusinessSubType } from "@/lib/db";
 
 const datePrefix = (d: string | number | Date | undefined): string =>
   typeof d === "string" ? d.slice(0, 7) : d ? new Date(d).toISOString().slice(0, 7) : "";
@@ -155,75 +157,97 @@ function PribadiDashboard({ ws, currency }: { ws: { id: string; name: string; cu
   );
 }
 
-function UsahaDashboard({ ws, currency }: { ws: { id: string; name: string; currency: string }; currency: string }) {
+function UsahaDashboard({ ws, currency }: { ws: { id: string; name: string; currency: string; businessSubType?: BusinessSubType }; currency: string }) {
   const router = useRouter();
-  const { accounts, transactions, loadAccounts, loadCategories, loadTransactions } = useFinancialStore();
+  const bizConfig = getBusinessConfig(ws.businessSubType);
+  const { transactions, loadTransactions } = useFinancialStore();
   const { orders, loadOrders } = useOrderStore();
   const [customers, setCustomers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [inventory, setInventory] = useState<any[]>([]);
-  const [ppobTx, setPpobTx] = useState<any[]>([]);
-  const [qrisPm, setQrisPm] = useState<any[]>([]);
   const [supplierCount, setSupplierCount] = useState(0);
 
   useEffect(() => {
     if (ws) {
-      loadAccounts(ws.id); loadCategories(ws.id); loadTransactions(ws.id); loadOrders(ws.id);
+      loadTransactions(ws.id); loadOrders(ws.id);
       import("@/lib/db").then((db) => {
         db.getCustomersByWorkspace(ws.id).then(setCustomers);
         db.getProductsByWorkspace(ws.id).then(setProducts);
         db.getInventoryItemsByWorkspace(ws.id).then(setInventory);
-        db.getPpobTransactionsByWorkspace(ws.id).then(setPpobTx);
-        db.getQrisPaymentsByWorkspace(ws.id).then(setQrisPm);
         db.getSuppliersByWorkspace(ws.id).then((s: any[]) => setSupplierCount(s.length));
       });
     }
-  }, [ws, loadAccounts, loadCategories, loadTransactions, loadOrders]);
+  }, [ws, loadTransactions, loadOrders]);
 
-  const balance = accounts.reduce((s, a) => s + a.balance, 0);
   const totalIncome = transactions.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
-  const totalExpense = transactions.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
-  const netProfit = totalIncome - totalExpense;
+
+  const modalProduk = transactions.filter((t) => t.type === "expense" && t.costCategory === "modal_produk").reduce((s, t) => s + t.amount, 0);
+  const gajiKaryawan = transactions.filter((t) => t.type === "expense" && t.costCategory === "gaji_karyawan").reduce((s, t) => s + t.amount, 0);
+  const biayaOperasional = transactions.filter((t) => t.type === "expense" && t.costCategory === "biaya_operasional").reduce((s, t) => s + t.amount, 0);
+  const biayaTransportasi = transactions.filter((t) => t.type === "expense" && t.costCategory === "biaya_transportasi").reduce((s, t) => s + t.amount, 0);
+  const totalModal = modalProduk + gajiKaryawan + biayaOperasional + biayaTransportasi;
+  const labaBersihUsaha = totalIncome - totalModal;
+
   const baru = orders.filter((o) => o.status === "baru").length;
   const proses = orders.filter((o) => o.status === "proses").length;
   const selesai = orders.filter((o) => o.status === "selesai").length;
   const totalRevenue = orders.filter((o) => o.paymentStatus === "Lunas").reduce((s, o) => s + o.total, 0);
-  const ppobProfit = ppobTx.filter((t: any) => t.status === "sukses").reduce((s: number, t: any) => s + (t.profit || 0), 0);
-  const qrisCollect = qrisPm.filter((p: any) => p.status === "paid").reduce((s: number, p: any) => s + p.amount, 0);
   const lowStock = inventory.filter((i: any) => i.stock !== undefined && i.stock <= 2).length;
   const recent = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
 
+  const topSales = [...orders].filter((o) => o.paymentStatus === "Lunas").sort((a, b) => b.total - a.total).slice(0, 5);
+
+  const widgets = bizConfig.dashboard;
+
   return (
     <div className="space-y-5 animate-fade-in max-w-lg mx-auto pb-24">
-      <div className="hero-gradient">
-        <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1">Total Saldo Usaha</p>
-        <p className="text-3xl font-bold font-heading text-white mb-2">{currency} {balance.toLocaleString()}</p>
+      {/* Hero: Laba Bersih Usaha */}
+      <div className="hero-gradient" style={{ background: "linear-gradient(135deg, hsl(160 84% 39%), hsl(160 70% 25%))" }}>
+        <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1">{bizConfig.icon} {bizConfig.label}</p>
+        <p className="text-3xl font-bold font-heading text-white mb-2">{currency} {labaBersihUsaha.toLocaleString()}</p>
+        <p className="text-white/50 text-xs mb-3">Laba Bersih Usaha</p>
         <div className="flex gap-4">
           <span className="flex items-center gap-1 text-white/80 text-xs"><TrendingUp className="size-3.5 text-emerald-300" /> {currency} {totalIncome.toLocaleString()}</span>
-          <span className="flex items-center gap-1 text-white/80 text-xs"><TrendingDown className="size-3.5 text-red-300" /> {currency} {totalExpense.toLocaleString()}</span>
+          <span className="flex items-center gap-1 text-white/80 text-xs"><TrendingDown className="size-3.5 text-red-300" /> {currency} {totalModal.toLocaleString()}</span>
         </div>
       </div>
 
+      {/* Aksi Cepat */}
       <div>
         <h2 className="text-sm font-semibold mb-3">Aksi Cepat</h2>
         <div className="grid grid-cols-4 gap-2">
-          <button onClick={() => router.push("/ppob")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg"><Zap className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">PPOB</span></button>
           <button onClick={() => router.push("/qris")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg"><QrCode className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">QRIS</span></button>
           <button onClick={() => router.push("/orders")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 shadow-lg"><ShoppingCart className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">Pesanan</span></button>
-          <button onClick={() => router.push("/invoices")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-lg"><FileText className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">Tagih</span></button>
+          <button onClick={() => router.push("/products")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-lg"><Package className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">Produk</span></button>
+          <button onClick={() => router.push("/transactions")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg"><Plus className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">Catat</span></button>
         </div>
       </div>
 
+      {/* Ringkasan Bisnis */}
       <div>
         <h2 className="text-sm font-semibold mb-3">Ringkasan Bisnis</h2>
         <div className="grid grid-cols-2 gap-3">
-          <div className="premium-stat"><p className="premium-stat-label">Laba Bersih</p><p className={`premium-stat-value ${netProfit >= 0 ? "text-emerald-600" : "text-red-500"}`}>{currency} {Math.abs(netProfit).toLocaleString()}</p></div>
-          <div className="premium-stat"><p className="premium-stat-label">Revenue</p><p className="premium-stat-value text-blue-600">{currency} {totalRevenue.toLocaleString()}</p></div>
-          <div className="premium-stat"><p className="premium-stat-label">PPOB Profit</p><p className="premium-stat-value text-emerald-600">{currency} {ppobProfit.toLocaleString()}</p></div>
-          <div className="premium-stat"><p className="premium-stat-label">QRIS Terkumpul</p><p className="premium-stat-value text-blue-600">{currency} {qrisCollect.toLocaleString()}</p></div>
+          <div className="premium-stat"><p className="premium-stat-label">Pendapatan Kotor</p><p className="premium-stat-value text-emerald-600">{currency} {totalIncome.toLocaleString()}</p></div>
+          <div className="premium-stat"><p className="premium-stat-label">Total Modal</p><p className="premium-stat-value text-red-500">{currency} {totalModal.toLocaleString()}</p></div>
+          <div className="premium-stat"><p className="premium-stat-label">Laba Bersih Usaha</p><p className={`premium-stat-value ${labaBersihUsaha >= 0 ? "text-emerald-600" : "text-red-500"}`}>{currency} {Math.abs(labaBersihUsaha).toLocaleString()}</p></div>
+          <div className="premium-stat"><p className="premium-stat-label">Revenue Pesanan</p><p className="premium-stat-value text-blue-600">{currency} {totalRevenue.toLocaleString()}</p></div>
         </div>
       </div>
 
+      {/* Rincian Biaya Modal */}
+      {totalModal > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold mb-3">Rincian Biaya Modal</h2>
+          <div className="space-y-1">
+            <div className="premium-card p-3 flex justify-between items-center"><span className="text-xs font-medium text-muted-foreground">Modal Produk</span><span className="text-sm font-semibold">{currency} {modalProduk.toLocaleString()}</span></div>
+            <div className="premium-card p-3 flex justify-between items-center"><span className="text-xs font-medium text-muted-foreground">Gaji Karyawan</span><span className="text-sm font-semibold">{currency} {gajiKaryawan.toLocaleString()}</span></div>
+            <div className="premium-card p-3 flex justify-between items-center"><span className="text-xs font-medium text-muted-foreground">Biaya Operasional</span><span className="text-sm font-semibold">{currency} {biayaOperasional.toLocaleString()}</span></div>
+            <div className="premium-card p-3 flex justify-between items-center"><span className="text-xs font-medium text-muted-foreground">Biaya Transportasi</span><span className="text-sm font-semibold">{currency} {biayaTransportasi.toLocaleString()}</span></div>
+          </div>
+        </div>
+      )}
+
+      {/* Pesanan */}
       <div>
         <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold">Pesanan</h2><button onClick={() => router.push("/orders")} className="text-xs font-medium text-emerald-600">Kelola</button></div>
         <div className="grid grid-cols-4 gap-2">
@@ -234,6 +258,7 @@ function UsahaDashboard({ ws, currency }: { ws: { id: string; name: string; curr
         </div>
       </div>
 
+      {/* Info Bisnis */}
       <div>
         <h2 className="text-sm font-semibold mb-3">Info Bisnis</h2>
         <div className="grid grid-cols-3 gap-2">
@@ -243,6 +268,28 @@ function UsahaDashboard({ ws, currency }: { ws: { id: string; name: string; curr
         </div>
       </div>
 
+      {/* Produk Terlaris (Kedai Kopi / Warung) */}
+      {widgets.includes("top_products") && topSales.length > 0 && (
+        <div>
+          <h2 className="text-sm font-semibold mb-3">Produk Terlaris</h2>
+          <div className="space-y-1">
+            {topSales.map((o, i) => (
+              <div key={o.id} className="premium-card p-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-muted-foreground/40 w-5">#{i + 1}</span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{o.customerName || `Pesanan #${o.number}`}</p>
+                    <p className="text-[10px] text-muted-foreground/60">{o.items?.length || 0} item</p>
+                  </div>
+                </div>
+                <span className="text-sm font-semibold text-emerald-600">{currency} {o.total.toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Transaksi Terbaru */}
       <div>
         <div className="flex items-center justify-between mb-3"><h2 className="text-sm font-semibold">Transaksi Terbaru</h2><button onClick={() => router.push("/transactions")} className="text-xs font-medium text-emerald-600">Lihat Semua</button></div>
         {recent.length === 0 ? (
@@ -385,7 +432,7 @@ export default function Dashboard() {
 
   const currency = activeWorkspace.currency || "IDR";
 
-  const dashboards: Record<string, React.FC<{ ws: { id: string; name: string; currency: string }; currency: string }>> = {
+  const dashboards: Record<string, React.FC<{ ws: { id: string; name: string; currency: string; businessSubType?: BusinessSubType }; currency: string }>> = {
     pribadi: PribadiDashboard,
     usaha: UsahaDashboard,
     hutang: HutangDashboard,

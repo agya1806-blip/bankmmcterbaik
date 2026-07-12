@@ -1,5 +1,7 @@
 import { openDB, type IDBPDatabase } from "idb";
 
+export type BusinessSubType = "general" | "konveksi" | "percetakan" | "toko_hp" | "toko_laptop" | "kelontong" | "kedai_kopi" | "warung";
+
 export interface User {
   id: string;
   email: string;
@@ -25,6 +27,7 @@ export interface Workspace {
   inviteCode: string;
   createdBy: string;
   type: WorkspaceType;
+  businessSubType?: BusinessSubType;
   connectedWorkspaces: string[];
   businessProfile?: {
     name: string;
@@ -71,6 +74,7 @@ export interface Transaction {
   description: string;
   date: string;
   createdAt: number;
+  costCategory?: "modal_produk" | "gaji_karyawan" | "biaya_operasional" | "biaya_transportasi";
 }
 
 export interface Budget {
