@@ -55,10 +55,10 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const PAYMENT_STYLES: Record<string, string> = {
-  "Belum Lunas": "bg-red-100/80 dark:bg-red-900/30 text-red-600",
-  DP: "bg-amber-100/80 dark:bg-amber-900/30 text-amber-600",
-  Lunas: "bg-emerald-100/80 dark:bg-emerald-900/30 text-emerald-600",
-  Batal: "bg-gray-100/80 dark:bg-gray-900/30 text-gray-600",
+  "Belum Lunas": "bg-red-100/80 dark:bg-red-900/30 text-red-600 dark:text-red-400",
+  DP: "bg-amber-100/80 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
+  Lunas: "bg-emerald-100/80 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
+  Batal: "bg-gray-100/80 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400",
 };
 
 function generateItemId(): string {

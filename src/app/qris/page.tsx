@@ -139,7 +139,7 @@ export default function QrisPage() {
           <div className="premium-card p-4">
             {image ? (
               <div className="flex flex-col items-center">
-                <div className="w-full max-w-sm bg-white rounded-2xl p-4 shadow-inner mb-4">
+                <div className="w-full max-w-sm bg-white dark:bg-card rounded-2xl p-4 shadow-inner mb-4">
                   <img src={image} alt="QRIS" className="w-full h-auto rounded-lg" />
                 </div>
                 <Button variant="outline" size="sm" onClick={() => setImage(null)}>

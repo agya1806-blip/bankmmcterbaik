@@ -403,7 +403,7 @@ export default function TransactionsPage() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Button variant="ghost" size="icon-sm" onClick={() => toggleRecurringRule(rule.id)}>
-                    <span className={`size-3 rounded-full ${rule.active ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    <span className={`size-3 rounded-full ${rule.active ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`} />
                   </Button>
                   <Button variant="ghost" size="icon-sm" onClick={() => removeRecurringRule(rule.id)}>
                     <Trash2Icon className="size-4 text-destructive" />

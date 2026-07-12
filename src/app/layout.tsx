@@ -65,6 +65,8 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=yes" />
         <meta name="HandheldFriendly" content="true" />
         <meta name="apple-touch-fullscreen" content="yes" />
+        <link rel="apple-touch-icon" href="/icon-192.svg" />
+        <link rel="mask-icon" href="/icon-512.svg" color="#059669" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}

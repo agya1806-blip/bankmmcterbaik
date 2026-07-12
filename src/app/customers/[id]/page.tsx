@@ -107,7 +107,7 @@ export default function CustomerDetailPage() {
               return (
                 <div key={tx.id} className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5 rounded-2xl p-4 flex items-center gap-4">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
-                    isPositive ? "bg-green-100 text-green-600 dark:bg-green-900/30" : "bg-red-100 text-red-600 dark:bg-red-900/30"
+                    isPositive ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
                   }`}>
                     {isPositive ? "+" : "-"}
                   </div>

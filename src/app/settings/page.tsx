@@ -26,26 +26,16 @@ import {
 import {
   getWorkspaceSettings,
   saveWorkspaceSettings,
-  getAccountsByWorkspace,
-  getCategoriesByWorkspace,
-  getTransactionsByWorkspace,
-  getBudgetsByWorkspace,
-  getCustomersByWorkspace,
-  getSuppliersByWorkspace,
-  getInventoryItemsByWorkspace,
   getPaymentMethodsByWorkspace,
-  getProductsByWorkspace,
-  getOrdersByWorkspace,
-  getBranchesByWorkspace,
   createAccount,
   createCategory,
   createTransaction,
   createCustomer,
-  createProduct,
-  createOrder,
   createSupplier,
   createBudget,
   createInventoryItem,
+  createProduct,
+  createOrder,
   createBranch,
   createPaymentMethod,
   deletePaymentMethod,
@@ -211,52 +201,9 @@ export default function SettingsPage() {
     if (!activeWorkspace) return;
     setExporting(true);
     try {
-      const [accounts, categories, transactions, budgets, customers, suppliers, inventory, paymentMethods, products, orders, branches] =
-        await Promise.all([
-          getAccountsByWorkspace(activeWorkspace.id),
-          getCategoriesByWorkspace(activeWorkspace.id),
-          getTransactionsByWorkspace(activeWorkspace.id),
-          getBudgetsByWorkspace(activeWorkspace.id),
-          getCustomersByWorkspace(activeWorkspace.id),
-          getSuppliersByWorkspace(activeWorkspace.id),
-          getInventoryItemsByWorkspace(activeWorkspace.id),
-          getPaymentMethodsByWorkspace(activeWorkspace.id),
-          getProductsByWorkspace(activeWorkspace.id),
-          getOrdersByWorkspace(activeWorkspace.id),
-          getBranchesByWorkspace(activeWorkspace.id),
-        ]);
-
-      const data = {
-        workspace: activeWorkspace,
-        settings: await getWorkspaceSettings(activeWorkspace.id),
-        businessProfile: {
-          name: localStorage.getItem("mmcbank-business-name") || "",
-          whatsapp: localStorage.getItem("mmcbank-business-wa") || "",
-          address: localStorage.getItem("mmcbank-business-address") || "",
-        },
-        accounts,
-        categories,
-        transactions,
-        budgets,
-        customers,
-        suppliers,
-        inventory,
-        paymentMethods,
-        products,
-        orders,
-        branches,
-        exportedAt: new Date().toISOString(),
-      };
-
-      const blob = new Blob([JSON.stringify(data, null, 2)], {
-        type: "application/json",
-      });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `mmcbank-${activeWorkspace.name}-${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+      const { exportBackup, downloadBackup } = await import("@/lib/backup");
+      const data = await exportBackup();
+      downloadBackup(data);
     } finally {
       setExporting(false);
     }
@@ -450,11 +397,13 @@ export default function SettingsPage() {
       const text = await file.text();
       const data = JSON.parse(text);
 
-      // Detect old Mughis Bank format (localStorage keys)
       if (data.mughis_wallets) {
         await importMughisLegacy(data);
+      } else if (data.stores) {
+        const { importBackup } = await import("@/lib/backup");
+        const results = await importBackup(data);
+        alert(`Import berhasil: ${results.map(r => `${r.store} (${r.count})`).join(", ")}`);
       } else {
-        // New format
         if (data.workspace) {
           await updateWorkspace(activeWorkspace.id, {
             name: data.workspace.name,

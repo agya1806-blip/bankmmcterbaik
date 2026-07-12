@@ -355,8 +355,8 @@ export default function InventoryPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`flex size-9 items-center justify-center rounded-full ${
-                      m.type === "in" ? "bg-green-100 text-green-600" :
-                      m.type === "out" ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600"
+                      m.type === "in" ? "bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400" :
+                      m.type === "out" ? "bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400" : "bg-blue-100 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
                     }`}>
                       {m.type === "in" ? <ArrowDownIcon className="size-4" /> :
                        m.type === "out" ? <ArrowUpIcon className="size-4" /> :

@@ -8,6 +8,7 @@ import { useThemeStore } from "@/components/layout/theme-store";
 import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import BottomNav from "@/components/layout/bottom-nav";
+import PWA from "@/components/pwa";
 
 const AUTH_ROUTES = ["/login", "/register"];
 
@@ -114,6 +115,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </div>
 
       <BottomNav />
+
+      <PWA />
 
       <div className="lg:hidden h-[130px]" />
     </div>
