@@ -19,7 +19,7 @@ function Dialog({ open, onOpenChange, trigger, children }: {
         <div onClick={() => setOpen(true)} style={{ display: "inline-flex" }}>{trigger}</div>
       )}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-4">
           <div
             className="fixed inset-0 bg-black/30 backdrop-blur-sm animate-fade-in"
             onClick={() => setOpen(false)}

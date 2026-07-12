@@ -448,7 +448,7 @@ export default function PpobPage() {
 
       {/* Buy Confirmation Modal */}
       {showBuyModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setShowBuyModal(null)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={() => setShowBuyModal(null)}>
           <div className="w-full max-w-sm bg-white dark:bg-card rounded-2xl p-6 shadow-2xl animate-slide-up" onClick={(e) => e.stopPropagation()}>
             <div className="text-center mb-4">
               <div className={`flex items-center justify-center size-14 rounded-2xl bg-gradient-to-br ${colorClass} mx-auto mb-3 shadow-lg`}>
