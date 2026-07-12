@@ -22,10 +22,8 @@ export const id = {
     products: "Produk",
     orders: "Pesanan",
     reports: "Laporan",
-    projects: "Proyek",
     calendar: "Kalender",
     debts: "Hutang",
-    wallets: "Dompet",
     settings: "Pengaturan",
     workspaces: "Ruang Kerja",
     signOut: "Keluar",
@@ -155,6 +153,7 @@ export const id = {
     type: "Tipe",
     balance: "Saldo",
     currency: "Mata Uang",
+    totalBalance: "Total Saldo",
     bank: "Bank",
     cash: "Tunai",
     ewallet: "Dompet Digital",
@@ -163,22 +162,6 @@ export const id = {
     empty: "Belum ada akun. Tambah akun pertama Anda.",
     deleteConfirm: "Yakin ingin menghapus akun ini?",
     loading: "Memuat...",
-  },
-
-  // Wallets
-  wallets: {
-    title: "Dompet",
-    description: "Kelola semua dompet dan rekening Anda",
-    add: "Tambah Dompet",
-    adding: "Menambahkan...",
-    save: "Simpan",
-    name: "Nama",
-    type: "Tipe",
-    balance: "Saldo",
-    currency: "Mata Uang",
-    totalBalance: "Total Saldo",
-    empty: "Belum ada dompet. Tambah dompet pertama Anda.",
-    deleteConfirm: "Yakin ingin menghapus dompet ini?",
   },
 
   // Budgets
@@ -480,30 +463,6 @@ export const id = {
   },
 
   // Projects
-  projects: {
-    title: "Proyek",
-    add: "Tambah Proyek",
-    adding: "Menambahkan...",
-    name: "Nama",
-    description: "Deskripsi",
-    startDate: "Tanggal Mulai",
-    endDate: "Tanggal Selesai",
-    empty: "Belum ada proyek.",
-    noDescription: "Tidak ada deskripsi",
-    loading: "Memuat...",
-    notFound: "Proyek tidak ditemukan",
-    back: "Kembali ke Proyek",
-    duration: "Durasi",
-    days: "hari",
-    tasks: "Tugas",
-    addTask: "Tambah",
-    addTaskPlaceholder: "Tambah tugas...",
-    noTasks: "Belum ada tugas.",
-    active: "Aktif",
-    completed: "Selesai",
-    cancelled: "Dibatalkan",
-  },
-
   // Branches
   branches: {
     title: "Cabang",

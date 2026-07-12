@@ -106,11 +106,10 @@ export default function SettingsPage() {
   const [invoiceTypes, setInvoiceTypes] = useState<string[]>(["print", "laptop", "handphone", "tiktok", "umum"]);
   const [shortcuts, setShortcuts] = useState<{label:string;enabled:boolean;href:string}[]>([
     { label: "Catat Keuangan", enabled: true, href: "/transactions" },
-    { label: "Faktur", enabled: true, href: "/invoices" },
     { label: "Laporan", enabled: false, href: "/reports" },
     { label: "Pesanan", enabled: true, href: "/orders" },
     { label: "Pelanggan", enabled: false, href: "/customers" },
-    { label: "Inventaris", enabled: false, href: "/inventory" },
+    { label: "Akun", enabled: true, href: "/accounts" },
   ]);
   const { rules: recurringRules, loadRules: loadRecurringRules, removeRule: removeRecurringRule } = useRecurringStore();
 

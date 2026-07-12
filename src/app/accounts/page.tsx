@@ -232,7 +232,7 @@ export default function AccountsPage() {
         <Card className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">{t("wallets.totalBalance")}</span>
+              <span className="text-sm text-muted-foreground">{t("accounts.totalBalance")}</span>
               <span className="text-xl font-bold font-heading">{activeWorkspace.currency} {totalBalance.toLocaleString()}</span>
             </div>
           </CardContent>

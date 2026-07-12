@@ -8,7 +8,7 @@ import { useFinancialStore } from "@/engines/financial/financial-store";
 import { useOrderStore } from "@/engines/business/order-store";
 import { Button } from "@/components/ui/button";
 import {
-  Zap, QrCode, FileText, Plus, ArrowUpRight, ArrowDownRight,
+  QrCode, Plus, ArrowUpRight, ArrowDownRight,
   ShoppingCart, TrendingUp, TrendingDown, Wallet, PieChart,
   ArrowLeftRight, Users, CalendarDays, BarChart3, Package,
   ChevronRight
@@ -28,10 +28,10 @@ function QuickActions({ type, router }: { type: string; router: ReturnType<typeo
 
   if (type === "usaha" || type === "toko") {
     actions.push(
-      { href: "/ppob", icon: Zap, label: "PPOB", color: "from-emerald-500 to-emerald-600" },
       { href: "/qris", icon: QrCode, label: "QRIS", color: "from-blue-500 to-blue-600" },
-      { href: "/invoices", icon: FileText, label: "Tagih", color: "from-violet-500 to-violet-600" },
       { href: "/orders", icon: ShoppingCart, label: "Pesanan", color: "from-rose-500 to-rose-600" },
+      { href: "/products", icon: Package, label: "Produk", color: "from-violet-500 to-violet-600" },
+      { href: "/transactions", icon: Plus, label: "Catat", color: "from-emerald-500 to-emerald-600" },
     );
   } else if (type === "pribadi") {
     actions.push(
