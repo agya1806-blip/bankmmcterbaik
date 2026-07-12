@@ -44,7 +44,7 @@ import {
 import { useRecurringStore } from "@/engines/financial/recurring-store";
 import { useTranslation } from "@/lib/i18n";
 import toast from "react-hot-toast";
-import { Trash2 } from "lucide-react";
+import { Trash2, User, Building2, Palette, Settings, Database } from "lucide-react";
 
 interface AuditLogView {
   id: string;
@@ -591,11 +591,11 @@ export default function SettingsPage() {
   }
 
   const SETTINGS_TABS = [
-    { id: "profile", label: "Profil & Keamanan", icon: "👤" },
-    { id: "workspace", label: "Ruang Kerja", icon: "🏢" },
-    { id: "display", label: "Tampilan", icon: "🎨" },
-    { id: "system", label: "Sistem", icon: "⚙️" },
-    { id: "data", label: "Data", icon: "💾" },
+    { id: "profile", label: "Profil & Keamanan", icon: User },
+    { id: "workspace", label: "Ruang Kerja", icon: Building2 },
+    { id: "display", label: "Tampilan", icon: Palette },
+    { id: "system", label: "Sistem", icon: Settings },
+    { id: "data", label: "Data", icon: Database },
   ] as const;
 
   return (
@@ -614,7 +614,7 @@ export default function SettingsPage() {
               activeTab === tab.id ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <span>{tab.icon}</span> {tab.label}
+            <tab.icon className="size-4" /> {tab.label}
           </button>
         ))}
       </div>
