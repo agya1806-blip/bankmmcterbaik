@@ -482,7 +482,7 @@
     @apply absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/40;
   }
   .byond-search-input {
-    @apply w-full h-11 pl-9 pr-3 rounded-xl bg-muted/40 border border-border/30 text-xs placeholder:text-muted-foreground/40;
+    @apply w-full h-11 pl-10 pr-4 rounded-xl bg-muted/40 border border-border/30 text-sm placeholder:text-muted-foreground/40;
     @apply focus:outline-none focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/10 transition-all;
   }
 
@@ -598,7 +598,7 @@
   }
 
   .byond-bottom-nav-item {
-    @apply relative flex flex-col items-center gap-1.5 py-3 px-4 rounded-xl min-w-[52px];
+    @apply relative flex flex-col items-center gap-1.5 py-3 px-4 rounded-xl min-w-[64px];
     @apply transition-all duration-200;
   }
   .byond-bottom-nav-item:active {
