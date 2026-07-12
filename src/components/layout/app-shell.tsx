@@ -103,7 +103,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <div
         className={`transition-all duration-[350ms] ${
           sidebarCollapsed ? 'lg:ml-[calc(var(--sidebar-collapsed-width)+16px)]' : 'lg:ml-[calc(var(--sidebar-width)+16px)]'
-        } pt-[calc(56px+16px)] pb-0 lg:pb-0`}
+        } pt-[calc(64px+12px+16px)] pb-0 lg:pb-0`}
       >
         <Header onMobileMenuToggle={() => setMobileSidebarOpen(!mobileSidebarOpen)} />
         <main className="min-h-[calc(100vh-80px)] p-4 sm:p-6 lg:p-8 section-padding">
@@ -115,7 +115,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <BottomNav />
 
-      <div className="lg:hidden h-[80px]" />
+      <div className="lg:hidden h-[130px]" />
     </div>
   );
 }
