@@ -1,6 +1,5 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,7 +8,6 @@
   :root {
     --background: 40 23% 97%;
     --foreground: 220 20% 14%;
-
     --card: 0 0% 100%;
     --card-foreground: 220 20% 14%;
     --popover: 0 0% 100%;
@@ -28,11 +26,6 @@
 
     --accent: 42 60% 58%;
     --accent-foreground: 0 0% 100%;
-
-    --gold: 42 60% 58%;
-    --gold-light: 42 60% 92%;
-    --gold-muted: 42 30% 85%;
-    --gold-foreground: 42 60% 20%;
 
     --success: 160 84% 39%;
     --success-light: 160 84% 95%;
@@ -112,70 +105,58 @@
   }
 
   .dark {
-    --background: 220 18% 6%;
-    --foreground: 40 15% 92%;
-
-    --card: 220 18% 9%;
-    --card-foreground: 40 15% 92%;
-    --popover: 220 18% 9%;
-    --popover-foreground: 40 15% 92%;
+    --background: 220 20% 8%;
+    --foreground: 40 20% 95%;
+    --card: 220 20% 11%;
+    --card-foreground: 40 20% 95%;
+    --popover: 220 20% 11%;
+    --popover-foreground: 40 20% 95%;
 
     --primary: 160 84% 45%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 160 84% 10%;
+    --primary-light: 160 84% 12%;
     --primary-dark: 160 84% 60%;
 
-    --secondary: 42 50% 50%;
+    --secondary: 150 40% 50%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 15% 12%;
-    --muted-foreground: 220 10% 50%;
+    --muted: 220 15% 15%;
+    --muted-foreground: 220 10% 55%;
 
     --accent: 42 60% 58%;
     --accent-foreground: 0 0% 100%;
 
-    --gold: 42 60% 58%;
-    --gold-light: 42 30% 15%;
-    --gold-muted: 42 20% 20%;
-    --gold-foreground: 42 60% 75%;
-
     --success: 160 84% 45%;
-    --success-light: 160 84% 10%;
+    --success-light: 160 84% 12%;
     --warning: 38 92% 50%;
-    --warning-light: 38 92% 10%;
+    --warning-light: 38 92% 12%;
     --danger: 0 72% 55%;
-    --danger-light: 0 72% 10%;
+    --danger-light: 0 72% 12%;
     --info: 210 100% 55%;
-    --info-light: 210 100% 10%;
+    --info-light: 210 100% 12%;
 
-    --border: 220 15% 15%;
-    --input: 220 15% 15%;
-    --ring: 42 60% 58%;
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 160 84% 45%;
 
-    --sidebar: 220 18% 8%;
-    --sidebar-foreground: 40 15% 90%;
-    --sidebar-muted: 220 15% 12%;
-    --sidebar-muted-foreground: 220 10% 45%;
-    --sidebar-accent: 42 30% 15%;
-    --sidebar-accent-foreground: 42 60% 70%;
-    --sidebar-border: 220 15% 14%;
-    --sidebar-ring: 42 60% 58%;
+    --sidebar: 220 20% 10%;
+    --sidebar-foreground: 40 20% 92%;
+    --sidebar-muted: 220 15% 15%;
+    --sidebar-muted-foreground: 220 10% 50%;
+    --sidebar-accent: 160 84% 12%;
+    --sidebar-accent-foreground: 160 84% 70%;
+    --sidebar-border: 220 15% 16%;
+    --sidebar-ring: 160 84% 45%;
 
-    --chart-1: 42 60% 58%;
-    --chart-2: 160 84% 45%;
-    --chart-3: 210 100% 55%;
-    --chart-4: 280 60% 60%;
-    --chart-5: 0 72% 55%;
-
-    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.3);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.3);
-    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.6);
-    --shadow-glass: 0 8px 32px rgb(0 0 0 / 0.25);
-    --shadow-card: 0 1px 3px rgb(0 0 0 / 0.3), 0 4px 12px rgb(0 0 0 / 0.2);
-    --shadow-glow: 0 0 20px hsl(42 60% 58% / 0.1);
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.2);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+    --shadow-glass: 0 8px 32px rgb(0 0 0 / 0.15);
+    --shadow-card: 0 1px 3px rgb(0 0 0 / 0.2), 0 4px 12px rgb(0 0 0 / 0.15);
+    --shadow-glow: 0 0 20px rgb(16 185 129 / 0.08);
   }
 
   * {
@@ -783,185 +764,6 @@
   .animate-count-up { animation: countUp 0.6s var(--ease-emphasized) forwards; }
   .animate-stagger-fade { animation: staggerFadeIn 0.5s var(--ease-smooth) forwards; opacity: 0; }
   .animate-rotate-in { animation: rotateIn 0.4s var(--ease-spring) forwards; }
-
-  /* ========== LUXURY DARK DESIGN SYSTEM ========== */
-  .luxury-card {
-    @apply relative overflow-hidden rounded-2xl border border-white/[0.06] shadow-glass;
-    background: linear-gradient(135deg, hsl(220 18% 10% / 0.9), hsl(220 18% 7% / 0.95));
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    transition: all var(--duration-normal) var(--ease-smooth);
-  }
-  .luxury-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(135deg, hsl(var(--gold) / 0.03) 0%, transparent 50%, hsl(var(--gold) / 0.01) 100%);
-    pointer-events: none;
-  }
-  .luxury-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.15), transparent);
-    opacity: 0;
-    transition: opacity var(--duration-normal) var(--ease-smooth);
-  }
-  .luxury-card:hover::after {
-    opacity: 1;
-  }
-
-  .luxury-card-gold {
-    background: linear-gradient(135deg, hsl(42 30% 12% / 0.95), hsl(42 20% 8% / 0.98));
-    border-color: hsl(42 30% 20% / 0.3);
-  }
-  .luxury-card-gold::before {
-    background: linear-gradient(135deg, hsl(var(--gold) / 0.06) 0%, transparent 40%, hsl(var(--gold) / 0.03) 100%);
-  }
-  .luxury-card-gold::after {
-    background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.25), transparent);
-  }
-
-  .luxury-heading {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-  .luxury-heading-light {
-    font-weight: 600;
-    font-style: italic;
-  }
-
-  .luxury-pill {
-    @apply inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium;
-    background: hsl(220 18% 10% / 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid hsl(var(--border) / 0.3);
-    transition: all var(--duration-normal) var(--ease-smooth);
-  }
-
-  .luxury-glass {
-    background: hsl(220 18% 10% / 0.6);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid hsl(var(--border) / 0.2);
-  }
-
-  .luxury-border-gradient {
-    position: relative;
-  }
-  .luxury-border-gradient::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(135deg, hsl(var(--gold) / 0.2), transparent 40%, hsl(var(--gold) / 0.1) 100%);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  .luxury-progress {
-    @apply h-1.5 rounded-full;
-    background: hsl(var(--muted) / 0.3);
-    overflow: hidden;
-  }
-  .luxury-progress-bar {
-    @apply h-full rounded-full;
-    background: linear-gradient(90deg, hsl(var(--gold) / 0.5), hsl(var(--gold) / 0.8));
-    transition: width 1s var(--ease-smooth);
-  }
-  .luxury-progress-bar-emerald {
-    background: linear-gradient(90deg, hsl(160 84% 45% / 0.5), hsl(160 84% 45% / 0.8));
-  }
-
-  .luxury-divider {
-    @apply w-full h-px;
-    background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.1), hsl(var(--border) / 0.2), hsl(var(--gold) / 0.1), transparent);
-  }
-
-  .luxury-sparkline {
-    @apply inline-flex items-center gap-1 text-xs font-semibold;
-  }
-  .luxury-sparkline-up { @apply text-emerald-400; }
-  .luxury-sparkline-down { @apply text-red-400; }
-
-  .luxury-status-dot {
-    @apply inline-block size-2 rounded-full;
-  }
-  .luxury-status-dot-success { @apply bg-emerald-500 shadow-[0_0_8px_hsl(160_84%_45%/0.4)]; }
-  .luxury-status-dot-warning { @apply bg-amber-500 shadow-[0_0_8px_hsl(38_92%_50%/0.4)]; }
-  .luxury-status-dot-info { @apply bg-blue-500 shadow-[0_0_8px_hsl(210_100%_55%/0.4)]; }
-
-  .luxury-floating-header {
-    @apply fixed top-0 left-0 right-0 z-40;
-    padding-top: env(safe-area-inset-top, 0px);
-  }
-  .luxury-floating-header-inner {
-    @apply mx-3 mt-3 px-4 h-14 flex items-center justify-between rounded-2xl;
-    background: hsl(220 18% 8% / 0.85);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid hsl(var(--border) / 0.2);
-    box-shadow: 0 4px 24px rgb(0 0 0 / 0.2);
-  }
-
-  .luxury-master-footer {
-    @apply fixed bottom-0 left-0 right-0 z-50;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  .luxury-master-footer-inner {
-    @apply mx-3 mb-3 px-4 py-2 flex items-center justify-around rounded-2xl;
-    background: hsl(220 18% 8% / 0.85);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid hsl(var(--border) / 0.2);
-    box-shadow: 0 4px 24px rgb(0 0 0 / 0.2);
-  }
-
-  .luxury-footer-item {
-    @apply relative flex flex-col items-center gap-1 py-2 px-4 rounded-xl transition-all duration-200;
-  }
-  .luxury-footer-item:active {
-    transform: scale(0.9);
-  }
-  .luxury-footer-item-active {
-    background: hsl(var(--gold) / 0.1);
-  }
-  .luxury-footer-item-active::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: radial-gradient(circle at center, hsl(var(--gold) / 0.12) 0%, transparent 70%);
-    animation: navGlowPulse 3s ease-in-out infinite;
-  }
-  .luxury-footer-icon {
-    @apply size-5 relative z-10;
-  }
-  .luxury-footer-icon-active {
-    @apply text-amber-400;
-    filter: drop-shadow(0 0 6px hsl(42 60% 58% / 0.3));
-  }
-  .luxury-footer-icon-inactive {
-    @apply text-muted-foreground/50;
-  }
-  .luxury-footer-label {
-    @apply text-[10px] font-medium relative z-10;
-  }
-  .luxury-footer-label-active {
-    @apply text-amber-400 font-semibold;
-  }
-  .luxury-footer-label-inactive {
-    @apply text-muted-foreground/50;
-  }
 
   .border-glass {
     @apply border border-white/20 dark:border-white/[0.06];
