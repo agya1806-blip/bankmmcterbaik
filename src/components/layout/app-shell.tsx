@@ -9,6 +9,7 @@ import Sidebar from "@/components/layout/sidebar";
 import Header from "@/components/layout/header";
 import BottomNav from "@/components/layout/bottom-nav";
 import PWA from "@/components/pwa";
+import Reminder from "@/components/reminder";
 
 const AUTH_ROUTES = ["/login", "/register"];
 
@@ -117,6 +118,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <BottomNav />
 
       <PWA />
+      <Reminder />
 
       <div className="lg:hidden h-[130px]" />
     </div>

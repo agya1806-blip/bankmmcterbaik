@@ -28,6 +28,7 @@ export default function QrisPage() {
   const [history, setHistory] = useState<QrisPayment[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [dragging, setDragging] = useState(false);
+  const [scanResult, setScanResult] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleImage = useCallback((file: File) => {
@@ -36,7 +37,28 @@ export default function QrisPage() {
       return;
     }
     const reader = new FileReader();
-    reader.onload = (e) => setImage(e.target?.result as string);
+    reader.onload = async (e) => {
+      const dataUrl = e.target?.result as string;
+      setImage(dataUrl);
+      setScanResult(null);
+      try {
+        const img = new Image();
+        img.src = dataUrl;
+        await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; });
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const jsQR = (await import("jsqr")).default;
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        if (code) {
+          setScanResult(code.data);
+          toast.success("QR Code terdeteksi!");
+        }
+      } catch { /* QR scan optional */ }
+    };
     reader.readAsDataURL(file);
   }, []);
 
@@ -142,6 +164,12 @@ export default function QrisPage() {
                 <div className="w-full max-w-sm bg-white dark:bg-card rounded-2xl p-4 shadow-inner mb-4">
                   <img src={image} alt="QRIS" className="w-full h-auto rounded-lg" />
                 </div>
+                {scanResult && (
+                  <div className="w-full mb-4 p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-xl text-xs break-all">
+                    <p className="font-medium text-blue-700 dark:text-blue-300 mb-1">QR Terdeteksi:</p>
+                    <p className="text-blue-600 dark:text-blue-400">{scanResult}</p>
+                  </div>
+                )}
                 <Button variant="outline" size="sm" onClick={() => setImage(null)}>
                   {t("qris.changeImage") || "Ganti Gambar"}
                 </Button>

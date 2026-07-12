@@ -99,6 +99,7 @@ export default function SettingsPage() {
   const [logsLoading, setLogsLoading] = useState(true);
   const [branches, setBranches] = useState<import("@/lib/db").Branch[]>([]);
   const [widgetIds, setWidgetIds] = useState<import("@/lib/widgets").WidgetId[]>([]);
+  const [lightweight, setLightweight] = useState(false);
   type WidgetDef = { id: import("@/lib/widgets").WidgetId; label: string; default: boolean };
   const [allWidgetDefs, setAllWidgetDefs] = useState<WidgetDef[]>([]);
   const [branchName, setBranchName] = useState("");
@@ -156,9 +157,14 @@ export default function SettingsPage() {
      );
    }, [activeWorkspace]);
 
-   useEffect(() => {
-     document.documentElement.classList.toggle("dark", theme === "dark");
-   }, [theme]);
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("lightweight", lightweight);
+    localStorage.setItem("mmcbank-lightweight", String(lightweight));
+  }, [lightweight]);
 
   useEffect(() => {
     setBusinessName(localStorage.getItem("mmcbank-business-name") || "");
@@ -168,6 +174,7 @@ export default function SettingsPage() {
     if (savedTypes) try { setInvoiceTypes(JSON.parse(savedTypes)); } catch {}
     const savedShortcuts = localStorage.getItem("mmcbank-shortcuts");
     if (savedShortcuts) try { setShortcuts(JSON.parse(savedShortcuts)); } catch {}
+    setLightweight(localStorage.getItem("mmcbank-lightweight") === "true");
     import("@/lib/widgets").then((m) => {
       setWidgetIds(m.getWidgets());
       setAllWidgetDefs(Array.from(m.ALL_WIDGETS) as WidgetDef[]);
@@ -888,6 +895,13 @@ export default function SettingsPage() {
 
         {activeTab === "data" && (
           <>
+            <div className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div><h3 className="text-base font-semibold">Mode Hemat</h3><p className="text-xs text-muted-foreground">Matikan animasi & efek visual untuk performa lebih cepat</p></div>
+                <Switch checked={lightweight} onCheckedChange={setLightweight} />
+              </div>
+            </div>
+
             <div className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5 rounded-2xl p-6">
               <h3 className="text-base font-semibold">{t("settings.dataManagement")}</h3>
               <p className="text-xs text-muted-foreground mb-4">{t("settings.dataDesc")}</p>

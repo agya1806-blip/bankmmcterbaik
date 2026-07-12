@@ -7,7 +7,7 @@ import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
 import { useOrderStore } from "@/engines/business/order-store";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeftIcon, EditIcon, Trash2Icon, DownloadIcon, Share2Icon, PrinterIcon, CameraIcon } from "lucide-react";
+import { ArrowLeftIcon, EditIcon, Trash2Icon, DownloadIcon, Share2Icon, PrinterIcon, CameraIcon, CopyIcon } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { toCanvas } from "qrcode";
 import jsPDF from "jspdf";
@@ -40,7 +40,7 @@ export default function InvoiceDetailPage() {
   const { t } = useTranslation();
   const { user, isLoading: authLoading } = useAuthStore();
   const { activeWorkspace, loadWorkspaces } = useWorkspaceStore();
-  const { orders, loadOrders, removeOrder } = useOrderStore();
+  const { orders, loadOrders, addOrder, removeOrder } = useOrderStore();
 
   const qrRef = useRef<HTMLCanvasElement>(null);
   const printRef = useRef<HTMLDivElement>(null);
@@ -80,6 +80,13 @@ export default function InvoiceDetailPage() {
     await removeOrder(order.id);
     router.push("/invoices");
   }, [order, removeOrder, router, t]);
+
+  const handleDuplicate = useCallback(async () => {
+    if (!order || !activeWorkspace) return;
+    const { id: _id, number: _num, createdAt: _ca, ...rest } = order; void _id; void _num; void _ca;
+    await addOrder({ ...rest, workspaceId: activeWorkspace.id });
+    router.push("/invoices");
+  }, [order, activeWorkspace, addOrder, router]);
 
   const handleDownloadPDF = useCallback(() => {
     if (!order || !activeWorkspace) return;
@@ -290,6 +297,9 @@ export default function InvoiceDetailPage() {
           </Badge>
           <Button variant="outline" size="sm" onClick={() => router.push("/orders")}>
             <EditIcon className="size-3" /> {t("invoices.edit")}
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleDuplicate}>
+            <CopyIcon className="size-3" /> Duplikat
           </Button>
           <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
             <DownloadIcon className="size-3" /> PDF
