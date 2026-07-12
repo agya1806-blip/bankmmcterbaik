@@ -34,11 +34,11 @@ function generateInviteCode(): string {
 }
 
 export const WORKSPACE_TYPES: { type: WorkspaceType; label: string; desc: string; icon: string }[] = [
-  { type: "pribadi", label: "Buku Pribadi", desc: "Catat keuangan pribadi harian", icon: "📒" },
-  { type: "usaha", label: "Buku Usaha", desc: "Kelola bisnis dengan cabang", icon: "🏪" },
-  { type: "modal", label: "Buku Modal", desc: "Tracking modal & investasi", icon: "💰" },
-  { type: "toko", label: "Toko Online", desc: "Jualan online & kelola pesanan", icon: "🛒" },
-  { type: "hutang", label: "Buku Hutang", desc: "Catat hutang & piutang", icon: "📋" },
+  { type: "pribadi", label: "Buku Pribadi", desc: "Catat keuangan pribadi harian", icon: "Book" },
+  { type: "usaha", label: "Buku Usaha", desc: "Kelola bisnis dengan cabang", icon: "Store" },
+  { type: "modal", label: "Buku Modal", desc: "Tracking modal & investasi", icon: "Coins" },
+  { type: "toko", label: "Toko Online", desc: "Jualan online & kelola pesanan", icon: "ShoppingCart" },
+  { type: "hutang", label: "Buku Hutang", desc: "Catat hutang & piutang", icon: "ClipboardList" },
 ];
 
 export interface WorkspaceState {

@@ -8,6 +8,7 @@ import {
   Settings, ChevronLeft, Building2, LogOut, Plus, ArrowUpDown,
   QrCode, Search, type LucideIcon
 } from "lucide-react";
+import { WorkspaceIcon } from "@/components/workspace-icon";
 import { useAuthStore } from "@/engines/identity/auth-store";
 import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
 import { useTranslation } from "@/lib/i18n";
@@ -130,7 +131,7 @@ export default function Sidebar({ collapsed, onToggle, onMobileClose }: SidebarP
         {!collapsed && (
           <div className="byond-brand">
             <div className="byond-brand-icon">
-              {activeWorkspace?.icon || "M"}
+              <WorkspaceIcon type={activeWorkspace?.type || "pribadi"} className="size-6" />
             </div>
             <div className="byond-brand-text">
               <p className="byond-brand-name">{activeWorkspace?.name || "MUGHIS"}</p>
@@ -141,7 +142,7 @@ export default function Sidebar({ collapsed, onToggle, onMobileClose }: SidebarP
         {collapsed && (
           <div className="byond-brand byond-brand-collapsed">
             <div className="byond-brand-icon byond-brand-icon-sm">
-              {activeWorkspace?.icon || "M"}
+               <WorkspaceIcon type={activeWorkspace?.type || "pribadi"} className="size-5" />
             </div>
           </div>
         )}

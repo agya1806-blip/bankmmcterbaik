@@ -15,8 +15,7 @@ import {
 import { useTranslation } from "@/lib/i18n";
 import { BUSINESS_TYPES, getBusinessConfig } from "@/config/business-types";
 import type { WorkspaceType, BusinessSubType } from "@/lib/db";
-
-const getIcon = (type: WorkspaceType) => WORKSPACE_TYPES.find((w) => w.type === type)?.icon || "📒";
+import { WorkspaceIcon, WORKSPACE_ICON_NAMES } from "@/components/workspace-icon";
 
 export default function WorkspacesPage() {
   const router = useRouter();
@@ -45,7 +44,7 @@ export default function WorkspacesPage() {
     e.preventDefault();
     if (!user) return;
     try {
-      const wsData: any = { name: newName, description: WORKSPACE_TYPES.find((w) => w.type === newType)?.desc || "", currency: newCurrency, icon: getIcon(newType), type: newType };
+      const wsData: any = { name: newName, description: WORKSPACE_TYPES.find((w) => w.type === newType)?.desc || "", currency: newCurrency, icon: WORKSPACE_ICON_NAMES[newType] || "Book", type: newType };
       if (newType === "usaha") wsData.businessSubType = newSubType;
       await createWorkspace(wsData, user.id);
       setCreateOpen(false);
@@ -88,8 +87,8 @@ export default function WorkspacesPage() {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center size-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 text-xl">
-                    {ws.icon}
+                  <div className="flex items-center justify-center size-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/5">
+                    <WorkspaceIcon type={ws.type} className="size-6" />
                   </div>
                   <div>
                     <p className="font-semibold">{ws.name}</p>
@@ -132,7 +131,7 @@ export default function WorkspacesPage() {
                         newType === wt.type ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/10" : "border-border/50 hover:border-muted-foreground/30"
                       }`}
                     >
-                      <span className="text-2xl">{wt.icon}</span>
+                      <WorkspaceIcon type={wt.type} className="size-6" />
                       <div>
                         <p className="text-sm font-semibold">{wt.label}</p>
                         <p className="text-xs text-muted-foreground/70">{wt.desc}</p>

@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import { getBusinessConfig } from "@/config/business-types";
 import type { BusinessSubType } from "@/lib/db";
+import { WorkspaceIcon } from "@/components/workspace-icon";
 
 const datePrefix = (d: string | number | Date | undefined): string =>
   typeof d === "string" ? d.slice(0, 7) : d ? new Date(d).toISOString().slice(0, 7) : "";
@@ -416,7 +417,7 @@ export default function Dashboard() {
           <div className="space-y-2">
             {workspaces.map((ws) => (
               <button key={ws.id} onClick={() => selectWorkspace(ws.id, user.id)} className="w-full flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors text-left">
-                <span className="text-xl">{ws.icon}</span>
+                <WorkspaceIcon type={ws.type} className="size-6" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium">{ws.name}</p>
                   <p className="text-xs text-muted-foreground/60">{[{v:"pribadi",l:"Buku Pribadi"},{v:"usaha",l:"Buku Usaha"},{v:"modal",l:"Buku Modal"},{v:"toko",l:"Toko Online"},{v:"hutang",l:"Buku Hutang"}].find(x=>x.v===ws.type)?.l||ws.type}</p>
