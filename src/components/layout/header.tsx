@@ -48,7 +48,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             onClick={onMobileMenuToggle}
             aria-label="Toggle menu"
           >
-            <PanelRightOpen className="size-4" />
+            <PanelRightOpen className="size-5" />
           </button>
           <div className="byond-header-brand">
             <Sparkles className="byond-header-sparkle" />
@@ -83,7 +83,7 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             className="byond-header-action md:hidden"
             aria-label="Search"
           >
-            <Search className="size-4" />
+            <Search className="size-5" />
           </button>
 
           <button
@@ -91,11 +91,11 @@ export default function Header({ onMobileMenuToggle }: HeaderProps) {
             className="byond-header-action"
             aria-label={theme === "dark" ? "Light mode" : "Dark mode"}
           >
-            {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            {theme === "dark" ? <Sun className="size-5" /> : <Moon className="size-5" />}
           </button>
 
           <button className="byond-header-action byond-header-notification" aria-label="Notifications">
-            <Bell className="size-4" />
+            <Bell className="size-5" />
             <span className="byond-notification-dot" />
           </button>
 

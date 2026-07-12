@@ -27,7 +27,7 @@ function Dialog({ open, onOpenChange, trigger, children }: {
           <div className="relative z-10 w-full sm:max-w-lg bg-white/95 dark:bg-[var(--card)]/95 backdrop-blur-2xl border border-border/50 shadow-2xl sm:rounded-2xl rounded-t-2xl p-6 animate-slide-up sm:animate-scale-in max-h-[90vh] overflow-y-auto pb-4 sm:pb-6">
             <button
               onClick={() => setOpen(false)}
-              className="absolute top-4 right-4 flex items-center justify-center size-8 rounded-xl hover:bg-muted/50 transition-colors text-muted-foreground active:scale-90"
+              className="absolute top-4 right-4 flex items-center justify-center size-11 rounded-xl hover:bg-muted/50 transition-colors text-muted-foreground active:scale-90"
             >
               <X className="size-4" />
             </button>

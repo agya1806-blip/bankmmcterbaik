@@ -28,13 +28,13 @@ const variantStyles: Record<string, string> = {
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  xs: "h-6.5 px-2 text-[11px] rounded-lg gap-1",
-  sm: "h-7.5 px-3 text-xs rounded-xl gap-1",
-  md: "h-8.5 px-4 text-xs rounded-xl gap-1.5",
-  lg: "h-10 px-5 text-sm rounded-2xl gap-2",
-  "icon-xs": "size-6.5 rounded-lg",
-  "icon-sm": "size-7.5 rounded-xl",
-  icon: "size-8.5 rounded-xl",
+  xs: "h-8 px-3 text-xs rounded-xl gap-1",
+  sm: "h-10 px-4 text-sm rounded-xl gap-1.5",
+  md: "h-11 px-5 text-sm rounded-2xl gap-2",
+  lg: "h-12 px-6 text-base rounded-2xl gap-2",
+  "icon-xs": "size-8 rounded-xl",
+  "icon-sm": "size-10 rounded-xl",
+  icon: "size-11 rounded-2xl",
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(

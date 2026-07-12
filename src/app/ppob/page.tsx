@@ -320,10 +320,10 @@ export default function PpobPage() {
                       onClick={() => setSelectedCat(cat.id)}
                       className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md transition-all active:scale-95"
                     >
-                      <div className={`flex items-center justify-center size-9 rounded-xl bg-gradient-to-br ${CATEGORY_COLORS[cat.id] || "from-emerald-500 to-emerald-600"} shadow-lg`}>
-                        <Icon className="size-4 text-white" />
+                      <div className={`flex items-center justify-center size-12 rounded-xl bg-gradient-to-br ${CATEGORY_COLORS[cat.id] || "from-emerald-500 to-emerald-600"} shadow-lg`}>
+                        <Icon className="size-5 text-white" />
                       </div>
-                      <span className="text-[10px] font-medium text-center leading-tight">{cat.name}</span>
+                      <span className="text-xs font-medium text-center leading-tight">{cat.name}</span>
                     </button>
                   );
                 })}
@@ -333,8 +333,8 @@ export default function PpobPage() {
             /* Products in Category */
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <button onClick={() => { setSelectedCat(null); setSearchQuery(""); }} className="flex items-center justify-center size-8 rounded-lg hover:bg-muted/50 transition-colors">
-                  <ArrowLeft className="size-4" />
+                <button onClick={() => { setSelectedCat(null); setSearchQuery(""); }} className="flex items-center justify-center size-11 rounded-xl hover:bg-muted/50 transition-colors">
+                  <ArrowLeft className="size-5" />
                 </button>
                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r ${colorClass} text-white`}>
                   {CategoryIcon && <CategoryIcon className="size-4" />}

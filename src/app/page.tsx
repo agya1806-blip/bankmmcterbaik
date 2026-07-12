@@ -63,10 +63,10 @@ function QuickActions({ type, router }: { type: string; router: ReturnType<typeo
             onClick={() => router.push(action.href)}
             className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md transition-all active:scale-95"
           >
-            <div className={`flex items-center justify-center size-10 rounded-xl bg-gradient-to-br ${action.color} shadow-lg`}>
+            <div className={`flex items-center justify-center size-12 rounded-xl bg-gradient-to-br ${action.color} shadow-lg`}>
               <action.icon className="size-5 text-white" />
             </div>
-            <span className="text-[10px] font-medium text-center leading-tight">{action.label}</span>
+            <span className="text-xs font-medium text-center leading-tight">{action.label}</span>
           </button>
         ))}
       </div>
@@ -217,10 +217,10 @@ function UsahaDashboard({ ws, currency }: { ws: { id: string; name: string; curr
       <div>
         <h2 className="text-sm font-semibold mb-3">Aksi Cepat</h2>
         <div className="grid grid-cols-4 gap-2">
-          <button onClick={() => router.push("/qris")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg"><QrCode className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">QRIS</span></button>
-          <button onClick={() => router.push("/orders")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 shadow-lg"><ShoppingCart className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">Pesanan</span></button>
-          <button onClick={() => router.push("/products")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-lg"><Package className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">Produk</span></button>
-          <button onClick={() => router.push("/transactions")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg"><Plus className="size-5 text-white" /></div><span className="text-[10px] font-medium text-center">Catat</span></button>
+          <button onClick={() => router.push("/qris")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg"><QrCode className="size-5 text-white" /></div><span className="text-xs font-medium text-center">QRIS</span></button>
+          <button onClick={() => router.push("/orders")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-12 rounded-xl bg-gradient-to-br from-rose-500 to-rose-600 shadow-lg"><ShoppingCart className="size-5 text-white" /></div><span className="text-xs font-medium text-center">Pesanan</span></button>
+          <button onClick={() => router.push("/products")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-12 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-lg"><Package className="size-5 text-white" /></div><span className="text-xs font-medium text-center">Produk</span></button>
+          <button onClick={() => router.push("/transactions")} className="premium-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95"><div className="flex items-center justify-center size-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg"><Plus className="size-5 text-white" /></div><span className="text-xs font-medium text-center">Catat</span></button>
         </div>
       </div>
 
