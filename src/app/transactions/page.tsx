@@ -13,35 +13,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
+  Card, CardHeader, CardTitle, CardContent,
 } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+  DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
+  Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "@/components/ui/select";
-import { ArrowDownIcon, ArrowUpIcon, ArrowLeftRightIcon, ArrowRightLeftIcon, BanknoteIcon, PlusIcon, EditIcon, Trash2Icon, Repeat } from "lucide-react";
+import {
+  ArrowDownIcon, ArrowUpIcon, ArrowLeftRightIcon, ArrowRightLeftIcon,
+  BanknoteIcon, PlusIcon, EditIcon, Trash2Icon, Repeat, Filter, Search,
+} from "lucide-react";
 
 const TX_TYPES = [
-  { value: "income", icon: ArrowDownIcon, color: "bg-emerald-100/80 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400" },
-  { value: "expense", icon: ArrowUpIcon, color: "bg-red-100/80 dark:bg-red-900/30 text-red-600 dark:text-red-400" },
-  { value: "transfer", icon: ArrowLeftRightIcon, color: "bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" },
-  { value: "debt", icon: ArrowRightLeftIcon, color: "bg-orange-100/80 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400" },
-  { value: "receivable", icon: BanknoteIcon, color: "bg-purple-100/80 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400" },
+  { value: "income", icon: ArrowDownIcon, label: "Pemasukan", color: "bg-emerald-100/80 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400" },
+  { value: "expense", icon: ArrowUpIcon, label: "Pengeluaran", color: "bg-red-100/80 dark:bg-red-900/30 text-red-600 dark:text-red-400" },
+  { value: "transfer", icon: ArrowLeftRightIcon, label: "Transfer", color: "bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" },
+  { value: "debt", icon: ArrowRightLeftIcon, label: "Hutang", color: "bg-orange-100/80 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400" },
+  { value: "receivable", icon: BanknoteIcon, label: "Piutang", color: "bg-purple-100/80 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400" },
 ] as const;
+
+const COST_CATEGORIES = [
+  { value: "modal_produk", label: "Modal Produk" },
+  { value: "gaji_karyawan", label: "Gaji Karyawan" },
+  { value: "biaya_operasional", label: "Biaya Operasional" },
+  { value: "biaya_transportasi", label: "Biaya Transportasi" },
+];
 
 export default function TransactionsPage() {
   const { t } = useTranslation();
@@ -66,13 +65,6 @@ export default function TransactionsPage() {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [costCategory, setCostCategory] = useState<string>("");
 
-  const COST_CATEGORIES = [
-    { value: "modal_produk", label: "Modal Produk" },
-    { value: "gaji_karyawan", label: "Gaji Karyawan" },
-    { value: "biaya_operasional", label: "Biaya Operasional" },
-    { value: "biaya_transportasi", label: "Biaya Transportasi" },
-  ];
-
   const {
     rules: recurringRules, loadRules: loadRecurringRules,
     addRule: addRecurringRule, removeRule: removeRecurringRule,
@@ -87,10 +79,11 @@ export default function TransactionsPage() {
   const [recurCategoryId, setRecurCategoryId] = useState("");
   const [recurDesc, setRecurDesc] = useState("");
   const [recurFreq, setRecurFreq] = useState<string>("monthly");
-  const [recurInterval, setRecurInterval] = useState("1");
+  const [recurInterval] = useState("1");
   const [recurStart, setRecurStart] = useState(new Date().toISOString().split("T")[0]);
   const [filterType, setFilterType] = useState<string>("all");
   const [filterAccount, setFilterAccount] = useState<string>("all");
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) router.push("/login");
@@ -137,10 +130,6 @@ export default function TransactionsPage() {
     result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     return result;
   }, [transactions, search, filterType, filterAccount, accountMap, categoryMap]);
-
-  const showCategory = type === "income" || type === "expense";
-  const showToAccount = type === "transfer";
-  const filteredCategories = categories.filter((c) => c.type === (type === "income" ? "income" : "expense"));
 
   if (authLoading) {
     return (
@@ -224,39 +213,58 @@ export default function TransactionsPage() {
           <h1 className="text-2xl font-bold font-heading text-foreground">{t("transactions.title")}</h1>
           <p className="text-sm text-muted-foreground/60 mt-0.5">{t("transactions.desc")}</p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (open) { setEditingTx(null); resetForm(); } }} trigger={<Button><PlusIcon className="size-4" /> {t("transactions.add")}</Button>}>
-          <DialogContent className="sm:max-w-md bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
+        <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (open) { setEditingTx(null); resetForm(); } }} trigger={<Button><PlusIcon className="size-5" /> Tambah</Button>}>
+          <DialogContent>
             <DialogHeader>
-              <DialogTitle>{editingTx ? t("transactions.edit") : t("transactions.add")}</DialogTitle>
-              <DialogDescription>{editingTx ? t("transactions.edit") : t("transactions.add")}</DialogDescription>
+              <DialogTitle>{editingTx ? "Edit Transaksi" : "Tambah Transaksi"}</DialogTitle>
+              <DialogDescription>{editingTx ? "Ubah data transaksi" : "Catat transaksi baru"}</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleAdd}>
-              <div className="space-y-4 py-4">
+              <div className="space-y-3">
                 {error && (
                   <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</div>
                 )}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">{t("transactions.type")}</label>
-                  <Select value={type} onValueChange={(v) => v && setType(v)}>
-                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {TX_TYPES.map((txType) => (
-                        <SelectItem key={txType.value} value={txType.value}>{t("transactions." + txType.value)}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Tipe</label>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {TX_TYPES.map((txType) => {
+                      const Icon = txType.icon;
+                      const active = type === txType.value;
+                      return (
+                        <button
+                          key={txType.value}
+                          type="button"
+                          onClick={() => { setType(txType.value); if (error) clearError(); }}
+                          className={`flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-[10px] font-medium transition-all active:scale-95 ${
+                            active
+                              ? "bg-muted text-foreground shadow-sm"
+                              : "text-muted-foreground/60 hover:text-foreground hover:bg-muted/40"
+                          }`}
+                        >
+                          <Icon className="size-4" />
+                          {txType.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">{t("transactions.amount")}</label>
-                  <Input type="number" step="0.01" min="0" value={amount}
-                    onChange={(e) => { setAmount(e.target.value); if (error) clearError(); }} required />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground">Jumlah</label>
+                    <Input type="number" step="0.01" min="0" value={amount} placeholder="0"
+                      onChange={(e) => { setAmount(e.target.value); if (error) clearError(); }} required />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground">Tanggal</label>
+                    <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    {type === "transfer" ? t("transactions.fromAccount") : t("transactions.account")}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    {type === "transfer" ? "Dari Akun" : "Akun"}
                   </label>
                   <Select value={accountId} onValueChange={(v) => v && setAccountId(v)}>
-                    <SelectTrigger className="w-full"><SelectValue placeholder={t("transactions.selectAccount")} /></SelectTrigger>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="Pilih akun" /></SelectTrigger>
                     <SelectContent>
                       {accounts.map((a) => (
                         <SelectItem key={a.id} value={a.id}>{a.name} ({a.currency} {a.balance})</SelectItem>
@@ -264,11 +272,11 @@ export default function TransactionsPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                {showToAccount && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">{t("transactions.toAccount")}</label>
+                {type === "transfer" && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground">Ke Akun</label>
                     <Select value={toAccountId} onValueChange={(v) => v && setToAccountId(v)}>
-                      <SelectTrigger className="w-full"><SelectValue placeholder={t("transactions.selectAccount")} /></SelectTrigger>
+                      <SelectTrigger className="w-full"><SelectValue placeholder="Pilih akun tujuan" /></SelectTrigger>
                       <SelectContent>
                         {accounts.filter((a) => a.id !== accountId).map((a) => (
                           <SelectItem key={a.id} value={a.id}>{a.name} ({a.currency})</SelectItem>
@@ -277,16 +285,16 @@ export default function TransactionsPage() {
                     </Select>
                   </div>
                 )}
-                {showCategory && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">{t("transactions.category")}</label>
+                {(type === "income" || type === "expense") && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground">Kategori</label>
                     <Select value={categoryId} onValueChange={(v) => v && setCategoryId(v)}>
-                      <SelectTrigger className="w-full"><SelectValue placeholder={t("transactions.selectCategory")} /></SelectTrigger>
+                      <SelectTrigger className="w-full"><SelectValue placeholder="Pilih kategori" /></SelectTrigger>
                       <SelectContent>
-                        {filteredCategories.map((c) => (
+                        {categories.filter((c) => c.type === (type === "income" ? "income" : "expense")).map((c) => (
                           <SelectItem key={c.id} value={c.id}>
                             <span className="flex items-center gap-2">
-                              <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: c.color }} />
+                              <span className="inline-block size-2 rounded-full" style={{ backgroundColor: c.color }} />
                               {c.name}
                             </span>
                           </SelectItem>
@@ -296,8 +304,8 @@ export default function TransactionsPage() {
                   </div>
                 )}
                 {type === "expense" && activeWorkspace?.type === "usaha" && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Jenis Biaya</label>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground">Jenis Biaya</label>
                     <Select value={costCategory} onValueChange={(v) => v && setCostCategory(v)}>
                       <SelectTrigger className="w-full"><SelectValue placeholder="Pilih jenis biaya" /></SelectTrigger>
                       <SelectContent>
@@ -308,18 +316,14 @@ export default function TransactionsPage() {
                     </Select>
                   </div>
                 )}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">{t("transactions.description")}</label>
-                  <Input value={description} onChange={(e) => setDescription(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">{t("transactions.date")}</label>
-                  <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">Keterangan</label>
+                  <Input value={description} placeholder="Mis: Belanja bulanan" onChange={(e) => setDescription(e.target.value)} />
                 </div>
               </div>
               <DialogFooter>
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? t("transactions.saving") : editingTx ? t("transactions.update") : t("transactions.save")}
+                  {isLoading ? "Menyimpan..." : editingTx ? "Perbarui" : "Simpan"}
                 </Button>
               </DialogFooter>
             </form>
@@ -327,30 +331,34 @@ export default function TransactionsPage() {
         </Dialog>
       </div>
 
-      {/* Filter Bar */}
-      <div className="flex flex-wrap gap-3 items-end">
-        <div className="space-y-1 flex-1 min-w-[200px]">
-          <label className="text-xs text-muted-foreground">{t("transactions.search")}</label>
-          <Input placeholder={t("transactions.searchPlaceholder")} value={search} onChange={(e) => setSearch(e.target.value)} />
+      {/* Search & Filter */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/40" />
+          <Input
+            placeholder="Cari transaksi..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
         </div>
-        <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">{t("transactions.type")}</label>
+        <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="sm:hidden">
+          <Filter className="size-4" /> Filter
+        </Button>
+        <div className={`${showFilters ? "flex" : "hidden"} sm:flex flex-wrap gap-2`}>
           <Select value={filterType} onValueChange={(v) => v && setFilterType(v)}>
-            <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("transactions.all")}</SelectItem>
+              <SelectItem value="all">Semua</SelectItem>
               {TX_TYPES.map((txType) => (
-                <SelectItem key={txType.value} value={txType.value}>{t("transactions." + txType.value)}</SelectItem>
+                <SelectItem key={txType.value} value={txType.value}>{txType.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">{t("transactions.account")}</label>
           <Select value={filterAccount} onValueChange={(v) => v && setFilterAccount(v)}>
-            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("transactions.all")}</SelectItem>
+              <SelectItem value="all">Semua Akun</SelectItem>
               {accounts.map((a) => (
                 <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
               ))}
@@ -370,67 +378,90 @@ export default function TransactionsPage() {
 
       {/* Recurring Toggle */}
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={() => setShowRecurring(!showRecurring)}>
-          <Repeat className="size-3" /> {t("transactions.recurringRules")} ({recurringRules.length})
+        <Button variant="outline" onClick={() => setShowRecurring(!showRecurring)}>
+          <Repeat className="size-4" /> Transaksi ({recurringRules.length})
         </Button>
       </div>
 
       {/* Recurring Rules Card */}
       {showRecurring && (
-        <Card className="bg-card/80 backdrop-blur-sm border-white/10 dark:border-white/5">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t("transactions.recurringRules")}</CardTitle>
+            <CardTitle className="text-base">Transaksi Berulang</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             {recurringRules.length === 0 && (
-              <p className="text-sm text-muted-foreground">{t("transactions.noResults")}</p>
+              <p className="text-sm text-muted-foreground">Belum ada aturan berulang</p>
             )}
             {recurringRules.map((rule) => (
               <div key={rule.id} className="flex items-center justify-between rounded-lg border px-3 py-2">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">{rule.description} ({t("transactions." + rule.type)})</p>
+                <div className="space-y-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{rule.description}</p>
                   <p className="text-xs text-muted-foreground">
-                    {activeWorkspace.currency} {rule.amount} &middot; {t("transactions.interval")} {rule.interval} ({t("transactions." + rule.frequency)}) &middot; {rule.nextDate}
+                    {activeWorkspace.currency} {rule.amount} &middot; Tiap {rule.interval} {rule.frequency} &middot; {rule.nextDate}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon-xs" onClick={() => toggleRecurringRule(rule.id)}>
-                    <span className={`size-2 rounded-full ${rule.active ? 'bg-green-500' : 'bg-gray-300'}`} />
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button variant="ghost" size="icon-sm" onClick={() => toggleRecurringRule(rule.id)}>
+                    <span className={`size-3 rounded-full ${rule.active ? 'bg-green-500' : 'bg-gray-300'}`} />
                   </Button>
-                  <Button variant="ghost" size="icon-xs" onClick={() => removeRecurringRule(rule.id)}>
-                    <Trash2Icon className="size-3 text-destructive" />
+                  <Button variant="ghost" size="icon-sm" onClick={() => removeRecurringRule(rule.id)}>
+                    <Trash2Icon className="size-4 text-destructive" />
                   </Button>
                 </div>
               </div>
             ))}
-            <div className="border-t pt-4 space-y-3">
-              <p className="text-sm font-medium">{t("transactions.addRule")}</p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <select className="rounded-lg border border-input bg-transparent px-2 py-1 text-sm" value={recurType} onChange={(e) => setRecurType(e.target.value)}>
-                  <option value="income">{t("transactions.income")}</option>
-                  <option value="expense">{t("transactions.expense")}</option>
-                  <option value="transfer">{t("transactions.transfer")}</option>
-                </select>
-                <Input placeholder={t("transactions.amount")} type="number" step="0.01" value={recurAmount} onChange={(e) => setRecurAmount(e.target.value)} />
-                <select className="rounded-lg border border-input bg-transparent px-2 py-1 text-sm" value={recurAccountId} onChange={(e) => setRecurAccountId(e.target.value)}>
-                  <option value="">{t("transactions.account")}</option>
-                  {accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-                </select>
-                <select className="rounded-lg border border-input bg-transparent px-2 py-1 text-sm" value={recurCategoryId} onChange={(e) => setRecurCategoryId(e.target.value)}>
-                  <option value="">{t("transactions.category")}</option>
-                  {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
-                <Input placeholder={t("transactions.description")} value={recurDesc} onChange={(e) => setRecurDesc(e.target.value)} />
-                <select className="rounded-lg border border-input bg-transparent px-2 py-1 text-sm" value={recurFreq} onChange={(e) => setRecurFreq(e.target.value)}>
-                  <option value="daily">{t("transactions.daily")}</option>
-                  <option value="weekly">{t("transactions.weekly")}</option>
-                  <option value="monthly">{t("transactions.monthly")}</option>
-                  <option value="yearly">{t("transactions.yearly")}</option>
-                </select>
-                <Input placeholder={t("transactions.interval")} type="number" min="1" value={recurInterval} onChange={(e) => setRecurInterval(e.target.value)} />
-                <Input type="date" value={recurStart} onChange={(e) => setRecurStart(e.target.value)} />
+            <div className="border-t pt-3 space-y-2">
+              <p className="text-sm font-medium">Tambah Aturan</p>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-muted-foreground">Tipe</label>
+                  <Select value={recurType} onValueChange={(v) => v && setRecurType(v)}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="income">Pemasukan</SelectItem>
+                      <SelectItem value="expense">Pengeluaran</SelectItem>
+                      <SelectItem value="transfer">Transfer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-muted-foreground">Jumlah</label>
+                  <Input type="number" step="0.01" value={recurAmount} onChange={(e) => setRecurAmount(e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-muted-foreground">Akun</label>
+                  <Select value={recurAccountId} onValueChange={(v) => v && setRecurAccountId(v)}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder="Pilih" /></SelectTrigger>
+                    <SelectContent>
+                      {accounts.map((a) => (
+                        <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-muted-foreground">Frekuensi</label>
+                  <Select value={recurFreq} onValueChange={(v) => v && setRecurFreq(v)}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Harian</SelectItem>
+                      <SelectItem value="weekly">Mingguan</SelectItem>
+                      <SelectItem value="monthly">Bulanan</SelectItem>
+                      <SelectItem value="yearly">Tahunan</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-muted-foreground">Keterangan</label>
+                  <Input value={recurDesc} onChange={(e) => setRecurDesc(e.target.value)} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-muted-foreground">Mulai</label>
+                  <Input type="date" value={recurStart} onChange={(e) => setRecurStart(e.target.value)} />
+                </div>
               </div>
-              <Button size="sm" onClick={async () => {
+              <Button onClick={async () => {
                 if (!activeWorkspace || !recurAmount || !recurAccountId) return;
                 await addRecurringRule({
                   workspaceId: activeWorkspace.id,
@@ -445,7 +476,7 @@ export default function TransactionsPage() {
                 });
                 setRecurAmount(""); setRecurDesc(""); setRecurCategoryId("");
               }}>
-                {t("transactions.addRule")}
+                Tambah
               </Button>
             </div>
           </CardContent>
@@ -496,11 +527,11 @@ export default function TransactionsPage() {
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
-                    <Button variant="ghost" size="icon-xs" onClick={() => openEdit(tx)}>
-                      <EditIcon className="size-3" />
+                    <Button variant="ghost" size="icon-sm" onClick={() => openEdit(tx)}>
+                      <EditIcon className="size-4" />
                     </Button>
-                    <Button variant="ghost" size="icon-xs" onClick={() => handleDelete(tx)}>
-                      <Trash2Icon className="size-3 text-destructive" />
+                    <Button variant="ghost" size="icon-sm" onClick={() => handleDelete(tx)}>
+                      <Trash2Icon className="size-4 text-destructive" />
                     </Button>
                   </div>
                 </div>
