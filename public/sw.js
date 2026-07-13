@@ -1,4 +1,4 @@
-const CACHE = "mughis-v1";
+const CACHE = "mughis-v2";
 const STATIC = [
   "/",
   "/manifest.json",
@@ -21,6 +21,8 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   if (e.request.url.includes("/api/")) return networkFirst(e);
+  if (e.request.url.includes("/_next/static/chunks/")) return networkFirst(e);
+  if (e.request.url.includes("/_next/webpack/")) return networkFirst(e);
   cacheFirst(e);
 });
 

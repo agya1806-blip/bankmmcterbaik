@@ -39,9 +39,9 @@ function PercetakanPanel() {
   const simpan = () => {
     if (!activeWorkspace) return;
     addPrintingJob({
-      id: crypto.randomUUID(), workspaceId: activeWorkspace.id, type,
+      id: crypto.randomUUID(), type,
       panjang: p, lebar: l, qty, pages: halaman, coverCost: cover, jilidCost: jilid,
-      totalCost: result?.totalCost ?? 0, price: result?.hargaJual ?? 0, createdAt: Date.now(),
+      totalCost: result?.totalCost ?? 0, hargaJual: result?.hargaJual ?? 0,
     });
     toast.success("Job cetak tersimpan");
   };
@@ -92,9 +92,9 @@ function GadgetPanel() {
   const simpan = () => {
     if (!activeWorkspace) return;
     addGadgetItem({
-      id: crypto.randomUUID(), workspaceId: activeWorkspace.id,
+      id: crypto.randomUUID(),
       imei1, imei2: imei2 || undefined, model, warrantyEnd: warranty,
-      hpp, price, tukarTambahValue: tukar || undefined, createdAt: Date.now(),
+      hpp, price, tukarTambahValue: tukar || undefined,
     });
     toast.success("Unit gadget tersimpan");
   };
@@ -144,8 +144,8 @@ function LaptopPanel() {
   const simpan = () => {
     if (!activeWorkspace) return;
     addLaptopBuild({
-      id: crypto.randomUUID(), workspaceId: activeWorkspace.id,
-      sn, parts, totalHpp, price, invoiceNumber: invNo, createdAt: Date.now(),
+      id: crypto.randomUUID(),
+      sn, parts, totalHpp, price, invoiceNumber: invNo,
     });
     toast.success("Build PC tersimpan");
   };
@@ -184,17 +184,13 @@ function LaptopPanel() {
 }
 
 function KedaiKopiPanel() {
-  const { coffeeIngredients, addCoffeeIngredient, reduceCoffeeStock } = useBusinessStore();
+  const { coffeeIngredients, addCoffeeIngredient, reduceStock } = useBusinessStore();
   const [name, setName] = useState(""); const [stock, setStock] = useState(0); const [minStock, setMinStock] = useState(0);
   const [sellName, setSellName] = useState(""); const [sellGram, setSellGram] = useState(0);
-  const { activeWorkspace } = useWorkspaceStore();
 
   const addIng = () => {
-    if (!activeWorkspace || !name) return;
-    addCoffeeIngredient({
-      id: crypto.randomUUID(), workspaceId: activeWorkspace.id,
-      name, stockGram: stock, minStockThreshold: minStock, unit: "gram", createdAt: Date.now(),
-    });
+    if (!name) return;
+    addCoffeeIngredient({ id: crypto.randomUUID(), name, stockGram: stock, minStockThreshold: minStock });
     setName(""); setStock(0); setMinStock(0);
     toast.success("Bahan baku ditambahkan");
   };
@@ -203,7 +199,8 @@ function KedaiKopiPanel() {
     if (!sellName || !sellGram) return;
     const found = coffeeIngredients.find((c) => c.name.toLowerCase() === sellName.toLowerCase());
     if (!found) { toast.error("Bahan tidak ditemukan"); return; }
-    reduceCoffeeStock(found.id, sellGram);
+    const ok = reduceStock(found.id, sellGram);
+    if (!ok) { toast.error("Stok tidak mencukupi"); return; }
     toast.success(`Stok ${found.name} berkurang ${sellGram}g`);
   };
 
@@ -252,11 +249,8 @@ function KonveksiPanel() {
   const { activeWorkspace } = useWorkspaceStore();
 
   const addSku = () => {
-    if (!activeWorkspace || !productName) return;
-    addFashionSKU({
-      id: crypto.randomUUID(), workspaceId: activeWorkspace.id,
-      productName, color, size, price, stock, createdAt: Date.now(),
-    });
+    if (!productName) return;
+    addFashionSKU({ id: crypto.randomUUID(), productName, color, size, price, stock });
     toast.success("SKU ditambahkan");
   };
 

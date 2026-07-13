@@ -1,41 +1,40 @@
-import type { Order, Transaction, Customer } from "@/lib/db";
+import type { Order, Transaction } from "@/lib/db";
 
 /* ─── WhatsApp ─── */
 
+const WA_PREFIX_REGEX = /^0+/;
+
 export function formatWaNumber(phone: string): string {
-  return phone.replace(/\D/g, "").replace(/^0/, "62");
+  return phone.replace(/\D/g, "").replace(WA_PREFIX_REGEX, "62");
 }
 
-export function kirimWhatsApp(phone: string, message: string) {
+export function sendWhatsAppReceipt(phone: string, orderData: { number?: string; total: number; dp?: number; remaining?: number; status?: string; items?: { description: string; quantity: number; total: number }[]; customerName?: string; id: string }): void {
   const wa = formatWaNumber(phone);
-  window.open(`https://wa.me/${wa}?text=${encodeURIComponent(message)}`, "_blank");
-}
-
-export function buatRingkasanTransaksi(orders: Order[], customer?: Customer): string {
-  let text = "";
-  if (customer) text += `*${customer.name}*\n`;
-  text += `*MUGHIS BANK — Laporan Transaksi*\n`;
-  text += `\n*Tiga Pilar Keuangan:*\n`;
-  const totalPenjualan = orders.reduce((s, o) => s + o.total, 0);
-  const totalDp = orders.reduce((s, o) => s + (o.dp || 0), 0);
-  const sisa = totalPenjualan - totalDp;
-  text += `💰 *Total Penjualan:* ${totalPenjualan.toLocaleString()}\n`;
-  text += `💳 *Total DP:* ${totalDp.toLocaleString()}\n`;
-  text += `📋 *Sisa Tagihan:* ${sisa.toLocaleString()}\n`;
-  text += `\n*Detail Pesanan:*\n`;
-  orders.slice(0, 5).forEach((o, i) => {
-    text += `${i + 1}. ${o.number || `#${o.id.slice(0, 6)}`} — ${o.status} — ${o.total.toLocaleString()}\n`;
-  });
-  const invoiceUrl = orders[0] ? `${window.location.origin}/invoices/${orders[0].id}` : window.location.origin;
-  text += `\n🔗 *Link Invoice:* ${invoiceUrl}`;
-  return text;
+  let text = `*MUGHIS BANK — Nota Pembayaran*\n\n`;
+  text += `*Tiga Pilar Keuangan:*\n`;
+  text += `💰 *Total Belanja:* ${orderData.total.toLocaleString()}\n`;
+  text += `💳 *Dibayar:* ${(orderData.dp || 0).toLocaleString()}\n`;
+  text += `📋 *Sisa Tagihan:* ${(orderData.remaining || orderData.total).toLocaleString()}\n`;
+  text += `📌 *Status:* ${orderData.status || "Baru"}\n\n`;
+  if (orderData.items && orderData.items.length > 0) {
+    text += `*Item Pesanan:*\n`;
+    orderData.items.slice(0, 5).forEach((i) => {
+      text += `  • ${i.description} x${i.quantity} = ${i.total.toLocaleString()}\n`;
+    });
+  }
+  const invoiceUrl = `${window.location.origin}/invoices/${orderData.id}`;
+  text += `\n🔗 *Link Invoice:* ${invoiceUrl}\n\n`;
+  text += `Terima kasih!`;
+  window.open(`https://wa.me/${wa}?text=${encodeURIComponent(text)}`, "_blank");
 }
 
 /* ─── PNG ─── */
 
-export async function eksporPNG(element: HTMLElement, filename = "struk.png") {
+export async function exportToPNG(elementId: string, filename = "struk.png"): Promise<void> {
+  const el = document.getElementById(elementId);
+  if (!el) return;
   const html2canvas = (await import("html2canvas")).default;
-  const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+  const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
   canvas.toBlob((blob) => {
     if (!blob) return;
     const url = URL.createObjectURL(blob);
@@ -47,19 +46,29 @@ export async function eksporPNG(element: HTMLElement, filename = "struk.png") {
 
 /* ─── PDF ─── */
 
-export async function eksporPDF(element: HTMLElement, filename = "struk.pdf") {
+const PDF_FORMATS: Record<string, { unit: "mm"; format: [number, number]; orientation: "portrait" | "landscape" }> = {
+  thermal: { unit: "mm", format: [80, 297], orientation: "portrait" },
+  a4: { unit: "mm", format: [210, 297], orientation: "portrait" },
+};
+
+export async function exportToPDF(elementId: string, format: "thermal" | "a4" = "thermal", filename = "struk.pdf"): Promise<void> {
+  const el = document.getElementById(elementId);
+  if (!el) return;
   const html2pdf = (await import("html2pdf.js")).default;
+  const cfg = PDF_FORMATS[format];
   html2pdf().set({
-    margin: [5, 5, 5, 5], filename, image: { type: "jpeg", quality: 0.98 },
+    margin: format === "thermal" ? [5, 5, 5, 5] : [10, 15, 10, 15],
+    filename,
+    image: { type: "jpeg", quality: 0.98 },
     html2canvas: { scale: 2, useCORS: true },
-    jsPDF: { unit: "mm", format: [80, 297], orientation: "portrait" },
-  }).from(element).save();
+    jsPDF: cfg,
+  }).from(el).save();
 }
 
 /* ─── XLSX ─── */
 
-export function eksporXLSX(data: Record<string, unknown>[], sheetName = "Laporan", filename = "laporan.xlsx") {
-  const XLSX = (window as unknown as { XLSX: typeof import("xlsx") }).XLSX;
+export function exportToExcel(data: Record<string, unknown>[], sheetName = "Laporan", filename = "laporan.xlsx"): void {
+  const XLSX = (window as unknown as Record<string, unknown>).XLSX as typeof import("xlsx") | undefined;
   if (!XLSX) return;
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.json_to_sheet(data);
