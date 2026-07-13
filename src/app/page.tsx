@@ -388,14 +388,72 @@ function TokoDashboard({ ws, currency }: { ws: { id: string; name: string; curre
   );
 }
 
+function ExecutiveSummary({ workspaces }: { workspaces: { id: string; type: string; name: string; currency: string }[] }) {
+  const [aggData, setAggData] = useState<{ totalIncome: number; totalExpense: number; bookCount: number } | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { getTransactionsByWorkspace } = await import("@/lib/db");
+      let income = 0; let expense = 0;
+      for (const ws of workspaces) {
+        const txs = await getTransactionsByWorkspace(ws.id);
+        income += txs.filter((t: { type: string }) => t.type === "income").reduce((s: number, t: { amount: number }) => s + t.amount, 0);
+        expense += txs.filter((t: { type: string }) => t.type === "expense").reduce((s: number, t: { amount: number }) => s + t.amount, 0);
+      }
+      if (!cancelled) setAggData({ totalIncome: income, totalExpense: expense, bookCount: workspaces.length });
+    })();
+    return () => { cancelled = true; };
+  }, [workspaces]);
+
+  if (!aggData) return null;
+
+  const netProfit = aggData.totalIncome - aggData.totalExpense;
+
+  return (
+    <div className="mb-8 space-y-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold font-heading">MUGHIS BANK HO</h1>
+          <p className="text-sm text-muted-foreground/60">{aggData.bookCount} buku aktif</p>
+        </div>
+        <Button onClick={() => router.push("/workspaces")}><Plus className="size-4" /> Tambah Buku</Button>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-xl shadow-emerald-500/30">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.15),transparent_60%)]" />
+          <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1">Total Pemasukan Global</p>
+          <p className="text-2xl font-bold font-heading text-white">IDR {aggData.totalIncome.toLocaleString()}</p>
+        </div>
+        <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-rose-500 to-rose-600 shadow-xl shadow-rose-500/30">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.15),transparent_60%)]" />
+          <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1">Total HPP Global</p>
+          <p className="text-2xl font-bold font-heading text-white">IDR {aggData.totalExpense.toLocaleString()}</p>
+        </div>
+        <div className="relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br from-violet-500 to-violet-600 shadow-xl shadow-violet-500/30">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.15),transparent_60%)]" />
+          <p className="text-white/70 text-xs font-medium uppercase tracking-wider mb-1">Laba Bersih Murni</p>
+          <p className={`text-2xl font-bold font-heading ${netProfit >= 0 ? "text-white" : "text-red-200"}`}>
+            {netProfit >= 0 ? "+" : ""}IDR {netProfit.toLocaleString()}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { activeWorkspace, workspaces, loadWorkspaces, selectWorkspace } = useWorkspaceStore();
 
   useEffect(() => { if (user) loadWorkspaces(user.id); }, [user, loadWorkspaces]);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   if (!user) return null;
+  if (!mounted) return <div className="min-h-[60vh]" />;
 
   if (workspaces.length === 0) {
     return (
@@ -444,5 +502,10 @@ export default function Dashboard() {
   };
 
   const DashboardComponent = dashboards[activeWorkspace.type] || PribadiDashboard;
-  return <DashboardComponent ws={activeWorkspace} currency={currency} />;
+  return (
+    <div className="space-y-4">
+      <ExecutiveSummary workspaces={workspaces} />
+      <DashboardComponent ws={activeWorkspace} currency={currency} />
+    </div>
+  );
 }
