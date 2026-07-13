@@ -27,6 +27,62 @@ export interface SavingsGoal {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   TIPE DATA — BUKU USAHA: PROFIL USAHA
+   ══════════════════════════════════════════════════════════════ */
+
+export interface BusinessProfile {
+  logoUrl: string;
+  namaUsaha: string;
+  alamat: string;
+  noWhatsapp: string;
+  slogan: string;
+  subLayanan: string[];
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TIPE DATA — BUKU USAHA: DOMPET / KAS OPERASIONAL
+   ══════════════════════════════════════════════════════════════ */
+
+export type WalletTipe = "KasTunai" | "Bank" | "EWallet";
+
+export interface Wallet {
+  id: string;
+  namaDompet: string;
+  saldo: number;
+  tipe: WalletTipe;
+  catatan: string;
+}
+
+export interface WalletMutasi {
+  id: string;
+  dariWalletId: string;
+  keWalletId: string;
+  nominal: number;
+  alasan: string;
+  createdAt: number;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TIPE DATA — BUKU USAHA: METODE PEMBAYARAN
+   ══════════════════════════════════════════════════════════════ */
+
+export interface PaymentMethod {
+  id: string;
+  namaMetode: string;
+  bankName: string;
+  accountNo: string;
+  accountName: string;
+  qrisImageUrl: string;
+  isEnabled: boolean;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TIPE DATA — BUKU USAHA: TEMA VISUAL
+   ══════════════════════════════════════════════════════════════ */
+
+export type AccentColor = "indigo" | "amber" | "emerald" | "sapphire" | "rose";
+
+/* ══════════════════════════════════════════════════════════════
    TIPE DATA — BUKU USAHA: PERCETAKAN
    ══════════════════════════════════════════════════════════════ */
 
@@ -289,6 +345,18 @@ export const BIZ_UNIT_LABELS: Record<BizUnit, string> = {
 };
 
 /* ══════════════════════════════════════════════════════════════
+   AKCENTHEME MAP
+   ══════════════════════════════════════════════════════════════ */
+
+export const ACCENT_THEMES: Record<AccentColor, { from: string; via: string; to: string; label: string }> = {
+  indigo: { from: "from-indigo-500", via: "via-purple-500", to: "to-indigo-600", label: "Ungu-Cyan (Default)" },
+  amber: { from: "from-amber-500", via: "via-yellow-500", to: "to-orange-600", label: "Amber Gold" },
+  emerald: { from: "from-emerald-500", via: "via-teal-500", to: "to-emerald-600", label: "Emerald Mint" },
+  sapphire: { from: "from-blue-500", via: "via-cyan-500", to: "to-blue-600", label: "Sapphire Blue" },
+  rose: { from: "from-rose-500", via: "via-pink-500", to: "to-rose-600", label: "Rose Pink" },
+};
+
+/* ══════════════════════════════════════════════════════════════
    STORE INTERFACE
    ══════════════════════════════════════════════════════════════ */
 
@@ -306,6 +374,39 @@ interface BusinessStore {
   setSavingsGoals: (g: SavingsGoal[]) => void;
   addSavingsGoal: (g: SavingsGoal) => void;
   alokasikanTabungan: (goalId: string, nominal: number) => void;
+
+  /* Buku Usaha — Profil */
+  profile: BusinessProfile;
+  setProfileLogo: (logoUrl: string) => void;
+  setProfileNama: (nama: string) => void;
+  setProfileAlamat: (alamat: string) => void;
+  setProfileWhatsapp: (no: string) => void;
+  setProfileSlogan: (slogan: string) => void;
+  updateProfile: (data: Partial<BusinessProfile>) => void;
+  resetProfile: () => void;
+  tambahSubLayanan: (item: string) => void;
+  hapusSubLayanan: (index: number) => void;
+
+  /* Buku Usaha — Wallets */
+  wallets: Wallet[];
+  mutasiLog: WalletMutasi[];
+  addWallet: (w: Wallet) => void;
+  updateWallet: (id: string, data: Partial<Wallet>) => void;
+  removeWallet: (id: string) => void;
+  tambahSaldoWallet: (id: string, nominal: number) => void;
+  kurangiSaldoWallet: (id: string, nominal: number) => boolean;
+  transferSaldo: (dariId: string, keId: string, nominal: number, alasan: string) => { ok: boolean; error?: string };
+
+  /* Buku Usaha — Payment Methods */
+  paymentMethods: PaymentMethod[];
+  addPaymentMethod: (p: PaymentMethod) => void;
+  updatePaymentMethod: (id: string, data: Partial<PaymentMethod>) => void;
+  removePaymentMethod: (id: string) => void;
+  togglePaymentMethod: (id: string) => void;
+
+  /* Buku Usaha — Tema */
+  accentColor: AccentColor;
+  setAccentColor: (color: AccentColor) => void;
 
   /* Buku Usaha — Percetakan */
   printingJobs: PrintingJob[];
@@ -360,6 +461,35 @@ interface BusinessStore {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   DEFAULTS
+   ══════════════════════════════════════════════════════════════ */
+
+const DEFAULT_PROFILE: BusinessProfile = {
+  logoUrl: "",
+  namaUsaha: "Mughis Group",
+  alamat: "Samalanga, Bireuen, Aceh",
+  noWhatsapp: "6285217706587",
+  slogan: "Jual Laptop Baru & Bekas • Penerbit & Percetakan • Desain Grafis & Logo • Jasa Bordir & Sablon",
+  subLayanan: [
+    "Jual Laptop Baru & Bekas",
+    "Penerbit & Percetakan",
+    "Desain Grafis & Logo",
+    "Jasa Bordir & Sablon",
+  ],
+};
+
+const INITIAL_SEDEKAH: SedekahBalance = {
+  zakatMal: 0,
+  zakatFitrah: 0,
+  infakTerikat: 0,
+  sedekahSubuh: 0,
+};
+
+function genId(): string {
+  return `id_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+}
+
+/* ══════════════════════════════════════════════════════════════
    PERSISTENCE CONFIG
    ══════════════════════════════════════════════════════════════ */
 
@@ -373,13 +503,6 @@ const ssrSafeStorage = createJSONStorage(() => {
 /* ══════════════════════════════════════════════════════════════
    STORE
    ══════════════════════════════════════════════════════════════ */
-
-const INITIAL_SEDEKAH: SedekahBalance = {
-  zakatMal: 0,
-  zakatFitrah: 0,
-  infakTerikat: 0,
-  sedekahSubuh: 0,
-};
 
 export const useBusinessStore = create<BusinessStore>()(
   persist(
@@ -409,6 +532,119 @@ export const useBusinessStore = create<BusinessStore>()(
               : g
           ),
         })),
+
+      /* ─── Buku Usaha: Profil ─── */
+      profile: { ...DEFAULT_PROFILE },
+      setProfileLogo: (logoUrl) =>
+        set((s) => ({ profile: { ...s.profile, logoUrl } })),
+      setProfileNama: (nama) =>
+        set((s) => ({ profile: { ...s.profile, namaUsaha: nama } })),
+      setProfileAlamat: (alamat) =>
+        set((s) => ({ profile: { ...s.profile, alamat } })),
+      setProfileWhatsapp: (no) =>
+        set((s) => ({ profile: { ...s.profile, noWhatsapp: no } })),
+      setProfileSlogan: (slogan) =>
+        set((s) => ({ profile: { ...s.profile, slogan } })),
+      updateProfile: (data) =>
+        set((s) => ({ profile: { ...s.profile, ...data } })),
+      resetProfile: () => set({ profile: { ...DEFAULT_PROFILE } }),
+      tambahSubLayanan: (item) =>
+        set((s) => ({
+          profile: { ...s.profile, subLayanan: [...s.profile.subLayanan, item] },
+        })),
+      hapusSubLayanan: (index) =>
+        set((s) => ({
+          profile: {
+            ...s.profile,
+            subLayanan: s.profile.subLayanan.filter((_, i) => i !== index),
+          },
+        })),
+
+      /* ─── Buku Usaha: Wallets ─── */
+      wallets: [
+        { id: "wallet-kas", namaDompet: "Kas Laci Kasir", saldo: 0, tipe: "KasTunai", catatan: "Uang fisik di laci kasir" },
+        { id: "wallet-bsi", namaDompet: "Rekening Operasional BSI", saldo: 0, tipe: "Bank", catatan: "BSI 1234567890" },
+        { id: "wallet-dana", namaDompet: "Dana Cadangan Usaha", saldo: 0, tipe: "EWallet", catatan: "Dana cadangan untuk restock" },
+      ],
+      mutasiLog: [],
+      addWallet: (w) => set((s) => ({ wallets: [w, ...s.wallets] })),
+      updateWallet: (id, data) =>
+        set((s) => ({
+          wallets: s.wallets.map((w) => (w.id === id ? { ...w, ...data } : w)),
+        })),
+      removeWallet: (id) =>
+        set((s) => ({ wallets: s.wallets.filter((w) => w.id !== id) })),
+      tambahSaldoWallet: (id, nominal) =>
+        set((s) => ({
+          wallets: s.wallets.map((w) =>
+            w.id === id ? { ...w, saldo: w.saldo + nominal } : w
+          ),
+        })),
+      kurangiSaldoWallet: (id, nominal) => {
+        const wallet = get().wallets.find((w) => w.id === id);
+        if (!wallet || wallet.saldo < nominal) return false;
+        set((s) => ({
+          wallets: s.wallets.map((w) =>
+            w.id === id ? { ...w, saldo: w.saldo - nominal } : w
+          ),
+        }));
+        return true;
+      },
+      transferSaldo: (dariId, keId, nominal, alasan) => {
+        const dari = get().wallets.find((w) => w.id === dariId);
+        const ke = get().wallets.find((w) => w.id === keId);
+        if (!dari) return { ok: false, error: "Dompet asal tidak ditemukan" };
+        if (!ke) return { ok: false, error: "Dompet tujuan tidak ditemukan" };
+        if (dari.saldo < nominal) return { ok: false, error: `Saldo ${dari.namaDompet} tidak mencukupi` };
+        if (nominal <= 0) return { ok: false, error: "Nominal harus lebih dari 0" };
+        const mutasi: WalletMutasi = {
+          id: genId(),
+          dariWalletId: dariId,
+          keWalletId: keId,
+          nominal,
+          alasan,
+          createdAt: Date.now(),
+        };
+        set((s) => ({
+          wallets: s.wallets.map((w) => {
+            if (w.id === dariId) return { ...w, saldo: w.saldo - nominal };
+            if (w.id === keId) return { ...w, saldo: w.saldo + nominal };
+            return w;
+          }),
+          mutasiLog: [mutasi, ...s.mutasiLog],
+        }));
+        return { ok: true };
+      },
+
+      /* ─── Buku Usaha: Payment Methods ─── */
+      paymentMethods: [
+        {
+          id: "pm-bsi",
+          namaMetode: "BSI",
+          bankName: "Bank Syariah Indonesia",
+          accountNo: "1234567890",
+          accountName: "Mughis Group",
+          qrisImageUrl: "",
+          isEnabled: true,
+        },
+      ],
+      addPaymentMethod: (p) => set((s) => ({ paymentMethods: [p, ...s.paymentMethods] })),
+      updatePaymentMethod: (id, data) =>
+        set((s) => ({
+          paymentMethods: s.paymentMethods.map((pm) => (pm.id === id ? { ...pm, ...data } : pm)),
+        })),
+      removePaymentMethod: (id) =>
+        set((s) => ({ paymentMethods: s.paymentMethods.filter((pm) => pm.id !== id) })),
+      togglePaymentMethod: (id) =>
+        set((s) => ({
+          paymentMethods: s.paymentMethods.map((pm) =>
+            pm.id === id ? { ...pm, isEnabled: !pm.isEnabled } : pm
+          ),
+        })),
+
+      /* ─── Buku Usaha: Tema ─── */
+      accentColor: "indigo",
+      setAccentColor: (color) => set({ accentColor: color }),
 
       /* ─── Buku Usaha: Percetakan ─── */
       printingJobs: [],
