@@ -78,11 +78,11 @@ export default function InvoicePakaianKonveksiView({ data, noRef, preview }: Pro
       const html2pdf = (await import("html2pdf.js")).default;
       if (!printRef.current) return;
       const opt = {
-        margin: [0.5, 0.5, 0.5, 0.5],
+        margin: [0.5, 0.5, 0.5, 0.5] as [number, number, number, number],
         filename: `Invoice-Fashion-${data.id}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
+        image: { type: "jpeg" as const, quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+        jsPDF: { unit: "in", format: "a4", orientation: "portrait" as const },
       };
       html2pdf().set(opt).from(printRef.current).save();
       toast.success("PDF A4 sedang diunduh");

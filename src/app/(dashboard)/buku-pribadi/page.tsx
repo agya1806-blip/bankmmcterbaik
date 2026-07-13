@@ -359,7 +359,7 @@ export default function BukuPribadiPage() {
               const kat = getKategori(tx.kategoriId);
               const Ico = kat.icon;
               const ampAmbil = amplopList.find((a) => a.id === tx.amplopId);
-              const ampIco = ampAmbil ? ampAmbil.icon : null;
+              const AmpIco = ampAmbil ? ampAmbil.icon : null;
               return (
                 <div
                   key={tx.id}
@@ -379,9 +379,9 @@ export default function BukuPribadiPage() {
                     <div className="flex items-center gap-2">
                       <Ico className={`size-3.5 ${kat.warna} shrink-0`} />
                       <p className="text-xs font-medium truncate">{kat.label}</p>
-                      {ampIco && (
+                      {AmpIco && (
                         <span className="flex items-center gap-0.5 text-[9px] text-muted-foreground/40">
-                          <ampIco className="size-2.5" />
+                          <AmpIco className="size-2.5" />
                         </span>
                       )}
                     </div>

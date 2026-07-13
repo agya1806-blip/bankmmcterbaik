@@ -150,7 +150,7 @@ export default function KasirPercetakan() {
 
   useEffect(() => {
     const k = KERTAS_ISI.find((x) => x.id === bKertasIsi);
-    if (k) setBHargaJualHal(k.hargaJual || 500);
+    if (k) setBHargaJualHal(k.hargaModal * 4 || 500);
   }, [bKertasIsi]);
 
   useEffect(() => { setMounted(true); }, []);
@@ -207,7 +207,7 @@ export default function KasirPercetakan() {
     let kertasIsi = "";
     let cover = "";
     let laminasi = "";
-    let wrapping = "Ya";
+    const wrapping = "Ya";
     let jilid = "";
 
     if (mode === "meteran") {
@@ -269,7 +269,7 @@ export default function KasirPercetakan() {
     let kertasIsi = "";
     let cover = "";
     let laminasi = "";
-    let wrapping = "Ya";
+    const wrapping = "Ya";
     let jilid = "";
 
     if (mode === "meteran") {

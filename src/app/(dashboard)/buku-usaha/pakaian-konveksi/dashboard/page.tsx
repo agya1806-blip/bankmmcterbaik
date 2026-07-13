@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Shirt, TrendingUp, TrendingDown, DollarSign, AlertTriangle,
   Clock, Plus, Download, Settings, Package, Ruler,
-  Cut, Sewing, Scissors, CheckCircle2, Truck,
+  Scissors, CheckCircle2, Truck,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../../percetakan/store/useProfilUsahaStore";
@@ -184,7 +184,7 @@ export default function DashboardPakaianKonveksi() {
       <div className="floating-card p-4 space-y-3">
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold flex items-center gap-1.5">
-            <Cut className="size-3.5 text-rose-500" /> Production &amp; Jasa CMT Monitor
+            <Scissors className="size-3.5 text-rose-500" /> Production &amp; Jasa CMT Monitor
           </p>
           <span className="text-[10px] text-muted-foreground/50">{orders.length} order</span>
         </div>
