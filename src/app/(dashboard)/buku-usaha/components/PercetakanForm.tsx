@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
-  Printer, Ruler, BookOpen, Layers, Package, CheckCircle2, Clock,
-  AlertTriangle, ArrowRight, Download, FileText, BarChart3, Trash2,
-  RotateCcw, QrCode, ChevronDown, X, Plus, TrendingUp, TrendingDown,
-  Search, Zap, Image, FileSpreadsheet, MessageSquare,
+  Printer, Ruler, BookOpen, Package, CheckCircle2, Clock,
+  AlertTriangle, ArrowRight, FileText, BarChart3, Trash2,
+  QrCode, Plus,
+  Search, Image, FileSpreadsheet, MessageSquare,
 } from "lucide-react";
 import toast from "react-hot-toast";
 

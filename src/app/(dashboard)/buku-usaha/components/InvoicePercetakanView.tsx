@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import {
-  Download, FileText, MessageSquare, Image, CreditCard, Printer,
+  FileText, MessageSquare, Image, CreditCard, Printer,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../percetakan/store/useProfilUsahaStore";

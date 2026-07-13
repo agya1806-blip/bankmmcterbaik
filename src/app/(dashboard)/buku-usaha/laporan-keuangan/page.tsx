@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import {
-  Wallet, TrendingUp, TrendingDown, BarChart3, Printer, Smartphone,
-  Coffee, Shirt, ArrowUpRight, ArrowDownRight, PieChart, DollarSign,
-  Receipt, Clock, Package, Layers,
+  Wallet, BarChart3, Printer, Smartphone, Coffee, Shirt,
+  ArrowUpRight, DollarSign, Receipt, Clock, Layers,
 } from "lucide-react";
 import { useBusinessStore, type BizUnit, BIZ_UNIT_LABELS } from "@/store/useBusinessStore";
 
@@ -30,7 +28,6 @@ function formatRupiah(n: number) {
 }
 
 export default function LaporanKeuangan() {
-  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 

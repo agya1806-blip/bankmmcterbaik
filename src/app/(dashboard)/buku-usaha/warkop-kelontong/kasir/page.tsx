@@ -3,15 +3,14 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Coffee, ShoppingBag, Pizza, Utensils, Plus, Minus, Trash2,
-  ArrowLeft, CheckCircle2, DollarSign, Timer, User, Receipt,
-  Search, X, Package, Wheat, Milk, Cigarette,
+  Coffee, ShoppingBag, Utensils, Plus, Minus, Trash2,
+  ArrowLeft, DollarSign, Receipt,
+  Search, Package, Wheat,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import BillWarkopKelontongView, {
   BillData, BillItem,
 } from "../../components/BillWarkopKelontongView";
-import { useProfilUsahaStore } from "../../percetakan/store/useProfilUsahaStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
 
 /* ─── Types ─── */
@@ -95,7 +94,6 @@ function pad2(n: number) {
 
 export default function KasirWarkopKelontong() {
   const router = useRouter();
-  const { profil } = useProfilUsahaStore();
   const { wallets, tambahSaldoWallet, kurangiSaldoWallet } = useBusinessStore();
   const [walletPenerimaanId, setWalletPenerimaanId] = useState(wallets[0]?.id || "wallet-kas");
   const [walletModalId, setWalletModalId] = useState(wallets[1]?.id || "wallet-bsi");
@@ -110,7 +108,7 @@ export default function KasirWarkopKelontong() {
   const [tipeOrder, setTipeOrder] = useState<TipeOrder>("dine-in");
   const [bahan, setBahan] = useState<BahanBaku[]>(BAHAN_BAKU);
   const [showBill, setShowBill] = useState(false);
-  const [billData, setBillData] = useState<BillData | null>(null);
+  const [, setBillData] = useState<BillData | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => setMounted(true), []);

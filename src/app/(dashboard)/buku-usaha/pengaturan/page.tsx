@@ -5,16 +5,12 @@ import { useRouter } from "next/navigation";
 import {
   Settings, ArrowLeft, Save, Image, Upload, Building2,
   Phone, MapPin, List, Loader2, Trash2, X, Plus,
-  CreditCard, Banknote, QrCode, Palette, CheckCircle2,
+  CreditCard, Banknote, Palette, CheckCircle2,
   Users, Fingerprint, Shield,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useBusinessStore, ACCENT_THEMES, AccentColor, PaymentMethod, BIZ_UNIT_LABELS, type BizUnit } from "@/store/useBusinessStore";
 import { useRoleStore, type Role } from "@/store/useRoleStore";
-
-function formatRupiah(n: number) {
-  return `IDR ${n.toLocaleString("id-ID")}`;
-}
 
 function genId(): string {
   return `pm_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;

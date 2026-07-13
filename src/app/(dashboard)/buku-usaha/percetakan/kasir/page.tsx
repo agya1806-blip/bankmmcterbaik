@@ -3,12 +3,12 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Printer, Ruler, BookOpen, Plus, Minus, ArrowLeft, Search,
-  CheckCircle2, CreditCard, User, Phone, DollarSign, FileText,
+  Printer, Ruler, BookOpen, ArrowLeft, Search,
+  CheckCircle2, User, DollarSign,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import InvoicePercetakanView, {
-  OrderInvoiceData, InvoiceItem,
+  OrderInvoiceData,
 } from "../../components/InvoicePercetakanView";
 import { useBusinessStore } from "@/store/useBusinessStore";
 
@@ -199,49 +199,6 @@ export default function KasirPercetakan() {
 
     const id = invoiceId || generateId();
     setInvoiceId(id);
-
-    let deskripsi = "";
-    let spesifikasi = "";
-    let ukuran = "";
-    let ukuranJadi = "";
-    let kertasIsi = "";
-    let cover = "";
-    let laminasi = "";
-    const wrapping = "Ya";
-    let jilid = "";
-
-    if (mode === "meteran") {
-      deskripsi = `${bahanTerpilih.label} (${mPanjang}m x ${mLebar}m) x ${mQty} Pcs`;
-      spesifikasi = `Bahan: ${bahanTerpilih.label} | ${mPanjang}m x ${mLebar}m x ${mQty} lembar`;
-      ukuran = `${mPanjang} x ${mLebar} m`;
-      ukuranJadi = `${mPanjang * 100} x ${mLebar * 100} cm`;
-      kertasIsi = bahanTerpilih.label;
-      cover = "-";
-      laminasi = "-";
-      jilid = "-";
-    } else {
-      const kertasLabel = kertasTerpilih.label;
-      const coverLabel = coverTerpilih.label;
-      const jilidLabel = jilidTerpilih.label;
-      deskripsi = `Cetak Buku ${bHalaman} hlm - ${kertasLabel} - ${jilidLabel} x ${bQty} Eks`;
-      spesifikasi = `Hal: ${bHalaman} | Kertas: ${kertasLabel} | Cetak: ${bCetakIsi === "warna" ? "Warna" : "Hitam Putih"}`;
-      ukuran = "A5";
-      ukuranJadi = "21 x 29.7 cm";
-      kertasIsi = kertasLabel;
-      cover = coverLabel;
-      laminasi = bLaminasi === "none" ? "Tidak" : bLaminasi === "glossy" ? "Glossy" : "Doff";
-      jilid = jilidLabel;
-    }
-
-    const items: InvoiceItem[] = [
-      {
-        no: 1,
-        item: deskripsi,
-        qty: mode === "meteran" ? mQty : bQty,
-        harga: Math.round(totalJual / (mode === "meteran" ? mQty : bQty)),
-        jumlah: Math.round(totalJual),
-      },
-    ];
 
     /* ─── Tampilkan invoice ─── */
     setShowInvoice(true);

@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import {
-  Download, FileText, MessageSquare, Image, CreditCard, Coffee,
-  ShoppingBag, Printer,
+  FileText, MessageSquare, Image, CreditCard, Coffee,
+  Printer,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../percetakan/store/useProfilUsahaStore";
@@ -40,10 +40,6 @@ interface Props {
 
 function formatRupiah(n: number) {
   return `Rp ${n.toLocaleString("id-ID")}`;
-}
-
-function pad(i: number) {
-  return String(i).padStart(2, "0");
 }
 
 export default function BillWarkopKelontongView({ data, noRef, preview }: Props) {

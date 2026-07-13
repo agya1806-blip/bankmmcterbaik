@@ -1,63 +1,23 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
-  LayoutDashboard, ArrowLeftRight, Wallet, FileText, Settings,
-  ShoppingCart, ArrowUpDown, type LucideIcon
+  LayoutDashboard, Briefcase, Wallet, FileText, Settings,
 } from "lucide-react";
-import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
-import { useTranslation } from "@/lib/i18n";
 
-const NAV_MAP: Record<string, { href: string; labelKey: string; icon: LucideIcon }[]> = {
-  pribadi: [
-    { href: "/", labelKey: "nav.home", icon: LayoutDashboard },
-    { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
-    { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
-    { href: "/budgets", labelKey: "nav.budgets", icon: FileText },
-    { href: "/settings", labelKey: "nav.settings", icon: Settings },
-  ],
-  usaha: [
-    { href: "/", labelKey: "nav.home", icon: LayoutDashboard },
-    { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
-    { href: "/orders", labelKey: "nav.orders", icon: ShoppingCart },
-    { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
-    { href: "/settings", labelKey: "nav.settings", icon: Settings },
-  ],
-  modal: [
-    { href: "/", labelKey: "nav.home", icon: LayoutDashboard },
-    { href: "/transactions", labelKey: "nav.transactions", icon: ArrowLeftRight },
-    { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
-    { href: "/reports", labelKey: "nav.reports", icon: FileText },
-    { href: "/settings", labelKey: "nav.settings", icon: Settings },
-  ],
-  toko: [
-    { href: "/", labelKey: "nav.home", icon: LayoutDashboard },
-    { href: "/orders", labelKey: "nav.orders", icon: ShoppingCart },
-    { href: "/products", labelKey: "nav.products", icon: Wallet },
-    { href: "/accounts", labelKey: "nav.accounts", icon: Wallet },
-    { href: "/settings", labelKey: "nav.settings", icon: Settings },
-  ],
-  hutang: [
-    { href: "/", labelKey: "nav.home", icon: LayoutDashboard },
-    { href: "/debts", labelKey: "nav.debts", icon: ArrowUpDown },
-    { href: "/customers", labelKey: "nav.customers", icon: Wallet },
-    { href: "/calendar", labelKey: "nav.calendar", icon: FileText },
-    { href: "/settings", labelKey: "nav.settings", icon: Settings },
-  ],
-};
+const ITEMS = [
+  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/buku-usaha", label: "Usaha", icon: Briefcase },
+  { href: "/buku-usaha/dompet", label: "Dompet", icon: Wallet },
+  { href: "/buku-usaha/laporan-keuangan", label: "Laporan", icon: FileText },
+  { href: "/buku-usaha/pengaturan", label: "Atur", icon: Settings },
+];
 
 export default function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
-  const { t } = useTranslation();
-  const { activeWorkspace } = useWorkspaceStore();
   const [pressed, setPressed] = useState<string | null>(null);
-
-  const items = useMemo(() => {
-    const type = activeWorkspace?.type || "pribadi";
-    return NAV_MAP[type] || NAV_MAP.pribadi;
-  }, [activeWorkspace?.type]);
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -67,7 +27,7 @@ export default function BottomNav() {
   return (
     <nav className="byond-bottom-nav">
       <div className="byond-bottom-nav-inner">
-        {items.map((item) => {
+        {ITEMS.map((item) => {
           const active = isActive(item.href);
           const isPressed = pressed === item.href;
           return (
@@ -84,7 +44,7 @@ export default function BottomNav() {
                 <item.icon className={`byond-bottom-nav-icon ${active ? "byond-bottom-nav-icon-active-color" : ""}`} />
               </div>
               <span className={`byond-bottom-nav-label ${active ? "byond-bottom-nav-label-active" : ""}`}>
-                {t(item.labelKey)}
+                {item.label}
               </span>
             </button>
           );

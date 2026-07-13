@@ -4,8 +4,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Shirt, ArrowLeft, Search, Plus, Minus, Trash2, DollarSign,
-  User, CheckCircle2, Ruler, Scissors, Layers, Package,
-  ShoppingBag, Settings, X,
+  User, CheckCircle2, Ruler, Layers, Package, ShoppingBag, X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import InvoicePakaianKonveksiView, {
@@ -41,11 +40,6 @@ interface KalkulasiKonveksi {
   labaKotor: number;
 }
 
-interface CustomerInfo {
-  nama: string;
-  wa: string;
-}
-
 /* ─── Mock ─── */
 const PRODUK_FASHION: ProdukFashion[] = [
   { id: "F-001", nama: "Kaos Polos Hitam", kategori: "Kaos", harga: 85000, varian: [{ warna: "Hitam", ukuran: "S", stok: 5 }, { warna: "Hitam", ukuran: "M", stok: 8 }, { warna: "Hitam", ukuran: "L", stok: 2 }, { warna: "Hitam", ukuran: "XL", stok: 1 }] },
@@ -56,7 +50,6 @@ const PRODUK_FASHION: ProdukFashion[] = [
   { id: "F-006", nama: "Celana Chino Khaki", kategori: "Celana", harga: 125000, varian: [{ warna: "Khaki", ukuran: "M", stok: 6 }, { warna: "Khaki", ukuran: "L", stok: 3 }] },
 ];
 
-const UKURAN_LIST = ["S", "M", "L", "XL", "XXL"];
 const WARNA_LIST = ["Hitam", "Putih", "Merah", "Biru", "Abu-abu", "Khaki", "Hijau Army", "Maroon"];
 
 const CUSTOMER_DUMMY = [
@@ -134,12 +127,6 @@ export default function KasirPakaianKonveksi() {
     const q = cariCustomer.toLowerCase();
     return CUSTOMER_DUMMY.filter((c) => c.nama.toLowerCase().includes(q));
   }, [cariCustomer]);
-
-  /* ─── Varian tersedia ─── */
-  const varianTersedia = useMemo(() => {
-    if (!selectedProduk) return [];
-    return selectedProduk.varian.filter((v) => v.stok > 0);
-  }, [selectedProduk]);
 
   /* ─── Ready: Add to cart ─── */
   const addReadyToCart = useCallback(() => {

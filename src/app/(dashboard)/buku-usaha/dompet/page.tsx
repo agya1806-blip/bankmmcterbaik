@@ -3,12 +3,11 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Wallet, ArrowLeft, Plus, Minus, ArrowRightLeft, History,
-  Building2, Banknote, Smartphone, Trash2, CheckCircle2, X,
-  Search, Loader2, TrendingUp, TrendingDown, BarChart3,
+  Wallet, ArrowLeft, Plus, ArrowRightLeft, History,
+  Building2, Banknote, Smartphone, Trash2, TrendingUp, BarChart3,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { useBusinessStore, Wallet as WalletType, WalletTipe } from "@/store/useBusinessStore";
+import { useBusinessStore, WalletTipe } from "@/store/useBusinessStore";
 
 function formatRupiah(n: number) {
   return `IDR ${n.toLocaleString("id-ID")}`;

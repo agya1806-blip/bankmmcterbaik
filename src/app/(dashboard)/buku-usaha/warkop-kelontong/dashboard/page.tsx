@@ -3,9 +3,9 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Coffee, TrendingUp, TrendingDown, DollarSign, AlertTriangle,
-  Clock, Plus, Download, Settings, ShoppingBag, Package,
-  Wheat, Milk, Timer, Receipt,
+  Coffee, AlertTriangle,
+  Plus, Download, Settings, Package,
+  Wheat, Timer,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../../percetakan/store/useProfilUsahaStore";

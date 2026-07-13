@@ -3,9 +3,7 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Shirt, TrendingUp, TrendingDown, DollarSign, AlertTriangle,
-  Clock, Plus, Download, Settings, Package, Ruler,
-  Scissors, CheckCircle2, Truck,
+  Shirt, AlertTriangle, Plus, Download, Settings, Scissors,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../../percetakan/store/useProfilUsahaStore";

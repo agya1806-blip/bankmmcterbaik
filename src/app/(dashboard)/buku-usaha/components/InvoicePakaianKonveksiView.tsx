@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import {
-  Download, FileText, MessageSquare, Image, CreditCard, Shirt,
+  FileText, MessageSquare, Image, CreditCard, Shirt,
   Printer, CheckCircle2, AlertTriangle,
 } from "lucide-react";
 import toast from "react-hot-toast";

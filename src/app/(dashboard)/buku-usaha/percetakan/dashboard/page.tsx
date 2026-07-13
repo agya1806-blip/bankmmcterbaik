@@ -3,9 +3,9 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  TrendingUp, TrendingDown, DollarSign, AlertTriangle, Clock,
-  Plus, Download, Printer, Package, Search, CheckCircle2,
-  ArrowRight, Trash2, BarChart3, FileSpreadsheet, Settings,
+  AlertTriangle, Clock,
+  Plus, Download, Printer, Search,
+  ArrowRight, Trash2, Settings,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../store/useProfilUsahaStore";
@@ -35,10 +35,6 @@ const STATUS_CFG: Record<StatusAntrean, { label: string; color: string; next: St
 const STATUS_ORDER: StatusAntrean[] = ["antrean-desain", "proses-cetak", "finishing", "selesai"];
 
 const FIXED_OPERATIONAL_COST = 5_000_000;
-
-function generateId() {
-  return `PRT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-}
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);

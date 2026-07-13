@@ -39,7 +39,7 @@ const BOOKS: BookCard[] = [
     icon: BookUser,
     gradient: "from-emerald-500 to-emerald-600",
     glow: "shadow-emerald-500/25",
-    route: "/transactions",
+    route: "/buku-pribadi",
     statusKey: "pribadi",
   },
   {
@@ -107,7 +107,7 @@ export default function BukuKeuanganGlobal() {
     const loadAll = async () => {
       setAggLoading(true);
       try {
-        const { getAllWorkspaces, getTransactionsByWorkspace } = await import("@/lib/db");
+        const { getAllWorkspaces } = await import("@/lib/db");
         const all = await getAllWorkspaces();
         for (const ws of all) {
           await loadAccounts(ws.id);

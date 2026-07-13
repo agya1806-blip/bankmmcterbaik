@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
-  Wallet, TrendingUp, TrendingDown, Plus, X, Download,
+  Wallet, TrendingUp, Plus, X, Download,
   Coffee, Car, ShoppingBag, Zap, Home, Heart, BookOpen,
   ArrowUpRight, ArrowDownRight, PiggyBank, Lightbulb,
-  Shield, CreditCard, Trash2, FileDown,
+  Shield, Trash2, FileDown,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -80,15 +80,6 @@ function formatRupiah(n: number) {
 
 function getKategori(id: string) {
   return KATEGORI.find((k) => k.id === id) || KATEGORI[7];
-}
-
-function getAmplopIcon(id: string) {
-  const map: Record<string, React.ElementType> = {
-    "uang-jajan": Coffee,
-    "bayar-listrik": Zap,
-    investasi: TrendingUp,
-  };
-  return map[id] || PiggyBank;
 }
 
 const AMPLOP_AWAL: Amplop[] = [

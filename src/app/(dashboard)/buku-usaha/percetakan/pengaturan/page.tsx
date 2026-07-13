@@ -4,18 +4,14 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Settings, ArrowLeft, Save, Image, X, Upload, Building2,
-  Phone, MapPin, List, Loader2, Trash2,
+  Phone, MapPin, List, Loader2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../store/useProfilUsahaStore";
 
-function rupiahFormat(n: number) {
-  return `IDR ${n.toLocaleString("id-ID")}`;
-}
-
 export default function PengaturanProfil() {
   const router = useRouter();
-  const { profil, updateProfil, setLogo, setNama, setAlamat, setNoWA, setSubLayanan, tambahSubLayanan, hapusSubLayanan, resetProfil } = useProfilUsahaStore();
+  const { profil, setLogo, setNama, setAlamat, setNoWA, tambahSubLayanan, hapusSubLayanan, resetProfil } = useProfilUsahaStore();
 
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);

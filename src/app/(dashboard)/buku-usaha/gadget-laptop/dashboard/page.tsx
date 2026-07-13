@@ -3,9 +3,8 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Smartphone, Laptop, TrendingUp, TrendingDown, DollarSign, Package,
-  AlertTriangle, Shield, Clock, Plus, Download, Settings, Search,
-  CheckCircle2, Wrench, Box, RefreshCw,
+  Smartphone, Package, AlertTriangle, Shield, Plus, Download,
+  Settings, Wrench, Box, RefreshCw,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../../percetakan/store/useProfilUsahaStore";
