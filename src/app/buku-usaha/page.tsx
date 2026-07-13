@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useBusinessStore, hitungCetakMeteran, hitungCetakBuku, hitungTukarTambah, hitungKonveksi } from "@/store/useBusinessStore";
+import { useBusinessStore, hitungCetakMeteran, hitungCetakBuku, hitungTukarTambah, hitungKonveksi, type FashionColor, type FashionSize } from "@/store/useBusinessStore";
 import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
 import {
   Printer, Smartphone, Monitor, Coffee, Shirt, Plus, AlertTriangle, Calculator
@@ -33,15 +33,19 @@ function PercetakanPanel() {
 
   const result = useMemo(() => {
     if (type === "meteran") return p > 0 && l > 0 && modal > 0 ? hitungCetakMeteran(p, l, qty, modal) : null;
-    return halaman > 0 ? hitungCetakBuku(halaman, kertas, cover, jilid, qty) : null;
+    return halaman > 0 ? hitungCetakBuku(halaman, kertas, 100, cover, jilid, qty) : null;
   }, [type, p, l, qty, modal, halaman, kertas, cover, jilid]);
 
   const simpan = () => {
     if (!activeWorkspace) return;
     addPrintingJob({
       id: crypto.randomUUID(), type,
-      panjang: p, lebar: l, qty, pages: halaman, coverCost: cover, jilidCost: jilid,
-      totalCost: result?.totalCost ?? 0, hargaJual: result?.hargaJual ?? 0,
+      panjang: p, lebar: l, qty, pages: halaman,
+      cover: { label: "Custom", harga: cover },
+      jilid: { label: "Custom", harga: jilid },
+      totalCost: result?.totalCost ?? 0,
+      hargaJual: result?.hargaJual ?? 0,
+      margin: (result?.hargaJual ?? 0) - (result?.totalCost ?? 0),
     });
     toast.success("Job cetak tersimpan");
   };
@@ -128,8 +132,8 @@ function GadgetPanel() {
 
 function LaptopPanel() {
   const { addLaptopBuild } = useBusinessStore();
-  const [sn, setSn] = useState(""); const [parts, setParts] = useState<{ name: string; price: number }[]>([]);
-  const [partName, setPartName] = useState(""); const [partPrice, setPartPrice] = useState(0);
+  const [sn, setSn] = useState(""); const [parts, setParts] = useState<{ name: string; sn: string; price: number }[]>([]);
+  const [partName, setPartName] = useState(""); const [partSn, setPartSn] = useState(""); const [partPrice, setPartPrice] = useState(0);
   const [price, setPrice] = useState(0); const [invNo, setInvNo] = useState("");
   const { activeWorkspace } = useWorkspaceStore();
 
@@ -137,8 +141,8 @@ function LaptopPanel() {
 
   const addPart = () => {
     if (!partName) return;
-    setParts([...parts, { name: partName, price: partPrice }]);
-    setPartName(""); setPartPrice(0);
+    setParts([...parts, { name: partName, sn: partSn, price: partPrice }]);
+    setPartName(""); setPartSn(""); setPartPrice(0);
   };
 
   const simpan = () => {
@@ -146,6 +150,7 @@ function LaptopPanel() {
     addLaptopBuild({
       id: crypto.randomUUID(),
       sn, parts, totalHpp, price, invoiceNumber: invNo,
+      margin: price - totalHpp,
     });
     toast.success("Build PC tersimpan");
   };
@@ -159,14 +164,15 @@ function LaptopPanel() {
         <Label className="text-xs">Komponen Rakitan</Label>
         <div className="flex gap-2 mt-1">
           <Input value={partName} onChange={(e) => setPartName(e.target.value)} placeholder="Nama part" className="flex-1" />
-          <Input type="number" value={partPrice || ""} onChange={(e) => setPartPrice(Number(e.target.value))} placeholder="Harga" className="w-24" />
+          <Input value={partSn} onChange={(e) => setPartSn(e.target.value)} placeholder="SN" className="w-20" />
+          <Input type="number" value={partPrice || ""} onChange={(e) => setPartPrice(Number(e.target.value))} placeholder="Harga" className="w-20" />
           <Button size="sm" variant="secondary" onClick={addPart}><Plus className="size-3" /></Button>
         </div>
         {parts.length > 0 && (
           <div className="mt-2 space-y-1">
             {parts.map((p, i) => (
               <div key={i} className="flex justify-between text-xs p-1.5 bg-muted/30 rounded-lg">
-                <span>{p.name}</span>
+                <span>{p.name}{p.sn ? ` [SN: ${p.sn}]` : ""}</span>
                 <span className="font-medium">{activeWorkspace?.currency} {p.price.toLocaleString()}</span>
               </div>
             ))}
@@ -241,8 +247,8 @@ function KedaiKopiPanel() {
 
 function KonveksiPanel() {
   const { addFashionSKU } = useBusinessStore();
-  const [productName, setProductName] = useState(""); const [color, setColor] = useState("");
-  const [size, setSize] = useState(""); const [price, setPrice] = useState(0); const [stock, setStock] = useState(0);
+  const [productName, setProductName] = useState(""); const [color, setColor] = useState<FashionColor>("Hitam");
+  const [size, setSize] = useState<FashionSize>("M"); const [price, setPrice] = useState(0); const [stock, setStock] = useState(0);
   const [berat, setBerat] = useState(0); const [hargaKain, setHargaKain] = useState(0);
   const [cmt, setCmt] = useState(0); const [sablon, setSablon] = useState(0); const [wastage, setWastage] = useState(5);
   const [konvResult, setKonvResult] = useState<{ totalCost: number; hargaJual: number } | null>(null);
@@ -258,8 +264,8 @@ function KonveksiPanel() {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2"><Label className="text-xs">Nama Produk</Label><Input value={productName} onChange={(e) => setProductName(e.target.value)} /></div>
-        <div><Label className="text-xs">Warna</Label><Input value={color} onChange={(e) => setColor(e.target.value)} /></div>
-        <div><Label className="text-xs">Ukuran</Label><Input value={size} onChange={(e) => setSize(e.target.value)} /></div>
+        <div><Label className="text-xs">Warna</Label><select value={color} onChange={(e) => setColor(e.target.value as FashionColor)} className="w-full h-10 rounded-xl border border-input bg-transparent px-3 text-sm">{(["Hitam","Putih","Merah","Biru","Hijau","Kuning","Abu","Coklat","Navy","Burgundy"] as const).map((c) => <option key={c} value={c}>{c}</option>)}</select></div>
+        <div><Label className="text-xs">Ukuran</Label><select value={size} onChange={(e) => setSize(e.target.value as FashionSize)} className="w-full h-10 rounded-xl border border-input bg-transparent px-3 text-sm">{(["S","M","L","XL","XXL","3XL"] as const).map((s) => <option key={s} value={s}>{s}</option>)}</select></div>
         <div><Label className="text-xs">Harga Jual</Label><Input type="number" value={price || ""} onChange={(e) => setPrice(Number(e.target.value))} /></div>
         <div><Label className="text-xs">Stok</Label><Input type="number" value={stock || ""} onChange={(e) => setStock(Number(e.target.value))} /></div>
         <Button size="sm" onClick={addSku} className="col-span-2"><Plus className="size-3" /> Tambah SKU</Button>
