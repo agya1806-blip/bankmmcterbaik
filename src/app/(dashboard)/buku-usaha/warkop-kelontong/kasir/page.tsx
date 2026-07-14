@@ -6,6 +6,7 @@ import {
   Coffee, ShoppingBag, Utensils, Plus, Minus, Trash2,
   ArrowLeft, DollarSign, Receipt,
   Search, Package, Wheat,
+  Printer, Smartphone, Shirt, CheckCircle2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import BillWarkopKelontongView, {
@@ -96,7 +97,7 @@ function pad2(n: number) {
 
 export default function KasirWarkopKelontong() {
   const router = useRouter();
-  const { wallets, tambahSaldoWallet, kurangiSaldoWallet } = useBusinessStore();
+  const { wallets, tambahSaldoWallet, kurangiSaldoWallet, setLastKasirUnit } = useBusinessStore();
   const [walletPenerimaanId, setWalletPenerimaanId] = useState(wallets[0]?.id || "wallet-kas");
   const [walletModalId, setWalletModalId] = useState(wallets[1]?.id || "wallet-bsi");
   const [mounted, setMounted] = useState(false);
@@ -113,7 +114,7 @@ export default function KasirWarkopKelontong() {
   const [, setBillData] = useState<BillData | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => { setMounted(true); setLastKasirUnit("kedai_kopi"); }, [setLastKasirUnit]);
 
   /* ─── Filter Menu ─── */
   const menuFiltered = useMemo(() => {
@@ -256,6 +257,31 @@ export default function KasirWarkopKelontong() {
             <ArrowLeft className="size-3.5" /> Baru Lagi
           </button>
         )}
+      </div>
+
+      {/* ─── Unit Switcher ─── */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-4 px-4 mb-2">
+        {([
+          { id: "percetakan", label: "Percetakan", icon: Printer, route: "percetakan" },
+          { id: "gadget-laptop", label: "Gadget", icon: Smartphone, route: "gadget-laptop" },
+          { id: "warkop-kelontong", label: "Warkop", icon: Coffee, route: "warkop-kelontong" },
+          { id: "pakaian-konveksi", label: "Konveksi", icon: Shirt, route: "pakaian-konveksi" },
+        ] as const).map((u) => {
+          const Ico = u.icon;
+          const active = u.id === "warkop-kelontong";
+          return (
+            <button
+              key={u.id}
+              onClick={() => router.push(`/buku-usaha/${u.route}/kasir`)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+                active ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-sm" : "bg-muted/50 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Ico className="size-3.5" />
+              {u.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4">
@@ -497,7 +523,39 @@ export default function KasirWarkopKelontong() {
         <div className="overflow-y-auto max-h-[calc(100vh-10rem)] pr-1">
           <div className="sticky top-0">
             {cart.length > 0 ? (
-              <BillWarkopKelontongView data={liveBillData!} preview={!showBill} noRef="MUGHIS BANK v3 — Warkop & Kelontong" />
+              <>
+                <BillWarkopKelontongView data={liveBillData!} preview={!showBill} noRef="MUGHIS BANK v3 — Warkop & Kelontong" />
+                {showBill && (
+                  <>
+                    <div className="mt-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+                        <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Transaksi BERHASIL — {liveBillData?.id || ""}</p>
+                      </div>
+                    </div>
+                    <div className="sticky bottom-0 mt-3 p-3 bg-background/80 backdrop-blur-md border border-border/30 rounded-xl shadow-lg flex gap-2">
+                      <button onClick={resetForm}
+                        className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all"
+                      >
+                        Transaksi Baru
+                      </button>
+                      <button onClick={() => window.print()}
+                        className="flex-1 py-2.5 rounded-xl bg-muted/50 text-muted-foreground text-xs font-bold hover:bg-muted/80 transition-colors"
+                      >
+                        Cetak Nota
+                      </button>
+                      <button onClick={() => {
+                        const msg = encodeURIComponent(`Terima kasih ${pelanggan || noMeja || "Pelanggan"}!\n\nTransaksi: ${liveBillData?.id || ""}\nTotal: ${formatRupiah(subtotal)}\nKembalian: ${formatRupiah(kembalian)}`);
+                        window.open(`https://wa.me/6285217706587?text=${msg}`, "_blank");
+                      }}
+                        className="flex-1 py-2.5 rounded-xl bg-green-500/10 text-green-600 text-xs font-bold hover:bg-green-500/20 transition-colors"
+                      >
+                        Kirim WA
+                      </button>
+                    </div>
+                  </>
+                )}
+              </>
             ) : (
               <div className="floating-card p-8 text-center min-h-[60vh] flex flex-col items-center justify-center">
                 <Coffee className="size-12 text-muted-foreground/20 mb-3" />

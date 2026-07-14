@@ -612,6 +612,10 @@ interface BusinessStore {
   recordCustomerTransaction: (customerId: string, transaction: Omit<CustomerTransaction, "id">) => void;
   getCustomerById: (id: string) => CustomerRecord | undefined;
   getCustomerByWA: (wa: string) => CustomerRecord | undefined;
+
+  /* Last Kasir Unit (quick-switch preference) */
+  lastKasirUnit: BizUnit | null;
+  setLastKasirUnit: (unit: BizUnit) => void;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1127,6 +1131,10 @@ export const useBusinessStore = create<BusinessStore>()(
       },
       getCustomerById: (id) => get().customers.find((c) => c.id === id),
       getCustomerByWA: (wa) => get().customers.find((c) => c.noWA === wa),
+
+      /* Last Kasir Unit */
+      lastKasirUnit: null,
+      setLastKasirUnit: (unit) => set({ lastKasirUnit: unit }),
     }),
     {
       name: "mmcbank-business-store-v3",

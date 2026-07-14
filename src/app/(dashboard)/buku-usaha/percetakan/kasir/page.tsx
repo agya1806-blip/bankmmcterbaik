@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Printer, Ruler, BookOpen, ArrowLeft, Search,
   CheckCircle2, User, DollarSign, Trash2, Save,
+  Smartphone, Coffee, Shirt,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import InvoicePercetakanView, {
@@ -145,7 +146,7 @@ export default function KasirPercetakan() {
   /* Generated invoice ID */
   const [invoiceId, setInvoiceId] = useState("");
   const [showInvoice, setShowInvoice] = useState(false);
-  const { wallets, tambahSaldoWallet, kurangiSaldoWallet, addCustomerRecord, recordCustomerTransaction, getCustomerByWA, addQuickOrder, deleteQuickOrder } = useBusinessStore();
+  const { wallets, tambahSaldoWallet, kurangiSaldoWallet, addCustomerRecord, recordCustomerTransaction, getCustomerByWA, addQuickOrder, deleteQuickOrder, setLastKasirUnit } = useBusinessStore();
   const [walletPenerimaanId, setWalletPenerimaanId] = useState(wallets[0]?.id || "wallet-kas");
   const [walletModalId, setWalletModalId] = useState(wallets[1]?.id || "wallet-bsi");
 
@@ -160,7 +161,7 @@ export default function KasirPercetakan() {
     if (k) setBHargaJualHal(k.hargaModal * 4 || 500);
   }, [bKertasIsi]);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => { setMounted(true); setLastKasirUnit("percetakan"); }, [setLastKasirUnit]);
 
   /* Kalkulasi */
   const bahanTerpilih = useMemo(() => BAHAN_METERAN.find((b) => b.id === mBahan) || BAHAN_METERAN[0], [mBahan]);
@@ -244,6 +245,24 @@ export default function KasirPercetakan() {
       bHalaman, kertasTerpilih, bCetakIsi, coverTerpilih, bLaminasi, jilidTerpilih, bQty, dpNumber,
       hasilBuku.totalHPPGlobal, hasilMeteran.totalHPP, kurangiSaldoWallet, tambahSaldoWallet,
       walletModalId, walletPenerimaanId]);
+
+  const resetForm = useCallback(() => {
+    setMode("meteran");
+    setMBahan(BAHAN_METERAN[0].id);
+    setMPanjang(2); setMLebar(1); setMQty(1);
+    setMHargaJual(BAHAN_METERAN[0].hargaJual);
+    setMHargaModal(BAHAN_METERAN[0].hargaModal);
+    setBHalaman(50); setBQty(1);
+    setBKertasIsi(KERTAS_ISI[0].id);
+    setBCetakIsi("hitam-putih");
+    setBKertasCover(COVER_LIST[0].id);
+    setBLaminasi("none");
+    setBJilid(JILID_LIST[0].id);
+    setBHargaJualHal(500);
+    setCariCustomer(""); setCustomerNama(""); setCustomerWA("");
+    setShowCustomerDropdown(false); setDP(""); setCartItems([]);
+    setInvoiceId(""); setShowInvoice(false);
+  }, []);
 
   /* Invoice data — always computed for live preview */
   const invoiceData = useMemo<OrderInvoiceData>(() => {
@@ -339,6 +358,31 @@ export default function KasirPercetakan() {
             <ArrowLeft className="size-3.5" /> Baru Lagi
           </button>
         )}
+      </div>
+
+      {/* ─── Unit Switcher ─── */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-4 px-4 mb-2">
+        {([
+          { id: "percetakan", label: "Percetakan", icon: Printer, route: "percetakan" },
+          { id: "gadget-laptop", label: "Gadget", icon: Smartphone, route: "gadget-laptop" },
+          { id: "warkop-kelontong", label: "Warkop", icon: Coffee, route: "warkop-kelontong" },
+          { id: "pakaian-konveksi", label: "Konveksi", icon: Shirt, route: "pakaian-konveksi" },
+        ] as const).map((u) => {
+          const Ico = u.icon;
+          const active = u.id === "percetakan";
+          return (
+            <button
+              key={u.id}
+              onClick={() => router.push(`/buku-usaha/${u.route}/kasir`)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+                active ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-sm" : "bg-muted/50 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Ico className="size-3.5" />
+              {u.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4">
@@ -637,7 +681,39 @@ export default function KasirPercetakan() {
         <div className="overflow-y-auto max-h-[calc(100vh-10rem)] pr-1">
           <div className="sticky top-0">
             {customerNama && totalJual > 0 ? (
-              <InvoicePercetakanView data={invoiceData} preview={!showInvoice} noRef="MUGHIS BANK v3 — POS Kasir Percetakan" />
+              <>
+                <InvoicePercetakanView data={invoiceData} preview={!showInvoice} noRef="MUGHIS BANK v3 — POS Kasir Percetakan" />
+                {showInvoice && (
+                  <>
+                    <div className="mt-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+                        <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Transaksi BERHASIL — {invoiceId}</p>
+                      </div>
+                    </div>
+                    <div className="sticky bottom-0 mt-3 p-3 bg-background/80 backdrop-blur-md border border-border/30 rounded-xl shadow-lg flex gap-2">
+                      <button onClick={resetForm}
+                        className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all"
+                      >
+                        Transaksi Baru
+                      </button>
+                      <button onClick={() => window.print()}
+                        className="flex-1 py-2.5 rounded-xl bg-muted/50 text-muted-foreground text-xs font-bold hover:bg-muted/80 transition-colors"
+                      >
+                        Cetak Nota
+                      </button>
+                      <button onClick={() => {
+                        const msg = encodeURIComponent(`Terima kasih ${customerNama}!\n\nTransaksi: ${invoiceId}\nTotal: ${formatRupiah(Math.round(totalJual))}\nSisa: ${formatRupiah(Math.round(sisa))}`);
+                        window.open(`https://wa.me/${customerWA || "6285217706587"}?text=${msg}`, "_blank");
+                      }}
+                        className="flex-1 py-2.5 rounded-xl bg-green-500/10 text-green-600 text-xs font-bold hover:bg-green-500/20 transition-colors"
+                      >
+                        Kirim WA
+                      </button>
+                    </div>
+                  </>
+                )}
+              </>
             ) : (
               <div className="floating-card p-8 text-center min-h-[60vh] flex flex-col items-center justify-center">
                 <Printer className="size-12 text-muted-foreground/20 mb-3" />
