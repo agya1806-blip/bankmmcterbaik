@@ -509,7 +509,7 @@ ${customerPhone ? `\nKonfirmasi via: wa.me/${customerPhone}` : ""}`;
                 </select>
               </div>
               {/* Dimensi */}
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">Panjang (m)</label>
                   <input type="number" min={0.1} step={0.1} value={mPanjang} onChange={(e) => setMPanjang(parseFloat(e.target.value) || 0)} className="input-premium w-full text-xs" />
@@ -556,7 +556,7 @@ ${customerPhone ? `\nKonfirmasi via: wa.me/${customerPhone}` : ""}`;
               <p className="text-xs font-semibold flex items-center gap-1.5">
                 <BookOpen className="size-3.5 text-cyan-500" /> Form Order Buku / Dokumen
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">Jumlah Halaman</label>
                   <input type="number" min={1} value={bHalaman} onChange={(e) => setBHalaman(parseInt(e.target.value) || 1)} className="input-premium w-full text-xs" />
@@ -592,7 +592,7 @@ ${customerPhone ? `\nKonfirmasi via: wa.me/${customerPhone}` : ""}`;
                   ))}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">Kertas Cover</label>
                   <select value={bKertasCover} onChange={(e) => setBKertasCover(e.target.value)} className="input-premium w-full text-xs">
@@ -793,7 +793,7 @@ ${customerPhone ? `\nKonfirmasi via: wa.me/${customerPhone}` : ""}`;
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 text-[10px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-[10px]">
                   <div>
                     <p className="text-muted-foreground/50 font-medium">Tanggal</p>
                     <p>{selectedOrder.tanggal}</p>
@@ -841,7 +841,7 @@ ${customerPhone ? `\nKonfirmasi via: wa.me/${customerPhone}` : ""}`;
                 </div>
 
                 <div className="flex justify-end">
-                  <div className="w-56 space-y-1 text-[10px]">
+                  <div className="w-full max-w-[14rem] space-y-1 text-[10px]">
                     <div className="flex justify-between"><span className="text-muted-foreground/60">Subtotal</span><span className="tabular-nums">{FORMAT_RUPIAH(selectedOrder.totalJual)}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground/60">PPN 0%</span><span className="tabular-nums">IDR 0</span></div>
                     <div className="flex justify-between text-xs font-bold font-heading border-t border-border/40 pt-1">
@@ -978,7 +978,7 @@ function ResultCardMeteran({ hasil }: { hasil: KalkulasiMeteran }) {
   return (
     <div className="rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20 p-4 space-y-2">
       <p className="text-[10px] font-semibold text-cyan-600 dark:text-cyan-400 uppercase tracking-wider">Hasil Kalkulasi Meteran</p>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-[10px]">
         <div className="flex justify-between"><span className="text-muted-foreground/60">Luas Total</span><span className="font-semibold tabular-nums">{hasil.luasTotal.toFixed(2)} m²</span></div>
         <div className="flex justify-between"><span className="text-muted-foreground/60">Safety Waste (5%)</span><span className="font-semibold tabular-nums text-amber-500">{hasil.wasteMargin.toFixed(3)} m²</span></div>
         <div className="flex justify-between"><span className="text-muted-foreground/60">Total HPP</span><span className="font-semibold tabular-nums text-rose-500">{FORMAT_RUPIAH(Math.round(hasil.totalHPP))}</span></div>
@@ -1001,7 +1001,7 @@ function ResultCardBuku({ hasil }: { hasil: KalkulasiBuku }) {
   return (
     <div className="rounded-xl bg-gradient-to-br from-violet-500/10 to-blue-500/10 border border-violet-500/20 p-4 space-y-2">
       <p className="text-[10px] font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-wider">Hasil Kalkulasi Buku</p>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-[10px]">
         <div className="flex justify-between"><span className="text-muted-foreground/60">HPP Isi</span><span className="font-semibold tabular-nums">{FORMAT_RUPIAH(Math.round(hasil.hppIsi))}</span></div>
         <div className="flex justify-between"><span className="text-muted-foreground/60">HPP Cover</span><span className="font-semibold tabular-nums">{FORMAT_RUPIAH(Math.round(hasil.hppCover))}</span></div>
         <div className="flex justify-between"><span className="text-muted-foreground/60">HPP Jilid</span><span className="font-semibold tabular-nums">{FORMAT_RUPIAH(Math.round(hasil.hppJilid))}</span></div>
@@ -1009,7 +1009,7 @@ function ResultCardBuku({ hasil }: { hasil: KalkulasiBuku }) {
         <div className="flex justify-between"><span className="text-muted-foreground/60">Jual/Satuan</span><span className="font-semibold tabular-nums text-emerald-600">{FORMAT_RUPIAH(Math.round(hasil.totalJualSatuan))}</span></div>
         <div className="flex justify-between"><span className="text-muted-foreground/60">Total HPP Global</span><span className="font-semibold tabular-nums text-rose-500">{FORMAT_RUPIAH(Math.round(hasil.totalHPPGlobal))}</span></div>
       </div>
-      <div className="grid grid-cols-2 gap-4 pt-2 border-t border-violet-500/20">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-violet-500/20">
         <div className="flex justify-between items-center">
           <span className="text-[10px] font-semibold">Total Jual Global</span>
           <span className="text-xs font-bold font-heading tabular-nums text-emerald-600">{FORMAT_RUPIAH(Math.round(hasil.totalJualGlobal))}</span>
@@ -1042,7 +1042,7 @@ function OrderMetaForm({
   return (
     <div className="space-y-3 pt-2 border-t border-border/30">
       <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">Data Order</p>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1">
           <label className="text-[9px] text-muted-foreground/50">No. Invoice</label>
           <input type="text" value={noInvoice} onChange={(e) => setNoInvoice(e.target.value)} placeholder="(Otomatis)" className="input-premium w-full text-[10px]" />

@@ -472,7 +472,7 @@ export default function BukuPribadiPage() {
               {/* Kategori */}
               <div className="space-y-1">
                 <label className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">Kategori</label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {KATEGORI.map((kat) => {
                     const Ico = kat.icon;
                     const aktif = fKategori === kat.id;

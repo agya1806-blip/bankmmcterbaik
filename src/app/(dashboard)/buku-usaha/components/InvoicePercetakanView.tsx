@@ -209,7 +209,7 @@ Terima kasih — ${profil.nama}`;
         {/* ─── SPESIFIKASI TEKNIS ─── */}
         <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-3.5 mb-5 text-[10px] space-y-1">
           <p className="text-gray-400 text-[9px] uppercase tracking-wider font-semibold mb-1.5">SPESIFIKASI TEKNIS</p>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
             <p><span className="text-gray-500">Ukuran:</span> {data.ukuran}</p>
             <p><span className="text-gray-500">Jilid:</span> {data.jilid}</p>
             <p><span className="text-gray-500">Ukuran Jadi:</span> {data.ukuranJadi}</p>
@@ -246,7 +246,7 @@ Terima kasih — ${profil.nama}`;
 
         {/* ─── TOTALS ─── */}
         <div className="flex justify-end mb-5">
-          <div className="w-64 space-y-1.5 text-[11px]">
+          <div className="w-full max-w-xs space-y-1.5 text-[11px]">
             <div className="flex justify-between py-1">
               <span className="text-gray-500">Total</span>
               <span className="font-semibold tabular-nums">{formatRupiah(data.total)}</span>

@@ -227,7 +227,7 @@ Terima kasih — ${profil.nama}`;
 
         {/* ─── TOTALS + DP PROGRESS ─── */}
         <div className="flex justify-end mb-5">
-          <div className="w-64 space-y-1.5 text-[11px]">
+          <div className="w-full max-w-xs space-y-1.5 text-[11px]">
             <div className="flex justify-between py-1">
               <span className="text-gray-500">Total</span>
               <span className="font-semibold tabular-nums">{formatRupiah(data.subtotal)}</span>

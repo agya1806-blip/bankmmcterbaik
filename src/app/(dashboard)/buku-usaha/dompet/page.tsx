@@ -202,7 +202,7 @@ export default function DompetPage() {
                     </div>
                     <div className="flex justify-between text-[9px] text-muted-foreground/40">
                       <span>{pct.toFixed(1)}% dari total</span>
-                      {w.catatan && <span className="truncate max-w-[180px]">{w.catatan}</span>}
+                      {w.catatan && <span className="truncate max-w-[120px] sm:max-w-[180px]">{w.catatan}</span>}
                     </div>
                   </div>
                 );
