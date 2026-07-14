@@ -29,37 +29,12 @@ interface KalkulasiMeteran {
   luasTotal: number; wasteMargin: number; totalHPP: number; totalJual: number; labaKotor: number;
 }
 
-interface KalkulasiBuku {
-  hppIsi: number; hppCover: number; hppJilid: number;
-  totalHPPSatuan: number; totalHPPGlobal: number;
-  totalJualSatuan: number; totalJualGlobal: number;
-  labaKotorSatuan: number; labaKotorGlobal: number;
-}
-
 /* ─── Static ─── */
 const BAHAN_METERAN: BahanMeteran[] = [
   { id: "banner-flexi-280", label: "Banner Flexi 280g", hargaModal: 25000, hargaJual: 45000 },
   { id: "korchin", label: "Korchin", hargaModal: 18000, hargaJual: 35000 },
   { id: "albatros", label: "Albatros", hargaModal: 22000, hargaJual: 40000 },
   { id: "stiker-ritrama", label: "Stiker Ritrama", hargaModal: 30000, hargaJual: 55000 },
-];
-
-const KERTAS_ISI = [
-  { id: "hvs-70", label: "HVS 70gr", hargaModal: 120 },
-  { id: "hvs-80", label: "HVS 80gr", hargaModal: 150 },
-  { id: "ap-150", label: "Art Paper 150g", hargaModal: 350 },
-];
-
-const COVER_LIST = [
-  { id: "ac-260", label: "Art Carton 260gr", hargaModal: 2000 },
-  { id: "ac-310", label: "Art Carton 310gr", hargaModal: 3000 },
-  { id: "hardcover", label: "Hardcover", hargaModal: 8000 },
-];
-
-const JILID_LIST = [
-  { id: "staples", label: "Staples", biaya: 1000 },
-  { id: "spiral", label: "Spiral (Ring)", biaya: 5000 },
-  { id: "lem-panas", label: "Lem Panas (Perfect Binding)", biaya: 4000 },
 ];
 
 function generateId() {
@@ -83,22 +58,6 @@ function hitungMeteran(bahan: BahanMeteran, panjang: number, lebar: number, qty:
   return { luasTotal, wasteMargin, totalHPP, totalJual, labaKotor: totalJual - totalHPP };
 }
 
-function hitungBuku(halaman: number, modalKertas: number, modalCover: number, biayaLaminasi: number, biayaJilid: number, qty: number, hargaJualHal: number): KalkulasiBuku {
-  const hppIsi = halaman * modalKertas;
-  const hppCover = modalCover + biayaLaminasi;
-  const hppJilid = biayaJilid;
-  const totalHPPSatuan = hppIsi + hppCover + hppJilid;
-  const totalHPPGlobal = totalHPPSatuan * qty;
-  const totalJualSatuan = (hargaJualHal * halaman) + modalCover + biayaLaminasi + biayaJilid;
-  const totalJualGlobal = totalJualSatuan * qty;
-  return {
-    hppIsi, hppCover, hppJilid, totalHPPSatuan, totalHPPGlobal,
-    totalJualSatuan, totalJualGlobal,
-    labaKotorSatuan: totalJualSatuan - totalHPPSatuan,
-    labaKotorGlobal: totalJualGlobal - totalHPPGlobal,
-  };
-}
-
 export default function KasirPercetakan() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -114,15 +73,10 @@ export default function KasirPercetakan() {
   const [mHargaJual, setMHargaJual] = useState(BAHAN_METERAN[0].hargaJual);
   const [mHargaModal, setMHargaModal] = useState(BAHAN_METERAN[0].hargaModal);
 
-  /* Buku */
+  /* Buku — manual price input */
   const [bHalaman, setBHalaman] = useState(50);
-  const [bKertasIsi, setBKertasIsi] = useState(KERTAS_ISI[0].id);
-  const [bCetakIsi, setBCetakIsi] = useState<"warna" | "hitam-putih">("hitam-putih");
-  const [bKertasCover, setBKertasCover] = useState(COVER_LIST[0].id);
-  const [bLaminasi, setBLaminasi] = useState<"none" | "glossy" | "doff">("none");
-  const [bJilid, setBJilid] = useState(JILID_LIST[0].id);
   const [bQty, setBQty] = useState(1);
-  const [bHargaJualHal, setBHargaJualHal] = useState(500);
+  const [bHargaSatuan, setBHargaSatuan] = useState("");
 
   /* Customer */
   const [cariCustomer, setCariCustomer] = useState("");
@@ -150,11 +104,6 @@ export default function KasirPercetakan() {
     if (b) { setMHargaJual(b.hargaJual); setMHargaModal(b.hargaModal); }
   }, [mBahan]);
 
-  useEffect(() => {
-    const k = KERTAS_ISI.find((x) => x.id === bKertasIsi);
-    if (k) setBHargaJualHal(k.hargaModal * 4 || 500);
-  }, [bKertasIsi]);
-
   useEffect(() => { setMounted(true); setLastKasirUnit("percetakan"); }, [setLastKasirUnit]);
 
   /* Kalkulasi */
@@ -165,18 +114,9 @@ export default function KasirPercetakan() {
     [bahanTerpilih, mPanjang, mLebar, mQty, mHargaJual, mHargaModal]
   );
 
-  const kertasTerpilih = useMemo(() => KERTAS_ISI.find((k) => k.id === bKertasIsi) || KERTAS_ISI[0], [bKertasIsi]);
-  const coverTerpilih = useMemo(() => COVER_LIST.find((c) => c.id === bKertasCover) || COVER_LIST[0], [bKertasCover]);
-  const jilidTerpilih = useMemo(() => JILID_LIST.find((j) => j.id === bJilid) || JILID_LIST[0], [bJilid]);
-  const biayaLaminasi = useMemo(() => bLaminasi === "glossy" ? 1500 : bLaminasi === "doff" ? 2000 : 0, [bLaminasi]);
-  const hargaModalKertas = useMemo(() => kertasTerpilih.hargaModal * (bCetakIsi === "warna" ? 2.5 : 1), [kertasTerpilih, bCetakIsi]);
+  const bHarga = parseInt(bHargaSatuan.replace(/\D/g, ""), 10) || 0;
 
-  const hasilBuku = useMemo<KalkulasiBuku>(
-    () => hitungBuku(bHalaman, hargaModalKertas, coverTerpilih.hargaModal, biayaLaminasi, jilidTerpilih.biaya, bQty, bHargaJualHal),
-    [bHalaman, hargaModalKertas, coverTerpilih.hargaModal, biayaLaminasi, jilidTerpilih.biaya, bQty, bHargaJualHal]
-  );
-
-  const totalJual = mode === "meteran" ? hasilMeteran.totalJual : hasilBuku.totalJualGlobal;
+  const totalJual = mode === "meteran" ? hasilMeteran.totalJual : bHarga * bQty;
   const dpNumber = parseInt(dp.replace(/\D/g, ""), 10) || 0;
   const sisa = Math.max(totalJual - dpNumber, 0);
 
@@ -219,7 +159,7 @@ export default function KasirPercetakan() {
         tanggal: todayISO(),
         items: mode === "meteran"
           ? `${bahanTerpilih.label} ${mPanjang}x${mLebar}m x${mQty}`
-          : `Buku ${bHalaman}hlm ${kertasTerpilih.label} x${bQty}`,
+          : `Buku ${bHalaman}hlm x${bQty}`,
       });
     }
 
@@ -227,9 +167,11 @@ export default function KasirPercetakan() {
     setShowInvoice(true);
     toast.success(`Transaksi ${id} berhasil disimpan`);
 
-    /* Update wallet: kurangi modal dari wallet modal, tambah pembayaran ke wallet penerimaan */
-    const hpp = mode === "meteran" ? Math.round(hasilMeteran.totalHPP) : Math.round(hasilBuku.totalHPPGlobal);
-    if (hpp > 0) kurangiSaldoWallet(walletModalId, hpp);
+    /* Update wallet */
+    if (mode === "meteran") {
+      const hpp = Math.round(hasilMeteran.totalHPP);
+      if (hpp > 0) kurangiSaldoWallet(walletModalId, hpp);
+    }
     if (dpNumber > 0) tambahSaldoWallet(walletPenerimaanId, dpNumber);
 
     /* scroll to invoice */
@@ -238,9 +180,8 @@ export default function KasirPercetakan() {
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 200);
   }, [customerNama, totalJual, invoiceId, mode, bahanTerpilih, mPanjang, mLebar, mQty,
-      bHalaman, kertasTerpilih, bCetakIsi, coverTerpilih, bLaminasi, jilidTerpilih, bQty, dpNumber,
-      hasilBuku.totalHPPGlobal, hasilMeteran.totalHPP, kurangiSaldoWallet, tambahSaldoWallet,
-      walletModalId, walletPenerimaanId]);
+      bHalaman, bQty, dpNumber, hasilMeteran.totalHPP, hasilMeteran,
+      kurangiSaldoWallet, tambahSaldoWallet, walletModalId, walletPenerimaanId]);
 
   const resetForm = useCallback(() => {
     setMode("meteran");
@@ -248,13 +189,7 @@ export default function KasirPercetakan() {
     setMPanjang(2); setMLebar(1); setMQty(1);
     setMHargaJual(BAHAN_METERAN[0].hargaJual);
     setMHargaModal(BAHAN_METERAN[0].hargaModal);
-    setBHalaman(50); setBQty(1);
-    setBKertasIsi(KERTAS_ISI[0].id);
-    setBCetakIsi("hitam-putih");
-    setBKertasCover(COVER_LIST[0].id);
-    setBLaminasi("none");
-    setBJilid(JILID_LIST[0].id);
-    setBHargaJualHal(500);
+    setBHalaman(50); setBQty(1); setBHargaSatuan("");
     setCariCustomer(""); setCustomerNama(""); setCustomerWA("");
     setShowCustomerDropdown(false); setDP(""); setCartItems([]);
     setInvoiceId(""); setShowInvoice(false);
@@ -303,23 +238,16 @@ export default function KasirPercetakan() {
         });
       }
     } else {
-      kertasIsi = kertasTerpilih.label;
-      cover = coverTerpilih.label;
-      laminasi = bLaminasi === "none" ? "Tidak" : bLaminasi === "glossy" ? "Glossy" : "Doff";
-      jilid = jilidTerpilih.label;
-      deskripsi = `Cetak Buku ${bHalaman} hlm - ${kertasIsi} - ${jilid} x ${bQty} Eks`;
-      spesifikasi = `Hal: ${bHalaman} | Kertas: ${kertasIsi} | Cetak: ${bCetakIsi === "warna" ? "Warna" : "Hitam Putih"}`;
+      kertasIsi = "-";
+      cover = "-";
+      laminasi = "-";
+      jilid = "-";
+      deskripsi = `Cetak Buku ${bHalaman} hlm x ${bQty} Eks`;
+      spesifikasi = `Hal: ${bHalaman} | Qty: ${bQty} eks`;
       ukuran = "A5";
       ukuranJadi = "21 x 29.7 cm";
 
-      const hppIsiSatuan = Math.round(hasilBuku.hppIsi / bQty);
-      const hppCoverSatuan = Math.round(hasilBuku.hppCover / bQty);
-      const hppJilidSatuan = Math.round(hasilBuku.hppJilid / bQty);
-
-      if (hppIsiSatuan > 0) items.push({ no: no++, item: `Kertas Isi — ${kertasTerpilih.label}`, qty: bQty, harga: hppIsiSatuan, jumlah: Math.round(hasilBuku.hppIsi) });
-      if (hppCoverSatuan > 0) items.push({ no: no++, item: `Cover — ${coverTerpilih.label}`, qty: bQty, harga: hppCoverSatuan, jumlah: Math.round(hasilBuku.hppCover) });
-      if (biayaLaminasi > 0) items.push({ no: no++, item: `Laminasi ${laminasi}`, qty: bQty, harga: biayaLaminasi, jumlah: biayaLaminasi * bQty });
-      if (hppJilidSatuan > 0) items.push({ no: no++, item: `Jilid — ${jilidTerpilih.label}`, qty: bQty, harga: hppJilidSatuan, jumlah: Math.round(hasilBuku.hppJilid) });
+      if (bHarga > 0) items.push({ no: no++, item: `Cetak Buku ${bHalaman} hlm`, qty: bQty, harga: bHarga, jumlah: bHarga * bQty });
       if (cartItems.length > 0) {
         cartItems.forEach((ci) => {
           items.push({ no: no++, item: ci.desc, qty: 1, harga: ci.price, jumlah: ci.price });
@@ -354,9 +282,8 @@ export default function KasirPercetakan() {
       rekeningNomor: defaultPayment?.accountNo || "",
       rekeningAtasNama: defaultPayment?.accountName || profil?.nama || "",
     };
-  }, [mode, bahanTerpilih, mPanjang, mLebar, mQty, bHalaman, kertasTerpilih,
-      bCetakIsi, coverTerpilih, bLaminasi, jilidTerpilih, bQty, invoiceId, customerNama,
-      customerWA, totalJual, dpNumber, sisa, hasilMeteran, hasilBuku, biayaLaminasi,
+  }, [mode, bahanTerpilih, mPanjang, mLebar, mQty, bHalaman, bQty, bHarga,
+      invoiceId, customerNama, customerWA, totalJual, dpNumber, sisa, hasilMeteran,
       cartItems, defaultPayment, profil]);
 
   if (!mounted) return <KasirSkeleton />;
@@ -524,13 +451,14 @@ export default function KasirPercetakan() {
             </div>
           )}
 
-          {/* ─── FORM BUKU ─── */}
+          {/* ─── FORM BUKU (manual price input) ─── */}
           {mode === "buku" && (
             <div className="floating-card p-5 space-y-4">
               <p className="text-xs font-semibold flex items-center gap-1.5">
-                <BookOpen className="size-3.5 text-indigo-500" /> Kalkulator Cetak Buku
+                <BookOpen className="size-3.5 text-indigo-500" /> Cetak Buku / Dokumen
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <p className="text-[10px] text-muted-foreground/40">Masukkan harga satuan secara manual</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
                   <label className="text-[9px] text-muted-foreground/50">Jumlah Halaman</label>
                   <input type="number" min={1} value={bHalaman} onChange={(e) => setBHalaman(parseInt(e.target.value) || 1)} className="input-premium w-full text-[10px]" />
@@ -539,70 +467,22 @@ export default function KasirPercetakan() {
                   <label className="text-[9px] text-muted-foreground/50">Qty (Eks)</label>
                   <input type="number" min={1} value={bQty} onChange={(e) => setBQty(parseInt(e.target.value) || 1)} className="input-premium w-full text-[10px]" />
                 </div>
-              </div>
-              <div className="space-y-1">
-                <label className="text-[9px] text-muted-foreground/50">Jenis Kertas Isi</label>
-                <select value={bKertasIsi} onChange={(e) => setBKertasIsi(e.target.value)} className="input-premium w-full text-[10px]">
-                  {KERTAS_ISI.map((k) => <option key={k.id} value={k.id}>{k.label}</option>)}
-                </select>
-              </div>
-              <div className="space-y-1">
-                <label className="text-[9px] text-muted-foreground/50">Tipe Cetak Isi</label>
-                <div className="flex gap-2">
-                  {(["hitam-putih", "warna"] as const).map((t) => (
-                    <button key={t} onClick={() => setBCetakIsi(t)}
-                      className={`flex-1 py-1.5 rounded-lg text-[10px] font-semibold transition-all ${
-                        bCetakIsi === t
-                          ? "bg-indigo-500 text-white shadow-md shadow-indigo-500/20"
-                          : "bg-muted/30 text-muted-foreground/50 hover:bg-muted/50"
-                      }`}
-                    >{t === "hitam-putih" ? "Hitam Putih" : "Warna"}</button>
-                  ))}
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] text-muted-foreground/50">Kertas Cover</label>
-                  <select value={bKertasCover} onChange={(e) => setBKertasCover(e.target.value)} className="input-premium w-full text-[10px]">
-                    {COVER_LIST.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] text-muted-foreground/50">Laminasi Cover</label>
-                  <select value={bLaminasi} onChange={(e) => setBLaminasi(e.target.value as any)} className="input-premium w-full text-[10px]">
-                    <option value="none">Tanpa Laminasi</option>
-                    <option value="glossy">Glossy (+Rp1.500)</option>
-                    <option value="doff">Doff (+Rp2.000)</option>
-                  </select>
+                  <label className="text-[9px] text-muted-foreground/50">Harga per Buku (Rp)</label>
+                  <div className="relative">
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/40">Rp</span>
+                    <input type="text" inputMode="numeric" value={bHargaSatuan} onChange={(e) => setBHargaSatuan(e.target.value.replace(/\D/g, ""))} placeholder="0" className="input-premium w-full text-[10px] pl-8 tabular-nums" />
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-[9px] text-muted-foreground/50">Jenis Jilid</label>
-                  <select value={bJilid} onChange={(e) => setBJilid(e.target.value)} className="input-premium w-full text-[10px]">
-                    {JILID_LIST.map((j) => <option key={j.id} value={j.id}>{j.label}</option>)}
-                  </select>
+              {bHarga > 0 && (
+                <div className="rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground/60">Total ({bQty} eks × Rp {bHarga.toLocaleString("id-ID")})</span>
+                    <span className="text-lg font-bold font-heading tabular-nums text-emerald-600">{formatRupiah(bHarga * bQty)}</span>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] text-muted-foreground/50">Harga Jual/Halaman</label>
-                  <input type="number" value={bHargaJualHal} onChange={(e) => setBHargaJualHal(parseInt(e.target.value) || 0)} className="input-premium w-full text-[10px] tabular-nums" />
-                </div>
-              </div>
-              <div className="rounded-xl bg-gradient-to-br from-violet-500/10 to-indigo-500/10 border border-violet-500/20 p-4 space-y-1.5">
-                <p className="text-[10px] font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-wider">Hasil Kalkulasi</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
-                  <div className="flex justify-between"><span className="text-muted-foreground/60">HPP Isi</span><span className="font-semibold tabular-nums">{formatRupiah(Math.round(hasilBuku.hppIsi))}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground/60">HPP Cover</span><span className="font-semibold tabular-nums">{formatRupiah(Math.round(hasilBuku.hppCover))}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground/60">HPP Jilid</span><span className="font-semibold tabular-nums">{formatRupiah(Math.round(hasilBuku.hppJilid))}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground/60">HPP/Satuan</span><span className="font-semibold tabular-nums text-rose-500">{formatRupiah(Math.round(hasilBuku.totalHPPSatuan))}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground/60">Jual/Satuan</span><span className="font-semibold tabular-nums text-emerald-600">{formatRupiah(Math.round(hasilBuku.totalJualSatuan))}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground/60">Total HPP Global</span><span className="font-semibold tabular-nums text-rose-500">{formatRupiah(Math.round(hasilBuku.totalHPPGlobal))}</span></div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1.5 border-t border-violet-500/20">
-                  <div className="flex justify-between"><span className="text-[10px] font-semibold">Total Jual Global</span><span className="text-xs font-bold font-heading tabular-nums text-emerald-600">{formatRupiah(Math.round(hasilBuku.totalJualGlobal))}</span></div>
-                  <div className="flex justify-between"><span className="text-[10px] font-semibold">Laba Kotor</span><span className={`text-xs font-bold font-heading tabular-nums ${hasilBuku.labaKotorGlobal >= 0 ? "text-emerald-600" : "text-rose-500"}`}>{hasilBuku.labaKotorGlobal >= 0 ? "+" : ""}{formatRupiah(Math.round(hasilBuku.labaKotorGlobal))}</span></div>
-                </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -689,7 +569,7 @@ export default function KasirPercetakan() {
                 if (!label?.trim()) return;
                 const desc = mode === "meteran"
                   ? `${bahanTerpilih.label} ${mPanjang}x${mLebar}m x${mQty}`
-                  : `Buku ${bHalaman}hlm ${kertasTerpilih.label} x${bQty}`;
+                  : `Buku ${bHalaman}hlm x${bQty}`;
                 addQuickOrder({ unit: "percetakan", label: label.trim(), items: [{ desc, price: Math.round(totalJual) }] });
                 toast.success(`Template "${label.trim()}" disimpan`);
               }}

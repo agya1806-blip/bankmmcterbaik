@@ -43,36 +43,9 @@ interface BahanBaku {
   satuan: string;
 }
 
-/* ─── Mock Menu ─── */
-const MENU_LIST: MenuItem[] = [
-  { id: "M-001", nama: "Kopi Hitam", harga: 8000, kategori: "minuman", icon: Coffee, grad: "from-amber-700 to-amber-900", stok: 50, resep: [{ bahanId: "B-001", qty: 10 }] },
-  { id: "M-002", nama: "Kopi Susu", harga: 12000, kategori: "minuman", icon: Coffee, grad: "from-amber-500 to-amber-700", stok: 50, resep: [{ bahanId: "B-001", qty: 10 }, { bahanId: "B-002", qty: 30 }] },
-  { id: "M-003", nama: "Es Kopi Gula Aren", harga: 15000, kategori: "minuman", icon: Coffee, grad: "from-amber-600 to-amber-800", stok: 40, resep: [{ bahanId: "B-001", qty: 12 }, { bahanId: "B-003", qty: 15 }] },
-  { id: "M-004", nama: "Teh Manis", harga: 5000, kategori: "minuman", icon: Coffee, grad: "from-yellow-500 to-yellow-600", stok: 60, resep: [{ bahanId: "B-003", qty: 10 }] },
-  { id: "M-005", nama: "Es Jeruk", harga: 7000, kategori: "minuman", icon: Coffee, grad: "from-orange-400 to-orange-500", stok: 30, resep: [] },
-  { id: "M-006", nama: "Air Mineral", harga: 4000, kategori: "minuman", icon: Coffee, grad: "from-blue-400 to-blue-500", stok: 20, resep: [] },
-  { id: "M-101", nama: "Mie Goreng", harga: 12000, kategori: "makanan", icon: Utensils, grad: "from-orange-500 to-red-500", stok: 15, resep: [{ bahanId: "B-004", qty: 1 }] },
-  { id: "M-102", nama: "Mie Kuah", harga: 12000, kategori: "makanan", icon: Utensils, grad: "from-yellow-500 to-orange-500", stok: 12, resep: [{ bahanId: "B-004", qty: 1 }] },
-  { id: "M-103", nama: "Nasi Goreng", harga: 15000, kategori: "makanan", icon: Utensils, grad: "from-red-500 to-red-600", stok: 10, resep: [] },
-  { id: "M-104", nama: "Indomie Telur", harga: 10000, kategori: "makanan", icon: Utensils, grad: "from-amber-500 to-orange-500", stok: 20, resep: [{ bahanId: "B-004", qty: 1 }] },
-  { id: "M-201", nama: "Roti Bakar", harga: 8000, kategori: "makanan", icon: Utensils, grad: "from-yellow-600 to-amber-600", stok: 8, resep: [] },
-  { id: "M-202", nama: "Pisang Goreng", harga: 7000, kategori: "makanan", icon: Utensils, grad: "from-yellow-400 to-amber-500", stok: 10, resep: [] },
-  { id: "K-001", nama: "Minyak Goreng 1L", harga: 18000, kategori: "kelontong", icon: Package, grad: "from-green-500 to-green-600", stok: 3, resep: [] },
-  { id: "K-002", nama: "Gula Pasir 1kg", harga: 16000, kategori: "kelontong", icon: Package, grad: "from-white to-gray-200", stok: 5, resep: [] },
-  { id: "K-003", nama: "Mie Instan (karton)", harga: 110000, kategori: "kelontong", icon: Package, grad: "from-red-500 to-red-600", stok: 2, resep: [] },
-  { id: "K-004", nama: "Air Galon", harga: 20000, kategori: "kelontong", icon: Package, grad: "from-blue-400 to-blue-500", stok: 4, resep: [] },
-  { id: "R-001", nama: "Rokok Filter A", harga: 28000, kategori: "rokok", icon: Package, grad: "from-gray-600 to-gray-800", stok: 10, resep: [] },
-  { id: "R-002", nama: "Rokok Filter B", harga: 22000, kategori: "rokok", icon: Package, grad: "from-gray-500 to-gray-700", stok: 8, resep: [] },
-  { id: "R-003", nama: "Rokok Mild", harga: 25000, kategori: "rokok", icon: Package, grad: "from-blue-600 to-blue-800", stok: 6, resep: [] },
-];
-
-/* ─── Mock Bahan Baku ─── */
-const BAHAN_BAKU: BahanBaku[] = [
-  { id: "B-001", nama: "Biji Kopi", stok: 500, satuan: "gr" },
-  { id: "B-002", nama: "Susu UHT", stok: 1000, satuan: "ml" },
-  { id: "B-003", nama: "Sirup Gula", stok: 800, satuan: "ml" },
-  { id: "B-004", nama: "Mie Instan (ecer)", stok: 25, satuan: "pcs" },
-];
+/* ─── Menu (kosong, user tambah sendiri) ─── */
+const MENU_LIST: MenuItem[] = [];
+const BAHAN_BAKU: BahanBaku[] = [];
 
 const KATEGORI_LIST: { key: KategoriMenu; label: string; icon: React.ElementType }[] = [
   { key: "minuman", label: "Minuman", icon: Coffee },
