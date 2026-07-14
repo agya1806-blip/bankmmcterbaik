@@ -3,8 +3,9 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Wallet, ArrowLeft, Plus, ArrowRightLeft, History,
+  ArrowLeft, Plus, ArrowRightLeft, History,
   Building2, Banknote, Smartphone, Trash2, TrendingUp, BarChart3, RefreshCw,
+  Wallet as WalletIcon,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useBusinessStore, WalletTipe } from "@/store/useBusinessStore";
@@ -147,7 +148,7 @@ export default function DompetPage() {
             <ArrowLeft className="size-4 text-muted-foreground" />
           </button>
           <div className="size-11 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-            <Wallet className="size-5 text-white" />
+            <WalletIcon className="size-5 text-white" />
           </div>
           <div>
             <h2 className="text-base font-bold font-heading">Dompet Kas Operasional</h2>
@@ -182,7 +183,7 @@ export default function DompetPage() {
 
       {/* ─── Tab Nav ─── */}
       <div className="flex gap-2">
-        {tabBtn("grid", "Dompet", Wallet)}
+        {tabBtn("grid", "Dompet", WalletIcon)}
         {tabBtn("transfer", "Transfer", ArrowRightLeft)}
         {tabBtn("tambah", "Tambah Dompet", Plus)}
       </div>
@@ -194,7 +195,7 @@ export default function DompetPage() {
         <div className="space-y-3">
           {wallets.length === 0 ? (
             <div className="floating-card p-6 text-center">
-              <Wallet className="size-10 mx-auto text-muted-foreground/20" />
+              <WalletIcon className="size-10 mx-auto text-muted-foreground/20" />
               <p className="text-xs text-muted-foreground/40 mt-2">Belum ada dompet</p>
             </div>
           ) : (
