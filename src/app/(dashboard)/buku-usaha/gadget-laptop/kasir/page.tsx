@@ -234,7 +234,7 @@ export default function KasirGadgetLaptop() {
   if (!mounted) return <div className="min-h-[60vh]" />;
 
   return (
-    <div className="pb-24 animate-fade-in">
+    <div className="pb-20 animate-fade-in">
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between max-w-full px-4 mb-4">
         <div className="flex items-center gap-3">
@@ -343,7 +343,7 @@ export default function KasirGadgetLaptop() {
                   required
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[9px] text-muted-foreground/50">Kondisi</label>
                   <div className="flex gap-2">
@@ -395,7 +395,7 @@ export default function KasirGadgetLaptop() {
                     <input type="text" value={tradeIn.namaUnit} onChange={(e) => setTradeIn((p) => ({ ...p, namaUnit: e.target.value }))}
                       placeholder="cth: iPhone 11 64GB" className="input-premium w-full text-[10px]" />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <label className="text-[9px] text-muted-foreground/50">IMEI/SN Unit Bekas</label>
                       <input type="text" value={tradeIn.imeiSn} onChange={(e) => setTradeIn((p) => ({ ...p, imeiSn: e.target.value }))}
@@ -482,7 +482,7 @@ export default function KasirGadgetLaptop() {
                 </div>
               </div>
           {/* Pilih Dompet */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div className="space-y-1">
               <label className="text-[9px] text-muted-foreground/50">Terima Pembayaran Ke</label>
               <select value={walletPenerimaanId} onChange={(e) => setWalletPenerimaanId(e.target.value)} className="input-premium w-full text-[10px]">
@@ -496,7 +496,7 @@ export default function KasirGadgetLaptop() {
               </select>
             </div>
           </div>
-              <div className="grid grid-cols-4 gap-2 pt-1">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                 <div>
                   <p className="text-[9px] text-muted-foreground/50">Subtotal</p>
                   <p className="text-xs font-bold font-heading tabular-nums">{formatRupiah(subtotal)}</p>

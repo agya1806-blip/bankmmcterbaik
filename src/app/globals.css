@@ -138,6 +138,7 @@
   h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
   html { font-size: 14px; }
   @media (max-width: 768px) { html { font-size: 13px; } }
+  @media (max-width: 380px) { html { font-size: 12px; } }
 
   h1 { font-size: 1.375rem; font-weight: 700; }
   h2 { font-size: 1.125rem; font-weight: 600; }
@@ -248,16 +249,16 @@
 
   /* Bottom Nav */
   .byond-bottom-nav { @apply fixed bottom-0 left-0 right-0 z-50 lg:hidden; padding-bottom: env(safe-area-inset-bottom, 0px); }
-  .byond-bottom-nav-inner { @apply relative flex items-center justify-around mx-3 mb-3 px-3 py-3 rounded-2xl bg-white backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.08)]; }
+  .byond-bottom-nav-inner { @apply relative flex items-center justify-around mx-2 mb-2 px-2 py-2 rounded-2xl bg-white backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.08)]; }
   .dark .byond-bottom-nav-inner { background: hsl(var(--card) / 0.9); @apply border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.25)]; }
-  .byond-bottom-nav-item { @apply relative flex flex-col items-center gap-1.5 py-3 px-4 rounded-xl min-w-[64px] transition-all duration-200; }
+  .byond-bottom-nav-item { @apply relative flex flex-col items-center gap-1 py-2 px-2 rounded-xl min-w-0 transition-all duration-200 flex-1; }
   .byond-bottom-nav-item:active { transform: scale(0.88); }
   .byond-bottom-nav-glow { @apply absolute inset-0 rounded-xl pointer-events-none; background: radial-gradient(circle at center, hsl(var(--primary) / 0.12) 0%, transparent 70%); animation: navGlowPulse 3s ease-in-out infinite; }
-  .byond-bottom-nav-icon-wrap { @apply flex items-center justify-center size-12 rounded-xl transition-all duration-300; }
+  .byond-bottom-nav-icon-wrap { @apply flex items-center justify-center size-9 rounded-xl transition-all duration-300; }
   .byond-bottom-nav-icon-active { @apply bg-muted text-foreground; transform: translateY(-2px); }
-  .byond-bottom-nav-icon { @apply size-6 transition-all duration-200; }
+  .byond-bottom-nav-icon { @apply size-5 transition-all duration-200; }
   .byond-bottom-nav-icon-active-color { @apply text-white; }
-  .byond-bottom-nav-label { @apply text-xs font-medium text-muted-foreground/60 transition-all duration-200; }
+  .byond-bottom-nav-label { @apply text-[10px] font-medium text-muted-foreground/60 transition-all duration-200 whitespace-nowrap; }
   .byond-bottom-nav-label-active { @apply text-foreground font-semibold; }
 
   /* Header */

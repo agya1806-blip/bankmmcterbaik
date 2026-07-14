@@ -120,7 +120,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <PWA />
       <Reminder />
 
-      <div className="lg:hidden h-[130px]" />
+      <div className="lg:hidden h-[100px]" />
     </div>
   );
 }

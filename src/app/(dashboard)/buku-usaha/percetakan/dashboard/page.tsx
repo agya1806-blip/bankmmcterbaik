@@ -125,7 +125,7 @@ export default function DashboardPercetakan() {
   if (!mounted) return <div className="min-h-[60vh]" />;
 
   return (
-    <div className="max-w-2xl mx-auto pb-24 space-y-5 animate-fade-in">
+    <div className="max-w-2xl mx-auto pb-20 space-y-5 animate-fade-in">
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -255,7 +255,7 @@ export default function DashboardPercetakan() {
         </div>
 
         {/* Column headers */}
-        <div className="grid grid-cols-4 gap-2 mb-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
           {STATUS_ORDER.map((st) => (
             <p key={st} className="text-[9px] font-semibold text-muted-foreground/50 uppercase tracking-wider text-center">
               {STATUS_CFG[st].label}
@@ -264,7 +264,7 @@ export default function DashboardPercetakan() {
         </div>
 
         {/* Board */}
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {STATUS_ORDER.map((st) => {
             const items = filteredOrders.filter((o) => o.status === st);
             return (

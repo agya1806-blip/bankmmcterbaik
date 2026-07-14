@@ -74,7 +74,7 @@ export default function LaporanKeuangan() {
   if (!mounted) return <div className="min-h-[60vh]" />;
 
   return (
-    <div className="max-w-2xl mx-auto pb-24 space-y-6 animate-fade-in">
+    <div className="max-w-2xl mx-auto pb-20 space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="size-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-xl shadow-emerald-500/20">
@@ -139,7 +139,7 @@ export default function LaporanKeuangan() {
                     <p className="text-sm font-semibold">{label}</p>
                     <span className="text-[10px] text-muted-foreground/50">{u.count} item</span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 mt-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
                     <div>
                       <p className="text-[9px] text-muted-foreground/50">Revenue</p>
                       <p className="text-xs font-bold tabular-nums text-emerald-600">{formatRupiah(u.revenue)}</p>

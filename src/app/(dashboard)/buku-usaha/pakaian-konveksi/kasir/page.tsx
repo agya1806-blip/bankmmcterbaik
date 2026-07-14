@@ -268,7 +268,7 @@ export default function KasirPakaianKonveksi() {
   if (!mounted) return <div className="min-h-[60vh]" />;
 
   return (
-    <div className="pb-24 animate-fade-in">
+    <div className="pb-20 animate-fade-in">
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between max-w-full px-4 mb-4">
         <div className="flex items-center gap-3">
@@ -425,7 +425,7 @@ export default function KasirPakaianKonveksi() {
                 <label className="text-[9px] text-muted-foreground/50">Nama Produk Custom</label>
                 <input type="text" value={customNamaProduk} onChange={(e) => setCustomNamaProduk(e.target.value)} className="input-premium w-full text-xs" />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1"><label className="text-[9px] text-muted-foreground/50">Jumlah (Pcs)</label><input type="number" min={1} value={customPcs} onChange={(e) => setCustomPcs(parseInt(e.target.value) || 0)} className="input-premium w-full text-xs" /></div>
                 <div className="space-y-1"><label className="text-[9px] text-muted-foreground/50">Kain (Kg/Yard)</label><input type="number" min={0} step={0.5} value={customKain} onChange={(e) => setCustomKain(parseFloat(e.target.value) || 0)} className="input-premium w-full text-xs" /></div>
                 <div className="space-y-1"><label className="text-[9px] text-muted-foreground/50">Modal Kain/unit</label><div className="relative"><span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground/40">Rp</span><input type="text" inputMode="numeric" value={customHargaKain} onChange={(e) => setCustomHargaKain(parseInt(e.target.value.replace(/\D/g, "")) || 0)} className="input-premium w-full text-xs pl-8 tabular-nums" /></div></div>
@@ -435,7 +435,7 @@ export default function KasirPakaianKonveksi() {
               </div>
               <div className="rounded-xl bg-gradient-to-br from-rose-500/10 to-pink-500/10 border border-rose-500/20 p-4 space-y-1.5">
                 <p className="text-[10px] font-semibold text-rose-600 uppercase tracking-wider">Hasil Kalkulasi</p>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
                   <div className="flex justify-between"><span className="text-muted-foreground/60">Modal Bahan</span><span className="font-semibold tabular-nums">{formatRupiah(Math.round(hasilKonveksi.totalModalBahan))}</span></div>
                   <div className="flex justify-between"><span className="text-muted-foreground/60">Wastage 5%</span><span className="font-semibold tabular-nums text-amber-500">{formatRupiah(Math.round(hasilKonveksi.wastageCost))}</span></div>
                   <div className="flex justify-between"><span className="text-muted-foreground/60">Total HPP</span><span className="font-semibold tabular-nums text-rose-500">{formatRupiah(Math.round(hasilKonveksi.totalHPP))}</span></div>
@@ -492,7 +492,7 @@ export default function KasirPakaianKonveksi() {
               </div>
             </div>
           {/* Pilih Dompet */}
-          <div className="grid grid-cols-2 gap-2 pt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
             <div className="space-y-1">
               <label className="text-[9px] text-muted-foreground/50">Terima Pembayaran Ke</label>
               <select value={walletPenerimaanId} onChange={(e) => setWalletPenerimaanId(e.target.value)} className="input-premium w-full text-[10px]">
@@ -506,7 +506,7 @@ export default function KasirPakaianKonveksi() {
               </select>
             </div>
           </div>
-            <div className="grid grid-cols-3 gap-3 pt-1">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
               <div><p className="text-[9px] text-muted-foreground/50">Total</p><p className="text-sm font-bold font-heading tabular-nums text-emerald-600">{formatRupiah(subtotal)}</p></div>
               <div><p className="text-[9px] text-muted-foreground/50">DP</p><p className="text-sm font-bold font-heading tabular-nums text-blue-600">{formatRupiah(dpNumber)}</p></div>
               <div><p className="text-[9px] text-muted-foreground/50">Sisa</p><p className={`text-sm font-bold font-heading tabular-nums ${sisa > 0 ? "text-rose-600" : "text-emerald-600"}`}>{sisa > 0 ? formatRupiah(sisa) : "LUNAS"}</p></div>

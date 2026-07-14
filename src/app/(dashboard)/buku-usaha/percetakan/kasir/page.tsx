@@ -286,7 +286,7 @@ export default function KasirPercetakan() {
 
   /* ─── RENDER (50:50 Split-Screen) ─── */
   return (
-    <div className="pb-24 animate-fade-in">
+    <div className="pb-20 animate-fade-in">
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between max-w-full px-4 mb-4">
         <div className="flex items-center gap-3">
@@ -353,7 +353,7 @@ export default function KasirPercetakan() {
                   {BAHAN_METERAN.map((b) => <option key={b.id} value={b.id}>{b.label}</option>)}
                 </select>
               </div>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <div className="space-y-1">
                   <label className="text-[9px] text-muted-foreground/50">Panjang (m)</label>
                   <input type="number" min={0.1} step={0.1} value={mPanjang} onChange={(e) => setMPanjang(parseFloat(e.target.value) || 0)} className="input-premium w-full text-[10px]" />
@@ -378,7 +378,7 @@ export default function KasirPercetakan() {
               {/* Hasil */}
               <div className="rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 p-4 space-y-1.5">
                 <p className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">Hasil Kalkulasi</p>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
                   <div className="flex justify-between"><span className="text-muted-foreground/60">Luas Total</span><span className="font-semibold tabular-nums">{hasilMeteran.luasTotal.toFixed(2)} m²</span></div>
                   <div className="flex justify-between"><span className="text-muted-foreground/60">Safety Waste (5%)</span><span className="font-semibold tabular-nums text-amber-500">{hasilMeteran.wasteMargin.toFixed(3)} m²</span></div>
                   <div className="flex justify-between"><span className="text-muted-foreground/60">Total HPP</span><span className="font-semibold tabular-nums text-rose-500">{formatRupiah(Math.round(hasilMeteran.totalHPP))}</span></div>
@@ -400,7 +400,7 @@ export default function KasirPercetakan() {
               <p className="text-xs font-semibold flex items-center gap-1.5">
                 <BookOpen className="size-3.5 text-indigo-500" /> Kalkulator Cetak Buku
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[9px] text-muted-foreground/50">Jumlah Halaman</label>
                   <input type="number" min={1} value={bHalaman} onChange={(e) => setBHalaman(parseInt(e.target.value) || 1)} className="input-premium w-full text-[10px]" />
@@ -430,7 +430,7 @@ export default function KasirPercetakan() {
                   ))}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[9px] text-muted-foreground/50">Kertas Cover</label>
                   <select value={bKertasCover} onChange={(e) => setBKertasCover(e.target.value)} className="input-premium w-full text-[10px]">
@@ -446,7 +446,7 @@ export default function KasirPercetakan() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="text-[9px] text-muted-foreground/50">Jenis Jilid</label>
                   <select value={bJilid} onChange={(e) => setBJilid(e.target.value)} className="input-premium w-full text-[10px]">
@@ -460,7 +460,7 @@ export default function KasirPercetakan() {
               </div>
               <div className="rounded-xl bg-gradient-to-br from-violet-500/10 to-indigo-500/10 border border-violet-500/20 p-4 space-y-1.5">
                 <p className="text-[10px] font-semibold text-violet-600 dark:text-violet-400 uppercase tracking-wider">Hasil Kalkulasi</p>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-[10px]">
                   <div className="flex justify-between"><span className="text-muted-foreground/60">HPP Isi</span><span className="font-semibold tabular-nums">{formatRupiah(Math.round(hasilBuku.hppIsi))}</span></div>
                   <div className="flex justify-between"><span className="text-muted-foreground/60">HPP Cover</span><span className="font-semibold tabular-nums">{formatRupiah(Math.round(hasilBuku.hppCover))}</span></div>
                   <div className="flex justify-between"><span className="text-muted-foreground/60">HPP Jilid</span><span className="font-semibold tabular-nums">{formatRupiah(Math.round(hasilBuku.hppJilid))}</span></div>
@@ -468,7 +468,7 @@ export default function KasirPercetakan() {
                   <div className="flex justify-between"><span className="text-muted-foreground/60">Jual/Satuan</span><span className="font-semibold tabular-nums text-emerald-600">{formatRupiah(Math.round(hasilBuku.totalJualSatuan))}</span></div>
                   <div className="flex justify-between"><span className="text-muted-foreground/60">Total HPP Global</span><span className="font-semibold tabular-nums text-rose-500">{formatRupiah(Math.round(hasilBuku.totalHPPGlobal))}</span></div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 pt-1.5 border-t border-violet-500/20">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1.5 border-t border-violet-500/20">
                   <div className="flex justify-between"><span className="text-[10px] font-semibold">Total Jual Global</span><span className="text-xs font-bold font-heading tabular-nums text-emerald-600">{formatRupiah(Math.round(hasilBuku.totalJualGlobal))}</span></div>
                   <div className="flex justify-between"><span className="text-[10px] font-semibold">Laba Kotor</span><span className={`text-xs font-bold font-heading tabular-nums ${hasilBuku.labaKotorGlobal >= 0 ? "text-emerald-600" : "text-rose-500"}`}>{hasilBuku.labaKotorGlobal >= 0 ? "+" : ""}{formatRupiah(Math.round(hasilBuku.labaKotorGlobal))}</span></div>
                 </div>
@@ -523,7 +523,7 @@ export default function KasirPercetakan() {
               </div>
             </div>
           {/* ─── Pilih Dompet ─── */}
-          <div className="grid grid-cols-2 gap-2 pt-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
             <div className="space-y-1">
               <label className="text-[9px] text-muted-foreground/50">Terima Pembayaran Ke</label>
               <select value={walletPenerimaanId} onChange={(e) => setWalletPenerimaanId(e.target.value)} className="input-premium w-full text-[10px]">
@@ -537,7 +537,7 @@ export default function KasirPercetakan() {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-3 pt-1">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
               <div><p className="text-[9px] text-muted-foreground/50">Total Tagihan</p><p className="text-sm font-bold font-heading tabular-nums text-emerald-600">{formatRupiah(Math.round(totalJual))}</p></div>
               <div><p className="text-[9px] text-muted-foreground/50">DP</p><p className="text-sm font-bold font-heading tabular-nums text-blue-600">{formatRupiah(dpNumber)}</p></div>
               <div><p className="text-[9px] text-muted-foreground/50">Sisa Tagihan</p><p className={`text-sm font-bold font-heading tabular-nums ${sisa > 0 ? "text-rose-600" : "text-emerald-600"}`}>{formatRupiah(Math.round(sisa))}</p></div>

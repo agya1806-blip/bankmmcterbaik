@@ -110,7 +110,7 @@ export default function DompetPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto pb-24 space-y-5 animate-fade-in">
+    <div className="max-w-3xl mx-auto pb-20 space-y-5 animate-fade-in">
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -138,7 +138,7 @@ export default function DompetPage() {
       <div className="floating-card p-5 bg-gradient-to-br from-violet-500/10 to-purple-500/10 border border-violet-500/20">
         <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider font-semibold">Total Kas Usaha</p>
         <p className="text-3xl font-bold font-heading tabular-nums mt-1">{formatRupiah(totalSaldo)}</p>
-        <div className="flex gap-2 mt-3">
+        <div className="flex gap-2 mt-3 flex-wrap">
           {wallets.map((w) => {
             const WIcon = WALLET_ICONS[w.tipe].icon;
             return (
@@ -256,7 +256,7 @@ export default function DompetPage() {
             <ArrowRightLeft className="size-3.5 text-violet-500" /> Transfer Antar Dompet
           </p>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="text-[9px] text-muted-foreground/50">Dari Dompet</label>
               <select value={dariId} onChange={(e) => setDariId(e.target.value)} className="input-premium w-full text-[10px]">

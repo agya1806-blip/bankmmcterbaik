@@ -14,7 +14,7 @@ export default function BukuUsahaPage() {
   const router = useRouter();
 
   return (
-    <div className="max-w-2xl mx-auto pb-24 space-y-6 animate-fade-in">
+    <div className="max-w-2xl mx-auto pb-20 space-y-6 animate-fade-in">
       <div className="flex items-center gap-3">
         <div className="size-12 rounded-2xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center shadow-xl shadow-violet-500/20">
           <Printer className="size-6 text-white" />
@@ -52,7 +52,7 @@ export default function BukuUsahaPage() {
       </div>
 
       {/* Navigasi Tools */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         <button onClick={() => router.push("/buku-usaha/dompet")}
           className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95 transition-all"
         >

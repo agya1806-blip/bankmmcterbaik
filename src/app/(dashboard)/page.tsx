@@ -165,7 +165,7 @@ export default function BukuKeuanganGlobal() {
   if (!mounted) return <div className="min-h-[60vh]" />;
 
   return (
-    <div className="space-y-7 animate-fade-in max-w-2xl mx-auto pb-24">
+    <div className="space-y-7 animate-fade-in max-w-2xl mx-auto pb-20">
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -333,7 +333,7 @@ export default function BukuKeuanganGlobal() {
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground">Jenis Buku</Label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {[
                   { value: "pribadi", label: "Buku Pribadi", icon: BookUser, grad: "from-emerald-500 to-emerald-600" },
                   { value: "usaha", label: "Buku Usaha", icon: Briefcase, grad: "from-violet-500 to-violet-600" },

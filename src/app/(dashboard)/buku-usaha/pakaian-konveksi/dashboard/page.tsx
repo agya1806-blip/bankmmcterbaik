@@ -118,7 +118,7 @@ export default function DashboardPakaianKonveksi() {
   if (!mounted) return <div className="min-h-[60vh]" />;
 
   return (
-    <div className="max-w-2xl mx-auto pb-24 space-y-5 animate-fade-in">
+    <div className="max-w-2xl mx-auto pb-20 space-y-5 animate-fade-in">
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -186,7 +186,7 @@ export default function DashboardPakaianKonveksi() {
           </p>
           <span className="text-[10px] text-muted-foreground/50">{orders.length} order</span>
         </div>
-        <div className="grid grid-cols-5 gap-1.5">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
           {(Object.entries(STATUS_CMT) as [StatusCMT, typeof STATUS_CMT[StatusCMT]][]).map(([key, cfg]) => {
             const items = orders.filter((o) => o.status === key);
             return (

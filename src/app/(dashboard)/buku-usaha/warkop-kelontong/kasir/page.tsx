@@ -229,7 +229,7 @@ export default function KasirWarkopKelontong() {
   if (!mounted) return <div className="min-h-[60vh]" />;
 
   return (
-    <div className="pb-24 animate-fade-in">
+    <div className="pb-20 animate-fade-in">
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between max-w-full px-4 mb-4">
         <div className="flex items-center gap-3">
@@ -345,7 +345,7 @@ export default function KasirWarkopKelontong() {
                 >{t === "dine-in" ? "Dine In" : "Take Away"}</button>
               ))}
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <input type="text" value={noMeja} onChange={(e) => setNoMeja(e.target.value)}
                 placeholder="No Meja" className="input-premium text-[10px]" />
               <input type="text" value={pelanggan} onChange={(e) => setPelanggan(e.target.value)}
@@ -415,7 +415,7 @@ export default function KasirWarkopKelontong() {
               <DollarSign className="size-3.5 text-emerald-500" /> Pembayaran Cepat
             </p>
 
-            <div className="grid grid-cols-3 gap-1.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
               <button onClick={() => presetBayar(10000)}
                 className="py-1.5 rounded-lg bg-muted/30 text-[10px] font-semibold hover:bg-muted/50 transition-colors">Rp10k</button>
               <button onClick={() => presetBayar(20000)}
@@ -438,7 +438,7 @@ export default function KasirWarkopKelontong() {
             </div>
 
           {/* Pilih Dompet */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div className="space-y-1">
               <label className="text-[9px] text-muted-foreground/50">Terima Pembayaran Ke</label>
               <select value={walletPenerimaanId} onChange={(e) => setWalletPenerimaanId(e.target.value)} className="input-premium w-full text-[10px]">
@@ -452,7 +452,7 @@ export default function KasirWarkopKelontong() {
               </select>
             </div>
           </div>
-            <div className="grid grid-cols-2 gap-3 text-[10px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[10px]">
               <div>
                 <p className="text-muted-foreground/50">Total</p>
                 <p className="text-sm font-bold font-heading tabular-nums">{formatRupiah(subtotal)}</p>

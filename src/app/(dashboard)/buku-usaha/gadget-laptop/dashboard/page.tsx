@@ -119,7 +119,7 @@ export default function DashboardGadgetLaptop() {
   if (!mounted) return <div className="min-h-[60vh]" />;
 
   return (
-    <div className="max-w-2xl mx-auto pb-24 space-y-5 animate-fade-in">
+    <div className="max-w-2xl mx-auto pb-20 space-y-5 animate-fade-in">
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -186,7 +186,7 @@ export default function DashboardGadgetLaptop() {
         <p className="text-xs font-semibold flex items-center gap-1.5">
           <Package className="size-3.5 text-cyan-500" /> Stock Breakdown
         </p>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <div className="rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 p-3 text-center">
             <Box className="size-5 mx-auto text-emerald-500 mb-1" />
             <p className="text-lg font-bold font-heading tabular-nums text-emerald-600">{stokBreakdown.baru}</p>

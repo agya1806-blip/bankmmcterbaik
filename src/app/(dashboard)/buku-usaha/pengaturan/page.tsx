@@ -172,7 +172,7 @@ export default function PengaturanBukuUsaha() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto pb-24 space-y-5 animate-fade-in">
+    <div className="max-w-3xl mx-auto pb-20 space-y-5 animate-fade-in">
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -336,7 +336,7 @@ export default function PengaturanBukuUsaha() {
             <p className="text-xs font-semibold flex items-center gap-1.5">
               <CreditCard className="size-3.5 text-violet-500" /> {pmEditId ? "Edit" : "Tambah"} Metode Pembayaran
             </p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-[9px] text-muted-foreground/50">Nama Metode *</label>
                 <input type="text" value={pmNama} onChange={(e) => setPmNama(e.target.value)} placeholder="cth: BSI / DANA / Tunai" className="input-premium w-full text-[10px]" />
@@ -550,7 +550,7 @@ export default function PengaturanBukuUsaha() {
             <p className="text-xs font-semibold flex items-center gap-1.5">
               <Plus className="size-3.5 text-violet-500" /> {editingUserId ? "Edit" : "Tambah"} Pengguna PIN
             </p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-[9px] text-muted-foreground/50">Nama</label>
                 <input type="text" value={newUName} onChange={(e) => setNewUName(e.target.value)} placeholder="Nama pengguna" className="input-premium w-full text-xs" />
