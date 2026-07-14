@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../../percetakan/store/useProfilUsahaStore";
+import { KasirSkeleton } from "@/components/ui/skeleton";
 
 /* ─── Types ─── */
 type StatusCMT = "pola-potong" | "proses-jahit" | "sablon-bordir" | "finishing-qc" | "siap-kirim";
@@ -115,7 +116,7 @@ export default function DashboardPakaianKonveksi() {
     toast.success("CSV SKU di-download");
   }, []);
 
-  if (!mounted) return <div className="min-h-[60vh]" />;
+  if (!mounted) return <KasirSkeleton />;
 
   return (
     <div className="max-w-2xl mx-auto pb-20 space-y-5 animate-fade-in">

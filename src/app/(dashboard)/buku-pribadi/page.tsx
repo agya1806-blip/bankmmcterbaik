@@ -8,6 +8,7 @@ import {
   Shield, Trash2, FileDown,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { CardSkeleton } from "@/components/ui/skeleton";
 
 /* ─── Types ─── */
 type TransType = "income" | "expense";
@@ -192,7 +193,7 @@ export default function BukuPribadiPage() {
     toast.success("Transaksi dihapus");
   }, []);
 
-  if (!mounted) return <div className="min-h-[60vh]" />;
+  if (!mounted) return <CardSkeleton />;
 
   return (
     <div className="max-w-2xl mx-auto pb-20 space-y-6 animate-fade-in">

@@ -8,6 +8,7 @@ import {
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../percetakan/store/useProfilUsahaStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
+import { ImgFromIdb } from "@/components/img-from-idb";
 
 /* ─── Types ─── */
 export interface BillItem {
@@ -225,7 +226,7 @@ ${profil.nama} — ${noRef || "MUGHIS BANK v3"}`;
                   <span className="text-gray-500">{pm.accountNo}</span>
                 </div>
                 {pm.qrisImageUrl && (
-                  <img src={pm.qrisImageUrl} alt="QRIS" className="size-10 rounded border border-gray-200 object-contain bg-white shrink-0" />
+                  <ImgFromIdb src={pm.qrisImageUrl} alt="QRIS" className="size-10 rounded border border-gray-200 object-contain bg-white shrink-0" />
                 )}
               </div>
             ))

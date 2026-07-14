@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
   LayoutDashboard, Briefcase, Wallet, FileText, Settings,
-  ChevronLeft, Printer, Smartphone, Coffee, Shirt, LogOut,
+  ChevronLeft, Printer, Smartphone, Coffee, Shirt, LogOut, Package, Zap,
   type LucideIcon
 } from "lucide-react";
 import { useAuthStore } from "@/engines/identity/auth-store";
@@ -31,7 +31,9 @@ const BIZ_ITEMS: NavItem[] = [
 
 const TOOL_ITEMS: NavItem[] = [
   { href: "/buku-usaha/dompet", label: "Dompet Kas", icon: Wallet },
+  { href: "/buku-usaha/inventory", label: "Manajemen Stok", icon: Package },
   { href: "/buku-usaha/laporan-keuangan", label: "Laporan Keuangan", icon: FileText },
+  { href: "/buku-usaha/template-cepat", label: "Template Cepat", icon: Zap },
   { href: "/buku-usaha/pengaturan", label: "Pengaturan", icon: Settings },
 ];
 

@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import InvoiceGadgetLaptopView, { GadgetOrderInvoiceData } from "../../components/InvoiceGadgetLaptopView";
 import { useProfilUsahaStore } from "../../percetakan/store/useProfilUsahaStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
+import { KasirSkeleton } from "@/components/ui/skeleton";
 
 /* ─── Types ─── */
 interface ProdukKatalog {
@@ -233,7 +234,7 @@ export default function KasirGadgetLaptop() {
       garansiLabel, statusBayar, tradeIn, subtotal, potonganTradeIn, total, dpNumber, sisa, profil.nama,
       imeiSn]);
 
-  if (!mounted) return <div className="min-h-[60vh]" />;
+  if (!mounted) return <KasirSkeleton />;
 
   return (
     <div className="pb-20 animate-fade-in">

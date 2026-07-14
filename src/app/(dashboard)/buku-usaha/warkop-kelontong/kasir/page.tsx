@@ -12,6 +12,7 @@ import BillWarkopKelontongView, {
   BillData, BillItem,
 } from "../../components/BillWarkopKelontongView";
 import { useBusinessStore } from "@/store/useBusinessStore";
+import { KasirSkeleton } from "@/components/ui/skeleton";
 
 /* ─── Types ─── */
 type KategoriMenu = "makanan" | "minuman" | "kelontong" | "rokok";
@@ -227,7 +228,7 @@ export default function KasirWarkopKelontong() {
     setBillData(null);
   }, []);
 
-  if (!mounted) return <div className="min-h-[60vh]" />;
+  if (!mounted) return <KasirSkeleton />;
 
   return (
     <div className="pb-20 animate-fade-in">

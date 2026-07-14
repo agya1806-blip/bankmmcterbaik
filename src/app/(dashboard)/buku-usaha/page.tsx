@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Printer, Smartphone, Coffee, Shirt, Wallet, Settings, BarChart3 } from "lucide-react";
+import { Printer, Smartphone, Coffee, Shirt, Wallet, Settings, BarChart3, Package, Users } from "lucide-react";
 
 const UNIT_LIST: { id: string; label: string; desc: string; icon: React.ElementType; grad: string; glow: string; route: string; }[] = [
   { id: "percetakan", label: "Percetakan", desc: "Digital Printing & Large Format", icon: Printer, grad: "from-indigo-500 to-purple-600", glow: "shadow-indigo-500/25", route: "/buku-usaha/percetakan/dashboard" },
@@ -52,7 +52,7 @@ export default function BukuUsahaPage() {
       </div>
 
       {/* Navigasi Tools */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <button onClick={() => router.push("/buku-usaha/dompet")}
           className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95 transition-all"
         >
@@ -60,6 +60,14 @@ export default function BukuUsahaPage() {
             <Wallet className="size-5 text-white" />
           </div>
           <span className="text-[10px] font-semibold">Dompet Kas</span>
+        </button>
+        <button onClick={() => router.push("/buku-usaha/inventory")}
+          className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95 transition-all"
+        >
+          <div className="size-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-md">
+            <Package className="size-5 text-white" />
+          </div>
+          <span className="text-[10px] font-semibold">Manajemen Stok</span>
         </button>
         <button onClick={() => router.push("/buku-usaha/laporan-keuangan")}
           className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95 transition-all"
@@ -69,10 +77,18 @@ export default function BukuUsahaPage() {
           </div>
           <span className="text-[10px] font-semibold">Laporan</span>
         </button>
-        <button onClick={() => router.push("/buku-usaha/pengaturan")}
+        <button onClick={() => router.push("/buku-usaha/pelanggan")}
           className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95 transition-all"
         >
           <div className="size-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-md">
+            <Users className="size-5 text-white" />
+          </div>
+          <span className="text-[10px] font-semibold">Pelanggan</span>
+        </button>
+        <button onClick={() => router.push("/buku-usaha/pengaturan")}
+          className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95 transition-all"
+        >
+          <div className="size-10 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center shadow-md">
             <Settings className="size-5 text-white" />
           </div>
           <span className="text-[10px] font-semibold">Pengaturan</span>

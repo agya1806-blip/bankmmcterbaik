@@ -10,6 +10,7 @@ import Header from "@/components/layout/header";
 import BottomNav from "@/components/layout/bottom-nav";
 import PWA from "@/components/pwa";
 import Reminder from "@/components/reminder";
+import OnboardingGuard from "@/components/onboarding-guard";
 
 const AUTH_ROUTES = ["/login", "/register"];
 
@@ -80,6 +81,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
+    <OnboardingGuard>
     <div className="min-h-screen bg-background">
       {mobileSidebarOpen && (
         <div
@@ -122,5 +124,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="lg:hidden h-[100px]" />
     </div>
+    </OnboardingGuard>
   );
 }

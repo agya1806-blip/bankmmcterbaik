@@ -6,6 +6,7 @@ import { useAuthStore } from "@/engines/identity/auth-store";
 import { useWorkspaceStore } from "@/engines/workspace/workspace-store";
 import { useFinancialStore } from "@/engines/financial/financial-store";
 import { useBusinessStore } from "@/store/useBusinessStore";
+import { KasirSkeleton } from "@/components/ui/skeleton";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
   DialogFooter,
@@ -84,7 +85,7 @@ export default function BukuKeuanganGlobal() {
   const router = useRouter();
   const { workspaces, createWorkspace } = useWorkspaceStore();
   const { accounts, transactions, loadAccounts, loadTransactions } = useFinancialStore();
-  const { sedekahBalance, ledgerDebts } = useBusinessStore();
+  const { sedekahBalance, ledgerDebts, wallets, paymentMethods } = useBusinessStore();
   const [mounted, setMounted] = useState(false);
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState("");
@@ -162,7 +163,7 @@ export default function BukuKeuanganGlobal() {
     }
   };
 
-  if (!mounted) return <div className="min-h-[60vh]" />;
+  if (!mounted) return <KasirSkeleton />;
 
   return (
     <div className="space-y-7 animate-fade-in max-w-2xl mx-auto pb-20">
@@ -254,6 +255,29 @@ export default function BukuKeuanganGlobal() {
         </div>
         <div className="size-12 rounded-full bg-muted/50 flex items-center justify-center">
           <Store className="size-5 text-muted-foreground/40" />
+        </div>
+      </div>
+
+      {/* ─── Ringkasan Bisnis ─── */}
+      <div className="floating-card p-4">
+        <h3 className="text-sm font-semibold mb-3">Ringkasan Bisnis</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div>
+            <p className="text-[10px] text-muted-foreground/60">Total Dompet</p>
+            <p className="text-lg font-bold tabular-nums">{wallets.length}</p>
+          </div>
+          <div>
+            <p className="text-[10px] text-muted-foreground/60">Total Saldo</p>
+            <p className="text-lg font-bold tabular-nums">IDR {wallets.reduce((s, w) => s + w.saldo, 0).toLocaleString()}</p>
+          </div>
+          <div>
+            <p className="text-[10px] text-muted-foreground/60">Metode Bayar</p>
+            <p className="text-lg font-bold tabular-nums">{paymentMethods.filter((p) => p.isEnabled).length}</p>
+          </div>
+          <div>
+            <p className="text-[10px] text-muted-foreground/60">Unit Bisnis</p>
+            <p className="text-lg font-bold tabular-nums">4</p>
+          </div>
         </div>
       </div>
 

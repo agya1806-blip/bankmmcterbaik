@@ -331,6 +331,38 @@ export interface DigitalMemo {
 }
 
 /* ══════════════════════════════════════════════════════════════
+   BUKU USAHA — INVENTORY / MANAJEMEN STOK
+   ══════════════════════════════════════════════════════════════ */
+
+export interface InventoryItem {
+  id: string;
+  unit: BizUnit;
+  sku: string;
+  nama: string;
+  kategori: string;
+  stok: number;
+  stokMin: number;
+  hargaModal: number;
+  hargaJual: number;
+  satuan: string;
+  catatan?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InventoryMutation {
+  id: string;
+  itemId: string;
+  tipe: "masuk" | "keluar" | "penyesuaian";
+  qty: number;
+  stokSebelum: number;
+  stokSesudah: number;
+  alasan: string;
+  referensi?: string;
+  createdAt: string;
+}
+
+/* ══════════════════════════════════════════════════════════════
    BUSINESS UNIT IDENTIFIER
    ══════════════════════════════════════════════════════════════ */
 
@@ -343,6 +375,43 @@ export const BIZ_UNIT_LABELS: Record<BizUnit, string> = {
   kedai_kopi: "Kedai Kopi",
   konveksi: "Konveksi",
 };
+
+/* ══════════════════════════════════════════════════════════════
+   QUICK ORDER TEMPLATES
+   ══════════════════════════════════════════════════════════════ */
+
+export interface QuickOrder {
+  id: string;
+  unit: BizUnit;
+  label: string;
+  items: { desc: string; price: number }[];
+  createdAt: string;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TIPE DATA — PELANGGAN & RIWAYAT
+   ══════════════════════════════════════════════════════════════ */
+
+export interface CustomerRecord {
+  id: string;
+  nama: string;
+  noWA: string;
+  totalTransaksi: number;
+  totalBelanja: number;
+  poin: number;
+  terakhirTransaksi: string;
+  createdAt: string;
+}
+
+export interface CustomerTransaction {
+  id: string;
+  customerId: string;
+  unit: BizUnit;
+  invoiceId: string;
+  total: number;
+  tanggal: string;
+  items: string;
+}
 
 /* ══════════════════════════════════════════════════════════════
    AKCENTHEME MAP
@@ -439,6 +508,14 @@ interface BusinessStore {
   addFashionSKU: (s: FashionSKU) => void;
   removeFashionSKU: (id: string) => void;
 
+  /* Buku Usaha — Inventory */
+  inventory: InventoryItem[];
+  inventoryMutations: InventoryMutation[];
+  addInventoryItem: (item: Omit<InventoryItem, "id" | "createdAt" | "updatedAt">) => void;
+  updateInventoryItem: (id: string, data: Partial<InventoryItem>) => void;
+  deleteInventoryItem: (id: string) => void;
+  adjustStok: (itemId: string, tipe: "masuk" | "keluar", qty: number, alasan: string, referensi?: string) => void;
+
   /* Buku Sedekah */
   sedekahBalance: SedekahBalance;
   distributions: Distribution[];
@@ -458,6 +535,20 @@ interface BusinessStore {
   addDigitalMemo: (m: DigitalMemo) => void;
   updateDigitalMemo: (id: string, m: Partial<DigitalMemo>) => void;
   removeDigitalMemo: (id: string) => void;
+
+  /* Quick Order Templates */
+  quickOrders: QuickOrder[];
+  addQuickOrder: (data: Omit<QuickOrder, "id" | "createdAt">) => void;
+  deleteQuickOrder: (id: string) => void;
+  getQuickOrdersByUnit: (unit: BizUnit) => QuickOrder[];
+
+  /* Pelanggan & Riwayat */
+  customers: CustomerRecord[];
+  customerTransactions: CustomerTransaction[];
+  addCustomerRecord: (data: Omit<CustomerRecord, "id" | "createdAt" | "totalTransaksi" | "totalBelanja" | "poin" | "terakhirTransaksi">) => string;
+  recordCustomerTransaction: (customerId: string, transaction: Omit<CustomerTransaction, "id">) => void;
+  getCustomerById: (id: string) => CustomerRecord | undefined;
+  getCustomerByWA: (wa: string) => CustomerRecord | undefined;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -712,6 +803,58 @@ export const useBusinessStore = create<BusinessStore>()(
           fashionSKUs: s.fashionSKUs.filter((sk) => sk.id !== id),
         })),
 
+      /* ─── Buku Usaha: Inventory ─── */
+      inventory: [],
+      inventoryMutations: [],
+      addInventoryItem: (item) =>
+        set((s) => ({
+          inventory: [
+            {
+              ...item,
+              id: genId(),
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            ...s.inventory,
+          ],
+        })),
+      updateInventoryItem: (id, data) =>
+        set((s) => ({
+          inventory: s.inventory.map((i) =>
+            i.id === id ? { ...i, ...data, updatedAt: new Date().toISOString() } : i
+          ),
+        })),
+      deleteInventoryItem: (id) =>
+        set((s) => ({
+          inventory: s.inventory.filter((i) => i.id !== id),
+        })),
+      adjustStok: (itemId, tipe, qty, alasan, referensi) => {
+        const item = get().inventory.find((i) => i.id === itemId);
+        if (!item) return;
+        const stokSebelum = item.stok;
+        const stokSesudah =
+          tipe === "masuk" ? item.stok + qty : Math.max(0, item.stok - qty);
+        const mutasi: InventoryMutation = {
+          id: genId(),
+          itemId,
+          tipe,
+          qty,
+          stokSebelum,
+          stokSesudah,
+          alasan,
+          referensi,
+          createdAt: new Date().toISOString(),
+        };
+        set((s) => ({
+          inventory: s.inventory.map((i) =>
+            i.id === itemId
+              ? { ...i, stok: stokSesudah, updatedAt: new Date().toISOString() }
+              : i
+          ),
+          inventoryMutations: [mutasi, ...s.inventoryMutations],
+        }));
+      },
+
       /* ─── Buku Sedekah ─── */
       sedekahBalance: { ...INITIAL_SEDEKAH },
       distributions: [],
@@ -766,6 +909,63 @@ export const useBusinessStore = create<BusinessStore>()(
         set((s) => ({
           digitalMemos: s.digitalMemos.filter((m) => m.id !== id),
         })),
+
+      /* ─── Quick Order Templates ─── */
+      quickOrders: [],
+      addQuickOrder: (data) => {
+        const id = genId();
+        const order: QuickOrder = {
+          id,
+          ...data,
+          createdAt: new Date().toISOString(),
+        };
+        set((s) => ({ quickOrders: [order, ...s.quickOrders] }));
+      },
+      deleteQuickOrder: (id) =>
+        set((s) => ({ quickOrders: s.quickOrders.filter((q) => q.id !== id) })),
+      getQuickOrdersByUnit: (unit) => get().quickOrders.filter((q) => q.unit === unit),
+
+      /* ─── Pelanggan & Riwayat ─── */
+      customers: [],
+      customerTransactions: [],
+      addCustomerRecord: (data) => {
+        const id = genId();
+        const now = new Date().toISOString();
+        const record: CustomerRecord = {
+          id,
+          ...data,
+          totalTransaksi: 0,
+          totalBelanja: 0,
+          poin: 0,
+          terakhirTransaksi: now,
+          createdAt: now,
+        };
+        set((s) => ({ customers: [record, ...s.customers] }));
+        return id;
+      },
+      recordCustomerTransaction: (customerId, transaction) => {
+        const tx: CustomerTransaction = {
+          id: genId(),
+          ...transaction,
+        };
+        const cust = get().customers.find((c) => c.id === customerId);
+        set((s) => ({
+          customerTransactions: [tx, ...s.customerTransactions],
+          customers: s.customers.map((c) =>
+            c.id === customerId
+              ? {
+                  ...c,
+                  totalTransaksi: c.totalTransaksi + 1,
+                  totalBelanja: c.totalBelanja + transaction.total,
+                  poin: c.poin + Math.floor(transaction.total / 10000),
+                  terakhirTransaksi: transaction.tanggal,
+                }
+              : c
+          ),
+        }));
+      },
+      getCustomerById: (id) => get().customers.find((c) => c.id === id),
+      getCustomerByWA: (wa) => get().customers.find((c) => c.noWA === wa),
     }),
     {
       name: "mmcbank-business-store-v3",

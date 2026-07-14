@@ -7,6 +7,7 @@ import {
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../percetakan/store/useProfilUsahaStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
+import { ImgFromIdb } from "@/components/img-from-idb";
 
 /* ─── Types ─── */
 export interface InvoiceItem {
@@ -289,7 +290,7 @@ Terima kasih — ${profil.nama}`;
                 </div>
                 {pm.qrisImageUrl && (
                   <div className="shrink-0">
-                    <img src={pm.qrisImageUrl} alt="QRIS" className="size-16 rounded-lg border border-gray-200 object-contain bg-white" />
+                    <ImgFromIdb src={pm.qrisImageUrl} alt="QRIS" className="size-16 rounded-lg border border-gray-200 object-contain bg-white" />
                   </div>
                 )}
               </div>

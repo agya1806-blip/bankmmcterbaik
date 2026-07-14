@@ -7,10 +7,14 @@ import {
   Phone, MapPin, List, Loader2, Trash2, X, Plus,
   CreditCard, Banknote, Palette, CheckCircle2,
   Users, Fingerprint, Shield,
+  Download, Database, AlertTriangle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useBusinessStore, ACCENT_THEMES, AccentColor, PaymentMethod, BIZ_UNIT_LABELS, type BizUnit } from "@/store/useBusinessStore";
 import { useRoleStore, type Role } from "@/store/useRoleStore";
+import { CardSkeleton } from "@/components/ui/skeleton";
+import { exportBackup, importBackup } from "@/lib/backup";
+import { saveImage, getImage, deleteImage, isRefKey } from "@/lib/image-store";
 
 function genId(): string {
   return `pm_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -23,7 +27,7 @@ export default function PengaturanBukuUsaha() {
   const { pinUsers, currentPinUserId, addPinUser, removePinUser, updatePinUser, logoutPin } = useRoleStore();
 
   const [mounted, setMounted] = useState(false);
-  const [tab, setTab] = useState<"profil" | "payment" | "tema" | "users">("profil");
+  const [tab, setTab] = useState<"profil" | "payment" | "tema" | "users" | "backup">("profil");
   const [loading, setLoading] = useState(false);
 
   /* ─── Tab 1: Profil ─── */
@@ -44,6 +48,9 @@ export default function PengaturanBukuUsaha() {
   const [pmQrisUrl, setPmQrisUrl] = useState("");
   const [pmEditId, setPmEditId] = useState<string | null>(null);
   const qrisInputRef = useRef<HTMLInputElement>(null);
+  const [pmQrisPreview, setPmQrisPreview] = useState("");
+  const [newPmId, setNewPmId] = useState<string | null>(null);
+  const [resolvedQris, setResolvedQris] = useState<Record<string, string>>({});
 
   /* ─── Tab 4: Users ─── */
   const [newUName, setNewUName] = useState("");
@@ -53,17 +60,58 @@ export default function PengaturanBukuUsaha() {
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const toggleUnit = (u: BizUnit) => setNewUUnits((prev) => prev.includes(u) ? prev.filter((x) => x !== u) : [...prev, u]);
 
+  /* ─── Tab 5: Backup ─── */
+  const [backupLoading, setBackupLoading] = useState(false);
+  const [restoreLoading, setRestoreLoading] = useState(false);
+  const backupFileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => setMounted(true), []);
 
-  /* Sync store → local when tab changes */
+  /* Resolve pmQrisUrl (key) → actual dataUrl for form preview */
   useEffect(() => {
-    const p = useBusinessStore.getState().profile;
-    setLocalLogo(p.logoUrl);
-    setLocalNama(p.namaUsaha);
-    setLocalAlamat(p.alamat);
-    setLocalWA(p.noWhatsapp);
-    setLocalSlogan(p.slogan);
-    setLocalSubLayanan([...p.subLayanan]);
+    if (!pmQrisUrl) { setPmQrisPreview(""); return; }
+    if (isRefKey(pmQrisUrl)) {
+      getImage(pmQrisUrl).then((img) => { if (img) setPmQrisPreview(img); }).catch(() => setPmQrisPreview(""));
+    } else {
+      setPmQrisPreview(pmQrisUrl);
+    }
+  }, [pmQrisUrl]);
+
+  /* Resolve all QRIS image keys in the payment list for display */
+  useEffect(() => {
+    const resolveAll = async () => {
+      const map: Record<string, string> = {};
+      for (const pm of paymentMethods) {
+        if (!pm.qrisImageUrl) continue;
+        if (isRefKey(pm.qrisImageUrl)) {
+          const img = await getImage(pm.qrisImageUrl).catch(() => null);
+          if (img) map[pm.id] = img;
+        } else {
+          map[pm.id] = pm.qrisImageUrl;
+        }
+      }
+      setResolvedQris(map);
+    };
+    resolveAll();
+  }, [paymentMethods]);
+
+  /* Sync store → local when tab changes (resolve logo key from IDB) */
+  useEffect(() => {
+    const sync = async () => {
+      const p = useBusinessStore.getState().profile;
+      if (p.logoUrl && isRefKey(p.logoUrl)) {
+        const img = await getImage(p.logoUrl).catch(() => null);
+        setLocalLogo(img || p.logoUrl);
+      } else {
+        setLocalLogo(p.logoUrl);
+      }
+      setLocalNama(p.namaUsaha);
+      setLocalAlamat(p.alamat);
+      setLocalWA(p.noWhatsapp);
+      setLocalSlogan(p.slogan);
+      setLocalSubLayanan([...p.subLayanan]);
+    };
+    sync();
   }, [tab]);
 
   /* ─── Profil Handlers ─── */
@@ -72,14 +120,18 @@ export default function PengaturanBukuUsaha() {
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { toast.error("Maksimal 2MB"); return; }
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       const dataUrl = ev.target?.result as string;
-      setLocalLogo(dataUrl);
+      if (dataUrl) {
+        await saveImage("logo", dataUrl);
+        setLocalLogo(dataUrl);
+      }
     };
     reader.readAsDataURL(file);
   }, []);
 
-  const handleHapusLogo = useCallback(() => {
+  const handleHapusLogo = useCallback(async () => {
+    await deleteImage("logo").catch(() => {});
     setLocalLogo("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, []);
@@ -101,7 +153,7 @@ export default function PengaturanBukuUsaha() {
     setLoading(true);
     const cleanWA = localWA.replace(/[^0-9]/g, "");
     const intlWA = cleanWA.startsWith("0") ? "62" + cleanWA.slice(1) : cleanWA.startsWith("62") ? cleanWA : "62" + cleanWA;
-    store.setProfileLogo(localLogo);
+    store.setProfileLogo(localLogo ? "logo" : "");
     store.setProfileNama(localNama);
     store.setProfileAlamat(localAlamat);
     store.setProfileWhatsapp(intlWA);
@@ -117,34 +169,58 @@ export default function PengaturanBukuUsaha() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { toast.error("Maksimal 2MB"); return; }
+    const id = pmEditId || genId();
+    const key = `qris-${id}`;
     const reader = new FileReader();
-    reader.onload = (ev) => setPmQrisUrl(ev.target?.result as string || "");
+    reader.onload = async (ev) => {
+      const dataUrl = ev.target?.result as string;
+      if (dataUrl) {
+        await saveImage(key, dataUrl);
+        setPmQrisUrl(key);
+        if (!pmEditId) setNewPmId(id);
+      }
+    };
     reader.readAsDataURL(file);
-  }, []);
+  }, [pmEditId]);
 
   const resetPmForm = useCallback(() => {
-    setPmNama(""); setPmBank(""); setPmNoRek(""); setPmAn(""); setPmQrisUrl(""); setPmEditId(null);
+    setPmNama(""); setPmBank(""); setPmNoRek(""); setPmAn(""); setPmQrisUrl(""); setPmEditId(null); setNewPmId(null);
   }, []);
 
-  const handleSimpanPayment = useCallback(() => {
+  const handleSimpanPayment = useCallback(async () => {
     if (!pmNama.trim() || !pmNoRek.trim()) { toast.error("Nama metode & No Rekening wajib diisi"); return; }
+    let finalQrisUrl = pmQrisUrl;
+    if (finalQrisUrl && !isRefKey(finalQrisUrl)) {
+      const id = pmEditId || newPmId || genId();
+      const key = `qris-${id}`;
+      await saveImage(key, finalQrisUrl).catch(() => {});
+      finalQrisUrl = key;
+      if (!pmEditId && !newPmId) setNewPmId(id);
+    }
     if (pmEditId) {
-      store.updatePaymentMethod(pmEditId, { namaMetode: pmNama, bankName: pmBank, accountNo: pmNoRek, accountName: pmAn, qrisImageUrl: pmQrisUrl });
+      store.updatePaymentMethod(pmEditId, { namaMetode: pmNama, bankName: pmBank, accountNo: pmNoRek, accountName: pmAn, qrisImageUrl: finalQrisUrl });
       toast.success("Metode pembayaran diperbarui");
     } else {
-      store.addPaymentMethod({ id: genId(), namaMetode: pmNama, bankName: pmBank, accountNo: pmNoRek, accountName: pmAn, qrisImageUrl: pmQrisUrl, isEnabled: true });
+      const id = newPmId || genId();
+      store.addPaymentMethod({ id, namaMetode: pmNama, bankName: pmBank, accountNo: pmNoRek, accountName: pmAn, qrisImageUrl: finalQrisUrl, isEnabled: true });
       toast.success("Metode pembayaran ditambahkan");
     }
     resetPmForm();
-  }, [pmNama, pmBank, pmNoRek, pmAn, pmQrisUrl, pmEditId, store]);
+  }, [pmNama, pmBank, pmNoRek, pmAn, pmQrisUrl, pmEditId, newPmId, store]);
 
-  const handleEditPm = useCallback((pm: PaymentMethod) => {
+  const handleEditPm = useCallback(async (pm: PaymentMethod) => {
     setPmNama(pm.namaMetode);
     setPmBank(pm.bankName);
     setPmNoRek(pm.accountNo);
     setPmAn(pm.accountName);
-    setPmQrisUrl(pm.qrisImageUrl);
     setPmEditId(pm.id);
+    if (pm.qrisImageUrl && !isRefKey(pm.qrisImageUrl)) {
+      const key = `qris-${pm.id}`;
+      await saveImage(key, pm.qrisImageUrl).catch(() => {});
+      setPmQrisUrl(key);
+    } else {
+      setPmQrisUrl(pm.qrisImageUrl);
+    }
   }, []);
 
   /* ─── Theme Handlers ─── */
@@ -153,9 +229,73 @@ export default function PengaturanBukuUsaha() {
     toast.success(`Tema diubah ke ${ACCENT_THEMES[color].label}`);
   }, [store]);
 
-  if (!mounted) return <div className="min-h-[60vh]" />;
+  /* ─── Backup Handlers ─── */
+  const handleDownloadBackup = useCallback(async () => {
+    setBackupLoading(true);
+    try {
+      const indexedDbData = await exportBackup();
+      const lsBusiness = localStorage.getItem("mmcbank-business-store-v3");
+      const lsRole = localStorage.getItem("mmcbank-role-store");
+      const lsTheme = localStorage.getItem("mmcbank-theme");
+      const combined = {
+        version: "1.0",
+        date: new Date().toISOString(),
+        indexedDB: indexedDbData,
+        localStorage: {
+          "mmcbank-business-store-v3": lsBusiness ? JSON.parse(lsBusiness) : null,
+          "mmcbank-role-store": lsRole ? JSON.parse(lsRole) : null,
+          "mmcbank-theme": lsTheme ? JSON.parse(lsTheme) : null,
+        },
+      };
+      const blob = new Blob([JSON.stringify(combined, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `mmcbank-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Backup berhasil diunduh");
+    } catch (err) {
+      toast.error("Gagal membuat backup: " + (err instanceof Error ? err.message : "Unknown error"));
+    } finally {
+      setBackupLoading(false);
+    }
+  }, []);
 
-  const tabButton = (key: "profil" | "payment" | "tema" | "users", label: string, icon: React.ElementType) => {
+  const handleRestoreBackup = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setRestoreLoading(true);
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!data.indexedDB || !data.localStorage) {
+        toast.error("Format file backup tidak valid");
+        return;
+      }
+      const results = await importBackup(data.indexedDB);
+      if (data.localStorage["mmcbank-business-store-v3"]) {
+        localStorage.setItem("mmcbank-business-store-v3", JSON.stringify(data.localStorage["mmcbank-business-store-v3"]));
+      }
+      if (data.localStorage["mmcbank-role-store"]) {
+        localStorage.setItem("mmcbank-role-store", JSON.stringify(data.localStorage["mmcbank-role-store"]));
+      }
+      if (data.localStorage["mmcbank-theme"]) {
+        localStorage.setItem("mmcbank-theme", JSON.stringify(data.localStorage["mmcbank-theme"]));
+      }
+      toast.success(`Restore berhasil! ${results.length} penyimpanan dipulihkan.`);
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (err) {
+      toast.error("Gagal restore: " + (err instanceof Error ? err.message : "Format tidak valid"));
+    } finally {
+      setRestoreLoading(false);
+      if (backupFileInputRef.current) backupFileInputRef.current.value = "";
+    }
+  }, []);
+
+  if (!mounted) return <CardSkeleton />;
+
+  const tabButton = (key: "profil" | "payment" | "tema" | "users" | "backup", label: string, icon: React.ElementType) => {
     const Ico = icon;
     const aktif = tab === key;
     return (
@@ -197,6 +337,7 @@ export default function PengaturanBukuUsaha() {
         {tabButton("payment", "Pembayaran & QRIS", CreditCard)}
         {tabButton("tema", "Tema Visual", Palette)}
         {tabButton("users", "Pengguna", Users)}
+        {tabButton("backup", "Cadangan Data", Database)}
       </div>
 
       {/* ══════════════════════════════════════════════════
@@ -363,8 +504,11 @@ export default function PengaturanBukuUsaha() {
                 </label>
                 {pmQrisUrl && (
                   <div className="flex items-center gap-2">
-                    <img src={pmQrisUrl} alt="QRIS" className="size-10 rounded-lg object-contain border border-border/40" />
-                    <button type="button" onClick={() => setPmQrisUrl("")} className="text-[9px] text-rose-500 hover:text-rose-600">
+                    <img src={pmQrisPreview} alt="QRIS" className="size-10 rounded-lg object-contain border border-border/40" />
+                    <button type="button" onClick={() => {
+                      if (pmQrisUrl && isRefKey(pmQrisUrl)) deleteImage(pmQrisUrl).catch(() => {});
+                      setPmQrisUrl("");
+                    }} className="text-[9px] text-rose-500 hover:text-rose-600">
                       <Trash2 className="size-3" />
                     </button>
                   </div>
@@ -403,8 +547,8 @@ export default function PengaturanBukuUsaha() {
                       <p className="text-xs font-medium">{pm.namaMetode}</p>
                       <p className="text-[9px] text-muted-foreground/50">{pm.bankName} — {pm.accountNo}</p>
                       {pm.accountName && <p className="text-[9px] text-muted-foreground/40">a.n {pm.accountName}</p>}
-                      {pm.qrisImageUrl && (
-                        <img src={pm.qrisImageUrl} alt="QRIS" className="size-8 mt-1 rounded-lg border border-border/30 object-contain" />
+                      {resolvedQris[pm.id] && (
+                        <img src={resolvedQris[pm.id]} alt="QRIS" className="size-8 mt-1 rounded-lg border border-border/30 object-contain" />
                       )}
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -416,7 +560,10 @@ export default function PengaturanBukuUsaha() {
                       <button onClick={() => handleEditPm(pm)} className="size-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-violet-500/10 text-muted-foreground/40 hover:text-violet-500 transition-all">
                         <Settings className="size-3" />
                       </button>
-                      <button onClick={() => { store.removePaymentMethod(pm.id); toast.success("Metode dihapus"); }}
+                      <button onClick={() => {
+                        if (pm.qrisImageUrl && isRefKey(pm.qrisImageUrl)) deleteImage(pm.qrisImageUrl).catch(() => {});
+                        store.removePaymentMethod(pm.id); toast.success("Metode dihapus");
+                      }}
                         className="size-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-rose-500/10 text-muted-foreground/40 hover:text-rose-500 transition-all">
                         <Trash2 className="size-3" />
                       </button>
@@ -614,6 +761,62 @@ export default function PengaturanBukuUsaha() {
             >
               {editingUserId ? "Simpan Perubahan" : "Tambah Pengguna"}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════
+          TAB 5: BACKUP & RESTORE (CADANGAN DATA)
+          ══════════════════════════════════════════════════ */}
+      {tab === "backup" && (
+        <div className="space-y-5">
+          {/* Download Backup */}
+          <div className="floating-card p-5 space-y-4">
+            <p className="text-xs font-semibold flex items-center gap-1.5">
+              <Download className="size-3.5 text-violet-500" /> Download Backup
+            </p>
+            <p className="text-[10px] text-muted-foreground/60">
+              Unduh semua data bisnis, dompet, transaksi, dan pengaturan ke dalam satu file JSON.
+            </p>
+            <button onClick={handleDownloadBackup} disabled={backupLoading}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white text-xs font-bold shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {backupLoading ? <><Loader2 className="size-4 animate-spin" /> Memproses...</> : <><Download className="size-4" /> Download Backup</>}
+            </button>
+          </div>
+
+          {/* Restore Backup */}
+          <div className="floating-card p-5 space-y-4">
+            <p className="text-xs font-semibold flex items-center gap-1.5">
+              <Upload className="size-3.5 text-violet-500" /> Restore dari Backup
+            </p>
+            <p className="text-[10px] text-muted-foreground/60">
+              Pilih file backup JSON yang sebelumnya telah diunduh untuk mengembalikan data.
+            </p>
+            <input
+              ref={backupFileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleRestoreBackup}
+              disabled={restoreLoading}
+              className="hidden"
+              id="backup-upload"
+            />
+            <label htmlFor="backup-upload"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-muted-foreground/20 text-xs text-muted-foreground/60 hover:border-violet-500/50 hover:text-violet-500 transition-all cursor-pointer"
+            >
+              {restoreLoading ? <><Loader2 className="size-4 animate-spin" /> Memulihkan...</> : <><Upload className="size-4" /> Pilih File Backup</>}
+            </label>
+          </div>
+
+          {/* Warning */}
+          <div className="floating-card p-4 space-y-2 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-500/20">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="size-4 text-amber-500 shrink-0 mt-0.5" />
+              <p className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">
+                Backup mencakup semua data bisnis, dompet, dan pengaturan. Restore akan menimpa data yang ada.
+              </p>
+            </div>
           </div>
         </div>
       )}

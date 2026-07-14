@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../store/useProfilUsahaStore";
+import { KasirSkeleton } from "@/components/ui/skeleton";
 
 /* ─── Types ─── */
 type StatusAntrean = "antrean-desain" | "proses-cetak" | "finishing" | "selesai";
@@ -122,7 +123,7 @@ export default function DashboardPercetakan() {
     toast.success("File CSV laporan di-download");
   }, [orders]);
 
-  if (!mounted) return <div className="min-h-[60vh]" />;
+  if (!mounted) return <KasirSkeleton />;
 
   return (
     <div className="max-w-2xl mx-auto pb-20 space-y-5 animate-fade-in">

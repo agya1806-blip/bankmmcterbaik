@@ -8,6 +8,9 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../store/useProfilUsahaStore";
+import { CardSkeleton } from "@/components/ui/skeleton";
+import { saveImage, getImage, deleteImage, isRefKey } from "@/lib/image-store";
+import { ImgFromIdb } from "@/components/img-from-idb";
 
 export default function PengaturanProfil() {
   const router = useRouter();
@@ -22,6 +25,13 @@ export default function PengaturanProfil() {
 
   useEffect(() => setMounted(true), []);
 
+  /* Resolve logo key from IDB on mount */
+  useEffect(() => {
+    if (profil.logo && isRefKey(profil.logo)) {
+      getImage(profil.logo).then((img) => { if (img) setPreviewLogo(img); }).catch(() => {});
+    }
+  }, []);
+
   const handleLogoUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -31,18 +41,22 @@ export default function PengaturanProfil() {
         return;
       }
       const reader = new FileReader();
-      reader.onload = (ev) => {
+      reader.onload = async (ev) => {
         const dataUrl = ev.target?.result as string;
-        setPreviewLogo(dataUrl);
-        setLogo(dataUrl);
-        toast.success("Logo berhasil diupload");
+        if (dataUrl) {
+          await saveImage("logo", dataUrl);
+          setPreviewLogo(dataUrl);
+          setLogo("logo");
+          toast.success("Logo berhasil diupload");
+        }
       };
       reader.readAsDataURL(file);
     },
     [setLogo]
   );
 
-  const handleHapusLogo = useCallback(() => {
+  const handleHapusLogo = useCallback(async () => {
+    await deleteImage("logo").catch(() => {});
     setPreviewLogo("");
     setLogo("");
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -72,7 +86,7 @@ export default function PengaturanProfil() {
     []
   );
 
-  if (!mounted) return <div className="min-h-[60vh]" />;
+  if (!mounted) return <CardSkeleton />;
 
   return (
     <div className="max-w-2xl mx-auto pb-20 space-y-6 animate-fade-in">
@@ -114,7 +128,7 @@ export default function PengaturanProfil() {
           <div className="flex items-center gap-4">
             <div className="size-20 rounded-2xl border-2 border-dashed border-muted-foreground/20 flex items-center justify-center overflow-hidden bg-muted/10 shrink-0">
               {previewLogo ? (
-                <img src={previewLogo} alt="Logo" className="size-full object-contain p-1" />
+                <ImgFromIdb src={previewLogo} alt="Logo" className="size-full object-contain p-1" />
               ) : (
                 <Building2 className="size-8 text-muted-foreground/30" />
               )}

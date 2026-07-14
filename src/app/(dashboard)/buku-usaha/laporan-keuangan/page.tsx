@@ -3,9 +3,10 @@
 import { useEffect, useState, useMemo } from "react";
 import {
   Wallet, BarChart3, Printer, Smartphone, Coffee, Shirt,
-  ArrowUpRight, DollarSign, Receipt, Clock, Layers,
+  ArrowUpRight, DollarSign, Receipt, Clock, Layers, Download,
 } from "lucide-react";
 import { useBusinessStore, type BizUnit, BIZ_UNIT_LABELS } from "@/store/useBusinessStore";
+import { CardSkeleton } from "@/components/ui/skeleton";
 
 const BIZ_COLORS: Record<BizUnit, string> = {
   percetakan: "from-indigo-500 to-purple-600",
@@ -71,7 +72,7 @@ export default function LaporanKeuangan() {
     return m;
   }, [wallets]);
 
-  if (!mounted) return <div className="min-h-[60vh]" />;
+  if (!mounted) return <div className="grid grid-cols-1 md:grid-cols-3 gap-4"><CardSkeleton /><CardSkeleton /><CardSkeleton /></div>;
 
   return (
     <div className="max-w-2xl mx-auto pb-20 space-y-6 animate-fade-in">
@@ -118,6 +119,54 @@ export default function LaporanKeuangan() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Export Buttons */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => {
+            const rows: string[][] = [];
+            const push = (r: string[]) => rows.push(r);
+            push(["Laporan Keuangan MMCBank", "", "", ""]);
+            push(["Tanggal", new Date().toLocaleDateString("id-ID"), "", ""]);
+            push([]);
+            push(["Total Kas", formatRupiah(agg.totalKas), "", ""]);
+            wallets.forEach((w) => {
+              push(["", w.namaDompet, formatRupiah(w.saldo), w.tipe]);
+            });
+            push([]);
+            push(["Unit Bisnis", "Revenue", "Modal", "Laba"]);
+            (Object.entries(BIZ_UNIT_LABELS) as [BizUnit, string][]).forEach(([key, label]) => {
+              const u = agg.perUnit[key];
+              push([label, formatRupiah(u.revenue), formatRupiah(u.modal), formatRupiah(u.laba)]);
+            });
+            push([]);
+            push(["Total", formatRupiah(agg.totalRevenue), formatRupiah(agg.totalModal), formatRupiah(agg.labaKotor)]);
+            push([]);
+            push(["Mutasi Transfer Terbaru", "", "", ""]);
+            push(["Dari", "Ke", "Nominal", "Alasan"]);
+            recentMutasi.forEach((m) => {
+              push([walletMap.get(m.dariWalletId) || "?", walletMap.get(m.keWalletId) || "?", formatRupiah(m.nominal), m.alasan]);
+            });
+            const csv = rows.map((r) => r.join(",")).join("\n");
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `laporan-keuangan-${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-semibold transition-colors"
+        >
+          <Download className="size-3.5" /> Export CSV
+        </button>
+        <button
+          onClick={() => window.print()}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 text-xs font-semibold transition-colors"
+        >
+          <Download className="size-3.5" /> Export PDF
+        </button>
       </div>
 
       {/* Breakdown Per Unit Bisnis */}

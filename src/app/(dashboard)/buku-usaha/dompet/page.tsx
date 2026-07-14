@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useBusinessStore, WalletTipe } from "@/store/useBusinessStore";
+import { CardSkeleton } from "@/components/ui/skeleton";
 
 function formatRupiah(n: number) {
   return `IDR ${n.toLocaleString("id-ID")}`;
@@ -91,7 +92,7 @@ export default function DompetPage() {
     toast.success(`Dompet ${nama} dihapus`);
   }, [wallets.length, store]);
 
-  if (!mounted) return <div className="min-h-[60vh]" />;
+  if (!mounted) return <div className="grid grid-cols-2 gap-4"><CardSkeleton /><CardSkeleton /></div>;
 
   const tabBtn = (key: "grid" | "transfer" | "tambah", label: string, icon: React.ElementType) => {
     const Ico = icon;

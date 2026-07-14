@@ -12,6 +12,7 @@ import InvoicePakaianKonveksiView, {
 } from "../../components/InvoicePakaianKonveksiView";
 import { useProfilUsahaStore } from "../../percetakan/store/useProfilUsahaStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
+import { KasirSkeleton } from "@/components/ui/skeleton";
 
 /* ─── Types ─── */
 type ModeKasir = "ready" | "custom";
@@ -264,9 +265,7 @@ export default function KasirPakaianKonveksi() {
     setInvoiceId("");
   }, []);
 
-  if (!mounted) return <div className="min-h-[60vh]" />;
-
-  if (!mounted) return <div className="min-h-[60vh]" />;
+  if (!mounted) return <KasirSkeleton />;
 
   return (
     <div className="pb-20 animate-fade-in">

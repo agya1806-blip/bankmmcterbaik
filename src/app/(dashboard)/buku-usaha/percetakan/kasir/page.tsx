@@ -4,13 +4,15 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Printer, Ruler, BookOpen, ArrowLeft, Search,
-  CheckCircle2, User, DollarSign,
+  CheckCircle2, User, DollarSign, Trash2, Save,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import InvoicePercetakanView, {
   OrderInvoiceData,
 } from "../../components/InvoicePercetakanView";
 import { useBusinessStore } from "@/store/useBusinessStore";
+import { KasirSkeleton } from "@/components/ui/skeleton";
+import QuickOrder from "@/components/quick-order";
 
 /* ─── Types ─── */
 type ModeCetak = "meteran" | "buku";
@@ -135,10 +137,13 @@ export default function KasirPercetakan() {
   /* DP */
   const [dp, setDP] = useState("");
 
+  /* Cart items from quick orders */
+  const [cartItems, setCartItems] = useState<{ desc: string; price: number }[]>([]);
+
   /* Generated invoice ID */
   const [invoiceId, setInvoiceId] = useState("");
   const [showInvoice, setShowInvoice] = useState(false);
-  const { wallets, tambahSaldoWallet, kurangiSaldoWallet } = useBusinessStore();
+  const { wallets, tambahSaldoWallet, kurangiSaldoWallet, addCustomerRecord, recordCustomerTransaction, getCustomerByWA, addQuickOrder, deleteQuickOrder } = useBusinessStore();
   const [walletPenerimaanId, setWalletPenerimaanId] = useState(wallets[0]?.id || "wallet-kas");
   const [walletModalId, setWalletModalId] = useState(wallets[1]?.id || "wallet-bsi");
 
@@ -199,6 +204,25 @@ export default function KasirPercetakan() {
 
     const id = invoiceId || generateId();
     setInvoiceId(id);
+
+    /* ─── Catat pelanggan ─── */
+    if (customerWA) {
+      let cust = getCustomerByWA(customerWA);
+      if (!cust) {
+        const custId = addCustomerRecord({ nama: customerNama, noWA: customerWA });
+        cust = { id: custId, nama: customerNama, noWA: customerWA, totalTransaksi: 0, totalBelanja: 0, poin: 0, terakhirTransaksi: "", createdAt: "" };
+      }
+      recordCustomerTransaction(cust.id, {
+        customerId: cust.id,
+        unit: "percetakan",
+        invoiceId: id,
+        total: Math.round(totalJual),
+        tanggal: todayISO(),
+        items: mode === "meteran"
+          ? `${bahanTerpilih.label} ${mPanjang}x${mLebar}m x${mQty}`
+          : `Buku ${bHalaman}hlm ${kertasTerpilih.label} x${bQty}`,
+      });
+    }
 
     /* ─── Tampilkan invoice ─── */
     setShowInvoice(true);
@@ -284,7 +308,7 @@ export default function KasirPercetakan() {
       bCetakIsi, coverTerpilih, bLaminasi, jilidTerpilih, bQty, invoiceId, customerNama,
       customerWA, totalJual, dpNumber, sisa]);
 
-  if (!mounted) return <div className="min-h-[60vh]" />;
+  if (!mounted) return <KasirSkeleton />;
 
   /* ─── RENDER (50:50 Split-Screen) ─── */
   return (
@@ -318,6 +342,33 @@ export default function KasirPercetakan() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 px-4">
         {/* ═══ SISI KIRI: FORM INPUT ═══ */}
         <div className="space-y-4 overflow-y-auto max-h-[calc(100vh-10rem)] pr-1">
+          {/* ─── Quick Order Templates ─── */}
+          <QuickOrder
+            unit="percetakan"
+            onSelect={(items) => {
+              setCartItems((prev) => [...prev, ...items]);
+              toast.success(`${items.length} item ditambahkan dari template`);
+            }}
+          />
+
+          {/* ─── Cart Items ─── */}
+          {cartItems.length > 0 && (
+            <div className="floating-card p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold">Keranjang ({cartItems.length})</p>
+                <button onClick={() => setCartItems([])} className="text-[10px] text-red-500 hover:text-red-600 flex items-center gap-1">
+                  <Trash2 className="size-3" /> Hapus Semua
+                </button>
+              </div>
+              {cartItems.map((item, i) => (
+                <div key={i} className="flex items-center justify-between text-[10px] py-1.5 border-b border-border/20 last:border-0">
+                  <span className="flex-1 truncate mr-2">{item.desc}</span>
+                  <span className="font-semibold tabular-nums text-emerald-600 shrink-0">Rp {item.price.toLocaleString("id-ID")}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* ─── Toggle Mode ─── */}
           <div className="flex gap-2">
             {([
@@ -552,6 +603,24 @@ export default function KasirPercetakan() {
               </div>
             )}
           </div>
+
+          {/* ─── Simpan sebagai Template ─── */}
+          {totalJual > 0 && (
+            <button
+              onClick={() => {
+                const label = prompt("Nama template pesanan cepat:");
+                if (!label?.trim()) return;
+                const desc = mode === "meteran"
+                  ? `${bahanTerpilih.label} ${mPanjang}x${mLebar}m x${mQty}`
+                  : `Buku ${bHalaman}hlm ${kertasTerpilih.label} x${bQty}`;
+                addQuickOrder({ unit: "percetakan", label: label.trim(), items: [{ desc, price: Math.round(totalJual) }] });
+                toast.success(`Template "${label.trim()}" disimpan`);
+              }}
+              className="w-full py-2.5 rounded-xl border border-dashed border-muted-foreground/20 text-muted-foreground/50 hover:text-indigo-500 hover:border-indigo-500/30 text-[10px] font-medium transition-all flex items-center justify-center gap-2"
+            >
+              <Save className="size-3.5" /> Simpan sebagai Template Cepat
+            </button>
+          )}
 
           {/* ─── SIMPAN ─── */}
           <button onClick={handleSimpan}

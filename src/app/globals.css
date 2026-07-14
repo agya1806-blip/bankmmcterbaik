@@ -308,7 +308,8 @@
 
 @media print {
   body * { visibility: hidden; }
-  .print-area, .print-area * { visibility: visible; }
-  .print-area { position: absolute; left: 0; top: 0; width: 100%; }
-  .no-print { display: none !important; }
+  #invoice-print-area, #invoice-print-area * { visibility: visible; }
+  #invoice-print-area { position: absolute; left: 0; top: 0; width: 100%; }
+  .no-print, .byond-sidebar, .byond-header, .byond-bottom-nav { display: none !important; }
+  @page { margin: 0.5cm; size: auto; }
 }
