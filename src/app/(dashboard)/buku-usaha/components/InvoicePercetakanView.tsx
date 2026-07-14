@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../percetakan/store/useProfilUsahaStore";
-import { useBusinessStore } from "@/store/useBusinessStore";
+import { useBusinessStore, type TransaksiLabel } from "@/store/useBusinessStore";
 import { ImgFromIdb } from "@/components/img-from-idb";
 
 /* ─── Types ─── */
@@ -60,10 +60,15 @@ export default function InvoicePercetakanView({ data, noRef, preview }: Props) {
   const { profil } = useProfilUsahaStore();
   const paymentMethods = useBusinessStore((s) => s.paymentMethods);
   const enabledPayments = paymentMethods.filter((pm) => pm.isEnabled);
+  const getLabelsForTransaksi = useBusinessStore((s) => s.getLabelsForTransaksi);
   const [mounted, setMounted] = useState(false);
+  const [invoiceLabels, setInvoiceLabels] = useState<TransaksiLabel[]>([]);
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    if (mounted) setInvoiceLabels(getLabelsForTransaksi(data.id));
+  }, [mounted, data.id, getLabelsForTransaksi]);
 
   /* ─── Export Handler ─── */
   const handleExportPNG = useCallback(async () => {
@@ -310,6 +315,26 @@ Terima kasih — ${profil.nama}`;
             Kirim bukti transfer via WhatsApp setelah pembayaran.
           </p>
         </div>
+
+        {/* ─── LABELS ─── */}
+        {invoiceLabels.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {invoiceLabels.map((l) => (
+              <span
+                key={l.id}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-semibold"
+                style={{
+                  backgroundColor: l.warna + "18",
+                  color: l.warna,
+                  border: `1px solid ${l.warna}40`,
+                }}
+              >
+                <span className="size-1.5 rounded-full" style={{ backgroundColor: l.warna }} />
+                {l.label}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* ─── FOOTER ─── */}
         <div className="text-center mt-5 pt-3 border-t border-gray-100">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Printer, Smartphone, Coffee, Shirt, Wallet, Settings, BarChart3, Package, Users } from "lucide-react";
+import { Printer, Smartphone, Coffee, Shirt, Wallet, Settings, BarChart3, Package, Users, ArrowUpDown, Tag } from "lucide-react";
 
 const UNIT_LIST: { id: string; label: string; desc: string; icon: React.ElementType; grad: string; glow: string; route: string; }[] = [
   { id: "percetakan", label: "Percetakan", desc: "Digital Printing & Large Format", icon: Printer, grad: "from-indigo-500 to-purple-600", glow: "shadow-indigo-500/25", route: "/buku-usaha/percetakan/dashboard" },
@@ -84,6 +84,22 @@ export default function BukuUsahaPage() {
             <Users className="size-5 text-white" />
           </div>
           <span className="text-[10px] font-semibold">Pelanggan</span>
+        </button>
+        <button onClick={() => router.push("/buku-usaha/labels")}
+          className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95 transition-all"
+        >
+          <div className="size-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-md">
+            <Tag className="size-5 text-white" />
+          </div>
+          <span className="text-[10px] font-semibold">Label</span>
+        </button>
+        <button onClick={() => router.push("/buku-usaha/piutang")}
+          className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95 transition-all"
+        >
+          <div className="size-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-md">
+            <ArrowUpDown className="size-5 text-white" />
+          </div>
+          <span className="text-[10px] font-semibold">Piutang</span>
         </button>
         <button onClick={() => router.push("/buku-usaha/pengaturan")}
           className="floating-card p-3 flex flex-col items-center gap-1.5 hover:shadow-md active:scale-95 transition-all"

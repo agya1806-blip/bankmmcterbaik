@@ -331,6 +331,50 @@ export interface DigitalMemo {
 }
 
 /* ══════════════════════════════════════════════════════════════
+    BUKU USAHA — PIUTANG & CICILAN
+    ══════════════════════════════════════════════════════════════ */
+
+export interface Piutang {
+  id: string;
+  unit: BizUnit;
+  customerNama: string;
+  customerWA: string;
+  invoiceId: string;
+  totalPiutang: number;
+  sisaPiutang: number;
+  jatuhTempo: string;
+  status: "aktif" | "lunas" | "dihapus";
+  catatan?: string;
+  createdAt: string;
+}
+
+export interface PembayaranCicilan {
+  id: string;
+  piutangId: string;
+  jumlah: number;
+  metode: string;
+  tanggal: string;
+  catatan?: string;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   KATEGORI & LABEL KUSTOM
+   ══════════════════════════════════════════════════════════════ */
+
+export interface TransaksiLabel {
+  id: string;
+  label: string;
+  warna: string;
+  createdAt: string;
+}
+
+export interface TransaksiTag {
+  id: string;
+  transaksiRef: string;
+  labelId: string;
+}
+
+/* ══════════════════════════════════════════════════════════════
    BUKU USAHA — INVENTORY / MANAJEMEN STOK
    ══════════════════════════════════════════════════════════════ */
 
@@ -508,6 +552,15 @@ interface BusinessStore {
   addFashionSKU: (s: FashionSKU) => void;
   removeFashionSKU: (id: string) => void;
 
+  /* Buku Usaha — Piutang & Cicilan */
+  piutangList: Piutang[];
+  cicilanList: PembayaranCicilan[];
+  addPiutang: (data: Omit<Piutang, "id" | "createdAt">) => string;
+  bayarCicilan: (piutangId: string, jumlah: number, metode: string, catatan?: string) => void;
+  getPiutangAktif: () => Piutang[];
+  getPiutangByUnit: (unit: BizUnit) => Piutang[];
+  getCicilanByPiutang: (piutangId: string) => PembayaranCicilan[];
+
   /* Buku Usaha — Inventory */
   inventory: InventoryItem[];
   inventoryMutations: InventoryMutation[];
@@ -536,6 +589,16 @@ interface BusinessStore {
   updateDigitalMemo: (id: string, m: Partial<DigitalMemo>) => void;
   removeDigitalMemo: (id: string) => void;
 
+  /* Kategori & Label Kustom */
+  transaksiLabels: TransaksiLabel[];
+  transaksiTags: TransaksiTag[];
+  addTransaksiLabel: (data: Omit<TransaksiLabel, "id" | "createdAt">) => string;
+  deleteTransaksiLabel: (id: string) => void;
+  updateTransaksiLabel: (id: string, data: Partial<Pick<TransaksiLabel, "label" | "warna">>) => void;
+  tagTransaksi: (transaksiRef: string, labelId: string) => void;
+  untagTransaksi: (transaksiRef: string, labelId: string) => void;
+  getLabelsForTransaksi: (transaksiRef: string) => TransaksiLabel[];
+
   /* Quick Order Templates */
   quickOrders: QuickOrder[];
   addQuickOrder: (data: Omit<QuickOrder, "id" | "createdAt">) => void;
@@ -554,6 +617,14 @@ interface BusinessStore {
 /* ══════════════════════════════════════════════════════════════
    DEFAULTS
    ══════════════════════════════════════════════════════════════ */
+
+const DEFAULT_LABELS: Omit<TransaksiLabel, "id" | "createdAt">[] = [
+  { label: "Modal", warna: "#f59e0b" },
+  { label: "Operasional", warna: "#3b82f6" },
+  { label: "Gaji", warna: "#8b5cf6" },
+  { label: "Pemasukan", warna: "#10b981" },
+  { label: "Pengeluaran", warna: "#ef4444" },
+];
 
 const DEFAULT_PROFILE: BusinessProfile = {
   logoUrl: "",
@@ -803,6 +874,48 @@ export const useBusinessStore = create<BusinessStore>()(
           fashionSKUs: s.fashionSKUs.filter((sk) => sk.id !== id),
         })),
 
+      /* ─── Buku Usaha: Piutang & Cicilan ─── */
+      piutangList: [],
+      cicilanList: [],
+      addPiutang: (data) => {
+        const id = genId();
+        const piutang: Piutang = {
+          id,
+          ...data,
+          createdAt: new Date().toISOString(),
+        };
+        set((s) => ({ piutangList: [piutang, ...s.piutangList] }));
+        return id;
+      },
+      bayarCicilan: (piutangId, jumlah, metode, catatan) => {
+        const cicilan: PembayaranCicilan = {
+          id: genId(),
+          piutangId,
+          jumlah,
+          metode,
+          tanggal: new Date().toISOString(),
+          catatan,
+        };
+        set((s) => {
+          const updatedPiutang = s.piutangList.map((p) => {
+            if (p.id !== piutangId) return p;
+            const sisaBaru = p.sisaPiutang - jumlah;
+            return {
+              ...p,
+              sisaPiutang: Math.max(0, sisaBaru),
+              status: sisaBaru <= 0 ? "lunas" : p.status,
+            };
+          });
+          return {
+            cicilanList: [cicilan, ...s.cicilanList],
+            piutangList: updatedPiutang,
+          };
+        });
+      },
+      getPiutangAktif: () => get().piutangList.filter((p) => p.status === "aktif"),
+      getPiutangByUnit: (unit) => get().piutangList.filter((p) => p.unit === unit),
+      getCicilanByPiutang: (piutangId) => get().cicilanList.filter((c) => c.piutangId === piutangId),
+
       /* ─── Buku Usaha: Inventory ─── */
       inventory: [],
       inventoryMutations: [],
@@ -909,6 +1022,54 @@ export const useBusinessStore = create<BusinessStore>()(
         set((s) => ({
           digitalMemos: s.digitalMemos.filter((m) => m.id !== id),
         })),
+
+      /* ─── Kategori & Label Kustom ─── */
+      transaksiLabels: DEFAULT_LABELS.map((l, i) => ({
+        ...l,
+        id: `label-default-${i}`,
+        createdAt: new Date().toISOString(),
+      })),
+      transaksiTags: [],
+      addTransaksiLabel: (data) => {
+        const id = genId();
+        const label: TransaksiLabel = {
+          id,
+          ...data,
+          createdAt: new Date().toISOString(),
+        };
+        set((s) => ({ transaksiLabels: [label, ...s.transaksiLabels] }));
+        return id;
+      },
+      deleteTransaksiLabel: (id) =>
+        set((s) => ({
+          transaksiLabels: s.transaksiLabels.filter((l) => l.id !== id),
+          transaksiTags: s.transaksiTags.filter((t) => t.labelId !== id),
+        })),
+      updateTransaksiLabel: (id, data) =>
+        set((s) => ({
+          transaksiLabels: s.transaksiLabels.map((l) =>
+            l.id === id ? { ...l, ...data } : l
+          ),
+        })),
+      tagTransaksi: (transaksiRef, labelId) =>
+        set((s) => {
+          if (s.transaksiTags.find((t) => t.transaksiRef === transaksiRef && t.labelId === labelId)) return s;
+          const tag: TransaksiTag = { id: genId(), transaksiRef, labelId };
+          return { transaksiTags: [tag, ...s.transaksiTags] };
+        }),
+      untagTransaksi: (transaksiRef, labelId) =>
+        set((s) => ({
+          transaksiTags: s.transaksiTags.filter(
+            (t) => !(t.transaksiRef === transaksiRef && t.labelId === labelId)
+          ),
+        })),
+      getLabelsForTransaksi: (transaksiRef) => {
+        const state = get();
+        const tagIds = state.transaksiTags
+          .filter((t) => t.transaksiRef === transaksiRef)
+          .map((t) => t.labelId);
+        return state.transaksiLabels.filter((l) => tagIds.includes(l.id));
+      },
 
       /* ─── Quick Order Templates ─── */
       quickOrders: [],

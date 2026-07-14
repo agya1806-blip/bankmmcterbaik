@@ -13,6 +13,7 @@ import InvoicePakaianKonveksiView, {
 import { useProfilUsahaStore } from "../../percetakan/store/useProfilUsahaStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { KasirSkeleton } from "@/components/ui/skeleton";
+import QrisDisplay from "@/components/qris-display";
 
 /* ─── Types ─── */
 type ModeKasir = "ready" | "custom";
@@ -543,6 +544,10 @@ export default function KasirPakaianKonveksi() {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="px-4 mt-4">
+        <QrisDisplay />
       </div>
     </div>
   );

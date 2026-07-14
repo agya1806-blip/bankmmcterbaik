@@ -13,6 +13,7 @@ import BillWarkopKelontongView, {
 } from "../../components/BillWarkopKelontongView";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { KasirSkeleton } from "@/components/ui/skeleton";
+import QrisDisplay from "@/components/qris-display";
 
 /* ─── Types ─── */
 type KategoriMenu = "makanan" | "minuman" | "kelontong" | "rokok";
@@ -506,6 +507,10 @@ export default function KasirWarkopKelontong() {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="px-4 mt-4">
+        <QrisDisplay />
       </div>
     </div>
   );

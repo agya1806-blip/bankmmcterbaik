@@ -8,12 +8,14 @@ import {
   CreditCard, Banknote, Palette, CheckCircle2,
   Users, Fingerprint, Shield,
   Download, Database, AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useBusinessStore, ACCENT_THEMES, AccentColor, PaymentMethod, BIZ_UNIT_LABELS, type BizUnit } from "@/store/useBusinessStore";
 import { useRoleStore, type Role } from "@/store/useRoleStore";
 import { CardSkeleton } from "@/components/ui/skeleton";
 import { exportBackup, importBackup } from "@/lib/backup";
+import { generateSyncCode, applySyncCode, getSyncCodeSize, estimateLocalStorageUsage, getLastSyncTimestamp, setLastSyncTimestamp } from "@/lib/sync";
 import { saveImage, getImage, deleteImage, isRefKey } from "@/lib/image-store";
 
 function genId(): string {
@@ -27,7 +29,7 @@ export default function PengaturanBukuUsaha() {
   const { pinUsers, currentPinUserId, addPinUser, removePinUser, updatePinUser, logoutPin } = useRoleStore();
 
   const [mounted, setMounted] = useState(false);
-  const [tab, setTab] = useState<"profil" | "payment" | "tema" | "users" | "backup">("profil");
+  const [tab, setTab] = useState<"profil" | "payment" | "tema" | "users" | "backup" | "sinkron">("profil");
   const [loading, setLoading] = useState(false);
 
   /* ─── Tab 1: Profil ─── */
@@ -64,6 +66,12 @@ export default function PengaturanBukuUsaha() {
   const [backupLoading, setBackupLoading] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
   const backupFileInputRef = useRef<HTMLInputElement>(null);
+
+  /* ─── Tab 6: Sinkron ─── */
+  const [syncCode, setSyncCode] = useState("");
+  const [importCode, setImportCode] = useState("");
+  const [syncGenerating, setSyncGenerating] = useState(false);
+  const [syncApplying, setSyncApplying] = useState(false);
 
   useEffect(() => setMounted(true), []);
 
@@ -295,7 +303,7 @@ export default function PengaturanBukuUsaha() {
 
   if (!mounted) return <CardSkeleton />;
 
-  const tabButton = (key: "profil" | "payment" | "tema" | "users" | "backup", label: string, icon: React.ElementType) => {
+  const tabButton = (key: "profil" | "payment" | "tema" | "users" | "backup" | "sinkron", label: string, icon: React.ElementType) => {
     const Ico = icon;
     const aktif = tab === key;
     return (
@@ -338,6 +346,7 @@ export default function PengaturanBukuUsaha() {
         {tabButton("tema", "Tema Visual", Palette)}
         {tabButton("users", "Pengguna", Users)}
         {tabButton("backup", "Cadangan Data", Database)}
+        {tabButton("sinkron", "Sinkronisasi", RefreshCw)}
       </div>
 
       {/* ══════════════════════════════════════════════════
@@ -817,6 +826,130 @@ export default function PengaturanBukuUsaha() {
                 Backup mencakup semua data bisnis, dompet, dan pengaturan. Restore akan menimpa data yang ada.
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════
+          TAB 6: SINKRONISASI MULTI-DEVICE
+          ══════════════════════════════════════════════════ */}
+      {tab === "sinkron" && (
+        <div className="space-y-5">
+          {/* Export */}
+          <div className="floating-card p-5 space-y-4">
+            <p className="text-xs font-semibold flex items-center gap-1.5">
+              <RefreshCw className="size-3.5 text-violet-500" /> Export / Kirim Data
+            </p>
+            <p className="text-[10px] text-muted-foreground/60">
+              Generate kode sinkronisasi untuk dibagikan ke perangkat lain. Kode berisi semua data pengaturan bisnis.
+            </p>
+            <button
+              onClick={() => {
+                setSyncGenerating(true);
+                try {
+                  const code = generateSyncCode();
+                  setSyncCode(code);
+                  toast.success("Kode sinkronisasi berhasil dibuat");
+                } catch {
+                  toast.error("Gagal membuat kode sinkronisasi");
+                }
+                setSyncGenerating(false);
+              }}
+              disabled={syncGenerating}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white text-xs font-bold shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {syncGenerating ? <><Loader2 className="size-4 animate-spin" /> Memproses...</> : <><RefreshCw className="size-4" /> Generate Kode Sinkronisasi</>}
+            </button>
+            {syncCode && (
+              <div className="space-y-3">
+                <textarea
+                  readOnly
+                  value={syncCode}
+                  rows={4}
+                  className="input-premium w-full text-[9px] font-mono break-all resize-none"
+                />
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(syncCode);
+                    toast.success("Kode berhasil disalin");
+                  }}
+                  className="w-full py-2 rounded-xl bg-emerald-500/10 text-emerald-600 text-[10px] font-semibold hover:bg-emerald-500/20 transition-all border border-emerald-500/20"
+                >
+                  Salin Kode
+                </button>
+                <p className="text-[9px] text-muted-foreground/40 text-center">
+                  Bagikan kode ini ke perangkat lain. Kode hanya berlaku untuk sesi ini.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Import */}
+          <div className="floating-card p-5 space-y-4">
+            <p className="text-xs font-semibold flex items-center gap-1.5">
+              <Upload className="size-3.5 text-violet-500" /> Import / Terima Data
+            </p>
+            <p className="text-[10px] text-muted-foreground/60">
+              Tempel kode sinkronisasi dari perangkat lain untuk menerapkan data yang sama.
+            </p>
+            <textarea
+              value={importCode}
+              onChange={(e) => setImportCode(e.target.value)}
+              placeholder="Tempel kode sinkronisasi di sini..."
+              rows={4}
+              className="input-premium w-full text-[9px] font-mono break-all resize-none"
+            />
+            <button
+              onClick={() => {
+                if (!importCode.trim()) { toast.error("Masukkan kode sinkronisasi terlebih dahulu"); return; }
+                setSyncApplying(true);
+                try {
+                  const result = applySyncCode(importCode.trim());
+                  if (result.success) {
+                    setLastSyncTimestamp();
+                    toast.success(result.message);
+                    setTimeout(() => window.location.reload(), 1500);
+                  } else {
+                    toast.error(result.message);
+                  }
+                } catch {
+                  toast.error("Gagal menerapkan sinkronisasi");
+                }
+                setSyncApplying(false);
+              }}
+              disabled={syncApplying || !importCode.trim()}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white text-xs font-bold shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {syncApplying ? <><Loader2 className="size-4 animate-spin" /> Menerapkan...</> : <><Upload className="size-4" /> Terapkan Sinkronisasi</>}
+            </button>
+            <p className="text-[9px] text-amber-600 dark:text-amber-400 flex items-start gap-1.5">
+              <AlertTriangle className="size-3 shrink-0 mt-0.5" />
+              <span>Ini akan menimpa semua data yang ada di perangkat ini.</span>
+            </p>
+          </div>
+
+          {/* Info */}
+          <div className="floating-card p-5 space-y-3 bg-gradient-to-br from-violet-500/5 to-purple-500/5 border border-violet-500/10">
+            <p className="text-xs font-semibold flex items-center gap-1.5">
+              <Database className="size-3.5 text-violet-500" /> Status Penyimpanan
+            </p>
+            <div className="space-y-2 text-[10px] text-muted-foreground/70">
+              <div className="flex justify-between">
+                <span>Total data tersimpan</span>
+                <span className="font-medium tabular-nums">{estimateLocalStorageUsage()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Sinkronisasi terakhir</span>
+                <span className="font-medium tabular-nums">{getLastSyncTimestamp() ? new Date(getLastSyncTimestamp()!).toLocaleString("id-ID") : "Belum pernah"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Ukuran kode saat ini</span>
+                <span className="font-medium tabular-nums">{(getSyncCodeSize() / 1024).toFixed(1)} KB</span>
+              </div>
+            </div>
+            <p className="text-[9px] text-muted-foreground/40 italic">
+              Semua data disimpan secara lokal di perangkat. Sinkronasi hanya mentransfer data antar perangkat.
+            </p>
           </div>
         </div>
       )}

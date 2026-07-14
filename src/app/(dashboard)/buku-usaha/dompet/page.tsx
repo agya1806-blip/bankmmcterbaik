@@ -4,11 +4,12 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Wallet, ArrowLeft, Plus, ArrowRightLeft, History,
-  Building2, Banknote, Smartphone, Trash2, TrendingUp, BarChart3,
+  Building2, Banknote, Smartphone, Trash2, TrendingUp, BarChart3, RefreshCw,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useBusinessStore, WalletTipe } from "@/store/useBusinessStore";
 import { CardSkeleton } from "@/components/ui/skeleton";
+import { usePullRefresh } from "@/lib/use-pull-refresh";
 
 function formatRupiah(n: number) {
   return `IDR ${n.toLocaleString("id-ID")}`;
@@ -30,6 +31,10 @@ export default function DompetPage() {
   const { wallets, mutasiLog } = store;
 
   const [mounted, setMounted] = useState(false);
+  const refresh = useCallback(async () => {
+    await new Promise((r) => setTimeout(r, 300));
+  }, []);
+  const { refreshing, pullDistance, onTouchStart, onTouchMove, onTouchEnd } = usePullRefresh(refresh);
 
   /* ─── Tab ─── */
   const [tab, setTab] = useState<"grid" | "transfer" | "tambah">("grid");
@@ -111,7 +116,26 @@ export default function DompetPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto pb-20 space-y-5 animate-fade-in">
+    <div
+      className="max-w-3xl mx-auto pb-20 space-y-5 animate-fade-in relative"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {refreshing && (
+        <div className="absolute top-0 left-0 right-0 flex items-center justify-center py-3 z-10">
+          <RefreshCw className="size-5 text-emerald-500 animate-spin" />
+          <span className="text-[10px] text-emerald-600 font-semibold ml-2">Memperbarui...</span>
+        </div>
+      )}
+      {pullDistance > 0 && !refreshing && (
+        <div
+          className="absolute top-0 left-0 right-0 flex items-center justify-center z-10 transition-all"
+          style={{ height: pullDistance }}
+        >
+          <RefreshCw className={`size-4 text-muted-foreground/50 transition-transform ${pullDistance >= 60 ? "rotate-180" : ""}`} />
+        </div>
+      )}
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Wallet, BarChart3, Printer, Smartphone, Coffee, Shirt,
-  ArrowUpRight, DollarSign, Receipt, Clock, Layers, Download,
+  ArrowUpRight, DollarSign, Receipt, Clock, Layers, Download, RefreshCw,
 } from "lucide-react";
 import { useBusinessStore, type BizUnit, BIZ_UNIT_LABELS } from "@/store/useBusinessStore";
 import { CardSkeleton } from "@/components/ui/skeleton";
+import { usePullRefresh } from "@/lib/use-pull-refresh";
 
 const BIZ_COLORS: Record<BizUnit, string> = {
   percetakan: "from-indigo-500 to-purple-600",
@@ -31,6 +32,10 @@ function formatRupiah(n: number) {
 export default function LaporanKeuangan() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  const refresh = useCallback(async () => {
+    await new Promise((r) => setTimeout(r, 300));
+  }, []);
+  const { refreshing, pullDistance, onTouchStart, onTouchMove, onTouchEnd } = usePullRefresh(refresh);
 
   const {
     wallets, mutasiLog,
@@ -75,7 +80,26 @@ export default function LaporanKeuangan() {
   if (!mounted) return <div className="grid grid-cols-1 md:grid-cols-3 gap-4"><CardSkeleton /><CardSkeleton /><CardSkeleton /></div>;
 
   return (
-    <div className="max-w-2xl mx-auto pb-20 space-y-6 animate-fade-in">
+    <div
+      className="max-w-2xl mx-auto pb-20 space-y-6 animate-fade-in relative"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {refreshing && (
+        <div className="absolute top-0 left-0 right-0 flex items-center justify-center py-3 z-10">
+          <RefreshCw className="size-5 text-emerald-500 animate-spin" />
+          <span className="text-[10px] text-emerald-600 font-semibold ml-2">Memperbarui...</span>
+        </div>
+      )}
+      {pullDistance > 0 && !refreshing && (
+        <div
+          className="absolute top-0 left-0 right-0 flex items-center justify-center z-10 transition-all"
+          style={{ height: pullDistance }}
+        >
+          <RefreshCw className={`size-4 text-muted-foreground/50 transition-transform ${pullDistance >= 60 ? "rotate-180" : ""}`} />
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="size-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-xl shadow-emerald-500/20">

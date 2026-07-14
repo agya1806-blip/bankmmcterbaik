@@ -13,6 +13,8 @@ import InvoicePercetakanView, {
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { KasirSkeleton } from "@/components/ui/skeleton";
 import QuickOrder from "@/components/quick-order";
+import QrisDisplay from "@/components/qris-display";
+import { hapticLight, hapticMedium, hapticSuccess } from "@/lib/haptic";
 
 /* ─── Types ─── */
 type ModeCetak = "meteran" | "buku";
@@ -346,6 +348,7 @@ export default function KasirPercetakan() {
           <QuickOrder
             unit="percetakan"
             onSelect={(items) => {
+              hapticLight();
               setCartItems((prev) => [...prev, ...items]);
               toast.success(`${items.length} item ditambahkan dari template`);
             }}
@@ -356,7 +359,7 @@ export default function KasirPercetakan() {
             <div className="floating-card p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold">Keranjang ({cartItems.length})</p>
-                <button onClick={() => setCartItems([])} className="text-[10px] text-red-500 hover:text-red-600 flex items-center gap-1">
+                <button onClick={() => { hapticMedium(); setCartItems([]); }} className="text-[10px] text-red-500 hover:text-red-600 flex items-center gap-1">
                   <Trash2 className="size-3" /> Hapus Semua
                 </button>
               </div>
@@ -380,7 +383,7 @@ export default function KasirPercetakan() {
               return (
                 <button
                   key={opt.value}
-                  onClick={() => setMode(opt.value)}
+                  onClick={() => { hapticLight(); setMode(opt.value); }}
                   className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold transition-all ${
                     aktif
                       ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/20"
@@ -623,7 +626,7 @@ export default function KasirPercetakan() {
           )}
 
           {/* ─── SIMPAN ─── */}
-          <button onClick={handleSimpan}
+          <button onClick={() => { hapticSuccess(); handleSimpan(); }}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-bold shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
           >
             <CheckCircle2 className="size-4" /> {showInvoice ? "Update & Cetak Ulang" : "Simpan Transaksi & Cetak Nota"}
@@ -644,6 +647,10 @@ export default function KasirPercetakan() {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="px-4 mt-4">
+        <QrisDisplay />
       </div>
     </div>
   );
