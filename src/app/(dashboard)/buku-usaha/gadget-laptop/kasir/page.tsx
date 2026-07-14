@@ -8,7 +8,7 @@ import {
   Printer, Coffee, Shirt,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import InvoiceGadgetLaptopView, { GadgetOrderInvoiceData } from "../../components/InvoiceGadgetLaptopView";
+import InvoiceGadgetLaptopView, { GadgetOrderInvoiceData, GadgetInvoiceItem } from "../../components/InvoiceGadgetLaptopView";
 import { useProfilUsahaStore } from "../../percetakan/store/useProfilUsahaStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { KasirSkeleton } from "@/components/ui/skeleton";
@@ -123,11 +123,13 @@ export default function KasirGadgetLaptop() {
     );
   }, [search]);
 
+  const storedCustomers = useBusinessStore((s) => s.customers);
   const filteredCustomers = useMemo(() => {
-    if (!cariCustomer) return CUSTOMER_DUMMY;
+    const all = storedCustomers.length > 0 ? storedCustomers.map((c) => ({ nama: c.nama, wa: c.noWA })) : CUSTOMER_DUMMY;
+    if (!cariCustomer) return all;
     const q = cariCustomer.toLowerCase();
-    return CUSTOMER_DUMMY.filter((c) => c.nama.toLowerCase().includes(q));
-  }, [cariCustomer]);
+    return all.filter((c) => c.nama.toLowerCase().includes(q) || c.wa.includes(q));
+  }, [cariCustomer, storedCustomers]);
 
   const pilihProduk = useCallback((p: ProdukKatalog) => {
     setSelectedProduct(p);
@@ -190,9 +192,25 @@ export default function KasirGadgetLaptop() {
   const garansiLabel = GARANSI_OPTIONS.find((g) => g.value === garansi)?.label || garansi;
   const statusBayar: "lunas" | "piutang" = sisa <= 0 ? "lunas" : "piutang";
 
+  const paymentMethods = useBusinessStore((s) => s.paymentMethods);
+  const enabledPayments = paymentMethods.filter((pm) => pm.isEnabled);
+  const defaultPayment = enabledPayments[0];
+
   const invoiceData = useMemo<GadgetOrderInvoiceData | null>(() => {
     if (!selectedProduct) return null;
     const id = invoiceId || generateId();
+    const items: GadgetInvoiceItem[] = [
+      {
+        no: 1,
+        item: `${selectedProduct.brand} ${selectedProduct.tipe}`,
+        spesifikasi: `Kondisi: ${kondisi === "baru" ? "Baru (BNIB)" : "Second/Bekas"} | Kategori: ${selectedProduct.kategori}`,
+        imeiSn: imeiSn,
+        garansi: garansiLabel,
+        qty: 1,
+        harga: selectedProduct.hargaJual,
+        jumlah: selectedProduct.hargaJual,
+      },
+    ];
     return {
       id,
       tanggal: todayISO(),
@@ -204,18 +222,7 @@ export default function KasirGadgetLaptop() {
       statusColor: statusBayar === "lunas"
         ? "text-emerald-700 bg-emerald-100"
         : "text-amber-700 bg-amber-100",
-      items: [
-        {
-          no: 1,
-          item: `${selectedProduct.brand} ${selectedProduct.tipe}`,
-          spesifikasi: `Kondisi: ${kondisi === "baru" ? "Baru (BNIB)" : "Second/Bekas"} | Kategori: ${selectedProduct.kategori}`,
-          imeiSn: imeiSn,
-          garansi: garansiLabel,
-          qty: 1,
-          harga: selectedProduct.hargaJual,
-          jumlah: selectedProduct.hargaJual,
-        },
-      ],
+      items,
       tradeIn: {
         aktif: tradeIn.aktif,
         unitBekas: tradeIn.namaUnit,
@@ -227,14 +234,16 @@ export default function KasirGadgetLaptop() {
       total,
       dp: dpNumber,
       sisa,
-      pembayaran: statusBayar === "lunas" ? "Tunai / Transfer" : "Piutang (Sisa Tagihan)",
-      rekeningBank: "Bank Aceh Syariah",
-      rekeningNomor: "010-01-123456-7",
-      rekeningAtasNama: profil.nama || "",
+      pembayaran: defaultPayment
+        ? `${defaultPayment.namaMetode}${defaultPayment.bankName ? ` (${defaultPayment.bankName})` : ""} — ${defaultPayment.accountNo}`
+        : statusBayar === "lunas" ? "Tunai / Transfer" : "Piutang (Sisa Tagihan)",
+      rekeningBank: defaultPayment?.bankName || "Bank",
+      rekeningNomor: defaultPayment?.accountNo || "",
+      rekeningAtasNama: defaultPayment?.accountName || profil.nama || "",
     };
   }, [selectedProduct, customerNama, customerWA, invoiceId, kondisi, garansi,
       garansiLabel, statusBayar, tradeIn, subtotal, potonganTradeIn, total, dpNumber, sisa, profil.nama,
-      imeiSn]);
+      imeiSn, defaultPayment]);
 
   if (!mounted) return <KasirSkeleton />;
 

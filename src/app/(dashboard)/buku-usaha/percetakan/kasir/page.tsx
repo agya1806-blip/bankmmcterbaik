@@ -9,9 +9,10 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import InvoicePercetakanView, {
-  OrderInvoiceData,
+  OrderInvoiceData, InvoiceItem,
 } from "../../components/InvoicePercetakanView";
 import { useBusinessStore } from "@/store/useBusinessStore";
+import { useProfilUsahaStore } from "../store/useProfilUsahaStore";
 import { KasirSkeleton } from "@/components/ui/skeleton";
 import QuickOrder from "@/components/quick-order";
 import QrisDisplay from "@/components/qris-display";
@@ -147,6 +148,7 @@ export default function KasirPercetakan() {
   const [invoiceId, setInvoiceId] = useState("");
   const [showInvoice, setShowInvoice] = useState(false);
   const { wallets, tambahSaldoWallet, kurangiSaldoWallet, addCustomerRecord, recordCustomerTransaction, getCustomerByWA, addQuickOrder, deleteQuickOrder, setLastKasirUnit } = useBusinessStore();
+  const { profil } = useProfilUsahaStore();
   const [walletPenerimaanId, setWalletPenerimaanId] = useState(wallets[0]?.id || "wallet-kas");
   const [walletModalId, setWalletModalId] = useState(wallets[1]?.id || "wallet-bsi");
 
@@ -186,12 +188,14 @@ export default function KasirPercetakan() {
   const dpNumber = parseInt(dp.replace(/\D/g, ""), 10) || 0;
   const sisa = Math.max(totalJual - dpNumber, 0);
 
-  /* Customer filter */
+  /* Customer filter — cari dari store + dummy fallback */
+  const storedCustomers = useBusinessStore((s) => s.customers);
   const filteredCustomers = useMemo(() => {
-    if (!cariCustomer) return CUSTOMER_DUMMY;
+    const all = storedCustomers.length > 0 ? storedCustomers.map((c) => ({ nama: c.nama, wa: c.noWA })) : CUSTOMER_DUMMY;
+    if (!cariCustomer) return all;
     const q = cariCustomer.toLowerCase();
-    return CUSTOMER_DUMMY.filter((c) => c.nama.toLowerCase().includes(q));
-  }, [cariCustomer]);
+    return all.filter((c) => c.nama.toLowerCase().includes(q) || c.wa.includes(q));
+  }, [cariCustomer, storedCustomers]);
 
   const pilihCustomer = useCallback((nama: string, wa: string) => {
     setCustomerNama(nama);
@@ -264,6 +268,11 @@ export default function KasirPercetakan() {
     setInvoiceId(""); setShowInvoice(false);
   }, []);
 
+  /* Payment methods from store */
+  const paymentMethods = useBusinessStore((s) => s.paymentMethods);
+  const enabledPayments = paymentMethods.filter((pm) => pm.isEnabled);
+  const defaultPayment = enabledPayments[0];
+
   /* Invoice data — always computed for live preview */
   const invoiceData = useMemo<OrderInvoiceData>(() => {
     let deskripsi = "";
@@ -276,6 +285,9 @@ export default function KasirPercetakan() {
     const wrapping = "Ya";
     let jilid = "";
 
+    const items: InvoiceItem[] = [];
+    let no = 1;
+
     if (mode === "meteran") {
       deskripsi = `${bahanTerpilih.label} (${mPanjang}m x ${mLebar}m) x ${mQty} Pcs`;
       spesifikasi = `Bahan: ${bahanTerpilih.label} | ${mPanjang}m x ${mLebar}m x ${mQty} lembar`;
@@ -285,6 +297,19 @@ export default function KasirPercetakan() {
       cover = "-";
       laminasi = "-";
       jilid = "-";
+
+      items.push({
+        no: no++,
+        item: `Cetak ${bahanTerpilih.label}`,
+        qty: mQty,
+        harga: Math.round(hasilMeteran.totalHPP / mQty),
+        jumlah: Math.round(hasilMeteran.totalHPP),
+      });
+      if (cartItems.length > 0) {
+        cartItems.forEach((ci) => {
+          items.push({ no: no++, item: ci.desc, qty: 1, harga: ci.price, jumlah: ci.price });
+        });
+      }
     } else {
       kertasIsi = kertasTerpilih.label;
       cover = coverTerpilih.label;
@@ -294,6 +319,20 @@ export default function KasirPercetakan() {
       spesifikasi = `Hal: ${bHalaman} | Kertas: ${kertasIsi} | Cetak: ${bCetakIsi === "warna" ? "Warna" : "Hitam Putih"}`;
       ukuran = "A5";
       ukuranJadi = "21 x 29.7 cm";
+
+      const hppIsiSatuan = Math.round(hasilBuku.hppIsi / bQty);
+      const hppCoverSatuan = Math.round(hasilBuku.hppCover / bQty);
+      const hppJilidSatuan = Math.round(hasilBuku.hppJilid / bQty);
+
+      if (hppIsiSatuan > 0) items.push({ no: no++, item: `Kertas Isi — ${kertasTerpilih.label}`, qty: bQty, harga: hppIsiSatuan, jumlah: Math.round(hasilBuku.hppIsi) });
+      if (hppCoverSatuan > 0) items.push({ no: no++, item: `Cover — ${coverTerpilih.label}`, qty: bQty, harga: hppCoverSatuan, jumlah: Math.round(hasilBuku.hppCover) });
+      if (biayaLaminasi > 0) items.push({ no: no++, item: `Laminasi ${laminasi}`, qty: bQty, harga: biayaLaminasi, jumlah: biayaLaminasi * bQty });
+      if (hppJilidSatuan > 0) items.push({ no: no++, item: `Jilid — ${jilidTerpilih.label}`, qty: bQty, harga: hppJilidSatuan, jumlah: Math.round(hasilBuku.hppJilid) });
+      if (cartItems.length > 0) {
+        cartItems.forEach((ci) => {
+          items.push({ no: no++, item: ci.desc, qty: 1, harga: ci.price, jumlah: ci.price });
+        });
+      }
     }
 
     return {
@@ -314,20 +353,19 @@ export default function KasirPercetakan() {
       laminasi,
       wrapping,
       jilid,
-      items: [
-        { no: 1, item: deskripsi, qty: mode === "meteran" ? mQty : bQty, harga: Math.round(totalJual / (mode === "meteran" ? mQty : bQty)), jumlah: Math.round(totalJual) },
-      ],
+      items,
       total: Math.round(totalJual),
       dp: dpNumber,
       sisa: Math.round(sisa),
-      pembayaran: "Transfer Bank / Tunai",
-      rekeningBank: "Bank Aceh Syariah",
-      rekeningNomor: "010-01-123456-7",
-      rekeningAtasNama: "",
+      pembayaran: defaultPayment ? `${defaultPayment.namaMetode} — ${defaultPayment.accountNo}` : "Transfer Bank / Tunai",
+      rekeningBank: defaultPayment?.bankName || "Bank",
+      rekeningNomor: defaultPayment?.accountNo || "",
+      rekeningAtasNama: defaultPayment?.accountName || profil?.nama || "",
     };
   }, [mode, bahanTerpilih, mPanjang, mLebar, mQty, bHalaman, kertasTerpilih,
       bCetakIsi, coverTerpilih, bLaminasi, jilidTerpilih, bQty, invoiceId, customerNama,
-      customerWA, totalJual, dpNumber, sisa]);
+      customerWA, totalJual, dpNumber, sisa, hasilMeteran, hasilBuku, biayaLaminasi,
+      cartItems, defaultPayment, profil]);
 
   if (!mounted) return <KasirSkeleton />;
 
