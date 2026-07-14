@@ -44,13 +44,6 @@ const KATALOG: ProdukKatalog[] = [
   { id: "P-009", brand: "Samsung", tipe: "Galaxy Buds3 Pro", kategori: "aksesoris", hargaJual: 2500000, hargaModal: 1800000 },
 ];
 
-const CUSTOMER_DUMMY = [
-  { nama: "Ahmad Fauzi", wa: "085211112222" },
-  { nama: "Siti Nurhaliza", wa: "085233334444" },
-  { nama: "Budi Santoso", wa: "085255556666" },
-  { nama: "Walk-in Customer", wa: "" },
-];
-
 const GARANSI_OPTIONS = [
   { value: "1-bulan", label: "1 Bulan" },
   { value: "3-bulan", label: "3 Bulan" },
@@ -125,7 +118,7 @@ export default function KasirGadgetLaptop() {
 
   const storedCustomers = useBusinessStore((s) => s.customers);
   const filteredCustomers = useMemo(() => {
-    const all = storedCustomers.length > 0 ? storedCustomers.map((c) => ({ nama: c.nama, wa: c.noWA })) : CUSTOMER_DUMMY;
+    const all = storedCustomers.map((c) => ({ nama: c.nama, wa: c.noWA }));
     if (!cariCustomer) return all;
     const q = cariCustomer.toLowerCase();
     return all.filter((c) => c.nama.toLowerCase().includes(q) || c.wa.includes(q));

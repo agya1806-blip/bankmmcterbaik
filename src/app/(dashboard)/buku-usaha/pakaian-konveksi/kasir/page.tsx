@@ -55,12 +55,6 @@ const PRODUK_FASHION: ProdukFashion[] = [
 
 const WARNA_LIST = ["Hitam", "Putih", "Merah", "Biru", "Abu-abu", "Khaki", "Hijau Army", "Maroon"];
 
-const CUSTOMER_DUMMY = [
-  { nama: "Toko Batik Jaya", wa: "085211112222" },
-  { nama: "CV Seragam Kita", wa: "085233334444" },
-  { nama: "Walk-in Customer", wa: "" },
-];
-
 function generateId() {
   const d = new Date();
   const ds = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
@@ -125,11 +119,13 @@ export default function KasirPakaianKonveksi() {
     return PRODUK_FASHION.filter((p) => p.nama.toLowerCase().includes(q) || p.kategori.toLowerCase().includes(q));
   }, [searchProduk]);
 
+  const storedCustomers = useBusinessStore((s) => s.customers);
   const filteredCustomers = useMemo(() => {
-    if (!cariCustomer) return CUSTOMER_DUMMY;
+    const all = storedCustomers.map((c) => ({ nama: c.nama, wa: c.noWA }));
+    if (!cariCustomer) return all;
     const q = cariCustomer.toLowerCase();
-    return CUSTOMER_DUMMY.filter((c) => c.nama.toLowerCase().includes(q));
-  }, [cariCustomer]);
+    return all.filter((c) => c.nama.toLowerCase().includes(q) || c.wa.includes(q));
+  }, [cariCustomer, storedCustomers]);
 
   /* ─── Ready: Add to cart ─── */
   const addReadyToCart = useCallback(() => {

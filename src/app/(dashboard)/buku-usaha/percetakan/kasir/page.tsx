@@ -62,14 +62,6 @@ const JILID_LIST = [
   { id: "lem-panas", label: "Lem Panas (Perfect Binding)", biaya: 4000 },
 ];
 
-const CUSTOMER_DUMMY = [
-  { nama: "Toko Buku Alea", wa: "0852777111222" },
-  { nama: "CV Karya Mandiri", wa: "0852777333444" },
-  { nama: "UD Sinar Abadi", wa: "0852777555666" },
-  { nama: "Yayasan Al-Falah", wa: "0852777777888" },
-  { nama: "Walk-in Customer", wa: "" },
-];
-
 function generateId() {
   return `INV/${new Date().getFullYear()}/PRT/${Date.now().toString(36).toUpperCase().slice(-6)}`;
 }
@@ -191,7 +183,7 @@ export default function KasirPercetakan() {
   /* Customer filter — cari dari store + dummy fallback */
   const storedCustomers = useBusinessStore((s) => s.customers);
   const filteredCustomers = useMemo(() => {
-    const all = storedCustomers.length > 0 ? storedCustomers.map((c) => ({ nama: c.nama, wa: c.noWA })) : CUSTOMER_DUMMY;
+    const all = storedCustomers.map((c) => ({ nama: c.nama, wa: c.noWA }));
     if (!cariCustomer) return all;
     const q = cariCustomer.toLowerCase();
     return all.filter((c) => c.nama.toLowerCase().includes(q) || c.wa.includes(q));

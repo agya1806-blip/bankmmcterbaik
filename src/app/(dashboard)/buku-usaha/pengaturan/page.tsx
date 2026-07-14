@@ -29,6 +29,7 @@ export default function PengaturanBukuUsaha() {
   const { pinUsers, currentPinUserId, addPinUser, removePinUser, updatePinUser, logoutPin } = useRoleStore();
 
   const [mounted, setMounted] = useState(false);
+  const [showReset, setShowReset] = useState(false);
   const [tab, setTab] = useState<"profil" | "payment" | "tema" | "users" | "backup" | "sinkron">("profil");
   const [loading, setLoading] = useState(false);
 
@@ -953,6 +954,54 @@ export default function PengaturanBukuUsaha() {
           </div>
         </div>
       )}
+
+      {/* ═══════════════ RESET DATA ═══════════════ */}
+      <div className="floating-card p-5 space-y-3 border border-rose-500/20 bg-rose-500/5">
+        <button
+          type="button"
+          onClick={() => setShowReset(!showReset)}
+          className="w-full flex items-center justify-between text-left"
+        >
+          <p className="text-xs font-semibold flex items-center gap-1.5 text-rose-600">
+            <Trash2 className="size-3.5" /> Reset Data
+          </p>
+          <span className="text-[10px] text-muted-foreground/50">{showReset ? "Tutup" : "Buka"}</span>
+        </button>
+        {showReset && (
+          <div className="space-y-3 pt-2 border-t border-rose-500/10">
+            <p className="text-[10px] text-muted-foreground/60">
+              Hapus semua data bisnis termasuk dompet, transaksi, pelanggan, dan pengaturan. 
+              Tindakan ini tidak bisa dibatalkan.
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  if (confirm("Hapus semua data bisnis? Data tidak bisa dikembalikan.")) {
+                    localStorage.removeItem("mmcbank-business-store-v3");
+                    toast.success("Data bisnis direset. Halaman akan dimuat ulang...");
+                    setTimeout(() => window.location.reload(), 1000);
+                  }
+                }}
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 text-white text-xs font-bold shadow-lg shadow-rose-500/20 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all"
+              >
+                <Trash2 className="size-3.5 inline mr-1" /> Reset Semua Data Bisnis
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm("Reset semua data PIN & pengguna? PIN default 123456 akan dikembalikan.")) {
+                    localStorage.removeItem("mmcbank-role-store");
+                    toast.success("Data pengguna direset. Halaman akan dimuat ulang...");
+                    setTimeout(() => window.location.reload(), 1000);
+                  }
+                }}
+                className="w-full py-2 rounded-xl bg-rose-500/10 text-rose-600 text-[10px] font-semibold hover:bg-rose-500/20 transition-colors"
+              >
+                Reset Data Pengguna (PIN)
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

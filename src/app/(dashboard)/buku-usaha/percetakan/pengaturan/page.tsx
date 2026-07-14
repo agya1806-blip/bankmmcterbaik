@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Settings, ArrowLeft, Save, Image, X, Upload, Building2,
-  Phone, MapPin, List, Loader2,
+  Phone, MapPin, List, Loader2, Trash2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useProfilUsahaStore } from "../store/useProfilUsahaStore";
@@ -17,6 +17,7 @@ export default function PengaturanProfil() {
   const { profil, setLogo, setNama, setAlamat, setNoWA, tambahSubLayanan, hapusSubLayanan, resetProfil } = useProfilUsahaStore();
 
   const [mounted, setMounted] = useState(false);
+  const [showReset, setShowReset] = useState(false);
   const [loading, setLoading] = useState(false);
   const [newLayanan, setNewLayanan] = useState("");
   const [previewLogo, setPreviewLogo] = useState(profil.logo);
@@ -279,6 +280,53 @@ export default function PengaturanProfil() {
           )}
         </button>
       </form>
+
+      {/* ─── Reset Data ─── */}
+      <div className="floating-card p-5 space-y-3 border border-rose-500/20 bg-rose-500/5">
+        <button
+          type="button"
+          onClick={() => setShowReset(!showReset)}
+          className="w-full flex items-center justify-between text-left"
+        >
+          <p className="text-xs font-semibold flex items-center gap-1.5 text-rose-600">
+            <Trash2 className="size-3.5" /> Reset Data
+          </p>
+          <span className="text-[10px] text-muted-foreground/50">{showReset ? "Tutup" : "Buka"}</span>
+        </button>
+        {showReset && (
+          <div className="space-y-3 pt-2 border-t border-rose-500/10">
+            <p className="text-[10px] text-muted-foreground/60">
+              Hapus semua data percetakan (job, pelanggan, riwayat). Tindakan ini tidak bisa dibatalkan.
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => {
+                  if (confirm("Hapus semua data percetakan?")) {
+                    localStorage.removeItem("mmcbank-business-store-v3");
+                    toast.success("Data direset. Halaman akan dimuat ulang...");
+                    setTimeout(() => window.location.reload(), 1000);
+                  }
+                }}
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 text-white text-xs font-bold shadow-lg shadow-rose-500/20 hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all"
+              >
+                <Trash2 className="size-3.5 inline mr-1" /> Reset Semua Data Bisnis
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm("Reset profil percetakan ke pengaturan awal?")) {
+                    resetProfil();
+                    setPreviewLogo("");
+                    toast.success("Profil percetakan direset");
+                  }
+                }}
+                className="w-full py-2 rounded-xl bg-rose-500/10 text-rose-600 text-[10px] font-semibold hover:bg-rose-500/20 transition-colors"
+              >
+                Reset Profil Saja
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Preview card */}
       <div className="floating-card p-4 space-y-2 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 border border-indigo-500/10">
