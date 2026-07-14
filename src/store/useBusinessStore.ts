@@ -497,7 +497,11 @@ const ssrSafeStorage = createJSONStorage(() => {
   if (typeof window === "undefined") {
     return { getItem: () => null, setItem: () => {}, removeItem: () => {} };
   }
-  return localStorage;
+  return {
+    getItem: (name) => { try { return localStorage.getItem(name); } catch { return null; } },
+    setItem: (name, value) => { try { localStorage.setItem(name, value); } catch (e) { console.warn("Storage penuh, hapus data lama atau backup"); } },
+    removeItem: (name) => { try { localStorage.removeItem(name); } catch {} },
+  };
 });
 
 /* ══════════════════════════════════════════════════════════════

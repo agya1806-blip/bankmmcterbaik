@@ -134,7 +134,7 @@ Terima kasih — ${profil.nama}`;
 
     window.open(`https://wa.me/${prefix || prefixToko}?text=${encodeURIComponent(msg)}`, "_blank");
     toast.success("Pesan WA dibuka");
-  }, [data, profil]);
+  }, [data, profil, enabledPayments]);
 
   const lunas = data.sisa <= 0;
 

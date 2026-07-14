@@ -75,9 +75,9 @@ const BOOKS: BookCard[] = [
 ];
 
 const MOCK_TOTALS = {
-  totalSaldo: 157_850_000,
-  arusMasuk: 42_300_000,
-  arusKeluar: 28_750_000,
+  totalSaldo: 0,
+  arusMasuk: 0,
+  arusKeluar: 0,
 };
 
 export default function BukuKeuanganGlobal() {

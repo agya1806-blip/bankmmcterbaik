@@ -215,7 +215,9 @@ export default function KasirPercetakan() {
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 200);
   }, [customerNama, totalJual, invoiceId, mode, bahanTerpilih, mPanjang, mLebar, mQty,
-      bHalaman, kertasTerpilih, bCetakIsi, coverTerpilih, bLaminasi, jilidTerpilih, bQty, dpNumber]);
+      bHalaman, kertasTerpilih, bCetakIsi, coverTerpilih, bLaminasi, jilidTerpilih, bQty, dpNumber,
+      hasilBuku.totalHPPGlobal, hasilMeteran.totalHPP, kurangiSaldoWallet, tambahSaldoWallet,
+      walletModalId, walletPenerimaanId]);
 
   /* Invoice data — always computed for live preview */
   const invoiceData = useMemo<OrderInvoiceData>(() => {

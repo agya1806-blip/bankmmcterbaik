@@ -149,7 +149,7 @@ Terima kasih — ${profil.nama}`;
 
     window.open(`https://wa.me/${prefix || prefixToko}?text=${encodeURIComponent(msg)}`, "_blank");
     toast.success("Pesan WA dibuka");
-  }, [data, profil]);
+  }, [data, profil, enabledPayments]);
 
   if (!mounted) return <div className="min-h-[60vh]" />;
 

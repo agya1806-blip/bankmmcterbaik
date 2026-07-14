@@ -168,7 +168,12 @@ export default function LaporanKeuangan() {
           <Wallet className="size-4 text-emerald-500" /> Kas Operasional
         </h2>
         <div className="space-y-1">
-          {wallets.map((w) => {
+          {wallets.length === 0 ? (
+            <div className="floating-card p-6 text-center">
+              <Wallet className="size-8 mx-auto text-muted-foreground/20 mb-2" />
+              <p className="text-xs text-muted-foreground/40">Belum ada dompet. Tambah dompet di menu Dompet.</p>
+            </div>
+          ) : wallets.map((w) => {
             const pct = agg.totalKas > 0 ? (w.saldo / agg.totalKas) * 100 : 0;
             return (
               <div key={w.id} className="floating-card p-3 flex items-center gap-3">

@@ -181,7 +181,8 @@ export default function KasirGadgetLaptop() {
       const el = document.getElementById("invoice-print-area");
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 200);
-  }, [selectedProduct, imeiSn, customerNama, invoiceId, tradeIn]);
+  }, [selectedProduct, imeiSn, customerNama, invoiceId, tradeIn, dpNumber,
+      kurangiSaldoWallet, tambahSaldoWallet, walletModalId, walletPenerimaanId]);
 
   const garansiLabel = GARANSI_OPTIONS.find((g) => g.value === garansi)?.label || garansi;
   const statusBayar: "lunas" | "piutang" = sisa <= 0 ? "lunas" : "piutang";
@@ -229,7 +230,8 @@ export default function KasirGadgetLaptop() {
       rekeningAtasNama: profil.nama || "Mughis Group",
     };
   }, [selectedProduct, customerNama, customerWA, invoiceId, kondisi, garansi,
-      garansiLabel, statusBayar, tradeIn, subtotal, potonganTradeIn, total, dpNumber, sisa, profil.nama]);
+      garansiLabel, statusBayar, tradeIn, subtotal, potonganTradeIn, total, dpNumber, sisa, profil.nama,
+      imeiSn]);
 
   if (!mounted) return <div className="min-h-[60vh]" />;
 

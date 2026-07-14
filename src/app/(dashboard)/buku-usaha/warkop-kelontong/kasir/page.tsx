@@ -215,7 +215,8 @@ export default function KasirWarkopKelontong() {
     if (bayar > 0) tambahSaldoWallet(walletPenerimaanId, bayar);
     setLoading(false);
     toast.success(`Bill ${liveBillData.id} berhasil dicetak`);
-  }, [cart, bayar, subtotal, kembalian, bahan, noMeja, pelanggan, tipeOrder, liveBillData]);
+  }, [cart, bayar, subtotal, kembalian, bahan, noMeja, pelanggan, tipeOrder, liveBillData,
+      kurangiSaldoWallet, tambahSaldoWallet, walletModalId, walletPenerimaanId]);
 
   const resetForm = useCallback(() => {
     setCart([]);

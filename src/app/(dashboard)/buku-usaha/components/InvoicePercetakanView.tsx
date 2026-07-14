@@ -149,7 +149,7 @@ Terima kasih — ${profil.nama}`;
 
     window.open(`https://wa.me/${targetWA}?text=${encodeURIComponent(msg)}`, "_blank");
     toast.success("Pesan WA dibuka di tab baru");
-  }, [data, profil]);
+  }, [data, profil, enabledPayments]);
 
   if (!mounted) return <div className="min-h-[60vh]" />;
 

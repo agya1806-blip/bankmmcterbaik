@@ -193,7 +193,8 @@ export default function KasirPakaianKonveksi() {
       const el = document.getElementById("invoice-print-area");
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 200);
-  }, [customerNama, mode, cartReady, customPcs, invoiceId]);
+  }, [customerNama, mode, cartReady, customPcs, invoiceId, dpNumber, hasilKonveksi.totalHPP,
+      kurangiSaldoWallet, subtotal, tambahSaldoWallet, walletModalId, walletPenerimaanId]);
 
   const lunas = sisa <= 0;
 
@@ -250,7 +251,7 @@ export default function KasirPakaianKonveksi() {
       rekeningAtasNama: profil.nama || "Mughis Group",
     };
   }, [mode, cartReady, customNamaProduk, customPcs, customKain, customHargaKain,
-      customOngkosCMT, customSablon, customHargaJual, hasilKonveksi, customerNama, customerWA,
+      customOngkosCMT, customSablon, customHargaJual, customerNama, customerWA,
       invoiceId, subtotal, dpNumber, sisa, lunas, profil.nama]);
 
   const resetForm = useCallback(() => {
