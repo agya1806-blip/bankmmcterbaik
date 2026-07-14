@@ -15,34 +15,12 @@ import { KasirSkeleton } from "@/components/ui/skeleton";
 import QrisDisplay from "@/components/qris-display";
 
 /* ─── Types ─── */
-interface ProdukKatalog {
-  id: string;
-  brand: string;
-  tipe: string;
-  kategori: "hp" | "laptop" | "tablet" | "aksesoris";
-  hargaJual: number;
-  hargaModal: number;
-}
-
 interface TradeInState {
   aktif: boolean;
   namaUnit: string;
   imeiSn: string;
   nilaiTaksir: number;
 }
-
-/* ─── Mock Katalog ─── */
-const KATALOG: ProdukKatalog[] = [
-  { id: "P-001", brand: "iPhone", tipe: "15 Pro Max 256GB", kategori: "hp", hargaJual: 22500000, hargaModal: 18000000 },
-  { id: "P-002", brand: "Samsung", tipe: "Galaxy S24 Ultra", kategori: "hp", hargaJual: 20000000, hargaModal: 16000000 },
-  { id: "P-003", brand: "Xiaomi", tipe: "Redmi Note 13 Pro", kategori: "hp", hargaJual: 3800000, hargaModal: 2800000 },
-  { id: "P-004", brand: "Apple", tipe: "MacBook Air M3", kategori: "laptop", hargaJual: 18500000, hargaModal: 14500000 },
-  { id: "P-005", brand: "Lenovo", tipe: "ThinkPad X1 Carbon", kategori: "laptop", hargaJual: 11000000, hargaModal: 8500000 },
-  { id: "P-006", brand: "ASUS", tipe: "ROG Zephyrus G14", kategori: "laptop", hargaJual: 18000000, hargaModal: 14000000 },
-  { id: "P-007", brand: "Samsung", tipe: "Galaxy Tab S9", kategori: "tablet", hargaJual: 9500000, hargaModal: 7500000 },
-  { id: "P-008", brand: "Samsung", tipe: "Galaxy A55", kategori: "hp", hargaJual: 3800000, hargaModal: 2800000 },
-  { id: "P-009", brand: "Samsung", tipe: "Galaxy Buds3 Pro", kategori: "aksesoris", hargaJual: 2500000, hargaModal: 1800000 },
-];
 
 const GARANSI_OPTIONS = [
   { value: "1-bulan", label: "1 Bulan" },
@@ -69,7 +47,7 @@ function formatRupiah(n: number) {
 export default function KasirGadgetLaptop() {
   const router = useRouter();
   const { profil } = useProfilUsahaStore();
-  const { wallets, tambahSaldoWallet, kurangiSaldoWallet, setLastKasirUnit } = useBusinessStore();
+  const { wallets, gadgetItems, tambahSaldoWallet, kurangiSaldoWallet, setLastKasirUnit } = useBusinessStore();
   const [walletPenerimaanId, setWalletPenerimaanId] = useState(wallets[0]?.id || "wallet-kas");
   const [walletModalId, setWalletModalId] = useState(wallets[1]?.id || "wallet-bsi");
   const [mounted, setMounted] = useState(false);
@@ -77,7 +55,7 @@ export default function KasirGadgetLaptop() {
   /* ─── Search & Selected Product ─── */
   const [search, setSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<ProdukKatalog | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<{ id: string; brand: string; tipe: string; kategori: string; hargaJual: number; hargaModal: number } | null>(null);
 
   /* ─── Unit Detail ─── */
   const [imeiSn, setImeiSn] = useState("");
@@ -104,17 +82,28 @@ export default function KasirGadgetLaptop() {
 
   useEffect(() => { setMounted(true); setLastKasirUnit("gadget"); }, [setLastKasirUnit]);
 
+  /* ─── Produk dari store (gadgetItems) ─── */
+  const produkList = useMemo(() => {
+    return gadgetItems.map((g) => ({
+      id: g.id,
+      brand: g.brand || "-",
+      tipe: g.model,
+      kategori: "hp" as const,
+      hargaJual: g.price,
+      hargaModal: g.hpp,
+    }));
+  }, [gadgetItems]);
+
   /* ─── Filter produk ─── */
   const filteredProducts = useMemo(() => {
-    if (!search) return KATALOG;
+    if (!search) return produkList;
     const q = search.toLowerCase();
-    return KATALOG.filter(
+    return produkList.filter(
       (p) =>
         p.brand.toLowerCase().includes(q) ||
-        p.tipe.toLowerCase().includes(q) ||
-        p.kategori.toLowerCase().includes(q)
+        p.tipe.toLowerCase().includes(q)
     );
-  }, [search]);
+  }, [search, produkList]);
 
   const storedCustomers = useBusinessStore((s) => s.customers);
   const filteredCustomers = useMemo(() => {
@@ -124,7 +113,7 @@ export default function KasirGadgetLaptop() {
     return all.filter((c) => c.nama.toLowerCase().includes(q) || c.wa.includes(q));
   }, [cariCustomer, storedCustomers]);
 
-  const pilihProduk = useCallback((p: ProdukKatalog) => {
+  const pilihProduk = useCallback((p: { id: string; brand: string; tipe: string; kategori: string; hargaJual: number; hargaModal: number }) => {
     setSelectedProduct(p);
     setSearch(`${p.brand} ${p.tipe}`);
     setShowDropdown(false);
@@ -308,7 +297,7 @@ export default function KasirGadgetLaptop() {
                 onChange={(e) => { setSearch(e.target.value); setShowDropdown(true); }}
                 onFocus={() => setShowDropdown(true)}
                 onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
-                placeholder="Cari brand, tipe, atau kategori..."
+                placeholder="Cari brand atau tipe..."
                 className="input-premium w-full text-xs pl-10"
               />
             </div>
