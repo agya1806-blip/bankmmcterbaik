@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
-  LayoutDashboard, Briefcase, Wallet, FileText, Settings,
+  LayoutDashboard, Briefcase, Wallet, FileText, Settings, BookUser,
 } from "lucide-react";
 
 const ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/buku-usaha", label: "Usaha", icon: Briefcase },
+  { href: "/buku-pribadi", label: "Pribadi", icon: BookUser },
   { href: "/buku-usaha/dompet", label: "Dompet", icon: Wallet },
   { href: "/buku-usaha/laporan-keuangan", label: "Laporan", icon: FileText },
-  { href: "/buku-usaha/pengaturan", label: "Atur", icon: Settings },
 ];
 
 export default function BottomNav() {
