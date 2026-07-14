@@ -6,7 +6,7 @@ import {
   Coffee, ShoppingBag, Utensils, Plus, Minus, Trash2,
   ArrowLeft, DollarSign, Receipt,
   Search, Package, Wheat,
-  Printer, Smartphone, Shirt, CheckCircle2,
+  Printer, Smartphone, Shirt, CheckCircle2, X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import BillWarkopKelontongView, {
@@ -98,8 +98,8 @@ function pad2(n: number) {
 export default function KasirWarkopKelontong() {
   const router = useRouter();
   const { wallets, tambahSaldoWallet, kurangiSaldoWallet, setLastKasirUnit } = useBusinessStore();
-  const [walletPenerimaanId, setWalletPenerimaanId] = useState(wallets[0]?.id || "wallet-kas");
-  const [walletModalId, setWalletModalId] = useState(wallets[1]?.id || "wallet-bsi");
+  const [walletPenerimaanId, setWalletPenerimaanId] = useState(wallets[0]?.id || "");
+  const [walletModalId, setWalletModalId] = useState(wallets[1]?.id || "");
   const [mounted, setMounted] = useState(false);
 
   /* ─── State ─── */
@@ -113,12 +113,15 @@ export default function KasirWarkopKelontong() {
   const [showBill, setShowBill] = useState(false);
   const [, setBillData] = useState<BillData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(MENU_LIST);
+  const [showTambahMenu, setShowTambahMenu] = useState(false);
+  const [menuBaru, setMenuBaru] = useState({ nama: "", harga: "", kategori: "makanan" as KategoriMenu, stok: "10" });
 
   useEffect(() => { setMounted(true); setLastKasirUnit("kedai_kopi"); }, [setLastKasirUnit]);
 
   /* ─── Filter Menu ─── */
   const menuFiltered = useMemo(() => {
-    let items = MENU_LIST.filter((m) => m.kategori === activeKategori);
+    let items = menuItems.filter((m) => m.kategori === activeKategori);
     if (search) {
       const q = search.toLowerCase();
       items = items.filter((m) => m.nama.toLowerCase().includes(q));
@@ -313,6 +316,11 @@ export default function KasirWarkopKelontong() {
                 </button>
               );
             })}
+            <button onClick={() => setShowTambahMenu(true)}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-semibold whitespace-nowrap transition-all bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-dashed border-emerald-500/30 shrink-0"
+            >
+              <Plus className="size-3" /> Tambah
+            </button>
           </div>
 
           {/* Grid Menu */}
@@ -546,7 +554,7 @@ export default function KasirWarkopKelontong() {
                       </button>
                       <button onClick={() => {
                         const msg = encodeURIComponent(`Terima kasih ${pelanggan || noMeja || "Pelanggan"}!\n\nTransaksi: ${liveBillData?.id || ""}\nTotal: ${formatRupiah(subtotal)}\nKembalian: ${formatRupiah(kembalian)}`);
-                        window.open(`https://wa.me/6285217706587?text=${msg}`, "_blank");
+                        window.open(`https://wa.me/${pelanggan || "62"}?text=${msg}`, "_blank");
                       }}
                         className="flex-1 py-2.5 rounded-xl bg-green-500/10 text-green-600 text-xs font-bold hover:bg-green-500/20 transition-colors"
                       >
@@ -570,6 +578,72 @@ export default function KasirWarkopKelontong() {
       <div className="px-4 mt-4">
         <QrisDisplay />
       </div>
+
+      {/* ─── Modal Tambah Menu ─── */}
+      {showTambahMenu && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowTambahMenu(false)} />
+          <div className="relative w-full max-w-sm bg-card rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold font-heading">Tambah Menu Baru</h3>
+              <button onClick={() => setShowTambahMenu(false)}
+                className="size-8 rounded-xl bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors"
+              >
+                <X className="size-4 text-muted-foreground" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] text-muted-foreground/60 mb-1 block">Nama Menu</label>
+                <input type="text" value={menuBaru.nama} onChange={(e) => setMenuBaru((p) => ({ ...p, nama: e.target.value }))}
+                  placeholder="cth: Es Campur" className="input-premium w-full text-xs" autoFocus />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[10px] text-muted-foreground/60 mb-1 block">Harga (Rp)</label>
+                  <input type="text" inputMode="numeric" value={menuBaru.harga} onChange={(e) => setMenuBaru((p) => ({ ...p, harga: e.target.value.replace(/\D/g, "") }))}
+                    placeholder="10000" className="input-premium w-full text-xs tabular-nums" />
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted-foreground/60 mb-1 block">Stok</label>
+                  <input type="text" inputMode="numeric" value={menuBaru.stok} onChange={(e) => setMenuBaru((p) => ({ ...p, stok: e.target.value.replace(/\D/g, "") }))}
+                    placeholder="10" className="input-premium w-full text-xs tabular-nums" />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] text-muted-foreground/60 mb-1 block">Kategori</label>
+                <select value={menuBaru.kategori} onChange={(e) => setMenuBaru((p) => ({ ...p, kategori: e.target.value as KategoriMenu }))}
+                  className="input-premium w-full text-xs"
+                >
+                  {KATEGORI_LIST.map((k) => <option key={k.key} value={k.key}>{k.label}</option>)}
+                </select>
+              </div>
+              <button onClick={() => {
+                const nama = menuBaru.nama.trim();
+                const harga = parseInt(menuBaru.harga) || 0;
+                const stok = parseInt(menuBaru.stok) || 0;
+                if (!nama || harga <= 0) { toast.error("Nama dan harga harus diisi"); return; }
+                const iconMap: Record<KategoriMenu, React.ElementType> = { makanan: Utensils, minuman: Coffee, kelontong: ShoppingBag, rokok: Package };
+                const gradMap: Record<KategoriMenu, string> = { makanan: "from-orange-500 to-red-500", minuman: "from-amber-500 to-amber-700", kelontong: "from-green-500 to-green-600", rokok: "from-gray-600 to-gray-800" };
+                const newItem: MenuItem = {
+                  id: `M-${Date.now()}`,
+                  nama, harga, stok, kategori: menuBaru.kategori,
+                  icon: iconMap[menuBaru.kategori],
+                  grad: gradMap[menuBaru.kategori],
+                };
+                setMenuItems((prev) => [...prev, newItem]);
+                setShowTambahMenu(false);
+                setMenuBaru({ nama: "", harga: "", kategori: "makanan", stok: "10" });
+                toast.success(`"${nama}" ditambahkan ke menu`);
+              }}
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold shadow-lg shadow-emerald-500/20 hover:shadow-xl transition-all"
+              >
+                <Plus className="size-3.5 inline mr-1" /> Tambahkan ke Menu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

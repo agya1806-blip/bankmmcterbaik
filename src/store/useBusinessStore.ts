@@ -622,26 +622,15 @@ interface BusinessStore {
    DEFAULTS
    ══════════════════════════════════════════════════════════════ */
 
-const DEFAULT_LABELS: Omit<TransaksiLabel, "id" | "createdAt">[] = [
-  { label: "Modal", warna: "#f59e0b" },
-  { label: "Operasional", warna: "#3b82f6" },
-  { label: "Gaji", warna: "#8b5cf6" },
-  { label: "Pemasukan", warna: "#10b981" },
-  { label: "Pengeluaran", warna: "#ef4444" },
-];
+const DEFAULT_LABELS: Omit<TransaksiLabel, "id" | "createdAt">[] = [];
 
 const DEFAULT_PROFILE: BusinessProfile = {
   logoUrl: "",
-  namaUsaha: "Mughis Group",
-  alamat: "Samalanga, Bireuen, Aceh",
-  noWhatsapp: "6285217706587",
-  slogan: "Jual Laptop Baru & Bekas • Penerbit & Percetakan • Desain Grafis & Logo • Jasa Bordir & Sablon",
-  subLayanan: [
-    "Jual Laptop Baru & Bekas",
-    "Penerbit & Percetakan",
-    "Desain Grafis & Logo",
-    "Jasa Bordir & Sablon",
-  ],
+  namaUsaha: "",
+  alamat: "",
+  noWhatsapp: "",
+  slogan: "",
+  subLayanan: [],
 };
 
 const INITIAL_SEDEKAH: SedekahBalance = {
@@ -731,11 +720,7 @@ export const useBusinessStore = create<BusinessStore>()(
         })),
 
       /* ─── Buku Usaha: Wallets ─── */
-      wallets: [
-        { id: "wallet-kas", namaDompet: "Kas Laci Kasir", saldo: 0, tipe: "KasTunai", catatan: "Uang fisik di laci kasir" },
-        { id: "wallet-bsi", namaDompet: "Rekening Operasional BSI", saldo: 0, tipe: "Bank", catatan: "BSI 1234567890" },
-        { id: "wallet-dana", namaDompet: "Dana Cadangan Usaha", saldo: 0, tipe: "EWallet", catatan: "Dana cadangan untuk restock" },
-      ],
+      wallets: [],
       mutasiLog: [],
       addWallet: (w) => set((s) => ({ wallets: [w, ...s.wallets] })),
       updateWallet: (id, data) =>
@@ -787,17 +772,7 @@ export const useBusinessStore = create<BusinessStore>()(
       },
 
       /* ─── Buku Usaha: Payment Methods ─── */
-      paymentMethods: [
-        {
-          id: "pm-bsi",
-          namaMetode: "BSI",
-          bankName: "Bank Syariah Indonesia",
-          accountNo: "1234567890",
-          accountName: "Mughis Group",
-          qrisImageUrl: "",
-          isEnabled: true,
-        },
-      ],
+      paymentMethods: [],
       addPaymentMethod: (p) => set((s) => ({ paymentMethods: [p, ...s.paymentMethods] })),
       updatePaymentMethod: (id, data) =>
         set((s) => ({

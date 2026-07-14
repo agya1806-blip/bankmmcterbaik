@@ -391,26 +391,26 @@ export default function PengaturanBukuUsaha() {
               <label className="text-[9px] font-medium text-muted-foreground/60 uppercase tracking-wider">Nama Usaha</label>
               <div className="relative">
                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/40" />
-                <input type="text" value={localNama} onChange={(e) => setLocalNama(e.target.value)} placeholder="cth: Mughis Group" className="input-premium w-full text-xs pl-9" required />
+                <input type="text" value={localNama} onChange={(e) => setLocalNama(e.target.value)} placeholder="Nama usaha Anda" className="input-premium w-full text-xs pl-9" required />
               </div>
             </div>
             <div className="space-y-1">
               <label className="text-[9px] font-medium text-muted-foreground/60 uppercase tracking-wider">Alamat Lengkap</label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-3 size-3.5 text-muted-foreground/40" />
-                <textarea value={localAlamat} onChange={(e) => setLocalAlamat(e.target.value)} placeholder="cth: Samalanga, Bireuen, Aceh" rows={3} className="input-premium w-full text-xs pl-9 resize-none" required />
+                <textarea value={localAlamat} onChange={(e) => setLocalAlamat(e.target.value)} placeholder="Alamat lengkap usaha" rows={3} className="input-premium w-full text-xs pl-9 resize-none" required />
               </div>
             </div>
             <div className="space-y-1">
               <label className="text-[9px] font-medium text-muted-foreground/60 uppercase tracking-wider">Nomor WhatsApp</label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground/40" />
-                <input type="tel" value={localWA} onChange={(e) => setLocalWA(e.target.value.replace(/[^0-9]/g, ""))} placeholder="cth: 6285217706587" maxLength={15} className="input-premium w-full text-xs pl-9 tabular-nums" required />
+                <input type="tel" value={localWA} onChange={(e) => setLocalWA(e.target.value.replace(/[^0-9]/g, ""))} placeholder="6281xxxxxxxxx" maxLength={15} className="input-premium w-full text-xs pl-9 tabular-nums" required />
               </div>
             </div>
             <div className="space-y-1">
               <label className="text-[9px] font-medium text-muted-foreground/60 uppercase tracking-wider">Slogan / Sub-titel</label>
-              <input type="text" value={localSlogan} onChange={(e) => setLocalSlogan(e.target.value)} placeholder="cth: Jual Laptop Baru & Bekas • Penerbit & Percetakan" className="input-premium w-full text-xs" />
+              <input type="text" value={localSlogan} onChange={(e) => setLocalSlogan(e.target.value)} placeholder="Slogan atau deskripsi singkat" className="input-premium w-full text-xs" />
             </div>
           </div>
 
@@ -422,7 +422,7 @@ export default function PengaturanBukuUsaha() {
             <div className="flex gap-2">
               <input type="text" value={newLayanan} onChange={(e) => setNewLayanan(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleTambahLayanan(); } }}
-                placeholder="cth: Jual Laptop Baru & Bekas" className="input-premium flex-1 text-xs" />
+                placeholder="cth: Jasa Desain Grafis" className="input-premium flex-1 text-xs" />
               <button type="button" onClick={handleTambahLayanan}
                 className="px-3 py-2 rounded-lg bg-violet-500/10 text-violet-600 text-[10px] font-semibold hover:bg-violet-500/20 transition-colors shrink-0">
                 <Plus className="size-3.5 inline" /> Tambah
@@ -501,7 +501,7 @@ export default function PengaturanBukuUsaha() {
               </div>
               <div className="space-y-1">
                 <label className="text-[9px] text-muted-foreground/50">Atas Nama</label>
-                <input type="text" value={pmAn} onChange={(e) => setPmAn(e.target.value)} placeholder="cth: Mughis Group" className="input-premium w-full text-[10px]" />
+                <input type="text" value={pmAn} onChange={(e) => setPmAn(e.target.value)} placeholder="Nama pemilik rekening" className="input-premium w-full text-[10px]" />
               </div>
             </div>
             <div className="space-y-1">

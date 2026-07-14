@@ -25,15 +25,10 @@ export interface ProfilUsahaState {
 
 const DEFAULT_PROFIL: ProfilUsaha = {
   logo: "",
-  nama: "Mughis Group",
-  alamat: "Samalanga, Bireuen, Aceh",
-  noWA: "085217706587",
-  subLayanan: [
-    "Jual Laptop Baru & Bekas",
-    "Penerbit & Percetakan",
-    "Desain Grafis & Logo",
-    "Jasa Bordir & Sablon",
-  ],
+  nama: "",
+  alamat: "",
+  noWA: "",
+  subLayanan: [],
 };
 
 function mapCentralToLegacy(central: { logoUrl: string; namaUsaha: string; alamat: string; noWhatsapp: string; subLayanan: string[] }): ProfilUsaha {

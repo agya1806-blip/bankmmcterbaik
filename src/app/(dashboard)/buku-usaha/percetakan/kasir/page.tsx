@@ -323,7 +323,7 @@ export default function KasirPercetakan() {
       pembayaran: "Transfer Bank / Tunai",
       rekeningBank: "Bank Aceh Syariah",
       rekeningNomor: "010-01-123456-7",
-      rekeningAtasNama: "Mughis Group",
+      rekeningAtasNama: "",
     };
   }, [mode, bahanTerpilih, mPanjang, mLebar, mQty, bHalaman, kertasTerpilih,
       bCetakIsi, coverTerpilih, bLaminasi, jilidTerpilih, bQty, invoiceId, customerNama,
@@ -704,7 +704,7 @@ export default function KasirPercetakan() {
                       </button>
                       <button onClick={() => {
                         const msg = encodeURIComponent(`Terima kasih ${customerNama}!\n\nTransaksi: ${invoiceId}\nTotal: ${formatRupiah(Math.round(totalJual))}\nSisa: ${formatRupiah(Math.round(sisa))}`);
-                        window.open(`https://wa.me/${customerWA || "6285217706587"}?text=${msg}`, "_blank");
+                        window.open(`https://wa.me/${customerWA || "62"}?text=${msg}`, "_blank");
                       }}
                         className="flex-1 py-2.5 rounded-xl bg-green-500/10 text-green-600 text-xs font-bold hover:bg-green-500/20 transition-colors"
                       >

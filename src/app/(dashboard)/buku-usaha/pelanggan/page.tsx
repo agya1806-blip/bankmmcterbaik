@@ -4,11 +4,19 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Users, ArrowLeft, Star, Search, ChevronRight, X,
-  Phone, ShoppingCart, Calendar,
+  Phone, ShoppingCart, Calendar, Upload, FileSpreadsheet,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useBusinessStore, CustomerRecord, CustomerTransaction, BizUnit, BIZ_UNIT_LABELS } from "@/store/useBusinessStore";
 import { CardSkeleton } from "@/components/ui/skeleton";
+
+declare global {
+  interface Navigator {
+    contacts?: {
+      select: (props: string[], opts: { multiple: boolean }) => Promise<Array<{ name?: string[]; tel?: string[] }>>;
+    };
+  }
+}
 
 function formatRupiah(n: number) {
   return `Rp ${n.toLocaleString("id-ID")}`;
@@ -29,6 +37,50 @@ export default function PelangganPage() {
   const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerRecord | null>(null);
+  const [importing, setImporting] = useState(false);
+
+  const importContacts = useCallback(async () => {
+    if (typeof navigator === "undefined" || !("contacts" in navigator) || !navigator.contacts) {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".csv";
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+        const text = await file.text();
+        const lines = text.split("\n").slice(1);
+        let added = 0;
+        for (const line of lines) {
+          const [nama, noWA] = line.split(",").map((s) => s.trim());
+          if (nama && noWA && !getCustomerByWA(noWA)) {
+            addCustomerRecord({ nama, noWA });
+            added++;
+          }
+        }
+        toast.success(`${added} kontak diimpor dari CSV`);
+      };
+      input.click();
+      return;
+    }
+    setImporting(true);
+    try {
+      const props = ["name", "tel"];
+      const contacts = await navigator.contacts.select(props, { multiple: true });
+      let added = 0;
+      for (const c of contacts) {
+        const nama = c.name?.[0] || "Kontak";
+        const noWA = c.tel?.[0]?.replace(/[^0-9]/g, "");
+        if (noWA && !getCustomerByWA(noWA)) {
+          addCustomerRecord({ nama, noWA });
+          added++;
+        }
+      }
+      toast.success(`${added} kontak diimpor dari ponsel`);
+    } catch {
+      toast.error("Gagal mengimpor kontak");
+    }
+    setImporting(false);
+  }, [addCustomerRecord, getCustomerByWA]);
 
   useEffect(() => setMounted(true), []);
 
@@ -70,19 +122,28 @@ export default function PelangganPage() {
         </div>
       </div>
 
-      {/* ─── Search ─── */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/40" />
-        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-          placeholder="Cari nama atau nomor WA..."
-          className="input-premium w-full text-xs pl-10" />
-        {search && (
-          <button onClick={() => setSearch("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground"
-          >
-            <X className="size-4" />
-          </button>
-        )}
+      {/* ─── Search + Import ─── */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/40" />
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+            placeholder="Cari nama atau nomor WA..."
+            className="input-premium w-full text-xs pl-10" />
+          {search && (
+            <button onClick={() => setSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground"
+            >
+              <X className="size-4" />
+            </button>
+          )}
+        </div>
+        <button onClick={importContacts} disabled={importing}
+          className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-semibold shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 active:scale-[0.97] transition-all disabled:opacity-50 shrink-0"
+          title="Impor kontak dari ponsel atau CSV"
+        >
+          <Upload className="size-3.5" />
+          <span className="hidden sm:inline">Impor Kontak</span>
+        </button>
       </div>
 
       {/* ─── Stat cards ─── */}

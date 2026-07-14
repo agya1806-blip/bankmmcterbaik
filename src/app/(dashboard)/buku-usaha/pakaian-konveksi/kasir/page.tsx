@@ -251,7 +251,7 @@ export default function KasirPakaianKonveksi() {
       pembayaran: lunas ? "Tunai / Transfer" : "Piutang (Sisa Tagihan)",
       rekeningBank: "Bank Aceh Syariah",
       rekeningNomor: "010-01-123456-7",
-      rekeningAtasNama: profil.nama || "Mughis Group",
+      rekeningAtasNama: profil.nama || "",
     };
   }, [mode, cartReady, customNamaProduk, customPcs, customKain, customHargaKain,
       customOngkosCMT, customSablon, customHargaJual, customerNama, customerWA,
@@ -583,7 +583,7 @@ export default function KasirPakaianKonveksi() {
                       </button>
                       <button onClick={() => {
                         const msg = encodeURIComponent(`Terima kasih ${customerNama}!\n\nTransaksi: ${invoiceId}\nTotal: ${formatRupiah(subtotal)}\nSisa: ${formatRupiah(sisa)}`);
-                        window.open(`https://wa.me/${customerWA || "6285217706587"}?text=${msg}`, "_blank");
+                        window.open(`https://wa.me/${customerWA || "62"}?text=${msg}`, "_blank");
                       }}
                         className="flex-1 py-2.5 rounded-xl bg-green-500/10 text-green-600 text-xs font-bold hover:bg-green-500/20 transition-colors"
                       >

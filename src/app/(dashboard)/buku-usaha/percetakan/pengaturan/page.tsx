@@ -176,7 +176,7 @@ export default function PengaturanProfil() {
                 type="text"
                 value={profil.nama}
                 onChange={(e) => setNama(e.target.value)}
-                placeholder="cth: Mughis Group"
+                placeholder="Nama percetakan Anda"
                 className="input-premium w-full text-xs pl-9"
                 required
               />
@@ -190,7 +190,7 @@ export default function PengaturanProfil() {
               <textarea
                 value={profil.alamat}
                 onChange={(e) => setAlamat(e.target.value)}
-                placeholder="cth: Samalanga, Bireuen, Aceh"
+                placeholder="Alamat lengkap"
                 rows={3}
                 className="input-premium w-full text-xs pl-9 resize-none"
                 required
@@ -206,7 +206,7 @@ export default function PengaturanProfil() {
                 type="tel"
                 value={profil.noWA}
                 onChange={(e) => setNoWA(e.target.value.replace(/[^0-9]/g, ""))}
-                placeholder="cth: 085217706587"
+                placeholder="08xxxxxxxxx"
                 maxLength={15}
                 className="input-premium w-full text-xs pl-9 tabular-nums"
                 required
@@ -227,7 +227,7 @@ export default function PengaturanProfil() {
               value={newLayanan}
               onChange={(e) => setNewLayanan(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleTambahLayanan(); } }}
-              placeholder="cth: Jual Laptop Baru & Bekas"
+              placeholder="cth: Desain Grafis"
               className="input-premium flex-1 text-xs"
             />
             <button
