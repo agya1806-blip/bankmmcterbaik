@@ -364,8 +364,18 @@ export default function PercetakanForm() {
   }, [antrean, searchCustomer]);
 
   /* ─── Export ─── */
-  const exportPNG = useCallback(() => {
-    toast.success("🖼️ PNG struk/nota akan di-download (simulasi)");
+  const exportPNG = useCallback(async () => {
+    const el = document.getElementById("percetakan-form-area");
+    if (!el) return;
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const link = document.createElement("a");
+      link.download = `Percetakan-${todayISO()}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      toast.success("PNG siap diunduh");
+    } catch { toast.error("Gagal export PNG"); }
   }, []);
 
   const exportPDF = useCallback(() => {
@@ -407,7 +417,7 @@ ${customerPhone ? `\nKonfirmasi via: wa.me/${customerPhone}` : ""}`;
   if (!mounted) return <div className="min-h-[60vh]" />;
 
   return (
-    <div className="space-y-5">
+    <div id="percetakan-form-area" className="space-y-5">
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

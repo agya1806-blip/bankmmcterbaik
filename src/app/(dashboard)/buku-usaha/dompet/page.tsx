@@ -33,6 +33,8 @@ export default function DompetPage() {
   const [mounted, setMounted] = useState(false);
   const refresh = useCallback(async () => {
     await new Promise((r) => setTimeout(r, 300));
+    useBusinessStore.persist.rehydrate();
+    toast.success("Data dompet diperbarui");
   }, []);
   const { refreshing, pullDistance, onTouchStart, onTouchMove, onTouchEnd } = usePullRefresh(refresh);
 

@@ -49,6 +49,8 @@ export default function LaporanKeuangan() {
   useEffect(() => setMounted(true), []);
   const refresh = useCallback(async () => {
     await new Promise((r) => setTimeout(r, 300));
+    useBusinessStore.persist.rehydrate();
+    toast.success("Data laporan diperbarui");
   }, []);
   const { refreshing, pullDistance, onTouchStart, onTouchMove, onTouchEnd } = usePullRefresh(refresh);
 
