@@ -25,7 +25,7 @@ export default function Header(_props: HeaderProps) {
           .join(" / ");
 
   return (
-    <header className="byond-header">
+    <header className="byond-header safe-top">
       <div className="flex items-center gap-2 min-w-0">
         <div className="size-8 rounded-lg bg-emerald-500/15 flex items-center justify-center shrink-0">
           <span className="text-emerald-400 font-bold text-xs">M</span>

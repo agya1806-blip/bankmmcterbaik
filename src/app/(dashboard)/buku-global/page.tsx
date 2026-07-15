@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { db, BOOK_LABELS, BRANCH_SLUGS, type BookOrBranch, type DbTransaction } from "@/lib/db-v4";
-import { TrendingUp, Wallet, AlertCircle, BarChart3, Settings, Globe, ChevronRight, Activity, PieChartIcon, DollarSign, Lock, FileSpreadsheet } from "lucide-react";
+import { TrendingUp, Wallet, AlertCircle, Settings, Globe, ChevronRight, Activity, PieChartIcon, DollarSign, Lock, FileSpreadsheet } from "lucide-react";
 import { PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from "recharts";
 
 function formatRupiah(n: number) { return `Rp ${n.toLocaleString("id-ID")}`; }
@@ -14,7 +14,16 @@ function shortRupiah(n: number) {
   return `Rp${n}`;
 }
 
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 11) return "Selamat Pagi";
+  if (h < 15) return "Selamat Siang";
+  if (h < 18) return "Selamat Sore";
+  return "Selamat Malam";
+}
+
 const COLORS = ["#7B61FF", "#FF5C00", "#06b6d4", "#10b981", "#f59e0b", "#ec4899", "#8b5cf6"];
+const TARGET_OMZET = 100_000_000;
 
 export default function BukuGlobalPage() {
   const router = useRouter();
@@ -132,68 +141,88 @@ export default function BukuGlobalPage() {
   }));
   const totalOmzet = pieData.reduce((s, d) => s + d.value, 0);
 
+  const progressPercent = Math.min(Math.round((data.omzetBulanIni / TARGET_OMZET) * 100), 100);
+  const circumference = 2 * Math.PI * 54;
+  const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
+
   if (loading) return <div className="space-y-4 animate-pulse"><div className="h-8 w-48 rounded-lg bg-slate-200 dark:bg-slate-800/50" /><div className="grid grid-cols-2 gap-3">{[1, 2, 3, 4].map((i) => <div key={i} className="h-24 rounded-2xl bg-slate-100 dark:bg-slate-800/30" />)}</div></div>;
 
   return (
     <div className="space-y-5 pb-4 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="size-10 rounded-xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-lg">
-            <Globe className="size-5 text-white" />
+      {/* Hero Banner with Greeting */}
+      <div className="premium-card p-5 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#7B61FF]/5 via-[#FF5C00]/3 to-transparent pointer-events-none" />
+        <div className="relative flex items-start justify-between">
+          <div className="space-y-1">
+            <h1 className="text-xl font-bold font-heading text-slate-900 dark:text-slate-50">{getGreeting()}, Owner</h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs leading-relaxed">
+              Berikut adalah ringkasan performa konsolidasi dari seluruh cabang Anda hari ini.
+            </p>
           </div>
-          <div>
-            <h1 className="text-lg font-bold font-heading">Dashboard Global</h1>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400">Konsolidasi semua cabang</p>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200/60 dark:border-emerald-800/40">
+            <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[9px] font-medium text-emerald-600 dark:text-emerald-400">DB Secured</span>
           </div>
-        </div>
-        <div className="flex gap-1">
-          <button onClick={() => router.push("/buku-global/laporan")} className="size-9 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-90" title="Laporan">
-            <BarChart3 className="size-4 text-slate-500" />
-          </button>
-          <button onClick={() => router.push("/buku-global/pengaturan")} className="size-9 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-90" title="Pengaturan">
-            <Settings className="size-4 text-slate-500" />
-          </button>
         </div>
       </div>
 
-      {/* Stat Cards - Premium Glassmorphism */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="premium-stat">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="size-8 rounded-lg bg-gradient-to-r from-[#7B61FF]/10 to-[#7B61FF]/5 flex items-center justify-center">
-              <Wallet className="size-4 text-[#7B61FF]" />
+      {/* Circular Progress + Stat Cards Row */}
+      <div className="grid grid-cols-3 gap-3">
+        {/* Circular Progress Ring */}
+        <div className="premium-card col-span-1 p-4 flex flex-col items-center justify-center">
+          <div className="relative size-32">
+            <svg className="size-32 -rotate-90" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="54" fill="none" stroke="#e2e8f0" strokeWidth="8" className="dark:stroke-slate-700" />
+              <circle cx="60" cy="60" r="54" fill="none" stroke="url(#progressGradient)" strokeWidth="8"
+                strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
+                style={{ transition: "stroke-dashoffset 1s ease-out" }} />
+              <defs>
+                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#7B61FF" />
+                  <stop offset="100%" stopColor="#FF5C00" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-2xl font-bold font-heading gradient-text">{progressPercent}%</span>
+              <span className="text-[9px] text-slate-500 dark:text-slate-400">Target</span>
             </div>
           </div>
-          <p className="premium-stat-label">Kekayaan Bersih</p>
-          <p className="premium-stat-value text-[#7B61FF]">{shortRupiah(data.totalKekayaan)}</p>
+          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-2 text-center">
+            {shortRupiah(data.omzetBulanIni)} / {shortRupiah(TARGET_OMZET)}
+          </p>
         </div>
-        <div className="premium-stat">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="size-8 rounded-lg bg-gradient-to-r from-[#FF5C00]/10 to-[#FF5C00]/5 flex items-center justify-center">
-              <TrendingUp className="size-4 text-[#FF5C00]" />
+
+        {/* Compact Stat Cards */}
+        <div className="col-span-2 grid grid-cols-2 gap-2">
+          <div className="premium-stat !p-3">
+            <div className="size-7 rounded-lg bg-gradient-to-r from-[#7B61FF]/10 to-[#7B61FF]/5 flex items-center justify-center mb-1.5">
+              <Wallet className="size-3.5 text-[#7B61FF]" />
             </div>
+            <p className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">Kekayaan Bersih</p>
+            <p className="text-base font-bold font-heading tabular-nums text-[#7B61FF]">{shortRupiah(data.totalKekayaan)}</p>
           </div>
-          <p className="premium-stat-label">Omzet Bulan Ini</p>
-          <p className="premium-stat-value text-[#FF5C00]">{shortRupiah(data.omzetBulanIni)}</p>
-        </div>
-        <div className="premium-stat">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="size-8 rounded-lg bg-gradient-to-r from-violet-500/10 to-fuchsia-500/5 flex items-center justify-center">
-              <DollarSign className="size-4 text-violet-500" />
+          <div className="premium-stat !p-3">
+            <div className="size-7 rounded-lg bg-gradient-to-r from-[#FF5C00]/10 to-[#FF5C00]/5 flex items-center justify-center mb-1.5">
+              <TrendingUp className="size-3.5 text-[#FF5C00]" />
             </div>
+            <p className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">Omzet Bulan Ini</p>
+            <p className="text-base font-bold font-heading tabular-nums text-[#FF5C00]">{shortRupiah(data.omzetBulanIni)}</p>
           </div>
-          <p className="premium-stat-label">Laba Bersih</p>
-          <p className={`premium-stat-value ${data.labaBersih >= 0 ? "text-emerald-500" : "text-red-500"}`}>{shortRupiah(data.labaBersih)}</p>
-        </div>
-        <div className="premium-stat">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="size-8 rounded-lg bg-gradient-to-r from-rose-500/10 to-rose-500/5 flex items-center justify-center">
-              <AlertCircle className="size-4 text-rose-500" />
+          <div className="premium-stat !p-3">
+            <div className="size-7 rounded-lg bg-gradient-to-r from-violet-500/10 to-fuchsia-500/5 flex items-center justify-center mb-1.5">
+              <DollarSign className="size-3.5 text-violet-500" />
             </div>
+            <p className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">Laba Bersih</p>
+            <p className={`text-base font-bold font-heading tabular-nums ${data.labaBersih >= 0 ? "text-emerald-500" : "text-red-500"}`}>{shortRupiah(data.labaBersih)}</p>
           </div>
-          <p className="premium-stat-label">Piutang Aktif</p>
-          <p className="premium-stat-value text-rose-500">{shortRupiah(data.totalPiutang)}</p>
+          <div className="premium-stat !p-3">
+            <div className="size-7 rounded-lg bg-gradient-to-r from-rose-500/10 to-rose-500/5 flex items-center justify-center mb-1.5">
+              <AlertCircle className="size-3.5 text-rose-500" />
+            </div>
+            <p className="text-[9px] text-slate-500 dark:text-slate-400 font-medium">Piutang Aktif</p>
+            <p className="text-base font-bold font-heading tabular-nums text-rose-500">{shortRupiah(data.totalPiutang)}</p>
+          </div>
         </div>
       </div>
 
@@ -266,7 +295,13 @@ export default function BukuGlobalPage() {
           <Activity className="size-4 text-[#7B61FF]" /> Transaksi Terbaru
         </p>
         {data.recentTransactions.length === 0 ? (
-          <p className="text-xs text-slate-500 dark:text-slate-400 text-center py-4">Belum ada transaksi</p>
+          <div className="text-center py-8 space-y-2">
+            <div className="size-12 rounded-2xl bg-slate-100 dark:bg-slate-800/40 flex items-center justify-center mx-auto">
+              <Activity className="size-5 text-slate-400" />
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Belum ada transaksi</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500">Mulai transaksi dari halaman kasir cabang</p>
+          </div>
         ) : (
           <div className="space-y-1">
             {data.recentTransactions.map((tx, i) => (

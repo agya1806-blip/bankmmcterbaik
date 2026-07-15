@@ -8,7 +8,8 @@ export function exportWA(
   message: string
 ): string {
   const text = encodeURIComponent(message);
-  const cleaned = phone.replace(/[^0-9]/g, "");
+  const cleaned = (phone ?? "").replace(/[^0-9]/g, "");
+  if (!cleaned) return `https://wa.me/?text=${text}`;
   return `https://wa.me/${cleaned}?text=${text}`;
 }
 
@@ -21,16 +22,20 @@ export function formatInvoiceWA(
   sisa: number,
   profilNama: string
 ): string {
-  let msg = `*${profilNama}*\n`;
+  const safe = (v: unknown, fallback: string) => (typeof v === "string" && v.trim()) || fallback;
+  let msg = `*${safe(profilNama, "Toko")}*\n`;
   msg += `─────────────────\n`;
-  msg += `*INVOICE #${invoiceNumber}*\n`;
-  msg += `Kepada: ${customerNama}\n\n`;
+  msg += `*INVOICE #${safe(invoiceNumber, "-")}*\n`;
+  msg += `Kepada: ${safe(customerNama, "Walk-in")}\n\n`;
   msg += `*Pesanan:*\n`;
-  items.forEach((it, i) => {
-    msg += `${i + 1}. ${it.namaItem} x${it.qty} — Rp${it.subtotal.toLocaleString()}\n`;
+  (items ?? []).forEach((it, i) => {
+    const nama = safe(it?.namaItem, "Item");
+    const qty = it?.qty ?? 0;
+    const sub = it?.subtotal ?? 0;
+    msg += `${i + 1}. ${nama} x${qty} — Rp${sub.toLocaleString()}\n`;
   });
   msg += `─────────────────\n`;
-  msg += `*Total: Rp${total.toLocaleString()}*\n`;
+  msg += `*Total: Rp${(total ?? 0).toLocaleString()}*\n`;
   if (dp > 0) msg += `DP: Rp${dp.toLocaleString()}\n`;
   if (sisa > 0) msg += `Sisa: Rp${sisa.toLocaleString()}\n`;
   msg += `─────────────────\n`;

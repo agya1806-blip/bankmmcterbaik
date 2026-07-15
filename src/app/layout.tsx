@@ -51,7 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
+    <html lang="id" suppressHydrationWarning className="overflow-x-hidden">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -65,9 +65,11 @@ export default function RootLayout({
         <link rel="mask-icon" href="/icon-512.svg" color="#7B61FF" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased overflow-x-hidden`}
       >
-        {children}
+        <div className="max-w-md mx-auto w-full min-h-screen shadow-2xl relative bg-[#F8F9FD] dark:bg-[#0B0C16]">
+          {children}
+        </div>
       </body>
     </html>
   );

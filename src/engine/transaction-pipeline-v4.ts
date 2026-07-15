@@ -64,18 +64,22 @@ export async function ensureBranchWallets(branch: BookOrBranch): Promise<void> {
 }
 
 async function findOrCreateCustomer(branch: BookOrBranch, nama: string, wa: string): Promise<string> {
-  const existing = await db.customers
-    .where("[bookOrBranchId+noWA]")
-    .equals([branch, wa])
-    .first();
-  if (existing) return existing.id;
+  const safeWA = (wa ?? "").replace(/[^0-9]/g, "").trim();
+  const safeNama = (nama ?? "").trim() || "Walk-in";
+  if (safeWA) {
+    const existing = await db.customers
+      .where("[bookOrBranchId+noWA]")
+      .equals([branch, safeWA])
+      .first();
+    if (existing) return existing.id;
+  }
 
   const id = crypto.randomUUID();
   await db.customers.add({
     id,
     bookOrBranchId: branch,
-    nama,
-    noWA: wa,
+    nama: safeNama,
+    noWA: safeWA,
     totalTransaksi: 0,
     totalBelanja: 0,
     poin: 0,
@@ -86,9 +90,11 @@ async function findOrCreateCustomer(branch: BookOrBranch, nama: string, wa: stri
 }
 
 async function findCustomerCrossBranch(noWA: string): Promise<{ id: string; bookOrBranchId: BookOrBranch; poin: number } | null> {
+  const safeWA = (noWA ?? "").replace(/[^0-9]/g, "").trim();
+  if (!safeWA) return null;
   const all = await db.customers
     .where("noWA")
-    .equals(noWA)
+    .equals(safeWA)
     .toArray();
   if (all.length === 0) return null;
   const withPoin = all.filter((c) => c.poin > 0).sort((a, b) => b.poin - a.poin);

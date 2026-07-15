@@ -71,7 +71,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   /* ─── Dashboard — stable layout ─── */
   return (
     <OnboardingGuard>
-      <div className="flex flex-col h-[100dvh] bg-slate-950 text-slate-100 overflow-hidden">
+      <div className="flex flex-col min-h-[100dvh] overflow-hidden">
         <Header />
         <div className="flex-1 flex flex-col min-h-0">
           <main className="flex-1 overflow-y-auto px-4 pt-3 pb-[70px] safe-bottom scrollbar-hide">
