@@ -1,4 +1,4 @@
-import { db, type BookOrBranch, type DbTransaction, type DbTransactionItem, type DbWallet, BOOK_LABELS, branchPrefix } from "@/lib/db-v4";
+import { db, type BookOrBranch, type DbTransaction, type DbTransactionItem, BOOK_LABELS, branchPrefix } from "@/lib/db-v4";
 import { writeAuditLog } from "@/lib/audit-logger";
 
 /* ─── Input / Output Types ─── */
@@ -47,10 +47,6 @@ function defaultJatuhTempo(): string {
   const d = new Date();
   d.setDate(d.getDate() + 14);
   return d.toISOString().slice(0, 10);
-}
-
-function formatRupiah(n: number): string {
-  return `Rp ${n.toLocaleString("id-ID")}`;
 }
 
 /* ─── Auto-init branch wallets ─── */
