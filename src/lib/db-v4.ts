@@ -206,6 +206,21 @@ export interface DbQuickOrder {
   createdAt: string;
 }
 
+export interface DbAuditLog {
+  id: string;
+  bookOrBranchId: BookOrBranch;
+  action: "CREATE" | "UPDATE" | "DELETE" | "BATAL" | "TRANSFER_KELUAR" | "TRANSFER_MASUK";
+  entityType: "transaction" | "piutang" | "wallet" | "customer" | "inventory" | "transfer";
+  entityId: string;
+  userId: string;
+  userName: string;
+  dataBefore: string;
+  dataAfter: string;
+  nominal: number;
+  alasan: string;
+  createdAt: string;
+}
+
 export interface DbSedekahBalance {
   id: string;
   bookOrBranchId: BookOrBranch;
@@ -240,6 +255,7 @@ class MmcBankDB extends Dexie {
   quickOrders!: Table<DbQuickOrder, string>;
   sedekahBalances!: Table<DbSedekahBalance, string>;
   invoiceCounters!: Table<DbInvoiceCounter, string>;
+  auditLogs!: Table<DbAuditLog, string>;
 
   constructor() {
     super("mmcbank-v4");
@@ -260,6 +276,7 @@ class MmcBankDB extends Dexie {
       quickOrders: "id, bookOrBranchId",
       sedekahBalances: "id, bookOrBranchId",
       invoiceCounters: "id, bookOrBranchId, prefix",
+      auditLogs: "id, bookOrBranchId, action, entityType, entityId, createdAt",
     });
   }
 }

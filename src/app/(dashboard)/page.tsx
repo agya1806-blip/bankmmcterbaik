@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { db, BOOK_LABELS, BRANCH_SLUGS, type BookOrBranch } from "@/lib/db-v4";
 import {
   Wallet, BookUser, Briefcase, HeartHandshake,
-  BookOpen, ArrowRight, Building2,
+  BookOpen, ArrowRight, Building2, ArrowRightLeft, Bot,
 } from "lucide-react";
 
 interface BookCard {
@@ -125,6 +125,32 @@ export default function BukuKeuanganGlobal() {
             );
           })}
         </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 gap-3">
+        <button onClick={() => router.push("/mutasi-antar-buku")}
+          className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 active:scale-[0.97] transition-all text-left"
+        >
+          <div className="size-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25">
+            <ArrowRightLeft className="size-5 text-white" />
+          </div>
+          <div>
+            <p className="text-sm font-bold font-heading">Mutasi Antar-Buku</p>
+            <p className="text-[10px] text-slate-400">Pindahkan dana antar buku/bisnis</p>
+          </div>
+        </button>
+        <button onClick={() => router.push("/asisten-ai")}
+          className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-violet-500/10 to-purple-500/10 border border-violet-500/20 active:scale-[0.97] transition-all text-left"
+        >
+          <div className="size-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
+            <Bot className="size-5 text-white" />
+          </div>
+          <div>
+            <p className="text-sm font-bold font-heading">Tanya AI</p>
+            <p className="text-[10px] text-slate-400">Analisis keuangan dengan AI</p>
+          </div>
+        </button>
       </div>
 
       {/* Buku Cards */}

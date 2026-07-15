@@ -16,6 +16,8 @@ import { useRoleStore, type Role } from "@/store/useRoleStore";
 import { CardSkeleton } from "@/components/ui/skeleton";
 import { exportBackup, importBackup } from "@/lib/backup";
 import { generateSyncCode, applySyncCode, getSyncCodeSize, estimateLocalStorageUsage, getLastSyncTimestamp, setLastSyncTimestamp } from "@/lib/sync";
+import { exportEncryptedBackup, importEncryptedBackup, downloadBlob } from "@/lib/backupEngine";
+import { requestPersistentStorage, getStorageEstimate, formatBytes } from "@/lib/storageStatus";
 import { saveImage, getImage, deleteImage, isRefKey } from "@/lib/image-store";
 
 function genId(): string {
@@ -67,6 +69,15 @@ export default function PengaturanBukuUsaha() {
   const [backupLoading, setBackupLoading] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
   const backupFileInputRef = useRef<HTMLInputElement>(null);
+  const [encryptPin, setEncryptPin] = useState("");
+  const [restorePin, setRestorePin] = useState("");
+  const [encryptLoading, setEncryptLoading] = useState(false);
+  const [decryptLoading, setDecryptLoading] = useState(false);
+  const encBackupFileRef = useRef<HTMLInputElement>(null);
+
+  /* ─── Storage Health ─── */
+  const [storagePersisted, setStoragePersisted] = useState(false);
+  const [storageUsage, setStorageUsage] = useState({ usage: 0, quota: 0, percentUsed: 0 });
 
   /* ─── Tab 6: Sinkron ─── */
   const [syncCode, setSyncCode] = useState("");
@@ -75,6 +86,56 @@ export default function PengaturanBukuUsaha() {
   const [syncApplying, setSyncApplying] = useState(false);
 
   useEffect(() => setMounted(true), []);
+
+  /* Load storage health */
+  useEffect(() => {
+    if (!mounted) return;
+    (async () => {
+      const est = await getStorageEstimate();
+      setStoragePersisted(est.persisted);
+      setStorageUsage({ usage: est.usage, quota: est.quota, percentUsed: est.percentUsed });
+    })();
+  }, [mounted]);
+
+  const handleRequestPersist = useCallback(async () => {
+    const ok = await requestPersistentStorage();
+    setStoragePersisted(ok);
+    toast.success(ok ? "Penyimpanan permanen aktif!" : "Gagal mengaktifkan");
+  }, []);
+
+  const handleEncryptedBackup = useCallback(async () => {
+    if (encryptPin.length < 4) { toast.error("PIN minimal 4 digit"); return; }
+    setEncryptLoading(true);
+    try {
+      const blob = await exportEncryptedBackup(encryptPin);
+      downloadBlob(blob, `mmcbank-encrypted-backup-${new Date().toISOString().slice(0, 10)}.json`);
+      toast.success("Backup terenkripsi berhasil diunduh");
+    } catch (err) {
+      toast.error("Gagal: " + (err instanceof Error ? err.message : "Unknown"));
+    } finally {
+      setEncryptLoading(false);
+    }
+  }, [encryptPin]);
+
+  const handleEncryptedRestore = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || restorePin.length < 4) { toast.error("Pilih file dan masukkan PIN"); return; }
+    setDecryptLoading(true);
+    try {
+      const result = await importEncryptedBackup(file, restorePin);
+      if (result.success) {
+        toast.success(result.message);
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        toast.error(result.message);
+      }
+    } catch {
+      toast.error("Gagal restore backup");
+    } finally {
+      setDecryptLoading(false);
+      if (encBackupFileRef.current) encBackupFileRef.current.value = "";
+    }
+  }, [restorePin]);
 
   /* Resolve pmQrisUrl (key) → actual dataUrl for form preview */
   useEffect(() => {
@@ -804,10 +865,51 @@ export default function PengaturanBukuUsaha() {
             </button>
           </div>
 
-          {/* Restore Backup */}
+          {/* Encrypted Backup */}
+          <div className="floating-card p-5 space-y-4 border border-emerald-500/20">
+            <p className="text-xs font-semibold flex items-center gap-1.5 text-emerald-500">
+              <Shield className="size-3.5" /> Backup Terenkripsi (AES-GCM)
+            </p>
+            <p className="text-[10px] text-muted-foreground/60">
+              Backup dengan enkripsi AES-GCM menggunakan PIN Admin. File aman dibagikan via WA.
+            </p>
+            <div className="space-y-1">
+              <label className="text-[9px] text-muted-foreground/50">PIN Enkripsi (min 4 digit)</label>
+              <input type="password" inputMode="numeric" maxLength={6} value={encryptPin}
+                onChange={(e) => setEncryptPin(e.target.value.replace(/\D/g, ""))}
+                placeholder="6 digit" className="input-premium w-full text-xs tabular-nums" />
+            </div>
+            <button onClick={handleEncryptedBackup} disabled={encryptLoading || encryptPin.length < 4}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold shadow-lg disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {encryptLoading ? <><Loader2 className="size-4 animate-spin" /> Mengenkripsi...</> : <><Shield className="size-4" /> Download Backup Terenkripsi</>}
+            </button>
+          </div>
+
+          {/* Encrypted Restore */}
+          <div className="floating-card p-5 space-y-4 border border-emerald-500/20">
+            <p className="text-xs font-semibold flex items-center gap-1.5 text-emerald-500">
+              <Upload className="size-3.5" /> Restore Backup Terenkripsi
+            </p>
+            <div className="space-y-1">
+              <label className="text-[9px] text-muted-foreground/50">PIN Dekripsi</label>
+              <input type="password" inputMode="numeric" maxLength={6} value={restorePin}
+                onChange={(e) => setRestorePin(e.target.value.replace(/\D/g, ""))}
+                placeholder="6 digit" className="input-premium w-full text-xs tabular-nums" />
+            </div>
+            <input ref={encBackupFileRef} type="file" accept=".json" onChange={handleEncryptedRestore}
+              disabled={decryptLoading} className="hidden" id="enc-backup-upload" />
+            <label htmlFor="enc-backup-upload"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-emerald-500/30 text-xs text-emerald-500 hover:border-emerald-500/50 transition-all cursor-pointer"
+            >
+              {decryptLoading ? <><Loader2 className="size-4 animate-spin" /> Mendekripsi...</> : <><Upload className="size-4" /> Pilih & Restore</>}
+            </label>
+          </div>
+
+          {/* Restore Backup (non-encrypted) */}
           <div className="floating-card p-5 space-y-4">
             <p className="text-xs font-semibold flex items-center gap-1.5">
-              <Upload className="size-3.5 text-violet-500" /> Restore dari Backup
+              <Upload className="size-3.5 text-violet-500" /> Restore dari Backup (Non-Enkripsi)
             </p>
             <p className="text-[10px] text-muted-foreground/60">
               Pilih file backup JSON yang sebelumnya telah diunduh untuk mengembalikan data.
@@ -938,10 +1040,55 @@ export default function PengaturanBukuUsaha() {
             </p>
           </div>
 
+          {/* Storage Health */}
+          <div className="floating-card p-5 space-y-3">
+            <p className="text-xs font-semibold flex items-center gap-1.5">
+              <Database className="size-3.5 text-violet-500" /> Kesehatan Penyimpanan
+            </p>
+            <div className="space-y-2 text-[10px]">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground/70">Status Persistency</span>
+                <span className={`font-semibold ${storagePersisted ? "text-emerald-500" : "text-amber-500"}`}>
+                  {storagePersisted ? "Aman (Permanen)" : "Tidak Permanen"}
+                </span>
+              </div>
+              {!storagePersisted && (
+                <button onClick={handleRequestPersist}
+                  className="w-full py-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 text-[9px] font-semibold hover:bg-emerald-500/20 transition-colors"
+                >
+                  Aktifkan Penyimpanan Permanen
+                </button>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground/70">Kapasitas Terpakai</span>
+                <span className="font-medium tabular-nums">{formatBytes(storageUsage.usage)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground/70">Total Kapasitas</span>
+                <span className="font-medium tabular-nums">{formatBytes(storageUsage.quota)}</span>
+              </div>
+              <div className="h-2 rounded-full bg-muted/50 overflow-hidden mt-1">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    storageUsage.percentUsed > 80
+                      ? "bg-rose-500"
+                      : storageUsage.percentUsed > 50
+                      ? "bg-amber-500"
+                      : "bg-emerald-500"
+                  }`}
+                  style={{ width: `${Math.min(storageUsage.percentUsed, 100)}%` }}
+                />
+              </div>
+              <p className="text-[9px] text-muted-foreground/40 text-center">
+                {storageUsage.percentUsed.toFixed(1)}% dari total kapasitas
+              </p>
+            </div>
+          </div>
+
           {/* Info */}
           <div className="floating-card p-5 space-y-3 bg-gradient-to-br from-violet-500/5 to-purple-500/5 border border-violet-500/10">
             <p className="text-xs font-semibold flex items-center gap-1.5">
-              <Database className="size-3.5 text-violet-500" /> Status Penyimpanan
+              <Database className="size-3.5 text-violet-500" /> Status Sinkronisasi
             </p>
             <div className="space-y-2 text-[10px] text-muted-foreground/70">
               <div className="flex justify-between">

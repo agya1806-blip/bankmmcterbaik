@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
 import { db } from "@/lib/db-v4";
@@ -24,13 +24,18 @@ export default function LoginPage() {
     if (currentUser) router.replace("/");
   }, [currentUser, router]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (pin.length < 4) { setError("PIN minimal 4 digit"); return; }
     setLoading(true);
     setError("");
 
     try {
+      /* Force keyboard dismissal — critical for iOS 100dvh reflow */
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+
       const users = await db.users.toArray();
       if (users.length === 0) {
         router.replace("/register");
@@ -46,13 +51,16 @@ export default function LoginPage() {
       }
 
       setSession(found);
-      router.replace("/");
+
+      /* Wait 150ms for iOS keyboard to fully dismiss + viewport to recalc 100dvh */
+      setTimeout(() => {
+        router.replace("/");
+      }, 150);
     } catch {
       setError("Terjadi kesalahan");
-    } finally {
       setLoading(false);
     }
-  }
+  }, [pin, router, setSession]);
 
   return (
     <div className="flex h-[100dvh] items-center justify-center bg-slate-950 p-6">

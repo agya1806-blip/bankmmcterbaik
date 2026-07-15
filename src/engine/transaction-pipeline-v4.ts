@@ -1,4 +1,5 @@
 import { db, type BookOrBranch, type DbTransaction, type DbTransactionItem } from "@/lib/db-v4";
+import { writeAuditLog } from "@/lib/audit-logger";
 
 export interface PipelineInputV4 {
   id: string;
@@ -14,6 +15,10 @@ export interface PipelineInputV4 {
   catatan?: string;
   jatuhTempo?: string;
   inventoryLinks?: { itemId: string; qtyDipotong: number }[];
+  userId?: string;
+  userName?: string;
+  poinDigunakan?: number;
+  originalCustomerBranch?: BookOrBranch;
 }
 
 export interface PipelineResultV4 {
@@ -21,6 +26,7 @@ export interface PipelineResultV4 {
   transactionId: string;
   customerId?: string;
   piutangId?: string;
+  poinTerpakai?: number;
   error?: string;
 }
 
@@ -46,15 +52,30 @@ async function findOrCreateCustomer(branch: BookOrBranch, nama: string, wa: stri
   return id;
 }
 
-async function updateCustomerMetrics(customerId: string, nominal: number) {
+async function findCustomerCrossBranch(noWA: string): Promise<{ id: string; bookOrBranchId: BookOrBranch; poin: number } | null> {
+  const all = await db.customers
+    .where("noWA")
+    .equals(noWA)
+    .toArray();
+  if (all.length === 0) return null;
+  const withPoin = all.filter((c) => c.poin > 0).sort((a, b) => b.poin - a.poin);
+  return withPoin.length > 0 ? withPoin[0] : all[0];
+}
+
+async function updateCustomerMetrics(customerId: string, nominal: number, poinBertambah: number) {
   const cust = await db.customers.get(customerId);
   if (!cust) return;
-  const poinBertambah = Math.floor(nominal * 0.01);
   await db.customers.update(customerId, {
     totalBelanja: cust.totalBelanja + nominal,
     poin: cust.poin + poinBertambah,
     terakhirTransaksi: new Date().toISOString(),
   });
+}
+
+async function usePoinCustomer(customerId: string, poinDigunakan: number) {
+  const cust = await db.customers.get(customerId);
+  if (!cust || cust.poin < poinDigunakan) return;
+  await db.customers.update(customerId, { poin: cust.poin - poinDigunakan });
 }
 
 async function cutInventoryStock(branch: BookOrBranch, links: { itemId: string; qtyDipotong: number }[]) {
@@ -126,8 +147,20 @@ export async function executeTransactionPipelineV4(input: PipelineInputV4): Prom
       db.customers,
       db.transactions,
       db.piutang,
+      db.auditLogs,
     ], async () => {
       const branch = input.bookOrBranchId;
+      let poinTerpakai = 0;
+      let customerId: string | undefined;
+
+      /* 0. Cross-branch poin redemption */
+      if (input.poinDigunakan && input.poinDigunakan > 0 && input.customerWA) {
+        const crossCust = await findCustomerCrossBranch(input.customerWA);
+        if (crossCust && crossCust.poin >= input.poinDigunakan) {
+          await usePoinCustomer(crossCust.id, input.poinDigunakan);
+          poinTerpakai = input.poinDigunakan;
+        }
+      }
 
       /* 1. Cut inventory stock */
       if (input.inventoryLinks?.length) {
@@ -135,7 +168,6 @@ export async function executeTransactionPipelineV4(input: PipelineInputV4): Prom
       }
 
       /* 2. Find or create customer */
-      let customerId: string | undefined;
       if (input.customerNama.trim()) {
         customerId = await findOrCreateCustomer(branch, input.customerNama, input.customerWA);
       }
@@ -169,7 +201,8 @@ export async function executeTransactionPipelineV4(input: PipelineInputV4): Prom
 
       /* 5. Update customer metrics */
       if (customerId) {
-        await updateCustomerMetrics(customerId, input.totalBruto);
+        const poinBertambah = input.poinDigunakan ? 0 : Math.floor(input.totalBruto * 0.01);
+        await updateCustomerMetrics(customerId, input.totalBruto, poinBertambah);
       }
 
       /* 6. Auto-create piutang if sisa > 0 */
@@ -186,7 +219,22 @@ export async function executeTransactionPipelineV4(input: PipelineInputV4): Prom
         });
       }
 
-      return { ok: true, transactionId: input.id, customerId, piutangId };
+      /* 7. Audit log */
+      if (input.userId) {
+        await writeAuditLog({
+          bookOrBranchId: branch,
+          action: "CREATE",
+          entityType: "transaction",
+          entityId: input.id,
+          userId: input.userId,
+          userName: input.userName ?? "System",
+          dataAfter: transaction,
+          nominal: input.totalBruto,
+          alasan: input.catatan ?? "Transaksi POS",
+        });
+      }
+
+      return { ok: true, transactionId: input.id, customerId, piutangId, poinTerpakai };
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

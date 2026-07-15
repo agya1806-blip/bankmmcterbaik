@@ -3,13 +3,13 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Clock, Plus, Printer, Search,
+  Clock, Plus, Tags, Search,
   ArrowRight, MessageSquare,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { db, type BookOrBranch } from "@/lib/db-v4";
 
-const BRANCH: BookOrBranch = "usaha-percetakan";
+const BRANCH: BookOrBranch = "usaha-konveksi";
 
 function formatRupiah(n: number) {
   return `Rp ${n.toLocaleString("id-ID")}`;
@@ -23,7 +23,7 @@ const KANBAN_COLS: { key: KanbanCol; label: string; color: string }[] = [
   { key: "selesai", label: "Selesai & Siap Diambil", color: "text-emerald-400" },
 ];
 
-export default function DashboardPercetakan() {
+export default function DashboardKonveksi() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -48,7 +48,6 @@ export default function DashboardPercetakan() {
     if (!tx) return;
     const currentCol = getCol(tx);
     if (currentCol === "selesai") {
-      // Kirim tagihan pelunasan via WA
       const sisa = tx.sisaTagihan || tx.totalBruto;
       const msg = encodeURIComponent(
         `Halo ${tx.customerNama},\n\nPesanan *${tx.invoiceNumber}* sudah selesai dan siap diambil.\n\nSisa tagihan: ${formatRupiah(sisa)}\n\nMohon segera dilunasi ya. Terima kasih!`
@@ -77,7 +76,6 @@ export default function DashboardPercetakan() {
     return "diproduksi";
   }
 
-  // KPI
   const kpi = useMemo(() => {
     const selesai = transactions.filter((t) => getCol(t) === "selesai");
     const omzet = selesai.reduce((s: number, t: any) => s + t.totalBruto, 0);
@@ -104,30 +102,29 @@ export default function DashboardPercetakan() {
     <div className="max-w-2xl mx-auto pb-20 space-y-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="size-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-xl shadow-violet-500/20">
-            <Printer className="size-6 text-white" />
+          <div className="size-12 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-xl shadow-rose-500/20">
+            <Tags className="size-6 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold font-heading">Dashboard Percetakan</h1>
-            <p className="text-xs text-slate-400">Pusat komando produksi</p>
+            <h1 className="text-lg font-bold font-heading">Dashboard Konveksi</h1>
+            <p className="text-xs text-slate-400">Pusat komando produksi konveksi</p>
           </div>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => router.push("/buku-usaha/percetakan/kasir")}
-            className="px-3 py-2 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white text-[10px] font-bold shadow-lg flex items-center gap-1.5 active:scale-95 transition-all"
+          <button onClick={() => router.push("/buku-usaha/konveksi/kasir")}
+            className="px-3 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 text-white text-[10px] font-bold shadow-lg flex items-center gap-1.5 active:scale-95 transition-all"
           >
             <Plus className="size-3.5" /> Order Baru
           </button>
         </div>
       </div>
 
-      {/* KPI */}
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-2xl p-4 bg-gradient-to-br from-emerald-500 to-emerald-600">
           <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Omzet</p>
           <p className="text-lg font-bold font-heading text-white tabular-nums">{formatRupiah(kpi.omzet)}</p>
         </div>
-        <div className="rounded-2xl p-4 bg-gradient-to-br from-violet-500 to-purple-600">
+        <div className="rounded-2xl p-4 bg-gradient-to-br from-rose-500 to-pink-600">
           <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Total Order</p>
           <p className="text-lg font-bold font-heading text-white tabular-nums">{kpi.totalTx}</p>
         </div>
@@ -137,11 +134,10 @@ export default function DashboardPercetakan() {
         </div>
       </div>
 
-      {/* Kanban Board */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold flex items-center gap-1.5">
-            <Clock className="size-4 text-violet-500" /> Production Board
+            <Clock className="size-4 text-rose-500" /> Production Board
           </h2>
           <div className="relative">
             <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-slate-500" />
@@ -185,7 +181,7 @@ export default function DashboardPercetakan() {
                         {col.key === "selesai" ? (
                           <MessageSquare className="size-2.5 text-emerald-400" />
                         ) : (
-                          <ArrowRight className="size-2.5 text-slate-500 group-hover:text-violet-400 transition-colors" />
+                          <ArrowRight className="size-2.5 text-slate-500 group-hover:text-rose-400 transition-colors" />
                         )}
                       </div>
                     </div>

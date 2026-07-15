@@ -38,6 +38,38 @@ export default function PelangganPage() {
   const [search, setSearch] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerRecord | null>(null);
   const [importing, setImporting] = useState(false);
+  const [showPasteImport, setShowPasteImport] = useState(false);
+  const [pasteText, setPasteText] = useState("");
+  const handlePasteImport = useCallback(() => {
+    const lines = pasteText.split("\n").filter(Boolean);
+    let added = 0;
+    for (const line of lines) {
+      const cleaned = line.trim();
+      let nama = "";
+      let noWA = "";
+      const dashMatch = cleaned.match(/^(.+?)\s*[-–—]\s*(0?81\d[\d\s-]*)$/);
+      const csvMatch = cleaned.match(/^(.+?)[,;]\s*(0?81\d[\d\s-]*)$/);
+      if (dashMatch) {
+        nama = dashMatch[1].trim();
+        noWA = dashMatch[2].replace(/[\s-]/g, "");
+      } else if (csvMatch) {
+        nama = csvMatch[1].trim();
+        noWA = csvMatch[2].replace(/[\s-]/g, "");
+      } else if (/^0?81\d/.test(cleaned.replace(/[\s-]/g, ""))) {
+        noWA = cleaned.replace(/[\s-]/g, "");
+        nama = "Pelanggan";
+      } else {
+        continue;
+      }
+      if (noWA && !getCustomerByWA(noWA)) {
+        addCustomerRecord({ nama, noWA });
+        added++;
+      }
+    }
+    toast.success(`${added} kontak diimpor dari teks`);
+    setPasteText("");
+    setShowPasteImport(false);
+  }, [pasteText, addCustomerRecord, getCustomerByWA]);
 
   const importContacts = useCallback(async () => {
     if (typeof navigator === "undefined" || !("contacts" in navigator) || !navigator.contacts) {
@@ -144,7 +176,43 @@ export default function PelangganPage() {
           <Upload className="size-3.5" />
           <span className="hidden sm:inline">Impor Kontak</span>
         </button>
+        <button onClick={() => setShowPasteImport(!showPasteImport)}
+          className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 active:scale-[0.97] transition-all shrink-0"
+          title="Salin-tempel kontak massal"
+        >
+          <Upload className="size-3.5" />
+          <span className="hidden sm:inline">Paste</span>
+        </button>
       </div>
+
+      {/* ─── Bulk Paste Import ─── */}
+      {showPasteImport && (
+        <div className="rounded-2xl bg-slate-900/80 border border-slate-800/60 p-4 space-y-3">
+          <p className="text-xs font-semibold">Salin-Tempel Massal</p>
+          <p className="text-[10px] text-slate-400">
+            Tempel daftar kontak. Format: <code className="text-emerald-400">Nama - 0812xxxx</code> atau <code className="text-emerald-400">Nama,0812xxxx</code> (satu per baris).
+          </p>
+          <textarea
+            value={pasteText}
+            onChange={(e) => setPasteText(e.target.value)}
+            placeholder={`Ahmad Fauzi - 081234567890\nSiti Nurhaliza, 081298765432\nBudi Santoso - 081111222333`}
+            rows={5}
+            className="input-premium w-full text-xs bg-slate-900/80 resize-none"
+          />
+          <div className="flex gap-2">
+            <button onClick={handlePasteImport} disabled={!pasteText.trim()}
+              className="flex-1 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold shadow-lg disabled:opacity-50"
+            >
+              Impor {pasteText.trim() ? `(${pasteText.split("\n").filter(Boolean).length} baris)` : ""}
+            </button>
+            <button onClick={() => { setShowPasteImport(false); setPasteText(""); }}
+              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 text-xs font-semibold"
+            >
+              Batal
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ─── Stat cards ─── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
