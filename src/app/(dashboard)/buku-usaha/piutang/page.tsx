@@ -117,14 +117,14 @@ export default function PiutangPage() {
       return <span className="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-500 text-[9px] font-bold">Terlambat</span>;
     if (sisaHariVal <= 3)
       return <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[9px] font-bold">Mendesak</span>;
-    return <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[9px] font-bold">Aktif</span>;
+    return <span className="px-2 py-0.5 rounded-full bg-[#7B61FF]/10 text-[#7B61FF] text-[9px] font-bold">Aktif</span>;
   };
 
   const cardBorder = (status: Piutang["status"], sisaHariVal: number) => {
     if (status === "lunas") return "border-l-emerald-500";
     if (sisaHariVal < 0) return "border-l-rose-500";
     if (sisaHariVal <= 3) return "border-l-amber-500";
-    return "border-l-emerald-500";
+    return "border-l-[#7B61FF]";
   };
 
   const sisaHariLabel = (val: number) => {
@@ -139,8 +139,8 @@ export default function PiutangPage() {
     <button key={key} onClick={() => setTab(key)}
       className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all ${
         tab === key
-          ? "bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg shadow-rose-500/20"
-          : "bg-muted/30 text-muted-foreground/60 hover:bg-muted/50"
+          ? "bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white shadow-lg shadow-[#7B61FF]/20"
+          : "bg-white/90 dark:bg-[#131527]/90 text-muted-foreground/60 hover:bg-white/70 dark:hover:bg-[#131527]/70 border border-slate-200/60 dark:border-slate-800/60"
       }`}
     >
       {label}
@@ -153,11 +153,11 @@ export default function PiutangPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push("/buku-usaha")}
-            className="size-9 rounded-xl bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors"
+            className="size-9 rounded-xl bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-colors border border-slate-200/60 dark:border-slate-800/60"
           >
             <ArrowLeft className="size-4 text-muted-foreground" />
           </button>
-          <div className="size-11 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-lg shadow-rose-500/20">
+          <div className="size-11 rounded-2xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-lg shadow-[#7B61FF]/20">
             <ArrowUpDown className="size-5 text-white" />
           </div>
           <div>
@@ -166,7 +166,7 @@ export default function PiutangPage() {
           </div>
         </div>
         <button onClick={() => { resetFormTambah(); setShowTambah(true); }}
-          className="px-3 py-2 rounded-xl bg-rose-500/10 text-rose-600 text-[10px] font-bold hover:bg-rose-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-1"
+          className="btn-gradient px-3 py-2 text-[10px] font-bold flex items-center gap-1"
         >
           <Plus className="size-3.5" /> Catat Piutang Baru
         </button>
@@ -174,17 +174,17 @@ export default function PiutangPage() {
 
       {/* ─── Summary ─── */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="floating-card p-3 text-center">
-          <p className="text-lg font-bold font-heading tabular-nums">{piutangList.filter((p) => p.status === "aktif").length}</p>
-          <p className="text-[9px] text-muted-foreground/50">Piutang Aktif</p>
+        <div className="premium-stat p-3 text-center">
+          <p className="premium-stat-value text-lg font-bold font-heading tabular-nums">{piutangList.filter((p) => p.status === "aktif").length}</p>
+          <p className="premium-stat-label text-[9px]">Piutang Aktif</p>
         </div>
-        <div className="floating-card p-3 text-center">
-          <p className="text-lg font-bold font-heading tabular-nums text-rose-500">{formatRupiah(totalPiutangAktif)}</p>
-          <p className="text-[9px] text-muted-foreground/50">Total Sisa</p>
+        <div className="premium-stat p-3 text-center">
+          <p className="premium-stat-value text-lg font-bold font-heading tabular-nums">{formatRupiah(totalPiutangAktif)}</p>
+          <p className="premium-stat-label text-[9px]">Total Sisa</p>
         </div>
-        <div className="floating-card p-3 text-center">
-          <p className="text-lg font-bold font-heading tabular-nums text-emerald-500">{piutangList.filter((p) => p.status === "lunas").length}</p>
-          <p className="text-[9px] text-muted-foreground/50">Lunas</p>
+        <div className="premium-stat p-3 text-center">
+          <p className="premium-stat-value text-lg font-bold font-heading tabular-nums">{piutangList.filter((p) => p.status === "lunas").length}</p>
+          <p className="premium-stat-label text-[9px]">Lunas</p>
         </div>
       </div>
 
@@ -197,7 +197,7 @@ export default function PiutangPage() {
 
       {/* ─── Piutang List ─── */}
       {filtered.length === 0 ? (
-        <div className="floating-card p-6 text-center">
+        <div className="premium-card p-6 text-center border border-slate-200/60 dark:border-slate-800/60">
           <ArrowUpDown className="size-10 mx-auto text-muted-foreground/20" />
           <p className="text-xs text-muted-foreground/40 mt-2">
             {piutangList.length === 0 ? "Belum ada piutang" : "Tidak ada piutang"}
@@ -210,7 +210,7 @@ export default function PiutangPage() {
             const expanded = expandedId === p.id;
             return (
               <div key={p.id}
-                className={`floating-card p-4 space-y-3 border-l-4 ${cardBorder(p.status, sisa)}`}
+                className={`premium-card p-4 space-y-3 border-l-4 border border-slate-200/60 dark:border-slate-800/60 ${cardBorder(p.status, sisa)}`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
@@ -247,12 +247,12 @@ export default function PiutangPage() {
                 {p.status === "aktif" && (
                   <div className="flex gap-1">
                     <button onClick={() => setShowBayar(p)}
-                      className="flex-1 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 text-[9px] font-bold hover:bg-emerald-500/20 transition-all flex items-center justify-center gap-1"
+                      className="flex-1 py-1.5 rounded-lg bg-[#7B61FF]/10 text-[#7B61FF] text-[9px] font-bold hover:bg-[#7B61FF]/20 transition-all flex items-center justify-center gap-1"
                     >
                       <Wallet className="size-3" /> Bayar Cicilan
                     </button>
                     <button onClick={() => setExpandedId(expanded ? null : p.id)}
-                      className="py-1.5 px-2 rounded-lg bg-muted/30 text-muted-foreground/50 hover:bg-muted/50 transition-all"
+                      className="py-1.5 px-2 rounded-lg bg-white/90 dark:bg-[#131527]/90 text-muted-foreground/50 hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-all border border-slate-200/60 dark:border-slate-800/60"
                     >
                       {expanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
                     </button>
@@ -261,7 +261,7 @@ export default function PiutangPage() {
 
                 {/* Expanded: Cicilan History */}
                 {expanded && (
-                  <div className="pt-2 border-t border-border/40 space-y-2">
+                  <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800/60 space-y-2">
                     <p className="text-[9px] font-semibold text-muted-foreground/60 flex items-center gap-1">
                       <Clock className="size-3" /> Riwayat Pembayaran ({cicilanForExpanded.length})
                     </p>
@@ -270,12 +270,12 @@ export default function PiutangPage() {
                     ) : (
                       <div className="space-y-1">
                         {cicilanForExpanded.map((c) => (
-                          <div key={c.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/20 text-[9px]">
-                            <div className="size-6 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                          <div key={c.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/90 dark:bg-[#131527]/90 text-[9px] border border-slate-200/60 dark:border-slate-800/60">
+                            <div className="size-6 rounded-lg bg-[#7B61FF]/10 flex items-center justify-center shrink-0">
                               <CheckCircle2 className="size-3" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-emerald-600">{formatRupiah(c.jumlah)}</p>
+                              <p className="font-medium">{formatRupiah(c.jumlah)}</p>
                               <p className="text-muted-foreground/50">
                                 {new Date(c.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                                 {c.metode ? ` — ${c.metode}` : ""}
@@ -303,15 +303,15 @@ export default function PiutangPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
           onClick={() => setShowTambah(false)}
         >
-          <div className="floating-card p-5 space-y-4 w-full max-w-sm"
+          <div className="premium-card p-5 space-y-4 w-full max-w-sm border border-slate-200/60 dark:border-slate-800/60"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
               <p className="text-xs font-bold flex items-center gap-1.5">
-                <Plus className="size-3.5 text-rose-500" /> Catat Piutang Baru
+                <Plus className="size-3.5" /> Catat Piutang Baru
               </p>
               <button onClick={() => setShowTambah(false)}
-                className="size-7 rounded-lg bg-muted/30 flex items-center justify-center hover:bg-muted/50"
+                className="size-7 rounded-lg bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 border border-slate-200/60 dark:border-slate-800/60"
               >
                 <X className="size-3.5" />
               </button>
@@ -367,7 +367,7 @@ export default function PiutangPage() {
 
             <button onClick={handleTambahPiutang}
               disabled={!formNama.trim() || !formTotal || parseInt(formTotal) <= 0 || !formJatuhTempo}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 text-white text-xs font-bold shadow-lg shadow-rose-500/20 hover:shadow-xl hover:shadow-rose-500/30 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="btn-gradient w-full py-2.5 text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <Plus className="size-4" /> Catat Piutang
             </button>
@@ -382,21 +382,21 @@ export default function PiutangPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
           onClick={() => setShowBayar(null)}
         >
-          <div className="floating-card p-5 space-y-4 w-full max-w-sm"
+          <div className="premium-card p-5 space-y-4 w-full max-w-sm border border-slate-200/60 dark:border-slate-800/60"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
               <p className="text-xs font-bold flex items-center gap-1.5">
-                <Wallet className="size-3.5 text-emerald-500" /> Bayar Cicilan
+                <Wallet className="size-3.5" /> Bayar Cicilan
               </p>
               <button onClick={() => setShowBayar(null)}
-                className="size-7 rounded-lg bg-muted/30 flex items-center justify-center hover:bg-muted/50"
+                className="size-7 rounded-lg bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 border border-slate-200/60 dark:border-slate-800/60"
               >
                 <X className="size-3.5" />
               </button>
             </div>
 
-            <div className="rounded-xl bg-muted/20 p-3 text-[10px] space-y-1">
+            <div className="rounded-xl bg-white/90 dark:bg-[#131527]/90 p-3 text-[10px] space-y-1 border border-slate-200/60 dark:border-slate-800/60">
               <p className="font-medium">{showBayar.customerNama}</p>
               <p className="text-muted-foreground/50">Invoice: {showBayar.invoiceId}</p>
               <p className="text-muted-foreground/50">
@@ -434,7 +434,7 @@ export default function PiutangPage() {
 
             <button onClick={handleBayarCicilan}
               disabled={!bayarJumlah || parseInt(bayarJumlah) <= 0}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="btn-gradient w-full py-2.5 text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <Wallet className="size-4" /> Catat Pembayaran
             </button>

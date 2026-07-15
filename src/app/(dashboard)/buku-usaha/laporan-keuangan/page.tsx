@@ -12,11 +12,11 @@ import { usePullRefresh } from "@/lib/use-pull-refresh";
 import toast from "react-hot-toast";
 
 const BIZ_COLORS: Record<BizUnit, string> = {
-  percetakan: "from-indigo-500 to-purple-600",
-  gadget: "from-cyan-500 to-blue-600",
-  laptop: "from-blue-500 to-indigo-600",
-  kedai_kopi: "from-emerald-500 to-emerald-600",
-  konveksi: "from-rose-500 to-pink-600",
+  percetakan: "from-[#7B61FF] to-[#FF5C00]",
+  gadget: "from-[#7B61FF] to-[#FF5C00]",
+  laptop: "from-[#7B61FF] to-[#FF5C00]",
+  kedai_kopi: "from-[#7B61FF] to-[#FF5C00]",
+  konveksi: "from-[#7B61FF] to-[#FF5C00]",
 };
 
 const BIZ_ICONS: Record<BizUnit, React.ElementType> = {
@@ -210,8 +210,8 @@ export default function LaporanKeuangan() {
     >
       {refreshing && (
         <div className="absolute top-0 left-0 right-0 flex items-center justify-center py-3 z-10">
-          <RefreshCw className="size-5 text-emerald-500 animate-spin" />
-          <span className="text-[10px] text-emerald-600 font-semibold ml-2">Memperbarui...</span>
+          <RefreshCw className="size-5 animate-spin" />
+          <span className="text-[10px] font-semibold ml-2">Memperbarui...</span>
         </div>
       )}
       {pullDistance > 0 && !refreshing && (
@@ -226,7 +226,7 @@ export default function LaporanKeuangan() {
       {/* Header & Periode */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="size-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-xl shadow-emerald-500/20">
+          <div className="size-12 rounded-2xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-xl shadow-[#7B61FF]/20">
             <BarChart3 className="size-6 text-white" />
           </div>
           <div>
@@ -241,29 +241,29 @@ export default function LaporanKeuangan() {
       {/* Action Buttons */}
       <div className="flex flex-wrap items-center gap-2">
         <button onClick={exportCSV}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-semibold transition-colors"
+          className="btn-ghost flex items-center gap-1.5 px-3 py-2 text-xs font-semibold"
         >
           <Download className="size-3.5" /> CSV
         </button>
         <button onClick={exportPDF} disabled={exporting}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 text-xs font-semibold transition-colors disabled:opacity-50"
+          className="btn-ghost flex items-center gap-1.5 px-3 py-2 text-xs font-semibold disabled:opacity-50"
         >
           <FileText className="size-3.5" /> {exporting ? "..." : "PDF"}
         </button>
         <button onClick={() => window.print()}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-violet-500/10 text-violet-600 hover:bg-violet-500/20 text-xs font-semibold transition-colors"
+          className="btn-ghost flex items-center gap-1.5 px-3 py-2 text-xs font-semibold"
         >
           <Printer className="size-3.5" /> Cetak
         </button>
         <button onClick={sendWA}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-green-500/10 text-green-600 hover:bg-green-500/20 text-xs font-semibold transition-colors"
+          className="btn-ghost flex items-center gap-1.5 px-3 py-2 text-xs font-semibold"
         >
           <Send className="size-3.5" /> Kirim WA
         </button>
       </div>
 
       {/* ═══════════════ REPORT CONTENT (for PDF) ═══════════════ */}
-      <div ref={reportRef} className="space-y-6 bg-white dark:bg-card rounded-2xl p-5 print:p-0 print:bg-white">
+      <div ref={reportRef} className="space-y-6 premium-card p-5 border border-slate-200/60 dark:border-slate-800/60 print:p-0 print:bg-white">
 
         {/* Kop Laporan (for print/PDF) */}
         <div className="hidden print:block text-center mb-6">
@@ -274,14 +274,14 @@ export default function LaporanKeuangan() {
 
         {/* Ringkasan Global */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-xl shadow-emerald-500/25 print:bg-emerald-600">
+          <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] shadow-xl shadow-[#7B61FF]/25 print:bg-[#7B61FF]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_60%)]" />
             <div className="relative z-10 space-y-1">
               <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Total Kas</p>
               <p className="text-lg font-bold font-heading text-white tabular-nums">{formatRupiah(agg.totalKas)}</p>
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-blue-500 to-blue-600 shadow-xl shadow-blue-500/25 print:bg-blue-600">
+          <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] shadow-xl shadow-[#7B61FF]/25 print:bg-[#7B61FF]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_60%)]" />
             <div className="relative z-10 space-y-1">
               <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Revenue</p>
@@ -295,7 +295,7 @@ export default function LaporanKeuangan() {
               <p className="text-lg font-bold font-heading text-white tabular-nums">{formatRupiah(agg.totalModal)}</p>
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-violet-500 to-purple-600 shadow-xl shadow-violet-500/25 print:bg-violet-600">
+          <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] shadow-xl shadow-[#7B61FF]/25 print:bg-[#7B61FF]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_60%)]" />
             <div className="relative z-10 space-y-1">
               <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Laba Kotor</p>
@@ -309,14 +309,14 @@ export default function LaporanKeuangan() {
         {/* Breakdown Per Unit Bisnis */}
         <div>
           <h2 className="text-sm font-semibold mb-3 flex items-center gap-1.5">
-            <Layers className="size-4 text-emerald-500" /> Breakdown Per Unit Bisnis
+            <Layers className="size-4" /> Breakdown Per Unit Bisnis
           </h2>
           <div className="space-y-2">
             {(Object.entries(BIZ_UNIT_LABELS) as [BizUnit, string][]).map(([key, label]) => {
               const u = agg.perUnit[key];
               const Icon = BIZ_ICONS[key];
               return (
-                <div key={key} className="floating-card p-4 space-y-3 print:border print:border-gray-300 print:rounded-lg">
+                <div key={key} className="premium-card p-4 space-y-3 border border-slate-200/60 dark:border-slate-800/60 print:border print:border-gray-300 print:rounded-lg">
                   <div className="flex items-start gap-4">
                     <div className={`size-10 rounded-xl bg-gradient-to-br ${BIZ_COLORS[key]} flex items-center justify-center shrink-0 shadow-md print:bg-gray-200 print:rounded`}>
                       <Icon className="size-5 text-white print:text-gray-700" />
@@ -329,7 +329,7 @@ export default function LaporanKeuangan() {
                       <div className="grid grid-cols-3 gap-2 mt-2">
                         <div>
                           <p className="text-[9px] text-muted-foreground/50">Revenue</p>
-                          <p className="text-xs font-bold tabular-nums text-emerald-600">{formatRupiah(u.revenue)}</p>
+                          <p className="text-xs font-bold tabular-nums">{formatRupiah(u.revenue)}</p>
                         </div>
                         <div>
                           <p className="text-[9px] text-muted-foreground/50">Modal</p>
@@ -337,7 +337,7 @@ export default function LaporanKeuangan() {
                         </div>
                         <div>
                           <p className="text-[9px] text-muted-foreground/50">Laba</p>
-                          <p className={`text-xs font-bold tabular-nums ${u.laba >= 0 ? "text-emerald-600" : "text-rose-500"}`}>
+                          <p className={`text-xs font-bold tabular-nums ${u.laba >= 0 ? "" : "text-rose-500"}`}>
                             {u.laba >= 0 ? "+" : ""}{formatRupiah(u.laba)}
                           </p>
                         </div>
@@ -346,7 +346,7 @@ export default function LaporanKeuangan() {
                   </div>
                   {/* Detail items per unit */}
                   {(key === "percetakan" && printingJobs.length > 0) && (
-                    <div className="border-t border-border/30 pt-2 space-y-1">
+                    <div className="border-t border-slate-200/60 dark:border-slate-800/60 pt-2 space-y-1">
                       <p className="text-[9px] text-muted-foreground/40 font-semibold uppercase tracking-wider">Item Detail</p>
                       <div className="max-h-36 overflow-y-auto space-y-1">
                         {printingJobs.map((j, i) => (
@@ -359,7 +359,7 @@ export default function LaporanKeuangan() {
                     </div>
                   )}
                   {(key === "gadget" && gadgetItems.length > 0) && (
-                    <div className="border-t border-border/30 pt-2 space-y-1">
+                    <div className="border-t border-slate-200/60 dark:border-slate-800/60 pt-2 space-y-1">
                       <p className="text-[9px] text-muted-foreground/40 font-semibold uppercase tracking-wider">Item Detail</p>
                       <div className="max-h-36 overflow-y-auto space-y-1">
                         {gadgetItems.map((g, i) => (
@@ -372,7 +372,7 @@ export default function LaporanKeuangan() {
                     </div>
                   )}
                   {(key === "laptop" && laptopBuilds.length > 0) && (
-                    <div className="border-t border-border/30 pt-2 space-y-1">
+                    <div className="border-t border-slate-200/60 dark:border-slate-800/60 pt-2 space-y-1">
                       <p className="text-[9px] text-muted-foreground/40 font-semibold uppercase tracking-wider">Item Detail</p>
                       <div className="max-h-36 overflow-y-auto space-y-1">
                         {laptopBuilds.map((l, i) => (
@@ -385,7 +385,7 @@ export default function LaporanKeuangan() {
                     </div>
                   )}
                   {(key === "konveksi" && fashionSKUs.length > 0) && (
-                    <div className="border-t border-border/30 pt-2 space-y-1">
+                    <div className="border-t border-slate-200/60 dark:border-slate-800/60 pt-2 space-y-1">
                       <p className="text-[9px] text-muted-foreground/40 font-semibold uppercase tracking-wider">Item Detail</p>
                       <div className="max-h-36 overflow-y-auto space-y-1">
                         {fashionSKUs.map((f, i) => (
@@ -439,20 +439,20 @@ export default function LaporanKeuangan() {
         {/* Kas Breakdown */}
         <div>
           <h2 className="text-sm font-semibold mb-3 flex items-center gap-1.5">
-            <Wallet className="size-4 text-emerald-500" /> Kas Operasional
+            <Wallet className="size-4" /> Kas Operasional
           </h2>
           <div className="space-y-1">
             {wallets.length === 0 ? (
-              <div className="floating-card p-6 text-center">
+              <div className="premium-card p-6 text-center border border-slate-200/60 dark:border-slate-800/60">
                 <Wallet className="size-8 mx-auto text-muted-foreground/20 mb-2" />
                 <p className="text-xs text-muted-foreground/40">Belum ada dompet. Tambah dompet di menu Dompet.</p>
               </div>
             ) : wallets.map((w) => {
               const pct = agg.totalKas > 0 ? (w.saldo / agg.totalKas) * 100 : 0;
               return (
-                <div key={w.id} className="floating-card p-3 flex items-center gap-3 print:border print:border-gray-300 print:rounded-lg">
+                <div key={w.id} className="premium-card p-3 flex items-center gap-3 border border-slate-200/60 dark:border-slate-800/60 print:border print:border-gray-300 print:rounded-lg">
                   <div className={`size-9 rounded-xl flex items-center justify-center shrink-0 ${
-                    w.tipe === "KasTunai" ? "bg-emerald-500/10 text-emerald-600" :
+                    w.tipe === "KasTunai" ? "bg-[#7B61FF]/10" :
                     w.tipe === "Bank" ? "bg-blue-500/10 text-blue-600" :
                     "bg-violet-500/10 text-violet-600"
                   }`}>
@@ -464,8 +464,8 @@ export default function LaporanKeuangan() {
                       <span className="text-xs font-bold tabular-nums">{formatRupiah(w.saldo)}</span>
                     </div>
                     <div className="flex items-center gap-2 mt-1">
-                      <div className="flex-1 h-1.5 rounded-full bg-muted/50 overflow-hidden">
-                        <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-emerald-500" style={{ width: `${Math.min(pct, 100)}%` }} />
+                      <div className="flex-1 h-1.5 rounded-full bg-white/90 dark:bg-[#131527]/90 overflow-hidden">
+                        <div className="h-full rounded-full bg-gradient-to-r from-[#7B61FF] to-[#FF5C00]" style={{ width: `${Math.min(pct, 100)}%` }} />
                       </div>
                       <span className="text-[9px] text-muted-foreground/50">{pct.toFixed(1)}%</span>
                     </div>
@@ -480,24 +480,24 @@ export default function LaporanKeuangan() {
         {/* Mutasi Terbaru */}
         <div>
           <h2 className="text-sm font-semibold mb-3 flex items-center gap-1.5">
-            <Clock className="size-4 text-emerald-500" /> Mutasi Transfer Terbaru
+            <Clock className="size-4" /> Mutasi Transfer Terbaru
           </h2>
           {recentMutasi.length === 0 ? (
-            <div className="floating-card p-6 text-center">
+            <div className="premium-card p-6 text-center border border-slate-200/60 dark:border-slate-800/60">
               <Receipt className="size-8 mx-auto text-muted-foreground/20 mb-2" />
               <p className="text-xs text-muted-foreground/40">Belum ada mutasi transfer</p>
             </div>
           ) : (
             <div className="space-y-1">
               {recentMutasi.map((m) => (
-                <div key={m.id} className="floating-card p-3 flex items-center gap-3 print:border print:border-gray-300 print:rounded-lg">
-                  <div className="size-8 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shrink-0">
+                <div key={m.id} className="premium-card p-3 flex items-center gap-3 border border-slate-200/60 dark:border-slate-800/60 print:border print:border-gray-300 print:rounded-lg">
+                  <div className="size-8 rounded-lg bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shrink-0">
                     <ArrowUpRight className="size-3.5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-medium truncate">{walletMap.get(m.dariWalletId) || "?"} → {walletMap.get(m.keWalletId) || "?"}</p>
-                      <span className="text-xs font-bold tabular-nums text-amber-600">{formatRupiah(m.nominal)}</span>
+                      <span className="text-xs font-bold tabular-nums">{formatRupiah(m.nominal)}</span>
                     </div>
                     <p className="text-[9px] text-muted-foreground/50">{m.alasan} &middot; {new Date(m.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</p>
                   </div>

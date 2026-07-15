@@ -39,8 +39,8 @@ export default function TransaksiPribadiPage() {
   return (
     <div className="max-w-2xl mx-auto pb-20 space-y-4 animate-fade-in">
       <div className="flex items-center gap-3">
-        <button onClick={() => router.push("/buku-pribadi")} className="size-10 rounded-xl bg-slate-800 flex items-center justify-center hover:bg-slate-700 transition-colors">
-          <ArrowLeft className="size-5 text-slate-300" />
+        <button onClick={() => router.push("/buku-pribadi")} className="btn-ghost size-10 rounded-xl flex items-center justify-center">
+          <ArrowLeft className="size-5" />
         </button>
         <div>
           <h1 className="text-lg font-bold font-heading">Riwayat Transaksi</h1>
@@ -51,7 +51,7 @@ export default function TransaksiPribadiPage() {
       <div className="flex gap-2">
         {(["all", "Pemasukan", "Pengeluaran"] as const).map((tip) => (
           <button key={tip} onClick={() => setFilterTipe(tip)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${filterTipe === tip ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-slate-800 text-muted-foreground/60"}`}>
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${filterTipe === tip ? "bg-[#7B61FF]/10 text-[#7B61FF] border border-[#7B61FF]/20" : "btn-ghost text-muted-foreground/60"}`}>
             {tip === "all" ? "Semua" : tip}
           </button>
         ))}
@@ -65,15 +65,15 @@ export default function TransaksiPribadiPage() {
           const Icon = KATEGORI_ICON[t.kategori] || BookOpen;
           const warna = KATEGORI_WARNA[t.kategori] || "text-gray-400";
           return (
-            <div key={t.id} className="floating-card p-3 flex items-center gap-3">
-              <div className={`size-9 rounded-xl bg-slate-800 flex items-center justify-center ${warna}`}>
+            <div key={t.id} className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-3 flex items-center gap-3">
+              <div className={`size-9 rounded-xl premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 flex items-center justify-center ${warna}`}>
                 <Icon className="size-4" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold">{t.catatan || t.kategori}</p>
                 <p className="text-[9px] text-muted-foreground/40">{t.tanggal} · {t.kategori}</p>
               </div>
-              <p className={`text-xs font-bold tabular-nums ${t.tipe === "Pemasukan" ? "text-emerald-400" : "text-rose-400"}`}>
+              <p className={`text-xs font-bold tabular-nums ${t.tipe === "Pemasukan" ? "text-[#7B61FF]" : "text-rose-400"}`}>
                 {t.tipe === "Pemasukan" ? "+" : "-"}{formatRupiah(t.nominal)}
               </p>
               <button onClick={() => { removePersonalTransaction(t.id); toast.success("Dihapus"); }}

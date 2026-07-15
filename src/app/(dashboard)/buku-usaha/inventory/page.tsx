@@ -208,8 +208,8 @@ export default function InventoryPage() {
       <button key={key} onClick={() => { if (key === "tambah") resetForm(); setTab(key); }}
         className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-bold transition-all ${
           aktif
-            ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/20"
-            : "bg-muted/30 text-muted-foreground/60 hover:bg-muted/50"
+            ? "bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white shadow-lg shadow-[#7B61FF]/20"
+            : "bg-white/90 dark:bg-[#131527]/90 text-muted-foreground/60 hover:bg-white/70 dark:hover:bg-[#131527]/70 border border-slate-200/60 dark:border-slate-800/60"
         }`}
       >
         <Ico className="size-3.5" /> {label}
@@ -222,13 +222,13 @@ export default function InventoryPage() {
       return <span className="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-500 text-[9px] font-bold">Habis</span>;
     if (stok <= stokMin)
       return <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-[9px] font-bold">Menipis</span>;
-    return <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[9px] font-bold">Aman</span>;
+    return <span className="px-2 py-0.5 rounded-full bg-[#7B61FF]/10 text-[#7B61FF] text-[9px] font-bold">Aman</span>;
   };
 
   const stokColor = (stok: number, stokMin: number) => {
     if (stok === 0) return "text-rose-500";
     if (stok <= stokMin) return "text-amber-500";
-    return "text-emerald-500";
+    return "";
   };
 
   return (
@@ -237,11 +237,11 @@ export default function InventoryPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push("/buku-usaha")}
-            className="size-9 rounded-xl bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors"
+            className="size-9 rounded-xl bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-colors border border-slate-200/60 dark:border-slate-800/60"
           >
             <ArrowLeft className="size-4 text-muted-foreground" />
           </button>
-          <div className="size-11 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+          <div className="size-11 rounded-2xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-lg shadow-[#7B61FF]/20">
             <Package className="size-5 text-white" />
           </div>
           <div>
@@ -250,7 +250,7 @@ export default function InventoryPage() {
           </div>
         </div>
         <button onClick={() => { resetForm(); setTab("tambah"); }}
-          className="px-3 py-2 rounded-xl bg-emerald-500/10 text-emerald-600 text-[10px] font-bold hover:bg-emerald-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-1"
+          className="btn-gradient px-3 py-2 text-[10px] font-bold flex items-center gap-1"
         >
           <Plus className="size-3.5" /> Tambah Barang
         </button>
@@ -258,17 +258,17 @@ export default function InventoryPage() {
 
       {/* ─── Summary ─── */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="floating-card p-3 text-center">
-          <p className="text-lg font-bold font-heading tabular-nums">{inventory.length}</p>
-          <p className="text-[9px] text-muted-foreground/50">Total Barang</p>
+        <div className="premium-stat p-3 text-center">
+          <p className="premium-stat-value text-lg font-bold font-heading tabular-nums">{inventory.length}</p>
+          <p className="premium-stat-label text-[9px]">Total Barang</p>
         </div>
-        <div className="floating-card p-3 text-center">
-          <p className="text-lg font-bold font-heading tabular-nums text-amber-500">{lowStockCount}</p>
-          <p className="text-[9px] text-muted-foreground/50">Stok Menipis</p>
+        <div className="premium-stat p-3 text-center">
+          <p className="premium-stat-value text-lg font-bold font-heading tabular-nums text-amber-500">{lowStockCount}</p>
+          <p className="premium-stat-label text-[9px]">Stok Menipis</p>
         </div>
-        <div className="floating-card p-3 text-center">
-          <p className="text-lg font-bold font-heading tabular-nums text-rose-500">{outOfStockCount}</p>
-          <p className="text-[9px] text-muted-foreground/50">Stok Habis</p>
+        <div className="premium-stat p-3 text-center">
+          <p className="premium-stat-value text-lg font-bold font-heading tabular-nums text-rose-500">{outOfStockCount}</p>
+          <p className="premium-stat-label text-[9px]">Stok Habis</p>
         </div>
       </div>
 
@@ -306,8 +306,8 @@ export default function InventoryPage() {
               <button key={f.key} onClick={() => setFilterUnit(f.key)}
                 className={`px-3 py-1.5 rounded-lg text-[9px] font-semibold transition-all ${
                   filterUnit === f.key
-                    ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md"
-                    : "bg-muted/30 text-muted-foreground/50 hover:bg-muted/50"
+                    ? "bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white shadow-md"
+                    : "bg-white/90 dark:bg-[#131527]/90 text-muted-foreground/50 hover:bg-white/70 dark:hover:bg-[#131527]/70 border border-slate-200/60 dark:border-slate-800/60"
                 }`}
               >
                 {f.label}
@@ -317,7 +317,7 @@ export default function InventoryPage() {
 
           {/* Items */}
           {filteredItems.length === 0 ? (
-            <div className="floating-card p-6 text-center">
+            <div className="premium-card p-6 text-center border border-slate-200/60 dark:border-slate-800/60">
               <Package className="size-10 mx-auto text-muted-foreground/20" />
               <p className="text-xs text-muted-foreground/40 mt-2">
                 {inventory.length === 0 ? "Belum ada barang, tambah barang baru" : "Tidak ada barang ditemukan"}
@@ -326,7 +326,7 @@ export default function InventoryPage() {
           ) : (
             <div className="space-y-2">
               {filteredItems.map((item) => (
-                <div key={item.id} className="floating-card p-4 space-y-2.5 group">
+                <div key={item.id} className="premium-card p-4 space-y-2.5 group border border-slate-200/60 dark:border-slate-800/60">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -343,7 +343,7 @@ export default function InventoryPage() {
                     </div>
                     <div className="flex gap-1 shrink-0">
                       <button onClick={() => openAdjust(item.id, "masuk")}
-                        className="size-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center hover:bg-emerald-500/20 transition-all"
+                        className="size-7 rounded-lg bg-[#7B61FF]/10 flex items-center justify-center hover:bg-[#7B61FF]/20 transition-all"
                         title="Stok Masuk"
                       >
                         <TrendingUp className="size-3.5" />
@@ -371,7 +371,7 @@ export default function InventoryPage() {
                     </div>
                     <div className="flex gap-1">
                       <button onClick={() => handleEdit(item.id)}
-                        className="px-2 py-1 rounded-lg bg-muted/30 text-muted-foreground/50 text-[9px] font-medium hover:bg-muted/50 transition-all"
+                        className="px-2 py-1 rounded-lg bg-white/90 dark:bg-[#131527]/90 text-muted-foreground/50 text-[9px] font-medium hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-all border border-slate-200/60 dark:border-slate-800/60"
                       >
                         Edit
                       </button>
@@ -393,7 +393,7 @@ export default function InventoryPage() {
 
           {/* Low stock alert */}
           {lowStockCount + outOfStockCount > 0 && (
-            <div className="floating-card p-4 border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5">
+            <div className="premium-card p-4 border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="size-4 text-amber-500" />
                 <p className="text-[10px] font-semibold text-amber-600">
@@ -411,9 +411,9 @@ export default function InventoryPage() {
           TAB: TAMBAH / EDIT BARANG
           ══════════════════════════════════════════════════ */}
       {tab === "tambah" && (
-        <div className="floating-card p-5 space-y-4">
+        <div className="premium-card p-5 space-y-4 border border-slate-200/60 dark:border-slate-800/60">
           <p className="text-xs font-semibold flex items-center gap-1.5">
-            <Plus className="size-3.5 text-amber-500" />
+            <Plus className="size-3.5" />
             {editId ? "Edit Barang" : "Tambah Barang Baru"}
           </p>
 
@@ -493,14 +493,14 @@ export default function InventoryPage() {
           <div className="flex gap-2">
             {editId && (
               <button onClick={() => { resetForm(); setTab("list"); }}
-                className="flex-1 py-2.5 rounded-xl bg-muted/30 text-muted-foreground/60 text-xs font-bold hover:bg-muted/50 transition-all"
+                className="flex-1 py-2.5 rounded-xl bg-white/90 dark:bg-[#131527]/90 text-muted-foreground/60 text-xs font-bold hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-all border border-slate-200/60 dark:border-slate-800/60"
               >
                 Batal
               </button>
             )}
             <button onClick={handleSimpan}
               disabled={!formNama.trim() || !formSku.trim()}
-              className={`${editId ? "flex-1" : "w-full"} py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-bold shadow-lg shadow-amber-500/20 hover:shadow-xl hover:shadow-amber-500/30 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2`}
+              className={`${editId ? "flex-1" : "w-full"} btn-gradient py-2.5 text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2`}
             >
               <Plus className="size-4" /> {editId ? "Simpan Perubahan" : "Tambah Barang"}
             </button>
@@ -512,9 +512,9 @@ export default function InventoryPage() {
           TAB: RIWAYAT MUTASI
           ══════════════════════════════════════════════════ */}
       {tab === "mutasi" && (
-        <div className="floating-card p-4 space-y-3">
+        <div className="premium-card p-4 space-y-3 border border-slate-200/60 dark:border-slate-800/60">
           <p className="text-xs font-semibold flex items-center gap-1.5">
-            <History className="size-3.5 text-amber-500" /> Riwayat Mutasi Stok
+            <History className="size-3.5" /> Riwayat Mutasi Stok
           </p>
           {inventoryMutations.length === 0 ? (
             <p className="text-[10px] text-muted-foreground/30 py-2 text-center">Belum ada mutasi stok</p>
@@ -525,8 +525,8 @@ export default function InventoryPage() {
                 const waktu = new Date(m.createdAt);
                 const isMasuk = m.tipe === "masuk";
                 return (
-                  <div key={m.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/20 text-[9px]">
-                    <div className={`size-7 rounded-lg flex items-center justify-center shrink-0 ${isMasuk ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-500/10 text-rose-500"}`}>
+                  <div key={m.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/90 dark:bg-[#131527]/90 text-[9px] border border-slate-200/60 dark:border-slate-800/60">
+                    <div className={`size-7 rounded-lg flex items-center justify-center shrink-0 ${isMasuk ? "bg-[#7B61FF]/10" : "bg-rose-500/10 text-rose-500"}`}>
                       {isMasuk ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -536,7 +536,7 @@ export default function InventoryPage() {
                       <p className="text-muted-foreground/50">{m.alasan}{m.referensi ? ` (ref: ${m.referensi})` : ""}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className={`font-semibold tabular-nums ${isMasuk ? "text-emerald-600" : "text-rose-600"}`}>
+                      <p className={`font-semibold tabular-nums ${isMasuk ? "" : "text-rose-600"}`}>
                         {isMasuk ? "+" : "-"}{m.qty}
                       </p>
                       <p className="text-muted-foreground/30">{waktu.toLocaleDateString("id-ID")}</p>
@@ -559,19 +559,19 @@ export default function InventoryPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
             onClick={() => setAdjustItemId(null)}
           >
-            <div className="floating-card p-5 space-y-4 w-full max-w-sm"
+            <div className="premium-card p-5 space-y-4 w-full max-w-sm border border-slate-200/60 dark:border-slate-800/60"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between">
                 <p className="text-xs font-bold">{adjustTipe === "masuk" ? "Stok Masuk" : "Stok Keluar"}</p>
                 <button onClick={() => setAdjustItemId(null)}
-                  className="size-7 rounded-lg bg-muted/30 flex items-center justify-center hover:bg-muted/50"
+                  className="size-7 rounded-lg bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 border border-slate-200/60 dark:border-slate-800/60"
                 >
                   <X className="size-3.5" />
                 </button>
               </div>
 
-              <div className="rounded-xl bg-muted/20 p-3 text-[10px] space-y-1">
+              <div className="rounded-xl bg-white/90 dark:bg-[#131527]/90 p-3 text-[10px] space-y-1 border border-slate-200/60 dark:border-slate-800/60">
                 <p className="font-medium">{item.nama}</p>
                 <p className="text-muted-foreground/50">SKU: {item.sku} | Stok saat ini: <span className="font-semibold">{item.stok}</span></p>
               </div>
@@ -591,11 +591,7 @@ export default function InventoryPage() {
 
               <button onClick={handleAdjust}
                 disabled={!adjustQty || !adjustAlasan.trim()}
-                className={`w-full py-2.5 rounded-xl text-white text-xs font-bold shadow-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 ${
-                  adjustTipe === "masuk"
-                    ? "bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-emerald-500/20"
-                    : "bg-gradient-to-r from-rose-500 to-rose-600 shadow-rose-500/20"
-                }`}
+                className={`btn-gradient w-full py-2.5 text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2`}
               >
                 {adjustTipe === "masuk" ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
                 {adjustTipe === "masuk" ? "Tambah Stok" : "Kurangi Stok"}

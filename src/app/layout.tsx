@@ -4,8 +4,8 @@ import "./globals.css";
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#059669" },
-    { media: "(prefers-color-scheme: dark)", color: "#059669" },
+    { media: "(prefers-color-scheme: light)", color: "#7B61FF" },
+    { media: "(prefers-color-scheme: dark)", color: "#7B61FF" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -62,7 +62,7 @@ export default function RootLayout({
         <meta name="HandheldFriendly" content="true" />
         <meta name="apple-touch-fullscreen" content="yes" />
         <link rel="apple-touch-icon" href="/icon-192.svg" />
-        <link rel="mask-icon" href="/icon-512.svg" color="#059669" />
+        <link rel="mask-icon" href="/icon-512.svg" color="#7B61FF" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}

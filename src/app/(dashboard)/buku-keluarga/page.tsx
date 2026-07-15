@@ -26,25 +26,25 @@ function Ringkasan({ pemasukan, pengeluaran }: { pemasukan: number; pengeluaran:
   const saldo = pemasukan - pengeluaran;
   return (
     <div className="grid grid-cols-3 gap-3">
-      <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-xl shadow-emerald-500/25">
+      <div className="premium-stat bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] shadow-xl shadow-[#7B61FF]/25">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_60%)]" />
         <div className="relative z-10 space-y-1">
-          <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Saldo</p>
-          <p className="text-base font-bold font-heading text-white tabular-nums">{formatRupiah(saldo)}</p>
+          <p className="premium-stat-label">Saldo</p>
+          <p className="premium-stat-value">{formatRupiah(saldo)}</p>
         </div>
       </div>
-      <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-blue-500 to-blue-600 shadow-xl shadow-blue-500/25">
+      <div className="premium-stat bg-gradient-to-br from-blue-500 to-blue-600 shadow-xl shadow-blue-500/25">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_60%)]" />
         <div className="relative z-10 space-y-1">
-          <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Pemasukan</p>
-          <p className="text-base font-bold font-heading text-white tabular-nums">+{formatRupiah(pemasukan)}</p>
+          <p className="premium-stat-label">Pemasukan</p>
+          <p className="premium-stat-value">+{formatRupiah(pemasukan)}</p>
         </div>
       </div>
-      <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-rose-500 to-rose-600 shadow-xl shadow-rose-500/25">
+      <div className="premium-stat bg-gradient-to-br from-rose-500 to-rose-600 shadow-xl shadow-rose-500/25">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_60%)]" />
         <div className="relative z-10 space-y-1">
-          <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Pengeluaran</p>
-          <p className="text-base font-bold font-heading text-white tabular-nums">-{formatRupiah(pengeluaran)}</p>
+          <p className="premium-stat-label">Pengeluaran</p>
+          <p className="premium-stat-value">-{formatRupiah(pengeluaran)}</p>
         </div>
       </div>
     </div>
@@ -105,25 +105,25 @@ export default function BukuKeluargaPage() {
 
       <div className="flex gap-2">
         <button onClick={() => setFormOpen(!formOpen)}
-          className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.97] transition-all">
+          className="btn-gradient flex-1 py-3.5 rounded-2xl text-xs">
           <Plus className="size-4 inline mr-1" />Catat Transaksi
         </button>
         <button onClick={() => router.push("/buku-keluarga/transaksi")}
-          className="flex-1 py-3.5 rounded-2xl bg-slate-800 text-slate-200 text-xs font-bold hover:bg-slate-700 transition-all">
+          className="btn-ghost flex-1 py-3.5 rounded-2xl text-xs">
           Riwayat
         </button>
         <button onClick={() => router.push("/buku-keluarga/laporan")}
-          className="flex-1 py-3.5 rounded-2xl bg-slate-800 text-slate-200 text-xs font-bold hover:bg-slate-700 transition-all">
+          className="btn-ghost flex-1 py-3.5 rounded-2xl text-xs">
           Laporan
         </button>
         <button onClick={() => router.push("/buku-keluarga/dompet")}
-          className="py-3.5 px-4 rounded-2xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition-all">
+          className="btn-ghost py-3.5 px-4 rounded-2xl">
           <Home className="size-4" />
         </button>
       </div>
 
       {formOpen && (
-        <form onSubmit={simpan} className="floating-card p-4 space-y-3 border border-emerald-500/20">
+        <form onSubmit={simpan} className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-4 space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <input ref={inputRef} type="date" value={fTanggal} onChange={(e) => setFTanggal(e.target.value)} className="input-premium text-xs" />
             <select value={fTipe} onChange={(e) => setFTipe(e.target.value as any)} className="input-premium text-xs">
@@ -141,7 +141,7 @@ export default function BukuKeluargaPage() {
               const Ico = k.icon;
               return (
                 <button key={k.id} type="button" onClick={() => setFKategori(k.id)}
-                  className={`flex flex-col items-center gap-1 p-2 rounded-xl min-w-[60px] transition-all ${fKategori === k.id ? "bg-emerald-500/20 border border-emerald-500/30" : "bg-slate-800"}`}>
+                  className={`flex flex-col items-center gap-1 p-2 rounded-xl min-w-[60px] transition-all ${fKategori === k.id ? "bg-[#7B61FF]/10 border border-[#7B61FF]/20" : "premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60"}`}>
                   <Ico className={`size-4 ${fKategori === k.id ? k.warna : "text-muted-foreground/40"}`} />
                   <span className={`text-[8px] whitespace-nowrap ${fKategori === k.id ? "text-white font-semibold" : "text-muted-foreground/40"}`}>{k.label}</span>
                 </button>
@@ -151,9 +151,9 @@ export default function BukuKeluargaPage() {
           <input type="text" value={fCatatan} onChange={(e) => setFCatatan(e.target.value)}
             placeholder="Catatan (opsional)" className="input-premium w-full text-xs" />
           <div className="flex gap-2">
-            <button type="submit" className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold shadow-md">Simpan</button>
+            <button type="submit" className="btn-gradient flex-1 py-3 rounded-xl text-xs">Simpan</button>
             <button type="button" onClick={() => { resetForm(); setFormOpen(false); }}
-              className="px-5 py-3 rounded-xl text-xs text-muted-foreground/50 hover:bg-muted/30">Batal</button>
+              className="btn-ghost px-5 py-3 rounded-xl text-xs">Batal</button>
           </div>
         </form>
       )}
@@ -165,13 +165,13 @@ export default function BukuKeluargaPage() {
             const kat = getKategori(t.kategori);
             const Ico = kat.icon;
             return (
-              <div key={t.id} className="floating-card p-3 flex items-center gap-3">
-                <div className={`size-9 rounded-xl bg-slate-800 flex items-center justify-center ${kat.warna}`}><Ico className="size-4" /></div>
+              <div key={t.id} className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-3 flex items-center gap-3">
+                <div className={`size-9 rounded-xl premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 flex items-center justify-center ${kat.warna}`}><Ico className="size-4" /></div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold">{t.catatan || kat.label}</p>
                   <p className="text-[9px] text-muted-foreground/40">{t.tanggal}</p>
                 </div>
-                <p className={`text-xs font-bold tabular-nums ${t.tipe === "Pemasukan" ? "text-emerald-400" : "text-rose-400"}`}>
+                <p className={`text-xs font-bold tabular-nums ${t.tipe === "Pemasukan" ? "text-[#7B61FF]" : "text-rose-400"}`}>
                   {t.tipe === "Pemasukan" ? "+" : "-"}{formatRupiah(t.nominal)}
                 </p>
               </div>

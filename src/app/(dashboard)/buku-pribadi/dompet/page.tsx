@@ -40,26 +40,26 @@ export default function DompetPribadiPage() {
   return (
     <div className="max-w-2xl mx-auto pb-20 space-y-4 animate-fade-in">
       <div className="flex items-center gap-3">
-        <button onClick={() => router.push("/buku-pribadi")} className="size-10 rounded-xl bg-slate-800 flex items-center justify-center hover:bg-slate-700 transition-colors">
-          <ArrowLeft className="size-5 text-slate-300" />
+        <button onClick={() => router.push("/buku-pribadi")} className="btn-ghost size-10 rounded-xl flex items-center justify-center">
+          <ArrowLeft className="size-5" />
         </button>
         <div>
           <h1 className="text-lg font-bold font-heading">Dompet</h1>
           <p className="text-xs text-muted-foreground/60">Buku Pribadi</p>
         </div>
-        <button onClick={() => setShowTambah(!showTambah)} className="ml-auto size-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center hover:bg-emerald-500/30">
-          <Plus className="size-5" />
+        <button onClick={() => setShowTambah(!showTambah)} className="ml-auto btn-gradient size-10 rounded-xl flex items-center justify-center">
+          <Plus className="size-5 text-white" />
         </button>
       </div>
 
       {showTambah && (
-        <div className="floating-card p-4 space-y-3 border border-emerald-500/20">
+        <div className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-4 space-y-3">
           <input type="text" value={nama} onChange={(e) => setNama(e.target.value)}
             placeholder="Nama dompet (cth: Dana)" className="input-premium w-full text-xs" />
           <input type="text" inputMode="numeric" value={saldoAwal} onChange={(e) => setSaldoAwal(e.target.value.replace(/\D/g, ""))}
             placeholder="Saldo awal" className="input-premium w-full text-xs" />
           <button onClick={tambahWallet}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold">
+            className="btn-gradient w-full py-2.5 rounded-xl text-xs">
             Simpan
           </button>
         </div>
@@ -70,15 +70,15 @@ export default function DompetPribadiPage() {
           <p className="text-xs text-muted-foreground/40 text-center py-8">Belum ada dompet</p>
         )}
         {wallets.map((w) => (
-          <div key={w.id} className="floating-card p-4 flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-slate-800 flex items-center justify-center text-lg">
+          <div key={w.id} className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-4 flex items-center gap-3">
+            <div className="size-10 rounded-xl premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 flex items-center justify-center text-lg">
               {WALLET_ICONS[w.id] || "💳"}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold">{w.namaDompet}</p>
               <p className="text-[10px] text-muted-foreground/40">{w.tipe || "Kas Tunai"}</p>
             </div>
-            <p className="text-sm font-bold text-emerald-400 font-heading tabular-nums">{formatRupiah(w.saldo)}</p>
+            <p className="text-sm font-bold text-[#7B61FF] font-heading tabular-nums">{formatRupiah(w.saldo)}</p>
           </div>
         ))}
       </div>

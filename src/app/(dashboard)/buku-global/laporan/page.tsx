@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { db, BOOK_LABELS, BRANCH_SLUGS } from "@/lib/db-v4";
-import { ArrowLeft, BarChart3, FileSpreadsheet, FileText, Download } from "lucide-react";
+import { ArrowLeft, BarChart3, FileText, Download } from "lucide-react";
 import toast from "react-hot-toast";
 import { jsPDF } from "jspdf";
 

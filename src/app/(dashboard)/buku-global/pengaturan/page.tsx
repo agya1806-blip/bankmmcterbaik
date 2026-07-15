@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Shield, Download, Upload, Lock, CheckCircle2, Key, Database } from "lucide-react";
+import { ArrowLeft, Shield, Download, Upload, CheckCircle2, Key, Database } from "lucide-react";
 import toast from "react-hot-toast";
 import { exportEncryptedBackup, importEncryptedBackup, downloadBlob } from "@/lib/backupEngine";
 

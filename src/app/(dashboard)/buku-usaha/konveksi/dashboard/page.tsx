@@ -95,24 +95,24 @@ export default function DashboardKonveksi() {
   }, [transactions, search]);
 
   if (!mounted) {
-    return <div className="space-y-4 animate-pulse"><div className="h-32 rounded-2xl bg-slate-800/30" /><div className="h-64 rounded-2xl bg-slate-800/30" /></div>;
+    return <div className="space-y-4 animate-pulse"><div className="h-32 rounded-2xl bg-slate-100 dark:bg-slate-800/30" /><div className="h-64 rounded-2xl bg-slate-100 dark:bg-slate-800/30" /></div>;
   }
 
   return (
     <div className="max-w-2xl mx-auto pb-20 space-y-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="size-12 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-xl shadow-rose-500/20">
+          <div className="size-12 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-xl shadow-[#7B61FF]/20">
             <Tags className="size-6 text-white" />
           </div>
           <div>
             <h1 className="text-lg font-bold font-heading">Dashboard Konveksi</h1>
-            <p className="text-xs text-slate-400">Pusat komando produksi konveksi</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Pusat komando produksi konveksi</p>
           </div>
         </div>
         <div className="flex gap-2">
           <button onClick={() => router.push("/buku-usaha/konveksi/kasir")}
-            className="px-3 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 text-white text-[10px] font-bold shadow-lg flex items-center gap-1.5 active:scale-95 transition-all"
+            className="btn-gradient text-[10px] h-9 px-3 gap-1.5"
           >
             <Plus className="size-3.5" /> Order Baru
           </button>
@@ -120,17 +120,17 @@ export default function DashboardKonveksi() {
       </div>
 
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-2xl p-4 bg-gradient-to-br from-emerald-500 to-emerald-600">
-          <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Omzet</p>
-          <p className="text-lg font-bold font-heading text-white tabular-nums">{formatRupiah(kpi.omzet)}</p>
+        <div className="premium-stat border-rose-500/20 bg-gradient-to-br from-rose-500/5 to-transparent">
+          <p className="premium-stat-label">Omzet</p>
+          <p className="premium-stat-value text-rose-500">{formatRupiah(kpi.omzet)}</p>
         </div>
-        <div className="rounded-2xl p-4 bg-gradient-to-br from-rose-500 to-pink-600">
-          <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Total Order</p>
-          <p className="text-lg font-bold font-heading text-white tabular-nums">{kpi.totalTx}</p>
+        <div className="premium-stat border-[#7B61FF]/20 bg-gradient-to-br from-[#7B61FF]/5 to-transparent">
+          <p className="premium-stat-label">Total Order</p>
+          <p className="premium-stat-value text-[#7B61FF]">{kpi.totalTx}</p>
         </div>
-        <div className="rounded-2xl p-4 bg-gradient-to-br from-amber-500 to-orange-600">
-          <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Menunggu DP</p>
-          <p className="text-lg font-bold font-heading text-white tabular-nums">{kpi.piutang}</p>
+        <div className="premium-stat border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent">
+          <p className="premium-stat-label">Menunggu DP</p>
+          <p className="premium-stat-value text-amber-500">{kpi.piutang}</p>
         </div>
       </div>
 
@@ -140,9 +140,9 @@ export default function DashboardKonveksi() {
             <Clock className="size-4 text-rose-500" /> Production Board
           </h2>
           <div className="relative">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-slate-500" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3 text-slate-400" />
             <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari..." className="input-premium w-28 text-[10px] pl-6 bg-slate-900/80" />
+              placeholder="Cari..." className="input-premium w-28 text-[10px] pl-7 h-8" />
           </div>
         </div>
 
@@ -160,28 +160,28 @@ export default function DashboardKonveksi() {
             return (
               <div key={col.key} className="space-y-1.5">
                 {items.length === 0 ? (
-                  <div className="h-16 rounded-xl bg-slate-800/20 border border-dashed border-slate-700/30 flex items-center justify-center">
-                    <p className="text-[8px] text-slate-600">Kosong</p>
+                  <div className="h-16 rounded-xl bg-slate-100 dark:bg-slate-800/20 border border-dashed border-slate-200 dark:border-slate-700/30 flex items-center justify-center">
+                    <p className="text-[8px] text-slate-400 dark:text-slate-600">Kosong</p>
                   </div>
                 ) : (
                   items.map((tx: any) => (
                     <div key={tx.id}
-                      className="rounded-2xl bg-slate-900/80 border border-slate-800/60 p-2.5 space-y-1 hover:shadow-md transition-shadow cursor-pointer group"
+                      className="premium-card p-2.5 space-y-1 cursor-pointer group"
                       onClick={() => updateStatus(tx.id)}
                     >
                       <div className="flex items-start justify-between gap-1">
                         <p className="text-[8px] font-semibold truncate">{tx.invoiceNumber}</p>
                       </div>
                       <p className="text-[7px] text-slate-500 truncate">{tx.customerNama}</p>
-                      <p className="text-[7px] text-slate-600 truncate">
+                      <p className="text-[7px] text-slate-400 dark:text-slate-600 truncate">
                         {tx.items?.map((i: any) => i.namaItem).join(", ") || "-"}
                       </p>
                       <div className="flex items-center justify-between pt-0.5">
-                        <p className="text-[7px] font-semibold tabular-nums text-emerald-400">{formatRupiah(tx.totalBruto)}</p>
+                        <p className="text-[7px] font-semibold tabular-nums text-rose-500">{formatRupiah(tx.totalBruto)}</p>
                         {col.key === "selesai" ? (
                           <MessageSquare className="size-2.5 text-emerald-400" />
                         ) : (
-                          <ArrowRight className="size-2.5 text-slate-500 group-hover:text-rose-400 transition-colors" />
+                          <ArrowRight className="size-2.5 text-slate-400 group-hover:text-rose-500 transition-colors" />
                         )}
                       </div>
                     </div>

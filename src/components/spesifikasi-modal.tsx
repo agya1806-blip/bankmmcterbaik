@@ -115,7 +115,7 @@ export default function SpesifikasiModal({ open, onOpenChange, branch, existingS
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="backdrop-blur-lg bg-white/95 dark:bg-[#131527]/95">
         <DialogHeader>
           <div className="flex items-center gap-2">
             <ClipboardList className="size-5 text-emerald-500" />

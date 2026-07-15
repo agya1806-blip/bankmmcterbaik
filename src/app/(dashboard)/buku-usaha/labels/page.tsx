@@ -73,11 +73,11 @@ export default function LabelsPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push("/buku-usaha")}
-            className="size-9 rounded-xl bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors"
+            className="size-9 rounded-xl bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-colors border border-slate-200/60 dark:border-slate-800/60"
           >
             <ArrowLeft className="size-4 text-muted-foreground" />
           </button>
-          <div className="size-11 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-pink-500/20">
+          <div className="size-11 rounded-2xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-lg shadow-[#7B61FF]/20">
             <Tag className="size-5 text-white" />
           </div>
           <div>
@@ -89,7 +89,7 @@ export default function LabelsPage() {
         </div>
         <button
           onClick={() => setShowForm(true)}
-          className="px-3 py-2 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 text-white text-[10px] font-bold shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5"
+          className="btn-gradient px-3 py-2 text-[10px] font-bold flex items-center gap-1.5"
         >
           <Plus className="size-3.5" /> Label Baru
         </button>
@@ -97,7 +97,7 @@ export default function LabelsPage() {
 
       {/* Add form */}
       {showForm && (
-        <div className="floating-card p-4 space-y-3">
+        <div className="premium-card p-4 space-y-3 border border-slate-200/60 dark:border-slate-800/60">
           <input
             type="text"
             value={newLabel}
@@ -122,13 +122,13 @@ export default function LabelsPage() {
           <div className="flex gap-2">
             <button
               onClick={handleAdd}
-              className="flex-1 px-3 py-2 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 text-white text-[10px] font-bold hover:shadow-lg transition-all"
+              className="btn-gradient flex-1 px-3 py-2 text-[10px] font-bold"
             >
               Simpan
             </button>
             <button
               onClick={() => setShowForm(false)}
-              className="px-3 py-2 rounded-lg bg-muted/30 text-[10px] font-medium text-muted-foreground hover:bg-muted/50 transition-all"
+              className="btn-ghost px-3 py-2 text-[10px] font-medium"
             >
               Batal
             </button>
@@ -138,7 +138,7 @@ export default function LabelsPage() {
 
       {/* Grid */}
       {labels.length === 0 ? (
-        <div className="floating-card p-8 text-center">
+        <div className="premium-card p-8 text-center border border-slate-200/60 dark:border-slate-800/60">
           <Tag className="size-12 mx-auto text-muted-foreground/20" />
           <p className="text-sm text-muted-foreground/40 mt-3">Belum ada label</p>
           <p className="text-[10px] text-muted-foreground/30 mt-1">
@@ -150,7 +150,7 @@ export default function LabelsPage() {
           {labels.map((l) => (
             <div
               key={l.id}
-              className="floating-card p-4 hover:shadow-lg transition-shadow"
+              className="premium-card p-4 border border-slate-200/60 dark:border-slate-800/60 hover:shadow-lg transition-shadow"
             >
               {editingId === l.id ? (
                 <div className="space-y-3">
@@ -177,13 +177,13 @@ export default function LabelsPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => saveEdit(l.id)}
-                      className="flex-1 px-2 py-1.5 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white text-[10px] font-bold flex items-center justify-center gap-1"
+                      className="btn-gradient flex-1 px-2 py-1.5 text-[10px] font-bold flex items-center justify-center gap-1"
                     >
                       <Check className="size-3" /> Simpan
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
-                      className="px-2 py-1.5 rounded-lg bg-muted/30 text-[10px] font-medium text-muted-foreground"
+                      className="btn-ghost px-2 py-1.5 text-[10px] font-medium"
                     >
                       Batal
                     </button>
@@ -207,13 +207,13 @@ export default function LabelsPage() {
                     <div className="flex gap-1">
                       <button
                         onClick={() => startEdit(l.id, l.label, l.warna)}
-                        className="size-7 rounded-lg bg-muted/20 flex items-center justify-center hover:bg-muted/40 transition-colors"
+                        className="size-7 rounded-lg bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-colors border border-slate-200/60 dark:border-slate-800/60"
                       >
                         <Check className="size-3 text-muted-foreground/50" />
                       </button>
                       <button
                         onClick={() => handleDelete(l.id, l.label)}
-                        className="size-7 rounded-lg bg-muted/20 flex items-center justify-center hover:bg-red-500/10 transition-colors"
+                        className="size-7 rounded-lg bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-red-500/10 transition-colors border border-slate-200/60 dark:border-slate-800/60"
                       >
                         <X className="size-3 text-red-400" />
                       </button>

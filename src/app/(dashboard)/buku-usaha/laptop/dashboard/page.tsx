@@ -20,39 +20,39 @@ export default function DashboardLaptop() {
   return (
     <div className="max-w-2xl mx-auto pb-20 space-y-5 animate-fade-in">
       <div className="flex items-center gap-3">
-        <button onClick={() => router.push("/buku-usaha")} className="size-10 rounded-xl bg-slate-800 flex items-center justify-center hover:bg-slate-700 transition-colors">
-          <ArrowLeft className="size-5 text-slate-300" />
+        <button onClick={() => router.push("/buku-usaha")} className="size-10 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
+          <ArrowLeft className="size-5 text-slate-600 dark:text-slate-400" />
         </button>
-        <div className="size-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-xl shadow-blue-500/20">
+        <div className="size-12 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-xl shadow-[#7B61FF]/20">
           <Laptop className="size-6 text-white" />
         </div>
         <div>
           <h1 className="text-lg font-bold font-heading">Dashboard Laptop</h1>
-          <p className="text-xs text-muted-foreground/60">Toko Laptop & Service</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Toko Laptop & Service</p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="floating-card p-4 space-y-1">
-          <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">Total Produk</p>
-          <p className="text-xl font-bold font-heading tabular-nums">{gadgetItems.length}</p>
+        <div className="premium-stat">
+          <p className="premium-stat-label">Total Produk</p>
+          <p className="premium-stat-value text-blue-500">{gadgetItems.length}</p>
         </div>
-        <div className="floating-card p-4 space-y-1">
-          <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">Total Stok</p>
-          <p className="text-xl font-bold font-heading tabular-nums">{totalStok}</p>
+        <div className="premium-stat">
+          <p className="premium-stat-label">Total Stok</p>
+          <p className="premium-stat-value text-blue-500">{totalStok}</p>
         </div>
       </div>
 
       {stokMenipis.length > 0 && (
-        <div className="floating-card p-4 border border-amber-500/30 space-y-2">
-          <div className="flex items-center gap-2 text-amber-400">
+        <div className="premium-card p-4 border-amber-500/30 space-y-2">
+          <div className="flex items-center gap-2 text-amber-500">
             <AlertTriangle className="size-4" />
             <span className="text-xs font-bold">Stok Menipis ({stokMenipis.length})</span>
           </div>
           {stokMenipis.map((g) => (
-            <div key={g.id} className="flex justify-between text-xs text-slate-300">
+            <div key={g.id} className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
               <span>{g.brand} {g.model}</span>
-              <span className="text-amber-400 font-bold">1 pcs</span>
+              <span className="text-amber-500 font-bold">1 pcs</span>
             </div>
           ))}
         </div>
@@ -60,20 +60,20 @@ export default function DashboardLaptop() {
 
       <div className="grid grid-cols-2 gap-3">
         <button onClick={() => router.push("/buku-usaha/laptop/kasir")}
-          className="floating-card p-5 space-y-2 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.97] transition-all">
-          <div className="size-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+          className="premium-card p-5 space-y-2 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.97] transition-all text-left">
+          <div className="size-10 rounded-xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] flex items-center justify-center">
             <Plus className="size-5 text-white" />
           </div>
           <p className="text-sm font-bold">Buka Kasir</p>
-          <p className="text-[10px] text-muted-foreground/50">Transaksi penjualan laptop</p>
+          <p className="text-[10px] text-slate-500 dark:text-slate-400">Transaksi penjualan laptop</p>
         </button>
         <button onClick={() => router.push("/buku-usaha/laptop")}
-          className="floating-card p-5 space-y-2 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.97] transition-all">
-          <div className="size-10 rounded-xl bg-gradient-to-br from-violet-500 to-violet-600 flex items-center justify-center">
+          className="premium-card p-5 space-y-2 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.97] transition-all text-left">
+          <div className="size-10 rounded-xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] flex items-center justify-center">
             <Settings className="size-5 text-white" />
           </div>
           <p className="text-sm font-bold">Pengaturan</p>
-          <p className="text-[10px] text-muted-foreground/50">Kelola produk & stok</p>
+          <p className="text-[10px] text-slate-500 dark:text-slate-400">Kelola produk & stok</p>
         </button>
       </div>
     </div>

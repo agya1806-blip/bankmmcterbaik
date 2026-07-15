@@ -36,8 +36,8 @@ export default function LaporanPribadiPage() {
   return (
     <div className="max-w-2xl mx-auto pb-20 space-y-5 animate-fade-in">
       <div className="flex items-center gap-3">
-        <button onClick={() => router.push("/buku-pribadi")} className="size-10 rounded-xl bg-slate-800 flex items-center justify-center hover:bg-slate-700 transition-colors">
-          <ArrowLeft className="size-5 text-slate-300" />
+        <button onClick={() => router.push("/buku-pribadi")} className="btn-ghost size-10 rounded-xl flex items-center justify-center">
+          <ArrowLeft className="size-5" />
         </button>
         <div>
           <h1 className="text-lg font-bold font-heading">Laporan Keuangan</h1>
@@ -49,14 +49,14 @@ export default function LaporanPribadiPage() {
         className="input-premium w-full text-xs" />
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="floating-card p-4 space-y-1 border border-emerald-500/20">
-          <div className="flex items-center gap-2 text-emerald-400">
+        <div className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-4 space-y-1 border-l-4 border-l-[#7B61FF]">
+          <div className="flex items-center gap-2 text-[#7B61FF]">
             <TrendingUp className="size-4" />
             <span className="text-[10px] uppercase tracking-wider font-bold">Pemasukan</span>
           </div>
           <p className="text-lg font-bold font-heading tabular-nums">+{formatRupiah(pemasukan)}</p>
         </div>
-        <div className="floating-card p-4 space-y-1 border border-rose-500/20">
+        <div className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-4 space-y-1 border-l-4 border-l-rose-500">
           <div className="flex items-center gap-2 text-rose-400">
             <TrendingDown className="size-4" />
             <span className="text-[10px] uppercase tracking-wider font-bold">Pengeluaran</span>
@@ -65,12 +65,12 @@ export default function LaporanPribadiPage() {
         </div>
       </div>
 
-      <div className="floating-card p-4 space-y-1">
+      <div className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-4 space-y-1">
         <div className="flex items-center gap-2 text-violet-400">
           <PiggyBank className="size-4" />
           <span className="text-[10px] uppercase tracking-wider font-bold">Selisih</span>
         </div>
-        <p className={`text-lg font-bold font-heading tabular-nums ${pemasukan - pengeluaran >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+        <p className={`text-lg font-bold font-heading tabular-nums ${pemasukan - pengeluaran >= 0 ? "text-[#7B61FF]" : "text-rose-400"}`}>
           {formatRupiah(pemasukan - pengeluaran)}
         </p>
       </div>
@@ -79,7 +79,7 @@ export default function LaporanPribadiPage() {
         <div className="space-y-2">
           <p className="text-xs font-bold text-muted-foreground">Pengeluaran per Kategori</p>
           {byKategori.map(([kategori, total]) => (
-            <div key={kategori} className="floating-card p-3 flex justify-between items-center">
+            <div key={kategori} className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-3 flex justify-between items-center">
               <span className="text-xs">{kategori}</span>
               <span className="text-xs font-bold text-rose-400 tabular-nums">{formatRupiah(total)}</span>
             </div>

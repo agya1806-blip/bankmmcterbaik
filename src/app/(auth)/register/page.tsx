@@ -70,14 +70,14 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex h-[100dvh] items-center justify-center bg-slate-950 p-6">
+    <div className="flex h-[100dvh] items-center justify-center p-6">
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
-          <div className="size-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white font-bold text-xl shadow-xl shadow-emerald-500/20 mb-4">
+          <div className="size-14 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] flex items-center justify-center text-white font-bold text-xl shadow-xl shadow-[#7B61FF]/20 mb-4">
             M
           </div>
-          <h1 className="text-xl font-bold font-heading text-slate-100">Buat Akun Baru</h1>
-          <p className="text-sm text-slate-500 mt-1">PIN digunakan untuk masuk ke sistem</p>
+          <h1 className="text-xl font-bold">Buat Akun Baru</h1>
+          <p className="text-xs text-muted-foreground mt-1">PIN digunakan untuk masuk ke sistem</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -88,22 +88,22 @@ export default function RegisterPage() {
           )}
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-300">Nama Lengkap</label>
+            <label className="text-xs font-medium text-muted-foreground">Nama Lengkap</label>
             <div className="relative">
               <input
                 type="text"
                 placeholder="Nama kamu"
                 value={nama}
                 onChange={(e) => setNama(e.target.value)}
-                className="w-full h-12 pl-10 pr-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 text-base placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/15 transition-all"
+                className="input-premium w-full h-12 pl-10 pr-4 text-base rounded-xl"
                 autoFocus
               />
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-600" />
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-300">PIN (4-6 digit)</label>
+            <label className="text-xs font-medium text-muted-foreground">PIN (4-6 digit)</label>
             <div className="relative">
               <input
                 type={showPin ? "text" : "password"}
@@ -113,13 +113,13 @@ export default function RegisterPage() {
                 placeholder="Masukkan PIN"
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                className="w-full h-12 pl-10 pr-12 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 text-base placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/15 transition-all"
+                className="input-premium w-full h-12 pl-10 pr-12 text-base rounded-xl"
               />
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-600" />
+              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <button
                 type="button"
                 onClick={() => setShowPin(!showPin)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showPin ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
@@ -127,7 +127,7 @@ export default function RegisterPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-slate-300">Konfirmasi PIN</label>
+            <label className="text-xs font-medium text-muted-foreground">Konfirmasi PIN</label>
             <div className="relative">
               <input
                 type={showPin ? "text" : "password"}
@@ -137,16 +137,16 @@ export default function RegisterPage() {
                 placeholder="Ulangi PIN"
                 value={confirmPin}
                 onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                className="w-full h-12 pl-10 pr-12 rounded-xl bg-slate-900 border border-slate-800 text-slate-100 text-base placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/15 transition-all"
+                className="input-premium w-full h-12 pl-10 pr-12 text-base rounded-xl"
               />
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-600" />
+              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading || !nama.trim() || pin.length < 4 || pin !== confirmPin}
-            className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 active:scale-[0.98]"
+            className="btn-gradient w-full h-12 rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span className="size-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -156,9 +156,9 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-xs text-slate-600">
+        <p className="mt-6 text-center text-xs text-muted-foreground">
           Sudah punya akun?{" "}
-          <button onClick={() => router.push("/login")} className="text-emerald-400 font-medium hover:underline">
+          <button onClick={() => router.push("/login")} className="text-[#7B61FF] font-medium hover:underline">
             Masuk
           </button>
         </p>

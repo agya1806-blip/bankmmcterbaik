@@ -76,7 +76,7 @@ export default function AsistenAIPage() {
   }, [input, loading, contextReady]);
 
   if (!mounted) {
-    return <div className="h-48 rounded-2xl bg-slate-800/30 animate-pulse" />;
+    return <div className="h-48 rounded-2xl bg-slate-100 dark:bg-slate-800/30 animate-pulse" />;
   }
 
   return (
@@ -84,16 +84,16 @@ export default function AsistenAIPage() {
       {/* Header */}
       <div className="flex items-center gap-3 py-3 shrink-0">
         <button onClick={() => router.push("/")}
-          className="size-9 rounded-xl bg-slate-800 flex items-center justify-center hover:bg-slate-700 transition-colors"
+          className="size-9 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-slate-100 dark:bg-slate-800/60 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700/60 transition-colors"
         >
-          <ArrowLeft className="size-4 text-slate-400" />
+          <ArrowLeft className="size-4 text-muted-foreground" />
         </button>
-        <div className="size-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/25">
+        <div className="size-10 rounded-xl bg-gradient-to-br from-[#7B61FF] to-[#7B61FF]/80 flex items-center justify-center shadow-lg shadow-[#7B61FF]/25">
           <Bot className="size-5 text-white" />
         </div>
         <div>
-          <h1 className="text-base font-bold font-heading">Tanya AI</h1>
-          <p className="text-[10px] text-slate-400">Asisten analisis keuangan</p>
+          <h1 className="text-base font-bold">Tanya AI</h1>
+          <p className="text-[10px] text-muted-foreground">Asisten analisis keuangan</p>
         </div>
       </div>
 
@@ -102,33 +102,33 @@ export default function AsistenAIPage() {
         {messages.map((m, i) => (
           <div key={i} className={`flex gap-2 ${m.role === "user" ? "justify-end" : ""}`}>
             {m.role === "assistant" && (
-              <div className="size-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shrink-0 mt-1">
+              <div className="size-8 rounded-xl bg-gradient-to-br from-[#7B61FF] to-[#7B61FF]/80 flex items-center justify-center shrink-0 mt-1">
                 <Bot className="size-4 text-white" />
               </div>
             )}
             <div
               className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed ${
                 m.role === "user"
-                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-br-md"
-                  : "bg-slate-800/80 text-slate-200 rounded-bl-md border border-slate-700/50"
+                  ? "bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white rounded-br-md"
+                  : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 rounded-bl-md border border-slate-200/60 dark:border-slate-700/50"
               }`}
             >
               {m.text}
             </div>
             {m.role === "user" && (
-              <div className="size-8 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 mt-1">
-                <User className="size-4 text-slate-400" />
+              <div className="size-8 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 mt-1">
+                <User className="size-4 text-muted-foreground" />
               </div>
             )}
           </div>
         ))}
         {loading && (
           <div className="flex gap-2">
-            <div className="size-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shrink-0">
+            <div className="size-8 rounded-xl bg-gradient-to-br from-[#7B61FF] to-[#7B61FF]/80 flex items-center justify-center shrink-0">
               <Bot className="size-4 text-white" />
             </div>
-            <div className="rounded-2xl px-4 py-2.5 bg-slate-800/80 border border-slate-700/50">
-              <Loader2 className="size-4 animate-spin text-violet-400" />
+            <div className="rounded-2xl px-4 py-2.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/50">
+              <Loader2 className="size-4 animate-spin text-[#7B61FF]" />
             </div>
           </div>
         )}
@@ -136,7 +136,7 @@ export default function AsistenAIPage() {
       </div>
 
       {/* Input */}
-      <div className="sticky bottom-0 bg-slate-950 pt-2 pb-4 safe-bottom shrink-0">
+      <div className="sticky bottom-0 pt-2 pb-4 safe-bottom shrink-0">
         <div className="flex items-end gap-2">
           <textarea
             ref={inputRef}
@@ -150,19 +150,19 @@ export default function AsistenAIPage() {
             }}
             placeholder="Tanya analisis keuangan..."
             rows={1}
-            className="flex-1 rounded-2xl bg-slate-800/80 border border-slate-700/50 text-xs px-4 py-3 resize-none focus:outline-none focus:border-violet-500/50 placeholder:text-slate-500"
+            className="flex-1 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/50 text-xs px-4 py-3 resize-none focus:outline-none focus:border-[#7B61FF]/40 focus:ring-2 focus:ring-[#7B61FF]/15 placeholder:text-muted-foreground"
             style={{ minHeight: 44, maxHeight: 120 }}
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="size-11 rounded-2xl bg-gradient-to-r from-violet-500 to-purple-600 text-white flex items-center justify-center shadow-lg disabled:opacity-50 active:scale-90 transition-all shrink-0"
+            className="size-11 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white flex items-center justify-center shadow-lg disabled:opacity-50 active:scale-90 transition-all shrink-0"
             style={{ minHeight: 44, minWidth: 44 }}
           >
             <Send className="size-5" />
           </button>
         </div>
-        <p className="text-[8px] text-slate-600 text-center mt-1">
+        <p className="text-[8px] text-muted-foreground text-center mt-1">
           AI dapat membuat kesalahan. Verifikasi data penting secara manual.
         </p>
       </div>

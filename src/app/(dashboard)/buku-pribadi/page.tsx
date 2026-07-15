@@ -12,7 +12,6 @@ import toast from "react-hot-toast";
 import { CardSkeleton } from "@/components/ui/skeleton";
 import { useBusinessStore, PersonalTransaction, SavingsGoal } from "@/store/useBusinessStore";
 
-/* ─── Kategori tetap ─── */
 interface Kategori {
   id: string;
   label: string;
@@ -47,37 +46,35 @@ function formatRupiah(n: number) {
   return `IDR ${n.toLocaleString("id-ID")}`;
 }
 
-/* ─── Ringkasan ─── */
 function Ringkasan({ pemasukan, pengeluaran }: { pemasukan: number; pengeluaran: number }) {
   const saldo = pemasukan - pengeluaran;
   return (
     <div className="grid grid-cols-3 gap-3">
-      <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-xl shadow-emerald-500/25">
+      <div className="premium-stat bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] shadow-xl shadow-[#7B61FF]/25">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_60%)]" />
         <div className="relative z-10 space-y-1">
-          <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Saldo</p>
-          <p className="text-base font-bold font-heading text-white tabular-nums">{formatRupiah(saldo)}</p>
+          <p className="premium-stat-label">Saldo</p>
+          <p className="premium-stat-value">{formatRupiah(saldo)}</p>
         </div>
       </div>
-      <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-blue-500 to-blue-600 shadow-xl shadow-blue-500/25">
+      <div className="premium-stat bg-gradient-to-br from-blue-500 to-blue-600 shadow-xl shadow-blue-500/25">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_60%)]" />
         <div className="relative z-10 space-y-1">
-          <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Pemasukan</p>
-          <p className="text-base font-bold font-heading text-white tabular-nums">+{formatRupiah(pemasukan)}</p>
+          <p className="premium-stat-label">Pemasukan</p>
+          <p className="premium-stat-value">+{formatRupiah(pemasukan)}</p>
         </div>
       </div>
-      <div className="relative overflow-hidden rounded-2xl p-4 bg-gradient-to-br from-rose-500 to-rose-600 shadow-xl shadow-rose-500/25">
+      <div className="premium-stat bg-gradient-to-br from-rose-500 to-rose-600 shadow-xl shadow-rose-500/25">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2),transparent_60%)]" />
         <div className="relative z-10 space-y-1">
-          <p className="text-white/70 text-[9px] font-semibold uppercase tracking-widest">Pengeluaran</p>
-          <p className="text-base font-bold font-heading text-white tabular-nums">-{formatRupiah(pengeluaran)}</p>
+          <p className="premium-stat-label">Pengeluaran</p>
+          <p className="premium-stat-value">-{formatRupiah(pengeluaran)}</p>
         </div>
       </div>
     </div>
   );
 }
 
-/* ─── Form Tambah Goal ─── */
 function TambahGoalForm({ onSave, onCancel }: { onSave: (g: SavingsGoal) => void; onCancel: () => void }) {
   const [nama, setNama] = useState("");
   const [target, setTarget] = useState("");
@@ -93,7 +90,7 @@ function TambahGoalForm({ onSave, onCancel }: { onSave: (g: SavingsGoal) => void
       onSave({ id: genId(), nama: nama.trim(), targetNominal: nominal, terkumpul: 0, targetDate: tanggal });
       toast.success(`Goal "${nama}" ditambahkan`);
       onCancel();
-    }} className="floating-card p-4 space-y-3 border border-emerald-500/20">
+    }} className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-4 space-y-3">
       <input ref={inputRef} type="text" value={nama} onChange={(e) => setNama(e.target.value)}
         placeholder="Nama goal (cth: MacBook Pro)" className="input-premium w-full text-xs" />
       <div className="grid grid-cols-2 gap-3">
@@ -106,12 +103,11 @@ function TambahGoalForm({ onSave, onCancel }: { onSave: (g: SavingsGoal) => void
           className="input-premium w-full text-xs" />
       </div>
       <div className="flex gap-2">
-        <button type="submit"
-          className="flex-1 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all">
+        <button type="submit" className="btn-gradient flex-1 py-2 rounded-xl text-xs">
           <Plus className="size-3 inline mr-1" /> Tambah Goal
         </button>
         <button type="button" onClick={onCancel}
-          className="px-4 py-2 rounded-xl text-xs text-muted-foreground/50 hover:bg-muted/30 transition-colors">
+          className="btn-ghost px-4 py-2 rounded-xl text-xs">
           Batal
         </button>
       </div>
@@ -127,7 +123,6 @@ export default function BukuPribadiPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [showTambahGoal, setShowTambahGoal] = useState(false);
 
-  /* form state */
   const [fTanggal, setFTanggal] = useState(todayISO());
   const [fTipe, setFTipe] = useState<"Pemasukan" | "Pengeluaran">("Pengeluaran");
   const [fNominal, setFNominal] = useState("");
@@ -137,7 +132,6 @@ export default function BukuPribadiPage() {
 
   useEffect(() => setMounted(true), []);
 
-  /* Ringkasan */
   const totalPemasukan = useMemo(() =>
     personalTransactions.filter((t) => t.tipe === "Pemasukan").reduce((s, t) => s + t.nominal, 0),
   [personalTransactions]);
@@ -168,7 +162,6 @@ export default function BukuPribadiPage() {
     };
     addPersonalTransaction(tx);
 
-    /* Alokasi ke goal jika dipilih */
     if (fTipe === "Pemasukan" && fGoalId) {
       alokasikanTabungan(fGoalId, nominal);
     }
@@ -231,10 +224,9 @@ export default function BukuPribadiPage() {
 
   return (
     <div id="buku-pribadi-area" className="max-w-2xl mx-auto pb-20 space-y-6 animate-fade-in">
-      {/* ─── HEADER ─── */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="size-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-xl shadow-emerald-500/20">
+          <div className="size-12 rounded-2xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-xl shadow-[#7B61FF]/20">
             <Wallet className="size-6 text-white" />
           </div>
           <div>
@@ -244,7 +236,7 @@ export default function BukuPribadiPage() {
         </div>
         <div className="flex gap-2">
           <button onClick={exportPDF}
-            className="size-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-md shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all"
+            className="btn-gradient size-9 rounded-xl flex items-center justify-center"
             title="Export PDF">
             <FileDown className="size-4 text-white" />
           </button>
@@ -261,15 +253,13 @@ export default function BukuPribadiPage() {
         </div>
       </div>
 
-      {/* ─── RINGKASAN ─── */}
       <Ringkasan pemasukan={totalPemasukan} pengeluaran={totalPengeluaran} />
 
-      {/* ─── TOMBOL CATAT ─── */}
       <button onClick={() => { resetForm(); setFormOpen(true); }}
-        className="w-full floating-card p-4 flex items-center justify-between group hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.99] transition-all duration-200"
+        className="w-full premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-4 flex items-center justify-between group hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.99] transition-all duration-200"
       >
         <div className="flex items-center gap-3">
-          <div className="size-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+          <div className="size-10 rounded-xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-md shadow-[#7B61FF]/20 group-hover:scale-105 transition-transform">
             <Plus className="size-5 text-white" />
           </div>
           <div className="text-left">
@@ -277,17 +267,16 @@ export default function BukuPribadiPage() {
             <p className="text-[10px] text-muted-foreground/60">Pemasukan / Pengeluaran</p>
           </div>
         </div>
-        <ArrowUpRight className="size-4 text-muted-foreground/40 group-hover:text-emerald-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+        <ArrowUpRight className="size-4 text-muted-foreground/40 group-hover:text-[#7B61FF] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
       </button>
 
-      {/* ─── SAVINGS GOALS ─── */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold flex items-center gap-1.5">
-            <Target className="size-4 text-emerald-500" /> Tabungan Goal
+            <Target className="size-4 text-[#7B61FF]" /> Tabungan Goal
           </h2>
           <button onClick={() => setShowTambahGoal(!showTambahGoal)}
-            className="text-[10px] text-emerald-600 font-semibold hover:underline">
+            className="text-[10px] text-[#7B61FF] font-semibold hover:underline">
             {showTambahGoal ? "Tutup" : "+ Tambah Goal"}
           </button>
         </div>
@@ -295,7 +284,7 @@ export default function BukuPribadiPage() {
           <TambahGoalForm onSave={addSavingsGoal} onCancel={() => setShowTambahGoal(false)} />
         )}
         {savingsGoals.length === 0 ? (
-          <div className="floating-card p-6 text-center">
+          <div className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-6 text-center">
             <PiggyBank className="size-8 mx-auto text-muted-foreground/20 mb-2" />
             <p className="text-xs text-muted-foreground/40">Belum ada goal tabungan</p>
             <p className="text-[10px] text-muted-foreground/30 mt-1">Buat goal untuk tracking target keuangan</p>
@@ -308,7 +297,7 @@ export default function BukuPribadiPage() {
               const tgl = new Date(g.targetDate + "T00:00:00");
               const overdue = tgl < new Date() && g.terkumpul < g.targetNominal;
               return (
-                <div key={g.id} className="floating-card p-4 space-y-2 hover:shadow-md transition-all">
+                <div key={g.id} className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-4 space-y-2 hover:shadow-md transition-all">
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-sm font-semibold">{g.nama}</p>
@@ -324,7 +313,7 @@ export default function BukuPribadiPage() {
                         if (n > 0) { alokasikanTabungan(g.id, n); toast.success(`${formatRupiah(n)} dialokasikan ke "${g.nama}"`); }
                       }
                     }}
-                      className="size-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center hover:bg-emerald-500/20 transition-colors"
+                      className="size-7 rounded-lg bg-[#7B61FF]/10 text-[#7B61FF] flex items-center justify-center hover:bg-[#7B61FF]/20 transition-colors"
                       title="Alokasikan dana">
                       <Plus className="size-3.5" />
                     </button>
@@ -336,11 +325,11 @@ export default function BukuPribadiPage() {
                     </div>
                     <div className="h-2 rounded-full bg-muted/50 overflow-hidden">
                       <div className={`h-full rounded-full transition-all duration-300 ${
-                        pct >= 100 ? "bg-emerald-500" : overdue ? "bg-rose-500" : "bg-gradient-to-r from-amber-400 to-emerald-500"
+                        pct >= 100 ? "bg-[#7B61FF]" : overdue ? "bg-rose-500" : "bg-gradient-to-r from-amber-400 to-[#7B61FF]"
                       }`} style={{ width: `${pct}%` }} />
                     </div>
                     <div className="flex justify-between text-[9px]">
-                      <span className={`font-semibold ${pct >= 100 ? "text-emerald-600" : "text-muted-foreground/40"}`}>
+                      <span className={`font-semibold ${pct >= 100 ? "text-[#7B61FF]" : "text-muted-foreground/40"}`}>
                         {pct.toFixed(0)}% terkumpul
                       </span>
                       <span className="text-muted-foreground/40">Sisa {formatRupiah(sisa)}</span>
@@ -353,16 +342,15 @@ export default function BukuPribadiPage() {
         )}
       </div>
 
-      {/* ─── LOG TRANSAKSI ─── */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold flex items-center gap-1.5">
-            <TrendingUp className="size-4 text-emerald-500" /> Log Transaksi
+            <TrendingUp className="size-4 text-[#7B61FF]" /> Log Transaksi
           </h2>
           <span className="text-[10px] text-muted-foreground/50">{personalTransactions.length} transaksi</span>
         </div>
         {personalTransactions.length === 0 ? (
-          <div className="floating-card p-6 text-center">
+          <div className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-6 text-center">
             <BookOpen className="size-8 mx-auto text-muted-foreground/20 mb-2" />
             <p className="text-xs text-muted-foreground/40">Belum ada transaksi</p>
             <p className="text-[10px] text-muted-foreground/30 mt-1">Klik &quot;Catat Transaksi Baru&quot; untuk memulai</p>
@@ -376,10 +364,10 @@ export default function BukuPribadiPage() {
                 const Ico = kat.icon;
                 return (
                   <div key={tx.id}
-                    className="floating-card p-3 flex items-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
+                    className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-3 flex items-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 group"
                   >
                     <div className={`size-9 rounded-xl flex items-center justify-center shrink-0 ${
-                      tx.tipe === "Pemasukan" ? "bg-emerald-500/10 text-emerald-600" : "bg-rose-500/10 text-rose-500"
+                      tx.tipe === "Pemasukan" ? "bg-[#7B61FF]/10 text-[#7B61FF]" : "bg-rose-500/10 text-rose-500"
                     }`}>
                       {tx.tipe === "Pemasukan"
                         ? <ArrowDownRight className="size-4" />
@@ -395,7 +383,7 @@ export default function BukuPribadiPage() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className={`text-xs font-bold font-heading tabular-nums ${
-                        tx.tipe === "Pemasukan" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400"
+                        tx.tipe === "Pemasukan" ? "text-[#7B61FF] dark:text-[#A78BFA]" : "text-rose-500 dark:text-rose-400"
                       }`}>
                         {tx.tipe === "Pemasukan" ? "+" : "-"}{formatRupiah(tx.nominal)}
                       </p>
@@ -414,20 +402,19 @@ export default function BukuPribadiPage() {
         )}
       </div>
 
-      {/* ─── FORM TRANSAKSI ─── */}
       {formOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setFormOpen(false)} />
-          <div className="relative w-full max-w-md mx-4 mb-0 sm:mb-0 rounded-2xl bg-card border border-border/60 shadow-2xl p-5 animate-scale-in">
+          <div className="relative w-full max-w-md mx-4 mb-0 sm:mb-0 rounded-2xl bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 shadow-2xl p-5 animate-scale-in">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2.5">
-                <div className="size-8 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
+                <div className="size-8 rounded-xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center">
                   <Plus className="size-4 text-white" />
                 </div>
                 <p className="text-sm font-bold font-heading">Catat Transaksi</p>
               </div>
               <button onClick={() => setFormOpen(false)}
-                className="size-8 rounded-xl flex items-center justify-center hover:bg-muted/50 transition-colors">
+                className="btn-ghost size-8 rounded-xl flex items-center justify-center">
                 <X className="size-4 text-muted-foreground" />
               </button>
             </div>
@@ -442,7 +429,7 @@ export default function BukuPribadiPage() {
                     className={`flex-1 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                       fTipe === t
                         ? t === "Pemasukan"
-                          ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20"
+                          ? "bg-[#7B61FF] text-white shadow-md shadow-[#7B61FF]/20"
                           : "bg-rose-500 text-white shadow-md shadow-rose-500/20"
                         : "bg-muted/40 text-muted-foreground/60 hover:bg-muted/60"
                     }`}>
@@ -468,10 +455,10 @@ export default function BukuPribadiPage() {
                     return (
                       <button key={kat.id} type="button" onClick={() => setFKategori(kat.id)}
                         className={`flex flex-col items-center gap-1 p-2 rounded-xl border-2 transition-all ${
-                          aktif ? "border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-950/20" : "border-transparent bg-muted/20 hover:bg-muted/40"
+                          aktif ? "border-[#7B61FF]/50 bg-[#7B61FF]/5" : "border-transparent bg-muted/20 hover:bg-muted/40"
                         }`}>
                         <Ico className={`size-4 ${kat.warna}`} />
-                        <span className={`text-[8px] font-medium ${aktif ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground/50"}`}>{kat.label}</span>
+                        <span className={`text-[8px] font-medium ${aktif ? "text-[#7B61FF] dark:text-[#A78BFA]" : "text-muted-foreground/50"}`}>{kat.label}</span>
                       </button>
                     );
                   })}
@@ -494,7 +481,7 @@ export default function BukuPribadiPage() {
                   placeholder="cth: Makan siang" className="input-premium w-full text-xs" maxLength={120} />
               </div>
               <button type="submit"
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 hover:scale-[1.01] active:scale-[0.99] transition-all">
+                className="btn-gradient w-full py-2.5 rounded-xl text-xs">
                 {fTipe === "Pemasukan" ? "Catat Pemasukan" : "Catat Pengeluaran"}
               </button>
             </form>
@@ -502,8 +489,7 @@ export default function BukuPribadiPage() {
         </div>
       )}
 
-      {/* ─── EXPORT ─── */}
-      <div className="floating-card p-4 flex items-center justify-between">
+      <div className="premium-card bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="size-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-md shadow-amber-500/20">
             <Download className="size-5 text-white" />
@@ -519,7 +505,7 @@ export default function BukuPribadiPage() {
             <Download className="size-3.5" /> CSV
           </button>
           <button onClick={exportPDF}
-            className="px-3 py-1.5 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 text-white text-[10px] font-semibold shadow-md hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5">
+            className="px-3 py-1.5 rounded-lg bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] text-white text-[10px] font-semibold shadow-md hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5">
             <FileDown className="size-3.5" /> PDF
           </button>
         </div>

@@ -137,11 +137,11 @@ export default function PelangganPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push("/buku-usaha")}
-            className="size-9 rounded-xl bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors"
+            className="size-9 rounded-xl bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-colors border border-slate-200/60 dark:border-slate-800/60"
           >
             <ArrowLeft className="size-4 text-muted-foreground" />
           </button>
-          <div className="size-11 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+          <div className="size-11 rounded-2xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-lg shadow-[#7B61FF]/20">
             <Users className="size-5 text-white" />
           </div>
           <div>
@@ -149,7 +149,7 @@ export default function PelangganPage() {
             <p className="text-[10px] text-muted-foreground/60">{customers.length} pelanggan terdaftar</p>
           </div>
         </div>
-        <div className="text-[10px] text-muted-foreground/40 bg-muted/30 px-2.5 py-1 rounded-lg">
+        <div className="text-[10px] text-muted-foreground/40 bg-white/90 dark:bg-[#131527]/90 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-800/60">
           {customers.length} total
         </div>
       </div>
@@ -170,14 +170,14 @@ export default function PelangganPage() {
           )}
         </div>
         <button onClick={importContacts} disabled={importing}
-          className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-semibold shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 active:scale-[0.97] transition-all disabled:opacity-50 shrink-0"
+          className="btn-gradient flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold shrink-0"
           title="Impor kontak dari ponsel atau CSV"
         >
           <Upload className="size-3.5" />
           <span className="hidden sm:inline">Impor Kontak</span>
         </button>
         <button onClick={() => setShowPasteImport(!showPasteImport)}
-          className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700 active:scale-[0.97] transition-all shrink-0"
+          className="btn-ghost flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold shrink-0"
           title="Salin-tempel kontak massal"
         >
           <Upload className="size-3.5" />
@@ -187,26 +187,26 @@ export default function PelangganPage() {
 
       {/* ─── Bulk Paste Import ─── */}
       {showPasteImport && (
-        <div className="rounded-2xl bg-slate-900/80 border border-slate-800/60 p-4 space-y-3">
+        <div className="premium-card p-4 space-y-3 border border-slate-200/60 dark:border-slate-800/60">
           <p className="text-xs font-semibold">Salin-Tempel Massal</p>
-          <p className="text-[10px] text-slate-400">
-            Tempel daftar kontak. Format: <code className="text-emerald-400">Nama - 0812xxxx</code> atau <code className="text-emerald-400">Nama,0812xxxx</code> (satu per baris).
+          <p className="text-[10px] text-muted-foreground/50">
+            Tempel daftar kontak. Format: <code className="text-[#7B61FF]">Nama - 0812xxxx</code> atau <code className="text-[#7B61FF]">Nama,0812xxxx</code> (satu per baris).
           </p>
           <textarea
             value={pasteText}
             onChange={(e) => setPasteText(e.target.value)}
             placeholder={`Ahmad Fauzi - 081234567890\nSiti Nurhaliza, 081298765432\nBudi Santoso - 081111222333`}
             rows={5}
-            className="input-premium w-full text-xs bg-slate-900/80 resize-none"
+            className="input-premium w-full text-xs resize-none"
           />
           <div className="flex gap-2">
             <button onClick={handlePasteImport} disabled={!pasteText.trim()}
-              className="flex-1 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold shadow-lg disabled:opacity-50"
+              className="btn-gradient flex-1 py-2 text-xs font-bold disabled:opacity-50"
             >
               Impor {pasteText.trim() ? `(${pasteText.split("\n").filter(Boolean).length} baris)` : ""}
             </button>
             <button onClick={() => { setShowPasteImport(false); setPasteText(""); }}
-              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 text-xs font-semibold"
+              className="btn-ghost px-4 py-2 text-xs font-semibold"
             >
               Batal
             </button>
@@ -216,28 +216,28 @@ export default function PelangganPage() {
 
       {/* ─── Stat cards ─── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="floating-card p-3 text-center">
-          <p className="text-[10px] text-muted-foreground/60">Total Pelanggan</p>
-          <p className="text-lg font-bold tabular-nums">{customers.length}</p>
+        <div className="premium-stat p-3 text-center">
+          <p className="premium-stat-label text-[10px]">Total Pelanggan</p>
+          <p className="premium-stat-value text-lg font-bold tabular-nums">{customers.length}</p>
         </div>
-        <div className="floating-card p-3 text-center">
-          <p className="text-[10px] text-muted-foreground/60">Total Transaksi</p>
-          <p className="text-lg font-bold tabular-nums">{customers.reduce((s, c) => s + c.totalTransaksi, 0)}</p>
+        <div className="premium-stat p-3 text-center">
+          <p className="premium-stat-label text-[10px]">Total Transaksi</p>
+          <p className="premium-stat-value text-lg font-bold tabular-nums">{customers.reduce((s, c) => s + c.totalTransaksi, 0)}</p>
         </div>
-        <div className="floating-card p-3 text-center">
-          <p className="text-[10px] text-muted-foreground/60">Total Belanja</p>
-          <p className="text-lg font-bold tabular-nums text-emerald-600">{formatRupiah(customers.reduce((s, c) => s + c.totalBelanja, 0))}</p>
+        <div className="premium-stat p-3 text-center">
+          <p className="premium-stat-label text-[10px]">Total Belanja</p>
+          <p className="premium-stat-value text-lg font-bold tabular-nums">{formatRupiah(customers.reduce((s, c) => s + c.totalBelanja, 0))}</p>
         </div>
-        <div className="floating-card p-3 text-center">
-          <p className="text-[10px] text-muted-foreground/60">Total Poin</p>
-          <p className="text-lg font-bold tabular-nums text-amber-500">{customers.reduce((s, c) => s + c.poin, 0)}</p>
+        <div className="premium-stat p-3 text-center">
+          <p className="premium-stat-label text-[10px]">Total Poin</p>
+          <p className="premium-stat-value text-lg font-bold tabular-nums text-amber-500">{customers.reduce((s, c) => s + c.poin, 0)}</p>
         </div>
       </div>
 
       {/* ─── Customer List ─── */}
       <div className="space-y-2">
         {filtered.length === 0 ? (
-          <div className="floating-card p-6 text-center">
+          <div className="premium-card p-6 text-center border border-slate-200/60 dark:border-slate-800/60">
             <Users className="size-10 mx-auto text-muted-foreground/20" />
             <p className="text-xs text-muted-foreground/40 mt-2">
               {search ? "Tidak ada pelanggan ditemukan" : "Belum ada pelanggan"}
@@ -251,9 +251,9 @@ export default function PelangganPage() {
             <button
               key={c.id}
               onClick={() => setSelectedCustomer(c)}
-              className="w-full text-left floating-card p-4 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center gap-4"
+              className="w-full text-left premium-card p-4 border border-slate-200/60 dark:border-slate-800/60 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 flex items-center gap-4"
             >
-              <div className="size-11 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shrink-0 shadow-lg shadow-amber-500/20">
+              <div className="size-11 rounded-xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shrink-0 shadow-lg shadow-[#7B61FF]/20">
                 <Users className="size-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
@@ -268,7 +268,7 @@ export default function PelangganPage() {
                 <div className="flex items-center gap-3 mt-0.5 text-[10px] text-muted-foreground/50">
                   {c.noWA && <span className="flex items-center gap-1"><Phone className="size-3" /> {c.noWA}</span>}
                   <span className="flex items-center gap-1"><ShoppingCart className="size-3" /> {c.totalTransaksi} tx</span>
-                  <span className="font-semibold text-emerald-600 tabular-nums">{formatRupiah(c.totalBelanja)}</span>
+                  <span className="font-semibold tabular-nums">{formatRupiah(c.totalBelanja)}</span>
                 </div>
                 <p className="text-[9px] text-muted-foreground/30 mt-0.5">
                   Terakhir: {new Date(c.terakhirTransaksi).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
@@ -284,17 +284,17 @@ export default function PelangganPage() {
       {selectedCustomer && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedCustomer(null)} />
-          <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto bg-card rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0">
+          <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto premium-card border border-slate-200/60 dark:border-slate-800/60 rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0">
             {/* Close */}
             <button onClick={() => setSelectedCustomer(null)}
-              className="absolute top-3 right-3 size-8 rounded-xl bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors"
+              className="absolute top-3 right-3 size-8 rounded-xl bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-colors border border-slate-200/60 dark:border-slate-800/60"
             >
               <X className="size-4 text-muted-foreground" />
             </button>
 
             {/* Customer Info */}
             <div className="flex items-center gap-4 mb-5">
-              <div className="size-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+              <div className="size-14 rounded-2xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-lg shadow-[#7B61FF]/20">
                 <Users className="size-6 text-white" />
               </div>
               <div>
@@ -308,17 +308,17 @@ export default function PelangganPage() {
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-2 mb-5">
-              <div className="floating-card p-3 text-center">
-                <p className="text-[9px] text-muted-foreground/50">Transaksi</p>
-                <p className="text-base font-bold tabular-nums">{selectedCustomer.totalTransaksi}</p>
+              <div className="premium-stat p-3 text-center">
+                <p className="premium-stat-label text-[9px]">Transaksi</p>
+                <p className="premium-stat-value text-base font-bold tabular-nums">{selectedCustomer.totalTransaksi}</p>
               </div>
-              <div className="floating-card p-3 text-center">
-                <p className="text-[9px] text-muted-foreground/50">Belanja</p>
-                <p className="text-base font-bold tabular-nums text-emerald-600">{formatRupiah(selectedCustomer.totalBelanja)}</p>
+              <div className="premium-stat p-3 text-center">
+                <p className="premium-stat-label text-[9px]">Belanja</p>
+                <p className="premium-stat-value text-base font-bold tabular-nums">{formatRupiah(selectedCustomer.totalBelanja)}</p>
               </div>
-              <div className="floating-card p-3 text-center">
-                <p className="text-[9px] text-muted-foreground/50">Poin</p>
-                <p className={`text-base font-bold tabular-nums ${getPoinBadge(selectedCustomer.poin)} flex items-center justify-center gap-1`}>
+              <div className="premium-stat p-3 text-center">
+                <p className="premium-stat-label text-[9px]">Poin</p>
+                <p className={`premium-stat-value text-base font-bold tabular-nums ${getPoinBadge(selectedCustomer.poin)} flex items-center justify-center gap-1`}>
                   <Star className={`size-4 ${selectedCustomer.poin > 0 ? "fill-amber-500" : ""}`} /> {selectedCustomer.poin}
                 </p>
               </div>
@@ -327,23 +327,23 @@ export default function PelangganPage() {
             {/* Riwayat Transaksi */}
             <div>
               <h4 className="text-xs font-semibold mb-3 flex items-center gap-1.5">
-                <ShoppingCart className="size-3.5 text-amber-500" /> Riwayat Transaksi ({customerTxs.length})
+                <ShoppingCart className="size-3.5" /> Riwayat Transaksi ({customerTxs.length})
               </h4>
               {customerTxs.length === 0 ? (
-                <div className="floating-card p-4 text-center">
+                <div className="premium-card p-4 text-center border border-slate-200/60 dark:border-slate-800/60">
                   <p className="text-[10px] text-muted-foreground/30">Belum ada transaksi</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   {customerTxs.map((tx) => (
-                    <div key={tx.id} className="floating-card p-3 flex items-center gap-3">
-                      <div className="size-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center shrink-0">
-                        <ShoppingCart className="size-4 text-amber-600" />
+                    <div key={tx.id} className="premium-card p-3 flex items-center gap-3 border border-slate-200/60 dark:border-slate-800/60">
+                      <div className="size-8 rounded-lg bg-[#7B61FF]/10 flex items-center justify-center shrink-0">
+                        <ShoppingCart className="size-4" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium flex items-center gap-1.5">
                           {tx.invoiceId}
-                          <span className="text-[9px] text-muted-foreground/40 px-1.5 py-0.5 rounded bg-muted/30">
+                          <span className="text-[9px] text-muted-foreground/40 px-1.5 py-0.5 rounded bg-white/90 dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60">
                             {BIZ_UNIT_LABELS[tx.unit as BizUnit] || tx.unit}
                           </span>
                         </p>
@@ -351,7 +351,7 @@ export default function PelangganPage() {
                         <p className="text-[9px] text-muted-foreground/30">{new Date(tx.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <p className="text-xs font-bold tabular-nums text-emerald-600">{formatRupiah(tx.total)}</p>
+                        <p className="text-xs font-bold tabular-nums">{formatRupiah(tx.total)}</p>
                       </div>
                     </div>
                   ))}
