@@ -47,10 +47,10 @@ export default function TemplateCepatPage() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FD] dark:bg-[#0B0C16]">
-      <div className="max-w-2xl mx-auto pb-24 space-y-4 px-3 sm:px-0 pt-4 animate-fade-in">
+      <div className="max-w-2xl mx-auto pb-24 safe-bottom space-y-4 px-3 sm:px-0 pt-4 animate-fade-in">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => router.push("/buku-usaha")} className="size-9 rounded-xl bg-white dark:bg-slate-800/80 flex items-center justify-center border border-slate-200/60 dark:border-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700">
+            <button onClick={() => router.push("/buku-usaha")} className="size-9 rounded-xl bg-white dark:bg-[#131527]/90 flex items-center justify-center border border-slate-200/60 dark:border-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all active:scale-[0.97]">
               <ArrowLeft className="size-4 text-slate-500 dark:text-slate-300" />
             </button>
             <div className="size-10 rounded-xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-lg shadow-[#7B61FF]/20">
@@ -69,10 +69,10 @@ export default function TemplateCepatPage() {
         <div className="flex gap-2 flex-wrap">
           {UNITS.map((u) => (
             <button key={u.id} onClick={() => { setActiveUnit(u.id); setShowAdd(false); }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all active:scale-[0.97] ${
                 activeUnit === u.id
                   ? "bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white"
-                  : "bg-white dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-slate-600 dark:text-slate-400"
+                  : "bg-white dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-700/60 text-slate-600 dark:text-slate-400"
               }`}>
               {u.label}
             </button>
@@ -83,16 +83,16 @@ export default function TemplateCepatPage() {
           <div className="premium-card p-4 space-y-3 bg-white/90 backdrop-blur-md dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl">
             <p className="text-sm font-bold text-slate-900 dark:text-white">Tambah Template Baru</p>
             <input type="text" value={label} onChange={(e) => setLabel(e.target.value)}
-              placeholder="Nama template, e.g. Fotoropia A4 50 lbr" className="w-full h-10 px-3 text-xs rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7B61FF]/30" />
+              placeholder="Nama template, e.g. Fotoropia A4 50 lbr" className="w-full h-10 px-3 text-xs rounded-xl bg-slate-100 dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-700/60 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7B61FF]/30" />
             <div className="space-y-2">
               {items.map((item, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <input type="text" value={item.desc} onChange={(e) => updateItem(i, "desc", e.target.value)}
-                    placeholder="Nama item" className="flex-1 h-9 px-2.5 text-xs rounded-lg bg-slate-100 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7B61FF]/30" />
+                    placeholder="Nama item" className="flex-1 h-9 px-2.5 text-xs rounded-lg bg-slate-100 dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-700/60 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7B61FF]/30" />
                   <input type="text" inputMode="numeric" value={item.price || ""} onChange={(e) => updateItem(i, "price", e.target.value)}
-                    placeholder="Harga" className="w-24 h-9 px-2.5 text-xs rounded-lg bg-slate-100 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7B61FF]/30 tabular-nums" />
+                    placeholder="Harga" className="w-24 h-9 px-2.5 text-xs rounded-lg bg-slate-100 dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-700/60 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7B61FF]/30 tabular-nums" />
                   {items.length > 1 && (
-                    <button onClick={() => removeItemField(i)} className="size-7 rounded-lg bg-rose-500/10 flex items-center justify-center hover:bg-rose-500/20 shrink-0">
+                    <button onClick={() => removeItemField(i)} className="size-7 rounded-lg bg-rose-500/10 flex items-center justify-center hover:bg-rose-500/20 shrink-0 transition-all active:scale-[0.97]">
                       <X className="size-3 text-rose-500" />
                     </button>
                   )}
@@ -100,7 +100,7 @@ export default function TemplateCepatPage() {
               ))}
             </div>
             <div className="flex gap-2">
-              <button onClick={addItemField} className="flex-1 h-9 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+              <button onClick={addItemField} className="flex-1 h-9 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-all active:scale-[0.97]">
                 + Tambah Item
               </button>
               <button onClick={handleSave} className="btn-gradient h-9 px-4 rounded-xl text-xs gap-1">
@@ -123,7 +123,7 @@ export default function TemplateCepatPage() {
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm font-bold text-slate-900 dark:text-white">{q.label}</p>
                   <button onClick={() => { deleteQuickOrder(q.id); toast.success("Template dihapus"); }}
-                    className="size-7 rounded-lg bg-rose-500/10 flex items-center justify-center hover:bg-rose-500/20">
+                    className="size-7 rounded-lg bg-rose-500/10 flex items-center justify-center hover:bg-rose-500/20 transition-all active:scale-[0.97]">
                     <Trash2 className="size-3 text-rose-500" />
                   </button>
                 </div>

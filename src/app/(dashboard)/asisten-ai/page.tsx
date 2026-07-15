@@ -84,7 +84,7 @@ export default function AsistenAIPage() {
       {/* Header */}
       <div className="flex items-center gap-3 py-3 shrink-0">
         <button onClick={() => router.push("/")}
-          className="size-9 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-slate-100 dark:bg-slate-800/60 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700/60 transition-colors"
+          className="size-9 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-slate-100 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700/60 transition-all active:scale-[0.97]"
         >
           <ArrowLeft className="size-4 text-muted-foreground" />
         </button>
@@ -110,13 +110,13 @@ export default function AsistenAIPage() {
               className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed ${
                 m.role === "user"
                   ? "bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white rounded-br-md"
-                  : "bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 rounded-bl-md border border-slate-200/60 dark:border-slate-700/50"
+                  : "bg-slate-100 dark:bg-[#131527]/90 text-slate-700 dark:text-slate-200 rounded-bl-md border border-slate-200/60 dark:border-slate-700/50"
               }`}
             >
               {m.text}
             </div>
             {m.role === "user" && (
-              <div className="size-8 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0 mt-1">
+              <div className="size-8 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-slate-100 dark:bg-[#131527] flex items-center justify-center shrink-0 mt-1">
                 <User className="size-4 text-muted-foreground" />
               </div>
             )}
@@ -127,7 +127,7 @@ export default function AsistenAIPage() {
             <div className="size-8 rounded-xl bg-gradient-to-br from-[#7B61FF] to-[#7B61FF]/80 flex items-center justify-center shrink-0">
               <Bot className="size-4 text-white" />
             </div>
-            <div className="rounded-2xl px-4 py-2.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/50">
+            <div className="rounded-2xl px-4 py-2.5 bg-slate-100 dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-700/50">
               <Loader2 className="size-4 animate-spin text-[#7B61FF]" />
             </div>
           </div>
@@ -150,14 +150,14 @@ export default function AsistenAIPage() {
             }}
             placeholder="Tanya analisis keuangan..."
             rows={1}
-            className="flex-1 rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/50 text-xs px-4 py-3 resize-none focus:outline-none focus:border-[#7B61FF]/40 focus:ring-2 focus:ring-[#7B61FF]/15 placeholder:text-muted-foreground"
+            className="flex-1 rounded-2xl bg-white dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-700/50 text-xs px-4 py-3 resize-none focus:outline-none focus:border-[#7B61FF]/40 focus:ring-2 focus:ring-[#7B61FF]/15 placeholder:text-muted-foreground"
             style={{ minHeight: 44, maxHeight: 120 }}
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="size-11 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white flex items-center justify-center shadow-lg disabled:opacity-50 active:scale-90 transition-all shrink-0"
-            style={{ minHeight: 44, minWidth: 44 }}
+            className="size-10 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white flex items-center justify-center shadow-lg disabled:opacity-50 active:scale-90 transition-all shrink-0"
+            style={{ minHeight: 40, minWidth: 40 }}
           >
             <Send className="size-5" />
           </button>

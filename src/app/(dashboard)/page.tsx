@@ -400,7 +400,7 @@ export default function BukuKeuanganGlobal() {
             {topTransactions.map((tx, i) => {
               const label = BOOK_LABELS[tx.bookOrBranchId as BookOrBranch] ?? tx.bookOrBranchId;
               return (
-                <div key={i} className="flex items-center justify-between text-xs py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/40">
+                <div key={i} className="flex items-center justify-between text-xs py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-[#131527]/60 border border-slate-100 dark:border-slate-800/40">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="size-5 rounded-full bg-gradient-to-r from-[#7B61FF]/10 to-[#FF5C00]/10 flex items-center justify-center text-[9px] font-bold text-[#7B61FF] shrink-0">{i + 1}</span>
                     <div className="min-w-0">
@@ -436,7 +436,7 @@ export default function BukuKeuanganGlobal() {
             </div>
             <span className="text-xs font-bold tabular-nums text-rose-700 dark:text-rose-300">{formatRupiah(labaRugi.expense)}</span>
           </div>
-          <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800/40">
+          <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-[#131527]/60 border border-slate-200 dark:border-slate-800/40">
             <div className="flex items-center gap-2">
               <CircleDollarSign className="size-4 text-[#7B61FF]" />
               <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Laba Bersih</span>

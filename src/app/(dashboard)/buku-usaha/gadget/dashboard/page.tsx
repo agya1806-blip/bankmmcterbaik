@@ -20,7 +20,7 @@ export default function DashboardGadget() {
   return (
     <div className="max-w-2xl mx-auto pb-20 space-y-5 animate-fade-in">
       <div className="flex items-center gap-3">
-        <button onClick={() => router.push("/buku-usaha")} className="size-10 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
+        <button onClick={() => router.push("/buku-usaha")} className="size-10 rounded-xl bg-white dark:bg-[#131527]/90 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-[0.97]">
           <ArrowLeft className="size-5 text-slate-600 dark:text-slate-400" />
         </button>
         <div className="size-12 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-xl shadow-[#7B61FF]/20">

@@ -108,7 +108,7 @@ export default function RegisterPage() {
                 placeholder="Nama kamu"
                 value={nama}
                 onChange={(e) => setNama(e.target.value)}
-                className="input-premium w-full h-12 pl-10 pr-4 text-base rounded-xl"
+                className="input-premium w-full h-10 pl-10 pr-4 text-base rounded-xl"
                 autoFocus
               />
               <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
@@ -126,7 +126,7 @@ export default function RegisterPage() {
                 placeholder="Masukkan PIN"
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                className="input-premium w-full h-12 pl-10 pr-12 text-base rounded-xl"
+                className="input-premium w-full h-10 pl-10 pr-12 text-base rounded-xl"
               />
               <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
               <button
@@ -150,7 +150,7 @@ export default function RegisterPage() {
                 placeholder="Ulangi PIN"
                 value={confirmPin}
                 onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                className="input-premium w-full h-12 pl-10 pr-12 text-base rounded-xl"
+                className="input-premium w-full h-10 pl-10 pr-12 text-base rounded-xl"
               />
               <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
             </div>
@@ -159,7 +159,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading || !nama.trim() || pin.length < 4 || pin !== confirmPin}
-            className="btn-gradient w-full h-12 rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-gradient w-full h-10 rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span className="size-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />

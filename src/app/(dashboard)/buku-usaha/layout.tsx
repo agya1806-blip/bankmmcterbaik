@@ -86,15 +86,15 @@ export default function BukuUsahaLayout({ children }: { children: React.ReactNod
                 </button>
                 <div className="flex border-t border-slate-100 dark:border-slate-800/60">
                   <button onClick={() => router.push(`/buku-usaha/${b.slug}/dashboard`)}
-                    className="flex-1 py-2.5 text-[10px] text-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors font-medium">
+                    className="flex-1 py-2.5 text-[10px] text-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-all active:scale-[0.97] font-medium">
                     Dashboard
                   </button>
                   <button onClick={() => router.push(`/buku-usaha/${b.slug}/kasir`)}
-                    className="flex-1 py-2.5 text-[10px] text-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors font-medium border-x border-slate-100 dark:border-slate-800/60">
+                    className="flex-1 py-2.5 text-[10px] text-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-all active:scale-[0.97] font-medium border-x border-slate-100 dark:border-slate-800/60">
                     Kasir
                   </button>
                   <button onClick={() => router.push(`/buku-usaha/${b.slug}/transaksi`)}
-                    className="flex-1 py-2.5 text-[10px] text-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors font-medium">
+                    className="flex-1 py-2.5 text-[10px] text-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-all active:scale-[0.97] font-medium">
                     Aktivitas
                   </button>
                 </div>

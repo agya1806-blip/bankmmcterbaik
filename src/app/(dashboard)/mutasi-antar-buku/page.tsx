@@ -140,7 +140,7 @@ export default function MutasiAntarBukuPage() {
   return (
     <div className="max-w-lg mx-auto pb-20 space-y-5 animate-fade-in">
       <div className="flex items-center gap-3">
-        <button onClick={() => router.push("/")} className="size-9 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-90">
+        <button onClick={() => router.push("/")} className="size-9 rounded-xl bg-white dark:bg-[#131527]/90 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-90">
           <ArrowLeft className="size-4 text-slate-500" />
         </button>
         <div className="size-10 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center shadow-md">

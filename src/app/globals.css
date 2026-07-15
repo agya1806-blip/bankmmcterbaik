@@ -201,22 +201,22 @@
 
   .btn-ghost {
     @apply inline-flex items-center justify-center h-10 px-4 rounded-xl text-sm font-medium;
-    @apply text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60;
-    @apply hover:bg-slate-200 dark:hover:bg-slate-700/60 active:scale-[0.97] transition-all duration-200;
+    @apply text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-[#131527]/60;
+    @apply hover:bg-slate-200 dark:hover:bg-[#131527]/80 active:scale-[0.97] transition-all duration-200;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/30;
     @apply disabled:opacity-50 disabled:pointer-events-none;
   }
 
   .btn-outline {
     @apply inline-flex items-center justify-center h-10 px-4 rounded-xl text-sm font-medium;
-    @apply border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300;
-    @apply hover:bg-slate-50 dark:hover:bg-slate-800/40 active:scale-[0.97] transition-all duration-200;
+    @apply border border-slate-200 dark:border-[#131527] text-slate-700 dark:text-slate-300;
+    @apply hover:bg-slate-50 dark:hover:bg-[#131527]/60 active:scale-[0.97] transition-all duration-200;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/30;
     @apply disabled:opacity-50 disabled:pointer-events-none;
   }
 
   .input-premium {
-    @apply flex w-full h-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/60 px-4 py-0 text-sm;
+    @apply flex w-full h-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#131527] px-4 py-0 text-sm;
     @apply text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500;
     @apply transition-all duration-200 ease-out;
     @apply focus-visible:outline-none focus-visible:border-[#7B61FF] focus-visible:ring-2 focus-visible:ring-[#7B61FF]/15;
@@ -371,9 +371,11 @@
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .animate-scale-in { animation: scaleIn 0.3s var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) forwards; }
+  .animate-fade-in { animation: fadeIn 0.15s ease-out forwards; }
+  .ios-blur { -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes scaleIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
 
 @media print {

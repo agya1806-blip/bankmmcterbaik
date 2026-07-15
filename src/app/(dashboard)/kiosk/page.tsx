@@ -92,10 +92,10 @@ export default function KioskPage() {
   if (!mounted) return null;
 
   return (
-    <div className="flex flex-col h-full max-w-lg mx-auto pt-8 pb-20">
+    <div className="flex flex-col h-full max-w-lg mx-auto pt-8 pb-20 safe-bottom">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => router.push("/")}
-          className="size-9 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-slate-100 dark:bg-slate-800/60 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700/60 transition-colors"
+          className="size-9 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-slate-100 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700/60 transition-all active:scale-[0.97]"
         >
           <ArrowLeft className="size-4 text-muted-foreground" />
         </button>
@@ -149,12 +149,12 @@ export default function KioskPage() {
               <p className="text-[10px] text-rose-400">PIN salah. Coba lagi.</p>
             )}
             <button onClick={handleUnlock} disabled={pinInput.length < 4}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 text-white text-xs font-bold shadow-lg disabled:opacity-50"
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 text-white text-xs font-bold shadow-lg disabled:opacity-50 transition-all active:scale-[0.97]"
             >
               <Lock className="size-4 inline mr-1" /> Buka Kunci Mode Kios
             </button>
             <button onClick={() => setSelectedBranch(null)}
-              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+              className="text-[10px] text-muted-foreground hover:text-foreground transition-all active:scale-[0.97]"
             >
               Pilih cabang lain
             </button>

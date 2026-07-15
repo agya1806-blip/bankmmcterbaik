@@ -73,7 +73,7 @@ export default function LabelsPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push("/buku-usaha")}
-            className="size-9 rounded-xl bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-colors border border-slate-200/60 dark:border-slate-800/60"
+            className="size-9 rounded-xl bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-all active:scale-[0.97] border border-slate-200/60 dark:border-slate-800/60"
           >
             <ArrowLeft className="size-4 text-muted-foreground" />
           </button>
@@ -207,13 +207,13 @@ export default function LabelsPage() {
                     <div className="flex gap-1">
                       <button
                         onClick={() => startEdit(l.id, l.label, l.warna)}
-                        className="size-7 rounded-lg bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-colors border border-slate-200/60 dark:border-slate-800/60"
+                        className="size-7 rounded-lg bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-all active:scale-[0.97] border border-slate-200/60 dark:border-slate-800/60"
                       >
                         <Check className="size-3 text-muted-foreground/50" />
                       </button>
                       <button
                         onClick={() => handleDelete(l.id, l.label)}
-                        className="size-7 rounded-lg bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-red-500/10 transition-colors border border-slate-200/60 dark:border-slate-800/60"
+                        className="size-7 rounded-lg bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md flex items-center justify-center hover:bg-red-500/10 transition-all active:scale-[0.97] border border-slate-200/60 dark:border-slate-800/60"
                       >
                         <X className="size-3 text-red-400" />
                       </button>

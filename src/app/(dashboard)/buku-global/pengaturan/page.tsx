@@ -70,7 +70,7 @@ export default function GlobalPengaturanPage() {
   return (
     <div className="space-y-5 pb-4 max-w-lg mx-auto animate-fade-in">
       <div className="flex items-center gap-3">
-        <button onClick={() => router.push("/buku-global")} className="size-9 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-90">
+        <button onClick={() => router.push("/buku-global")} className="size-9 rounded-xl bg-white dark:bg-[#131527]/90 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-90">
           <ArrowLeft className="size-4 text-slate-500" />
         </button>
         <div className="size-10 rounded-xl bg-gradient-to-r from-[#FF5C00] to-orange-600 flex items-center justify-center shadow-lg">

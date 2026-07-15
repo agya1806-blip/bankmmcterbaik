@@ -137,7 +137,7 @@ export default function PelangganPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push("/buku-usaha")}
-            className="size-9 rounded-xl bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-colors border border-slate-200/60 dark:border-slate-800/60"
+            className="size-9 rounded-xl bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-all active:scale-[0.97] border border-slate-200/60 dark:border-slate-800/60"
           >
             <ArrowLeft className="size-4 text-muted-foreground" />
           </button>
@@ -149,7 +149,7 @@ export default function PelangganPage() {
             <p className="text-[10px] text-muted-foreground/60">{customers.length} pelanggan terdaftar</p>
           </div>
         </div>
-        <div className="text-[10px] text-muted-foreground/40 bg-white/90 dark:bg-[#131527]/90 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-800/60">
+        <div className="text-[10px] text-muted-foreground/40 bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-800/60">
           {customers.length} total
         </div>
       </div>
@@ -287,7 +287,7 @@ export default function PelangganPage() {
           <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto premium-card border border-slate-200/60 dark:border-slate-800/60 rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl animate-in slide-in-from-bottom sm:slide-in-from-bottom-0">
             {/* Close */}
             <button onClick={() => setSelectedCustomer(null)}
-              className="absolute top-3 right-3 size-8 rounded-xl bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-colors border border-slate-200/60 dark:border-slate-800/60"
+              className="absolute top-3 right-3 size-8 rounded-xl bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-all active:scale-[0.97] border border-slate-200/60 dark:border-slate-800/60"
             >
               <X className="size-4 text-muted-foreground" />
             </button>
@@ -343,7 +343,7 @@ export default function PelangganPage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium flex items-center gap-1.5">
                           {tx.invoiceId}
-                          <span className="text-[9px] text-muted-foreground/40 px-1.5 py-0.5 rounded bg-white/90 dark:bg-[#131527]/90 border border-slate-200/60 dark:border-slate-800/60">
+                          <span className="text-[9px] text-muted-foreground/40 px-1.5 py-0.5 rounded bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md border border-slate-200/60 dark:border-slate-800/60">
                             {BIZ_UNIT_LABELS[tx.unit as BizUnit] || tx.unit}
                           </span>
                         </p>

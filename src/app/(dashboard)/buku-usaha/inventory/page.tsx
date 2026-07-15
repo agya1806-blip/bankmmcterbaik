@@ -206,10 +206,10 @@ export default function InventoryPage() {
     const aktif = tab === key;
     return (
       <button key={key} onClick={() => { if (key === "tambah") resetForm(); setTab(key); }}
-        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-bold transition-all ${
+        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-[0.97] ${
           aktif
             ? "bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white shadow-lg shadow-[#7B61FF]/20"
-            : "bg-white/90 dark:bg-[#131527]/90 text-muted-foreground/60 hover:bg-white/70 dark:hover:bg-[#131527]/70 border border-slate-200/60 dark:border-slate-800/60"
+            : "bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md text-muted-foreground/60 hover:bg-white/70 dark:hover:bg-[#131527]/70 border border-slate-200/60 dark:border-slate-800/60"
         }`}
       >
         <Ico className="size-3.5" /> {label}
@@ -237,7 +237,7 @@ export default function InventoryPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push("/buku-usaha")}
-            className="size-9 rounded-xl bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-colors border border-slate-200/60 dark:border-slate-800/60"
+            className="size-9 rounded-xl bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-all active:scale-[0.97] border border-slate-200/60 dark:border-slate-800/60"
           >
             <ArrowLeft className="size-4 text-muted-foreground" />
           </button>
@@ -304,10 +304,10 @@ export default function InventoryPage() {
           <div className="flex gap-1.5 flex-wrap">
             {UNIT_FILTERS.map((f) => (
               <button key={f.key} onClick={() => setFilterUnit(f.key)}
-                className={`px-3 py-1.5 rounded-lg text-[9px] font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-semibold transition-all active:scale-[0.97] ${
                   filterUnit === f.key
                     ? "bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white shadow-md"
-                    : "bg-white/90 dark:bg-[#131527]/90 text-muted-foreground/50 hover:bg-white/70 dark:hover:bg-[#131527]/70 border border-slate-200/60 dark:border-slate-800/60"
+                    : "bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md text-muted-foreground/50 hover:bg-white/70 dark:hover:bg-[#131527]/70 border border-slate-200/60 dark:border-slate-800/60"
                 }`}
               >
                 {f.label}
@@ -343,13 +343,13 @@ export default function InventoryPage() {
                     </div>
                     <div className="flex gap-1 shrink-0">
                       <button onClick={() => openAdjust(item.id, "masuk")}
-                        className="size-7 rounded-lg bg-[#7B61FF]/10 flex items-center justify-center hover:bg-[#7B61FF]/20 transition-all"
+                        className="size-7 rounded-lg bg-[#7B61FF]/10 flex items-center justify-center hover:bg-[#7B61FF]/20 transition-all active:scale-[0.97]"
                         title="Stok Masuk"
                       >
                         <TrendingUp className="size-3.5" />
                       </button>
                       <button onClick={() => openAdjust(item.id, "keluar")}
-                        className="size-7 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500/20 transition-all"
+                        className="size-7 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center hover:bg-rose-500/20 transition-all active:scale-[0.97]"
                         title="Stok Keluar"
                       >
                         <TrendingDown className="size-3.5" />
@@ -371,12 +371,12 @@ export default function InventoryPage() {
                     </div>
                     <div className="flex gap-1">
                       <button onClick={() => handleEdit(item.id)}
-                        className="px-2 py-1 rounded-lg bg-white/90 dark:bg-[#131527]/90 text-muted-foreground/50 text-[9px] font-medium hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-all border border-slate-200/60 dark:border-slate-800/60"
+                        className="px-2 py-1 rounded-lg bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md text-muted-foreground/50 text-[9px] font-medium hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-all active:scale-[0.97] border border-slate-200/60 dark:border-slate-800/60"
                       >
                         Edit
                       </button>
                       <button onClick={() => handleHapus(item.id, item.nama)}
-                        className="px-2 py-1 rounded-lg bg-rose-500/10 text-rose-500 text-[9px] font-medium hover:bg-rose-500/20 transition-all"
+                        className="px-2 py-1 rounded-lg bg-rose-500/10 text-rose-500 text-[9px] font-medium hover:bg-rose-500/20 transition-all active:scale-[0.97]"
                       >
                         <Trash2 className="size-3" />
                       </button>
@@ -493,7 +493,7 @@ export default function InventoryPage() {
           <div className="flex gap-2">
             {editId && (
               <button onClick={() => { resetForm(); setTab("list"); }}
-                className="flex-1 py-2.5 rounded-xl bg-white/90 dark:bg-[#131527]/90 text-muted-foreground/60 text-xs font-bold hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-all border border-slate-200/60 dark:border-slate-800/60"
+                className="flex-1 py-2.5 rounded-xl bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md text-muted-foreground/60 text-xs font-bold hover:bg-white/70 dark:hover:bg-[#131527]/70 transition-all border border-slate-200/60 dark:border-slate-800/60"
               >
                 Batal
               </button>
@@ -525,7 +525,7 @@ export default function InventoryPage() {
                 const waktu = new Date(m.createdAt);
                 const isMasuk = m.tipe === "masuk";
                 return (
-                  <div key={m.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/90 dark:bg-[#131527]/90 text-[9px] border border-slate-200/60 dark:border-slate-800/60">
+                  <div key={m.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md text-[9px] border border-slate-200/60 dark:border-slate-800/60">
                     <div className={`size-7 rounded-lg flex items-center justify-center shrink-0 ${isMasuk ? "bg-[#7B61FF]/10" : "bg-rose-500/10 text-rose-500"}`}>
                       {isMasuk ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
                     </div>
@@ -565,13 +565,13 @@ export default function InventoryPage() {
               <div className="flex items-center justify-between">
                 <p className="text-xs font-bold">{adjustTipe === "masuk" ? "Stok Masuk" : "Stok Keluar"}</p>
                 <button onClick={() => setAdjustItemId(null)}
-                  className="size-7 rounded-lg bg-white/90 dark:bg-[#131527]/90 flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 border border-slate-200/60 dark:border-slate-800/60"
+                  className="size-7 rounded-lg bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md flex items-center justify-center hover:bg-white/70 dark:hover:bg-[#131527]/70 border border-slate-200/60 dark:border-slate-800/60"
                 >
                   <X className="size-3.5" />
                 </button>
               </div>
 
-              <div className="rounded-xl bg-white/90 dark:bg-[#131527]/90 p-3 text-[10px] space-y-1 border border-slate-200/60 dark:border-slate-800/60">
+              <div className="rounded-xl bg-white/90 dark:bg-[#131527]/90 backdrop-blur-md p-3 text-[10px] space-y-1 border border-slate-200/60 dark:border-slate-800/60">
                 <p className="font-medium">{item.nama}</p>
                 <p className="text-muted-foreground/50">SKU: {item.sku} | Stok saat ini: <span className="font-semibold">{item.stok}</span></p>
               </div>

@@ -11,7 +11,7 @@ const PUBLIC_ROUTES = ["/login", "/register", "/forgot-pin"];
 
 function SolidLoader() {
   return (
-    <div className="flex h-[100dvh] items-center justify-center bg-slate-950">
+    <div className="flex h-[100dvh] items-center justify-center bg-[#0B0C16]">
       <div className="flex flex-col items-center gap-3">
         <div className="size-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white font-bold text-lg">
           M
@@ -60,7 +60,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   /* ─── Kiosk Mode — fullscreen, no nav ─── */
   if (isKioskFn() && kioskTarget) {
     return (
-      <div className="flex flex-col h-[100dvh] bg-slate-950 text-slate-100 overflow-hidden">
+      <div className="flex flex-col h-[100dvh] bg-[#0B0C16] text-slate-100 overflow-hidden">
         <main className="flex-1 overflow-y-auto scrollbar-hide">
           {children}
         </main>

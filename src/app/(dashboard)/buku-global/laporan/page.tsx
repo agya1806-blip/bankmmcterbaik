@@ -113,7 +113,7 @@ export default function GlobalLaporanPage() {
     <div className="space-y-5 pb-4 animate-fade-in">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button onClick={() => router.push("/buku-global")} className="size-9 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-90">
+          <button onClick={() => router.push("/buku-global")} className="size-9 rounded-xl bg-white dark:bg-[#131527]/90 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-90">
             <ArrowLeft className="size-4 text-slate-500" />
           </button>
           <div className="size-10 rounded-xl bg-gradient-to-r from-[#7B61FF] to-violet-600 flex items-center justify-center shadow-lg">
@@ -125,10 +125,10 @@ export default function GlobalLaporanPage() {
           </div>
         </div>
         <div className="flex gap-1">
-          <button onClick={exportPdf} className="size-9 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-90" title="Export PDF">
+          <button onClick={exportPdf} className="size-9 rounded-xl bg-white dark:bg-[#131527]/90 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-90" title="Export PDF">
             <FileText className="size-4 text-slate-500" />
           </button>
-          <button onClick={exportExcel} className="size-9 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-90" title="Export Excel">
+          <button onClick={exportExcel} className="size-9 rounded-xl bg-white dark:bg-[#131527]/90 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all active:scale-90" title="Export Excel">
             <Download className="size-4 text-slate-500" />
           </button>
         </div>

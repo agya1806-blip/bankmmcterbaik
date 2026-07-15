@@ -142,7 +142,7 @@ export default function DashboardKonveksi() {
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3 text-slate-400" />
             <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari..." className="input-premium w-28 text-[10px] pl-7 h-8" />
+              placeholder="Cari..." className="input-premium w-28 text-[10px] pl-7 h-9" />
           </div>
         </div>
 

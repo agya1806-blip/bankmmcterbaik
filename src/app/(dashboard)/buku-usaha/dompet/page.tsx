@@ -107,7 +107,7 @@ export default function DompetPage() {
     const aktif = tab === key;
     return (
       <button key={key} onClick={() => setTab(key)}
-        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-bold transition-all ${
+        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-[0.97] ${
           aktif
             ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg shadow-violet-500/20"
             : "bg-muted/30 text-muted-foreground/60 hover:bg-muted/50"
@@ -143,7 +143,7 @@ export default function DompetPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push("/buku-usaha")}
-            className="size-9 rounded-xl bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors"
+            className="size-9 rounded-xl bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-all active:scale-[0.97]"
           >
             <ArrowLeft className="size-4 text-muted-foreground" />
           </button>
@@ -217,7 +217,7 @@ export default function DompetPage() {
                         </div>
                       </div>
                       <button onClick={() => handleHapus(w.id, w.namaDompet)}
-                        className="size-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-rose-500/10 text-muted-foreground/40 hover:text-rose-500 transition-all"
+                        className="size-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-rose-500/10 text-muted-foreground/40 hover:text-rose-500 transition-all active:scale-[0.97]"
                       >
                         <Trash2 className="size-3.5" />
                       </button>
@@ -371,7 +371,7 @@ export default function DompetPage() {
                 const aktif = newTipe === t;
                 return (
                   <button key={t} onClick={() => setNewTipe(t)}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-semibold transition-all ${
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-semibold transition-all active:scale-[0.97] ${
                       aktif
                         ? "bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-md"
                         : "bg-muted/30 text-muted-foreground/50 hover:bg-muted/50"
