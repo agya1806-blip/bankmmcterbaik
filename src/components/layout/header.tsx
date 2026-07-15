@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Search, LogOut, ChevronRight } from "lucide-react";
 import { useSessionStore } from "@/store/useSessionStore";
+import GlobalSearch from "@/components/global-search";
 
 interface HeaderProps {
   onMobileMenuToggle?: () => void;
@@ -11,6 +13,7 @@ interface HeaderProps {
 export default function Header(_props: HeaderProps) {
   const pathname = usePathname();
   const { clearSession } = useSessionStore();
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const segments = pathname.split("/").filter(Boolean);
   const pageTitle =
@@ -39,7 +42,10 @@ export default function Header(_props: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-1">
-        <button className="flex items-center justify-center size-9 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-all active:scale-90">
+        <button
+          onClick={() => setSearchOpen(true)}
+          className="flex items-center justify-center size-9 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-slate-800/50 transition-all active:scale-90"
+        >
           <Search className="size-4" />
         </button>
         <button
@@ -49,6 +55,8 @@ export default function Header(_props: HeaderProps) {
           <LogOut className="size-4" />
         </button>
       </div>
+
+      <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   );
 }

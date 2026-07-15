@@ -11,6 +11,9 @@ declare global {
         filters?: { name?: string; namePrefix?: string; services?: string[] }[];
       }) => Promise<BluetoothDevice>;
     };
+    usb?: {
+      requestDevice: (options: USBRequestOptions) => Promise<USBDevice>;
+    };
   }
   interface BluetoothDevice {
     gatt?: BluetoothRemoteGATTServer;
@@ -28,6 +31,107 @@ declare global {
   }
   interface BluetoothRemoteGATTCharacteristic {
     writeValue: (value: BufferSource) => Promise<void>;
+  }
+  interface USBRequestOptions {
+    filters?: USBDeviceFilter[];
+    exclusionFilters?: USBDeviceFilter[];
+    acceptAllDevices?: boolean;
+  }
+  interface USBDeviceFilter {
+    vendorId?: number;
+    productId?: number;
+    classCode?: number;
+    subclassCode?: number;
+    protocolCode?: number;
+    serialNumber?: string;
+  }
+  interface USBDevice {
+    usbVersionMajor: number;
+    usbVersionMinor: number;
+    usbVersionSubminor: number;
+    deviceClass: number;
+    deviceSubclass: number;
+    deviceProtocol: number;
+    vendorId: number;
+    productId: number;
+    deviceVersionMajor: number;
+    deviceVersionMinor: number;
+    deviceVersionSubminor: number;
+    manufacturerName?: string;
+    productName?: string;
+    serialNumber?: string;
+    configuration?: USBConfiguration;
+    configurations: USBConfiguration[];
+    opened: boolean;
+    open: () => Promise<void>;
+    close: () => Promise<void>;
+    selectConfiguration: (configurationValue: number) => Promise<USBConfiguration>;
+    claimInterface: (interfaceNumber: number) => Promise<void>;
+    releaseInterface: (interfaceNumber: number) => Promise<void>;
+    selectAlternateInterface: (interfaceNumber: number, alternateSetting: number) => Promise<void>;
+    controlTransferIn: (setup: USBControlTransferParameters, length: number) => Promise<USBInTransferResult>;
+    controlTransferOut: (setup: USBControlTransferParameters, data?: BufferSource) => Promise<USBOutTransferResult>;
+    clearHalt: (direction: "in" | "out", endpointNumber: number) => Promise<void>;
+    transferIn: (endpointNumber: number, length: number) => Promise<USBInTransferResult>;
+    transferOut: (endpointNumber: number, data: BufferSource) => Promise<USBOutTransferResult>;
+    isochronousTransferIn: (endpointNumber: number, packetLengths: number[]) => Promise<USBIsochronousInTransferResult>;
+    isochronousTransferOut: (endpointNumber: number, data: BufferSource, packetLengths: number[]) => Promise<USBIsochronousOutTransferResult>;
+    reset: () => Promise<void>;
+  }
+  interface USBConfiguration {
+    configurationValue: number;
+    configurationName?: string;
+    interfaces: USBInterface[];
+  }
+  interface USBInterface {
+    interfaceNumber: number;
+    alternate: USBAlternateInterface;
+    alternates: USBAlternateInterface[];
+    claimed: boolean;
+  }
+  interface USBAlternateInterface {
+    alternateSetting: number;
+    interfaceClass: number;
+    interfaceSubclass: number;
+    interfaceProtocol: number;
+    interfaceName?: string;
+    endpoints: USBEndpoint[];
+  }
+  interface USBEndpoint {
+    endpointNumber: number;
+    direction: "in" | "out";
+    type: "bulk" | "interrupt" | "isochronous";
+    packetSize: number;
+  }
+  interface USBInTransferResult {
+    data?: DataView;
+    status: "ok" | "stall" | "babble";
+  }
+  interface USBOutTransferResult {
+    bytesWritten: number;
+    status: "ok" | "stall";
+  }
+  interface USBControlTransferParameters {
+    requestType: "standard" | "class" | "vendor";
+    recipient: "device" | "interface" | "endpoint" | "other";
+    request: number;
+    value: number;
+    index: number;
+  }
+  interface USBIsochronousInTransferResult {
+    results: USBIsochronousInTransferPacket[];
+    data?: DataView;
+  }
+  interface USBIsochronousOutTransferResult {
+    results: USBIsochronousOutTransferPacket[];
+  }
+  interface USBIsochronousInTransferPacket {
+    data?: DataView;
+    status: "ok" | "stall" | "babble";
+  }
+  interface USBIsochronousOutTransferPacket {
+    bytesWritten: number;
+    status: "ok" | "stall";
   }
 }
 
@@ -177,6 +281,23 @@ function buildReceipt(data: OrderPrintData): Uint8Array {
   return result;
 }
 
+/* ─── Find first OUT bulk endpoint from device ─── */
+
+function findOutEndpoint(device: USBDevice): number | null {
+  for (const config of device.configurations) {
+    for (const iface of config.interfaces) {
+      for (const alt of iface.alternates) {
+        for (const ep of alt.endpoints) {
+          if (ep.direction === "out" && (ep.type === "bulk" || ep.type === "interrupt")) {
+            return ep.endpointNumber;
+          }
+        }
+      }
+    }
+  }
+  return null;
+}
+
 /* ─── Hook ─── */
 
 export function useThermalPrinter() {
@@ -185,6 +306,9 @@ export function useThermalPrinter() {
   const [deviceName, setDeviceName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [device, setDevice] = useState<BluetoothDevice | null>(null);
+  const [usbDevice, setUsbDevice] = useState<USBDevice | null>(null);
+  const [connectionType, setConnectionType] = useState<"bluetooth" | "usb" | null>(null);
+  const [printerStatus, setPrinterStatus] = useState<"terhubung" | "tidak terhubung" | "mencoba...">("tidak terhubung");
 
   const connect = useCallback(async (): Promise<boolean> => {
     const bt = navigator.bluetooth;
@@ -193,6 +317,7 @@ export function useThermalPrinter() {
       return false;
     }
     setConnecting(true);
+    setPrinterStatus("mencoba...");
     setError(null);
     try {
       const d = await bt.requestDevice({
@@ -202,10 +327,13 @@ export function useThermalPrinter() {
       setDevice(d);
       setDeviceName(d.name || "Printer");
       setConnected(true);
+      setConnectionType("bluetooth");
+      setPrinterStatus("terhubung");
       return true;
     } catch (err) {
       const msg = (err as Error).message || "Gagal menghubungkan printer";
       setError(msg);
+      setPrinterStatus("tidak terhubung");
       return false;
     } finally {
       setConnecting(false);
@@ -241,6 +369,110 @@ export function useThermalPrinter() {
     setError(null);
   }, [device]);
 
+  const connectUSB = useCallback(async (): Promise<boolean> => {
+    const usb = navigator.usb;
+    if (!usb) {
+      setError("WebUSB tidak didukung di browser ini. Gunakan Chrome/Edge.");
+      return false;
+    }
+    setConnecting(true);
+    setPrinterStatus("mencoba...");
+    setError(null);
+    try {
+      const d = await usb.requestDevice({
+        filters: [{ vendorId: 0x04b8 }],
+      });
+      await d.open();
+      await d.selectConfiguration(1);
+      await d.claimInterface(0);
+      setUsbDevice(d);
+      setDeviceName(d.productName || "USB Printer");
+      setConnected(true);
+      setConnectionType("usb");
+      setPrinterStatus("terhubung");
+      return true;
+    } catch (firstErr) {
+      // Fallback: accept any device if specific vendor filter fails
+      try {
+        const d = await usb.requestDevice({
+          acceptAllDevices: true,
+        });
+        await d.open();
+        await d.selectConfiguration(1);
+        await d.claimInterface(0);
+        setUsbDevice(d);
+        setDeviceName(d.productName || "USB Printer");
+        setConnected(true);
+        setConnectionType("usb");
+        setPrinterStatus("terhubung");
+        return true;
+      } catch (fallbackErr) {
+        const msg = (firstErr as Error).message || (fallbackErr as Error).message || "Gagal menghubungkan USB printer";
+        setError(msg);
+        setPrinterStatus("tidak terhubung");
+        return false;
+      }
+    } finally {
+      setConnecting(false);
+    }
+  }, []);
+
+  const printViaUSB = useCallback(async (data: OrderPrintData): Promise<boolean> => {
+    if (!usbDevice) {
+      setError("USB printer belum terhubung.");
+      return false;
+    }
+    setError(null);
+    try {
+      const endpoint = findOutEndpoint(usbDevice);
+      if (endpoint === null) {
+        setError("Tidak dapat menemukan endpoint OUT pada printer USB.");
+        return false;
+      }
+      const payload = buildReceipt(data);
+      await usbDevice.transferOut(endpoint, payload as unknown as ArrayBuffer);
+      return true;
+    } catch (err) {
+      const msg = (err as Error).message || "Gagal mencetak via USB";
+      setError(msg);
+      return false;
+    }
+  }, [usbDevice]);
+
+  const disconnectUSB = useCallback(async () => {
+    try {
+      if (usbDevice?.opened) {
+        try { await usbDevice.releaseInterface(0); } catch { /* ignore */ }
+        await usbDevice.close();
+      }
+    } catch { /* ignore */ }
+    setUsbDevice(null);
+    setDeviceName(null);
+    setConnected(false);
+    setConnectionType(null);
+    setPrinterStatus("tidak terhubung");
+    setError(null);
+  }, [usbDevice]);
+
+  const disconnectPrinter = useCallback(async () => {
+    if (connectionType === "bluetooth") {
+      disconnect();
+    } else if (connectionType === "usb") {
+      await disconnectUSB();
+    }
+    setConnectionType(null);
+    setPrinterStatus("tidak terhubung");
+  }, [connectionType, disconnect, disconnectUSB]);
+
+  const printReceipt = useCallback(async (data: OrderPrintData): Promise<boolean> => {
+    setPrinterStatus("mencoba...");
+    if (connectionType === "usb") {
+      return await printViaUSB(data);
+    }
+    // Default to Bluetooth
+    return await print(data);
+  }, [connectionType, print, printViaUSB]);
+
   const scanAndPrint = useCallback(async (data: OrderPrintData): Promise<boolean> => {
     const ok = await connect();
     if (!ok) return false;
@@ -248,6 +480,7 @@ export function useThermalPrinter() {
   }, [connect, print]);
 
   return {
+    // Existing
     connect,
     print,
     disconnect,
@@ -256,5 +489,15 @@ export function useThermalPrinter() {
     connected,
     deviceName,
     error,
+    // New USB
+    connectUSB,
+    printViaUSB,
+    disconnectPrinter,
+    printReceipt,
+    connectionType,
+    printerStatus,
+    usbDevice,
   };
 }
+
+export { buildReceipt };

@@ -263,7 +263,7 @@ class MmcBankDB extends Dexie {
     this.version(1).stores({
       users: "id, &nama, role, bookOrBranchId",
       profiles: "id, bookOrBranchId",
-      wallets: "id, bookOrBranchId, tipe",
+      wallets: "id, bookOrBranchId, tipe, isActive",
       walletMutations: "id, bookOrBranchId, dariWalletId, keWalletId, createdAt",
       customers: "id, bookOrBranchId, &[bookOrBranchId+noWA], nama",
       transactions: "id, bookOrBranchId, customerId, tanggal, status, walletIdTarget, invoiceNumber",

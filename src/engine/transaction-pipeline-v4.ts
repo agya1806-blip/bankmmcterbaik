@@ -62,23 +62,13 @@ async function findCustomerCrossBranch(noWA: string): Promise<{ id: string; book
   return withPoin.length > 0 ? withPoin[0] : all[0];
 }
 
-async function updateCustomerMetrics(customerId: string, nominal: number, poinBertambah: number) {
-  const cust = await db.customers.get(customerId);
-  if (!cust) return;
-  await db.customers.update(customerId, {
-    totalBelanja: cust.totalBelanja + nominal,
-    poin: cust.poin + poinBertambah,
-    terakhirTransaksi: new Date().toISOString(),
-  });
-}
-
 async function usePoinCustomer(customerId: string, poinDigunakan: number) {
   const cust = await db.customers.get(customerId);
   if (!cust || cust.poin < poinDigunakan) return;
   await db.customers.update(customerId, { poin: cust.poin - poinDigunakan });
 }
 
-async function cutInventoryStock(branch: BookOrBranch, links: { itemId: string; qtyDipotong: number }[]) {
+export async function cutInventoryStock(branch: BookOrBranch, links: { itemId: string; qtyDipotong: number }[]) {
   for (const link of links) {
     const item = await db.inventory.get(link.itemId);
     if (!item) continue;
@@ -97,6 +87,17 @@ async function cutInventoryStock(branch: BookOrBranch, links: { itemId: string; 
       createdAt: new Date().toISOString(),
     });
   }
+}
+
+export async function updateCustomerMetrics(customerId: string, nominal: number, poinBertambah: number) {
+  const cust = await db.customers.get(customerId);
+  if (!cust) return;
+  await db.customers.update(customerId, {
+    totalTransaksi: (cust.totalTransaksi ?? 0) + 1,
+    totalBelanja: (cust.totalBelanja ?? 0) + nominal,
+    poin: (cust.poin ?? 0) + poinBertambah,
+    terakhirTransaksi: new Date().toISOString(),
+  });
 }
 
 async function updateWalletBalance(walletId: string, nominal: number) {
