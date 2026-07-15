@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Trash2, ShoppingBag, Heart, TrendingUp, PiggyBank, Users } from "lucide-react";
+import { ArrowLeft, Trash2, ShoppingBag, Heart, TrendingUp, Users } from "lucide-react";
 import toast from "react-hot-toast";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { CardSkeleton } from "@/components/ui/skeleton";

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { ShoppingBag, Plus, Minus, Trash2, ArrowLeft, DollarSign, Search, CheckCircle2, X } from "lucide-react";
+import { ShoppingBag, Plus, Minus, Trash2, ArrowLeft, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { KasirSkeleton } from "@/components/ui/skeleton";
@@ -15,7 +15,6 @@ function generateId() {
   return `KEL-${ds}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
 }
 
-function todayISO() { return new Date().toISOString().slice(0, 10); }
 function formatRupiah(n: number) { return `Rp ${n.toLocaleString("id-ID")}`; }
 
 export default function KasirKelontong() {
@@ -57,7 +56,7 @@ export default function KasirKelontong() {
       setLastKasirUnit(BOOK);
       toast.success("Pembayaran berhasil!");
       setShowBill(true);
-    } catch (err) {
+    } catch {
       toast.error("Gagal memproses pembayaran");
     } finally {
       setIsProcessing(false);

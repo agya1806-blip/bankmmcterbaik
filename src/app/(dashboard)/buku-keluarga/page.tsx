@@ -1,16 +1,13 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Wallet, TrendingUp, Plus, X, Download,
-  Users, Home, Heart, BookOpen, ShoppingBag,
-  ArrowUpRight, ArrowDownRight, PiggyBank,
-  Trash2, Target, Calendar, Send,
+  TrendingUp, Plus, Users, Home, Heart, ShoppingBag,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { CardSkeleton } from "@/components/ui/skeleton";
-import { useBusinessStore, PersonalTransaction, SavingsGoal, type PersonalCategory } from "@/store/useBusinessStore";
+import { useBusinessStore, type PersonalCategory } from "@/store/useBusinessStore";
 
 const KATEGORI: { id: PersonalCategory; label: string; icon: React.ElementType; warna: string }[] = [
   { id: "Makanan", label: "Makanan", icon: ShoppingBag, warna: "text-orange-400" },
@@ -56,7 +53,7 @@ function Ringkasan({ pemasukan, pengeluaran }: { pemasukan: number; pengeluaran:
 
 export default function BukuKeluargaPage() {
   const store = useBusinessStore();
-  const { personalTransactions, addPersonalTransaction, removePersonalTransaction } = store;
+  const { personalTransactions, addPersonalTransaction } = store;
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
@@ -121,7 +118,7 @@ export default function BukuKeluargaPage() {
         </button>
         <button onClick={() => router.push("/buku-keluarga/dompet")}
           className="py-3.5 px-4 rounded-2xl bg-slate-800 text-slate-200 hover:bg-slate-700 transition-all">
-          <Wallet className="size-4" />
+          <Home className="size-4" />
         </button>
       </div>
 

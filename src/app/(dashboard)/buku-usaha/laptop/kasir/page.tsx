@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Laptop, ArrowLeft, Search, DollarSign, User, CheckCircle2, Shield, Box, X, Printer, Coffee, Shirt, Plus } from "lucide-react";
+import { Laptop, ArrowLeft, Search, CheckCircle2, Plus } from "lucide-react";
 import toast from "react-hot-toast";
-import { useProfilUsahaStore } from "../../percetakan/store/useProfilUsahaStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { KasirSkeleton } from "@/components/ui/skeleton";
 
@@ -21,14 +20,12 @@ function generateId() {
   return `NOTA-LAPTOP-${ds}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 }
 
-function todayISO() { return new Date().toISOString().slice(0, 10); }
 function formatRupiah(n: number) { return `IDR ${n.toLocaleString("id-ID")}`; }
 
 export default function KasirLaptop() {
   const router = useRouter();
-  const { profil } = useProfilUsahaStore();
   const { wallets, gadgetItems, tambahSaldoWallet, kurangiSaldoWallet, setLastKasirUnit } = useBusinessStore();
-  const [walletPenerimaanId, setWalletPenerimaanId] = useState(wallets[0]?.id || "wallet-kas");
+  const [walletPenerimaanId] = useState(wallets[0]?.id || "wallet-kas");
   const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -36,10 +33,8 @@ export default function KasirLaptop() {
   const [imeiSn, setImeiSn] = useState("");
   const [kondisi, setKondisi] = useState<"baru" | "second">("baru");
   const [garansi, setGaransi] = useState("1-tahun");
-  const [cariCustomer, setCariCustomer] = useState("");
   const [customerNama, setCustomerNama] = useState("");
   const [customerWA, setCustomerWA] = useState("");
-  const [showCustDropdown, setShowCustDropdown] = useState(false);
   const [dp, setDP] = useState("");
   const [invoiceId, setInvoiceId] = useState("");
   const [showInvoice, setShowInvoice] = useState(false);
@@ -77,7 +72,7 @@ export default function KasirLaptop() {
       setLastKasirUnit(BOOK);
       toast.success("Transaksi berhasil!");
       setShowInvoice(true);
-    } catch (err) {
+    } catch {
       toast.error("Gagal memproses transaksi");
     } finally {
       setIsProcessing(false);

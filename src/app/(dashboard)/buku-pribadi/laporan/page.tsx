@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, TrendingUp, TrendingDown, PiggyBank, Download } from "lucide-react";
+import { ArrowLeft, TrendingUp, TrendingDown, PiggyBank } from "lucide-react";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { CardSkeleton } from "@/components/ui/skeleton";
 

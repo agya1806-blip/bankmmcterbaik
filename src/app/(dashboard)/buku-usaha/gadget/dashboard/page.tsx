@@ -2,13 +2,9 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Smartphone, Package, AlertTriangle, Shield, Plus, Download, Settings, Box, ArrowLeft } from "lucide-react";
-import toast from "react-hot-toast";
+import { Smartphone, AlertTriangle, Plus, Settings, ArrowLeft } from "lucide-react";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { CardSkeleton } from "@/components/ui/skeleton";
-
-function todayISO() { return new Date().toISOString().slice(0, 10); }
-function formatRupiah(n: number) { return `IDR ${n.toLocaleString("id-ID")}`; }
 
 export default function DashboardGadget() {
   const router = useRouter();

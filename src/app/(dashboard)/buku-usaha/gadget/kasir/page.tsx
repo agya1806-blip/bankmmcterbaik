@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Smartphone, ArrowLeft, Search, DollarSign, User, CheckCircle2, Shield, Box, X, Printer, Coffee, Shirt, Plus } from "lucide-react";
+import { Smartphone, ArrowLeft, Search, CheckCircle2, Plus } from "lucide-react";
 import toast from "react-hot-toast";
-import { useProfilUsahaStore } from "../../percetakan/store/useProfilUsahaStore";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { KasirSkeleton } from "@/components/ui/skeleton";
 
@@ -23,15 +22,12 @@ function generateId() {
   return `NOTA-GADGET-${ds}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 }
 
-function todayISO() { return new Date().toISOString().slice(0, 10); }
 function formatRupiah(n: number) { return `IDR ${n.toLocaleString("id-ID")}`; }
 
 export default function KasirGadget() {
   const router = useRouter();
-  const { profil } = useProfilUsahaStore();
   const { wallets, gadgetItems, tambahSaldoWallet, kurangiSaldoWallet, setLastKasirUnit } = useBusinessStore();
-  const [walletPenerimaanId, setWalletPenerimaanId] = useState(wallets[0]?.id || "wallet-kas");
-  const [walletModalId, setWalletModalId] = useState(wallets[1]?.id || "wallet-bsi");
+  const [walletPenerimaanId] = useState(wallets[0]?.id || "wallet-kas");
   const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -39,10 +35,8 @@ export default function KasirGadget() {
   const [imeiSn, setImeiSn] = useState("");
   const [kondisi, setKondisi] = useState<"baru" | "second">("baru");
   const [garansi, setGaransi] = useState("1-tahun");
-  const [cariCustomer, setCariCustomer] = useState("");
   const [customerNama, setCustomerNama] = useState("");
   const [customerWA, setCustomerWA] = useState("");
-  const [showCustDropdown, setShowCustDropdown] = useState(false);
   const [tradeIn, setTradeIn] = useState<TradeInState>({ aktif: false, namaUnit: "", imeiSn: "", nilaiTaksir: 0 });
   const [dp, setDP] = useState("");
   const [invoiceId, setInvoiceId] = useState("");
@@ -69,8 +63,6 @@ export default function KasirGadget() {
     return selectedProduct.hargaJual - (tradeIn.aktif ? tradeIn.nilaiTaksir : 0);
   }, [selectedProduct, tradeIn]);
 
-  const totalModal = selectedProduct?.hargaModal || 0;
-
   const bayar = useCallback(async () => {
     if (!selectedProduct) { toast.error("Pilih produk dulu"); return; }
     if (!customerNama.trim()) { toast.error("Nama pelanggan harus diisi"); return; }
@@ -91,7 +83,7 @@ export default function KasirGadget() {
       setLastKasirUnit(BOOK);
       toast.success("Transaksi berhasil!");
       setShowInvoice(true);
-    } catch (err) {
+    } catch {
       toast.error("Gagal memproses transaksi");
     } finally {
       setIsProcessing(false);
@@ -167,11 +159,6 @@ export default function KasirGadget() {
 
           <div className="floating-card p-4 space-y-3">
             <p className="text-xs font-bold text-muted-foreground">Pelanggan</p>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground/40" />
-              <input type="text" value={cariCustomer} onChange={(e) => { setCariCustomer(e.target.value); setShowCustDropdown(true); }}
-                placeholder="Cari nama pelanggan..." className="input-premium w-full pl-9 text-xs" />
-            </div>
             <input type="text" value={customerNama} onChange={(e) => setCustomerNama(e.target.value)}
               placeholder="Nama pelanggan" className="input-premium w-full text-xs" />
             <input type="text" value={customerWA} onChange={(e) => setCustomerWA(e.target.value)}

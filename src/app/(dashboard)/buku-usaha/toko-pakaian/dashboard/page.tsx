@@ -1,12 +1,9 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Shirt, Package, AlertTriangle, Plus, Settings, ArrowLeft } from "lucide-react";
-import { useBusinessStore } from "@/store/useBusinessStore";
+import { Shirt, Plus, Settings, ArrowLeft } from "lucide-react";
 import { CardSkeleton } from "@/components/ui/skeleton";
-
-function formatRupiah(n: number) { return `IDR ${n.toLocaleString("id-ID")}`; }
 
 export default function DashboardTokoPakaian() {
   const router = useRouter();

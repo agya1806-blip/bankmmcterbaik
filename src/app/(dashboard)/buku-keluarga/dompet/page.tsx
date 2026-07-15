@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Wallet, Plus, PiggyBank, Trash2, Home } from "lucide-react";
+import { ArrowLeft, Plus, Home } from "lucide-react";
 import toast from "react-hot-toast";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { CardSkeleton } from "@/components/ui/skeleton";

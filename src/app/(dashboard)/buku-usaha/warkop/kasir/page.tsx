@@ -2,26 +2,12 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Coffee, ShoppingBag, Utensils, Plus, Minus, Trash2, ArrowLeft, DollarSign, Search, Package, Printer, CheckCircle2, X } from "lucide-react";
+import { Coffee, Plus, Minus, Trash2, ArrowLeft, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { KasirSkeleton } from "@/components/ui/skeleton";
 
 const BOOK = "usaha-warkop";
-
-type KategoriMenu = "makanan" | "minuman" | "kelontong" | "rokok";
-type TipeOrder = "dine-in" | "take-away";
-
-interface MenuItem { id: string; nama: string; harga: number; kategori: KategoriMenu; icon: React.ElementType; grad: string; stok: number; resep?: { bahanId: string; qty: number }[]; }
-interface CartEntry { menu: MenuItem; qty: number; }
-
-const MENU_LIST: MenuItem[] = [];
-const KATEGORI_LIST: { key: KategoriMenu; label: string; icon: React.ElementType }[] = [
-  { key: "minuman", label: "Minuman", icon: Coffee },
-  { key: "makanan", label: "Makanan", icon: Utensils },
-  { key: "kelontong", label: "Kelontong", icon: ShoppingBag },
-  { key: "rokok", label: "Rokok", icon: Package },
-];
 
 function generateId() {
   const d = new Date();
@@ -29,46 +15,35 @@ function generateId() {
   return `WRK-${ds}-${String(Math.floor(Math.random() * 9000) + 1000)}`;
 }
 
-function todayISO() { return new Date().toISOString().slice(0, 10); }
 function formatRupiah(n: number) { return `Rp ${n.toLocaleString("id-ID")}`; }
-
-const KATEGORI_WARNA: Record<string, string> = {
-  makanan: "from-orange-500 to-rose-600", minuman: "from-cyan-500 to-blue-600",
-  kelontong: "from-violet-500 to-purple-600", rokok: "from-slate-500 to-slate-600",
-};
 
 export default function KasirWarkop() {
   const router = useRouter();
   const { wallets, tambahSaldoWallet, setLastKasirUnit } = useBusinessStore();
   const [mounted, setMounted] = useState(false);
-  const [cart, setCart] = useState<CartEntry[]>([]);
-  const [tipeOrder, setTipeOrder] = useState<TipeOrder>("dine-in");
+  const [cart, setCart] = useState<{ nama: string; harga: number; qty: number }[]>([]);
   const [customerNama, setCustomerNama] = useState("");
-  const [catatan, setCatatan] = useState("");
   const [walletId, setWalletId] = useState(wallets[0]?.id || "wallet-kas");
   const [invoiceId, setInvoiceId] = useState("");
   const [showBill, setShowBill] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [itemNama, setItemNama] = useState("");
+  const [itemHarga, setItemHarga] = useState("");
 
   useEffect(() => setMounted(true), []);
 
-  const total = useMemo(() => cart.reduce((s, e) => s + e.menu.harga * e.qty, 0), [cart]);
+  const total = useMemo(() => cart.reduce((s, e) => s + e.harga * e.qty, 0), [cart]);
 
-  const tambahMenu = (menu: MenuItem) => {
+  const tambahItem = () => {
+    const harga = parseInt(itemHarga.replace(/\D/g, ""), 10);
+    if (!itemNama.trim() || !harga) { toast.error("Nama dan harga harus diisi"); return; }
     setCart((prev) => {
-      const ex = prev.find((e) => e.menu.id === menu.id);
-      if (ex) return prev.map((e) => e.menu.id === menu.id ? { ...e, qty: e.qty + 1 } : e);
-      return [...prev, { menu, qty: 1 }];
+      const ex = prev.find((e) => e.nama === itemNama.trim());
+      if (ex) return prev.map((e) => e.nama === itemNama.trim() ? { ...e, qty: e.qty + 1 } : e);
+      return [...prev, { nama: itemNama.trim(), harga, qty: 1 }];
     });
-  };
-
-  const kurangQty = (id: string) => {
-    setCart((prev) => {
-      const ex = prev.find((e) => e.menu.id === id);
-      if (!ex) return prev;
-      if (ex.qty <= 1) return prev.filter((e) => e.menu.id !== id);
-      return prev.map((e) => e.menu.id === id ? { ...e, qty: e.qty - 1 } : e);
-    });
+    setItemNama("");
+    setItemHarga("");
   };
 
   const bayar = useCallback(async () => {
@@ -81,12 +56,12 @@ export default function KasirWarkop() {
       setLastKasirUnit(BOOK);
       toast.success("Pembayaran berhasil!");
       setShowBill(true);
-    } catch (err) {
+    } catch {
       toast.error("Gagal memproses pembayaran");
     } finally {
       setIsProcessing(false);
     }
-  }, [cart, total, walletId, tipeOrder, tambahSaldoWallet, setLastKasirUnit]);
+  }, [cart, total, walletId, tambahSaldoWallet, setLastKasirUnit]);
 
   if (!mounted) return <KasirSkeleton />;
 
@@ -107,40 +82,39 @@ export default function KasirWarkop() {
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <button onClick={() => setTipeOrder("dine-in")}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${tipeOrder === "dine-in" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-slate-800 text-muted-foreground/60"}`}>
-              Makan di Tempat
-            </button>
-            <button onClick={() => setTipeOrder("take-away")}
-              className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${tipeOrder === "take-away" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-slate-800 text-muted-foreground/60"}`}>
-              Bawa Pulang
-            </button>
+          <div className="floating-card p-4 space-y-3">
+            <p className="text-xs font-bold text-muted-foreground">Tambah Item</p>
+            <div className="flex gap-2">
+              <input type="text" value={itemNama} onChange={(e) => setItemNama(e.target.value)}
+                placeholder="Nama menu" className="input-premium flex-1 text-xs"
+                onKeyDown={(e) => e.key === "Enter" && tambahItem()} />
+              <input type="text" inputMode="numeric" value={itemHarga} onChange={(e) => setItemHarga(e.target.value.replace(/\D/g, ""))}
+                placeholder="Harga" className="input-premium w-24 text-xs tabular-nums"
+                onKeyDown={(e) => e.key === "Enter" && tambahItem()} />
+              <button onClick={tambahItem} className="size-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center hover:bg-emerald-500/30">
+                <Plus className="size-5" />
+              </button>
+            </div>
           </div>
 
-          <div className="floating-card p-4 space-y-3">
+          <div className="floating-card p-4">
             <input type="text" value={customerNama} onChange={(e) => setCustomerNama(e.target.value)}
               placeholder="Nama pelanggan (opsional)" className="input-premium w-full text-xs" />
           </div>
 
-          <div className="floating-card p-4 space-y-3">
-            <p className="text-xs font-bold text-muted-foreground">Menu Tersedia</p>
-            <p className="text-[10px] text-muted-foreground/40 italic">Belum ada menu. Tambah menu di Pengaturan.</p>
-          </div>
-
           {cart.length > 0 && (
             <div className="floating-card p-4 space-y-2">
-              <p className="text-xs font-bold text-muted-foreground">Keranjang</p>
-              {cart.map((e) => (
-                <div key={e.menu.id} className="flex items-center justify-between gap-2">
-                  <span className="text-xs flex-1 truncate">{e.menu.nama}</span>
+              <p className="text-xs font-bold text-muted-foreground">Keranjang ({cart.length})</p>
+              {cart.map((e, i) => (
+                <div key={i} className="flex items-center justify-between gap-2">
+                  <span className="text-xs flex-1 truncate">{e.nama}</span>
                   <div className="flex items-center gap-1">
-                    <button onClick={() => kurangQty(e.menu.id)} className="size-7 rounded-lg bg-slate-800 flex items-center justify-center hover:bg-slate-700"><Minus className="size-3" /></button>
+                    <button onClick={() => setCart((p) => p.map((x, j) => j === i ? { ...x, qty: Math.max(1, x.qty - 1) } : x))} className="size-7 rounded-lg bg-slate-800 flex items-center justify-center"><Minus className="size-3" /></button>
                     <span className="text-xs font-bold w-6 text-center tabular-nums">{e.qty}</span>
-                    <button onClick={() => tambahMenu(e.menu)} className="size-7 rounded-lg bg-slate-800 flex items-center justify-center hover:bg-slate-700"><Plus className="size-3" /></button>
+                    <button onClick={() => setCart((p) => p.map((x, j) => j === i ? { ...x, qty: x.qty + 1 } : x))} className="size-7 rounded-lg bg-slate-800 flex items-center justify-center"><Plus className="size-3" /></button>
                   </div>
-                  <span className="text-xs font-bold w-20 text-right tabular-nums">{formatRupiah(e.menu.harga * e.qty)}</span>
-                  <button onClick={() => setCart((p) => p.filter((x) => x.menu.id !== e.menu.id))} className="size-7 rounded-lg bg-rose-500/10 flex items-center justify-center hover:bg-rose-500/20">
+                  <span className="text-xs font-bold w-20 text-right tabular-nums">{formatRupiah(e.harga * e.qty)}</span>
+                  <button onClick={() => setCart((p) => p.filter((_, j) => j !== i))} className="size-7 rounded-lg bg-rose-500/10 flex items-center justify-center hover:bg-rose-500/20">
                     <Trash2 className="size-3 text-rose-400" />
                   </button>
                 </div>

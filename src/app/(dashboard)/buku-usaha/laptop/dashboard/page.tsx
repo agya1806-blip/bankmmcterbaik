@@ -2,11 +2,9 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Laptop, Package, AlertTriangle, Plus, Settings, ArrowLeft } from "lucide-react";
+import { Laptop, AlertTriangle, Plus, Settings, ArrowLeft } from "lucide-react";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { CardSkeleton } from "@/components/ui/skeleton";
-
-function formatRupiah(n: number) { return `IDR ${n.toLocaleString("id-ID")}`; }
 
 export default function DashboardLaptop() {
   const router = useRouter();
