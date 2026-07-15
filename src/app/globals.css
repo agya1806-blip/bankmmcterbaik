@@ -177,9 +177,13 @@
     @apply disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  .section-padding { @apply px-4 sm:px-6 lg:px-8; }
-  .content-container { @apply max-w-7xl mx-auto w-full; }
-  .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.section-padding { @apply px-4 sm:px-6 lg:px-8; }
+.content-container { @apply max-w-7xl mx-auto w-full; }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+.safe-top { padding-top: env(safe-area-inset-top, 0px); }
+.safe-left { padding-left: env(safe-area-inset-left, 0px); }
+.safe-right { padding-right: env(safe-area-inset-right, 0px); }
+.min-safe-bottom { min-height: env(safe-area-inset-bottom, 0px); }
 
   .status-dot { @apply inline-block size-2 rounded-full; }
   .status-dot-active { @apply bg-emerald-500; }
@@ -248,7 +252,7 @@
   .byond-toggle-icon { @apply transition-transform duration-300; }
 
   /* Bottom Nav */
-  .byond-bottom-nav { @apply fixed bottom-0 left-0 right-0 z-50 lg:hidden; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .byond-bottom-nav { @apply fixed bottom-0 left-0 right-0 z-50 lg:hidden; padding-bottom: env(safe-area-inset-bottom, 0px); background: hsl(222 20% 10% / 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid hsl(222 15% 16% / 0.8); }
   .byond-bottom-nav-inner { @apply relative flex items-center justify-around mx-2 mb-2 px-2 py-2 rounded-2xl bg-white backdrop-blur-2xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.08)]; }
   .dark .byond-bottom-nav-inner { background: hsl(var(--card) / 0.9); @apply border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.25)]; }
   .byond-bottom-nav-item { @apply relative flex flex-col items-center gap-1 py-2 px-2 rounded-xl min-w-0 transition-all duration-200 flex-1; }
@@ -262,7 +266,7 @@
   .byond-bottom-nav-label-active { @apply text-foreground font-semibold; }
 
   /* Header */
-  .byond-header { @apply fixed top-3 left-3 right-3 z-40 h-16 flex items-center justify-between px-4 bg-white/80 backdrop-blur-xl border border-white/60 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)]; }
+  .byond-header { @apply sticky top-0 z-40 h-14 flex items-center justify-between px-4 bg-white/95 dark:bg-slate-950/95 border-b border-border/50; }
   .dark .byond-header { background: hsl(var(--card) / 0.8); @apply border-white/[0.08] shadow-[0_4px_24px_rgba(0,0,0,0.15)]; }
   .byond-header-left { @apply flex items-center gap-3; }
   .byond-header-menu-btn { @apply lg:hidden flex items-center justify-center size-11 rounded-xl bg-muted/50 text-muted-foreground hover:bg-muted transition-all active:scale-90; }

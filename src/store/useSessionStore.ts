@@ -1,15 +1,15 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { MmcUser, BizUnit } from "@/lib/db/mmcbank-db";
+import type { DbUser, BookOrBranch } from "@/lib/db-v4";
 
 interface SessionState {
   currentUserId: string | null;
-  currentUser: MmcUser | null;
+  currentUser: DbUser | null;
   onboardingCompleted: boolean;
-  setSession: (user: MmcUser) => void;
+  setSession: (user: DbUser) => void;
   clearSession: () => void;
   setOnboardingCompleted: (v: boolean) => void;
-  hasUnitAccess: (unit: BizUnit) => boolean;
+  hasUnitAccess: (unit: string) => boolean;
   isLoggedIn: () => boolean;
 }
 

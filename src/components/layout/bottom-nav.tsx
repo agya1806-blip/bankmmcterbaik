@@ -1,23 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import {
-  LayoutDashboard, Briefcase, Wallet, FileText, Settings, BookUser,
-} from "lucide-react";
+import { LayoutDashboard, Briefcase, Wallet, BookUser, Settings } from "lucide-react";
 
 const ITEMS = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/buku-usaha", label: "Usaha", icon: Briefcase },
-  { href: "/buku-pribadi", label: "Pribadi", icon: BookUser },
-  { href: "/buku-usaha/dompet", label: "Dompet", icon: Wallet },
-  { href: "/buku-usaha/laporan-keuangan", label: "Laporan", icon: FileText },
+  { href: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-emerald-400" },
+  { href: "/buku-usaha", label: "Usaha", icon: Briefcase, color: "text-violet-400" },
+  { href: "/buku-pribadi", label: "Pribadi", icon: BookUser, color: "text-sky-400" },
+  { href: "/buku-usaha/dompet", label: "Dompet", icon: Wallet, color: "text-amber-400" },
+  { href: "/buku-usaha/pengaturan", label: "Settings", icon: Settings, color: "text-slate-400" },
 ];
 
 export default function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
-  const [pressed, setPressed] = useState<string | null>(null);
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -26,24 +22,29 @@ export default function BottomNav() {
 
   return (
     <nav className="byond-bottom-nav">
-      <div className="byond-bottom-nav-inner">
+      <div className="flex items-center justify-around px-2 py-1">
         {ITEMS.map((item) => {
           const active = isActive(item.href);
-          const isPressed = pressed === item.href;
+          const Icon = item.icon;
           return (
             <button
               key={item.href}
               onClick={() => router.push(item.href)}
-              onMouseDown={() => setPressed(item.href)}
-              onMouseUp={() => setPressed(null)}
-              onMouseLeave={() => setPressed(null)}
-              className={`byond-bottom-nav-item ${active ? "byond-bottom-nav-active" : ""} ${isPressed ? "scale-90" : ""}`}
+              className="relative flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl min-w-0 transition-all duration-200 flex-1 active:scale-90"
+              style={{ minHeight: 44, minWidth: 44 }}
             >
-              {active && <span className="byond-bottom-nav-glow" />}
-              <div className={`byond-bottom-nav-icon-wrap ${active ? "byond-bottom-nav-icon-active" : ""}`}>
-                <item.icon className={`byond-bottom-nav-icon ${active ? "byond-bottom-nav-icon-active-color" : ""}`} />
+              <div
+                className={`flex items-center justify-center size-9 rounded-xl transition-all duration-300 ${
+                  active ? "bg-slate-800 text-white translate-y-[-2px]" : "text-slate-500"
+                }`}
+              >
+                <Icon className={`size-5 transition-all duration-200 ${active ? item.color : ""}`} />
               </div>
-              <span className={`byond-bottom-nav-label ${active ? "byond-bottom-nav-label-active" : ""}`}>
+              <span
+                className={`text-[9px] font-medium transition-all duration-200 whitespace-nowrap ${
+                  active ? "text-slate-200 font-semibold" : "text-slate-500"
+                }`}
+              >
                 {item.label}
               </span>
             </button>
