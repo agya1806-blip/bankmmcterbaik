@@ -36,6 +36,11 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
+      /* Force keyboard dismissal — iOS 100dvh reflow */
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+
       const existing = await db.users.where("nama").equals(nama.trim()).first();
       if (existing) { setError("Nama sudah terdaftar"); setLoading(false); return; }
 
@@ -53,10 +58,13 @@ export default function RegisterPage() {
 
       await db.users.add(newUser);
       setSession(newUser);
-      router.replace("/");
+
+      /* Wait 150ms for iOS keyboard to fully dismiss + viewport to recalc 100dvh */
+      setTimeout(() => {
+        router.replace("/");
+      }, 150);
     } catch {
       setError("Gagal mendaftar");
-    } finally {
       setLoading(false);
     }
   }
