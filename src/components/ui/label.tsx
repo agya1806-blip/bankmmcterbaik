@@ -6,7 +6,7 @@ const Label = forwardRef<HTMLLabelElement, LabelHTMLAttributes<HTMLLabelElement>
   ({ className, ...props }, ref) => (
     <label
       ref={ref}
-      className={`text-sm font-medium text-foreground/80 ${className ?? ""}`}
+      className={`text-sm font-medium text-slate-700 dark:text-slate-300 ${className ?? ""}`}
       {...props}
     />
   )

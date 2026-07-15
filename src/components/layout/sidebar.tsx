@@ -18,7 +18,8 @@ interface SidebarProps {
 }
 
 const MAIN_ITEMS: NavItem[] = [
-  { href: "/", label: "Dashboard Global", icon: LayoutDashboard },
+  { href: "/", label: "Dashboard Eksekutif", icon: LayoutDashboard },
+  { href: "/buku-global", label: "Buku Global", icon: LayoutDashboard },
   { href: "/buku-usaha", label: "Buku Usaha", icon: Briefcase },
 ];
 

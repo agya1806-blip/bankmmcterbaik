@@ -3,24 +3,25 @@
 import { usePathname, useRouter } from "next/navigation";
 import {
   Printer, Monitor, Smartphone, Coffee, Store, Shirt, Tags,
-  Wallet, BarChart3, Settings, Users, Sigma,
+  Wallet, BarChart3, Settings, Users, Sigma, LayoutDashboard, ClipboardList,
 } from "lucide-react";
 
 const BRANCHES = [
-  { slug: "percetakan", label: "Percetakan", icon: Printer, color: "text-violet-400", bg: "bg-violet-500/10" },
-  { slug: "laptop", label: "Laptop / PC", icon: Monitor, color: "text-cyan-400", bg: "bg-cyan-500/10" },
-  { slug: "gadget", label: "Gadget", icon: Smartphone, color: "text-sky-400", bg: "bg-sky-500/10" },
-  { slug: "warkop", label: "Warkop", icon: Coffee, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-  { slug: "kelontong", label: "Kelontong", icon: Store, color: "text-amber-400", bg: "bg-amber-500/10" },
-  { slug: "konveksi", label: "Konveksi", icon: Tags, color: "text-rose-400", bg: "bg-rose-500/10" },
-  { slug: "toko-pakaian", label: "Toko Pakaian", icon: Shirt, color: "text-pink-400", bg: "bg-pink-500/10" },
+  { slug: "percetakan", label: "Percetakan", icon: Printer, color: "from-violet-500 to-purple-600" },
+  { slug: "laptop", label: "Laptop / PC", icon: Monitor, color: "from-cyan-500 to-blue-600" },
+  { slug: "gadget", label: "Gadget", icon: Smartphone, color: "from-sky-500 to-indigo-600" },
+  { slug: "warkop", label: "Warkop", icon: Coffee, color: "from-emerald-500 to-teal-600" },
+  { slug: "kelontong", label: "Kelontong", icon: Store, color: "from-amber-500 to-orange-600" },
+  { slug: "konveksi", label: "Konveksi", icon: Tags, color: "from-rose-500 to-pink-600" },
+  { slug: "toko-pakaian", label: "Toko Pakaian", icon: Shirt, color: "from-fuchsia-500 to-pink-600" },
 ] as const;
 
 const HUB_MENUS = [
-  { slug: "pelanggan", label: "Pelanggan Usaha", icon: Users, color: "text-emerald-400" },
-  { slug: "dompet", label: "Dompet Usaha", icon: Wallet, color: "text-emerald-400" },
-  { slug: "laporan-keuangan", label: "Laporan Usaha", icon: BarChart3, color: "text-emerald-400" },
-  { slug: "pengaturan", label: "Pengaturan", icon: Settings, color: "text-emerald-400" },
+  { slug: "pelanggan", label: "Pelanggan", icon: Users },
+  { slug: "dompet", label: "Dompet", icon: Wallet },
+  { slug: "laporan-keuangan", label: "Laporan", icon: BarChart3 },
+  { slug: "inventory", label: "Inventaris", icon: ClipboardList },
+  { slug: "pengaturan", label: "Pengaturan", icon: Settings },
 ];
 
 export default function BukuUsahaLayout({ children }: { children: React.ReactNode }) {
@@ -34,57 +35,70 @@ export default function BukuUsahaLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="space-y-6 pb-4">
-      {/* Header */}
+    <div className="space-y-5 pb-4 animate-fade-in">
       <div className="flex items-center gap-3">
-        <div className="size-10 rounded-xl bg-emerald-500/15 flex items-center justify-center">
-          <Sigma className="size-5 text-emerald-400" />
+        <div className="size-10 rounded-xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] flex items-center justify-center shadow-lg">
+          <Sigma className="size-5 text-white" />
         </div>
         <div>
           <h1 className="text-lg font-bold font-heading">Buku Usaha</h1>
-          <p className="text-xs text-slate-400">7 cabang usaha terpadu</p>
+          <p className="text-[10px] text-slate-500 dark:text-slate-400">7 cabang usaha terpadu dalam satu platform</p>
         </div>
       </div>
 
-      {/* Hub Menus */}
       <div>
-        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Manajemen Usaha</h2>
-        <div className="grid grid-cols-2 gap-3">
+        <h2 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-1">Manajemen Pusat</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {HUB_MENUS.map((m) => {
             const Icon = m.icon;
             return (
-              <button
-                key={m.slug}
-                onClick={() => router.push(`/buku-usaha/${m.slug}`)}
-                className="flex items-center gap-3 p-4 rounded-2xl bg-slate-900/80 border border-slate-800/60 active:scale-[0.97] transition-all text-left"
-              >
-                <div className="size-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-                  <Icon className="size-5 text-emerald-400" />
+              <button key={m.slug} onClick={() => router.push(`/buku-usaha/${m.slug}`)}
+                className="premium-card p-3 flex items-center gap-2.5 active:scale-[0.97] transition-all text-left group">
+                <div className="size-9 rounded-lg bg-gradient-to-r from-[#7B61FF]/10 to-[#FF5C00]/10 flex items-center justify-center shrink-0 group-hover:from-[#7B61FF]/20 group-hover:to-[#FF5C00]/20 transition-all">
+                  <Icon className="size-4 text-[#7B61FF]" />
                 </div>
-                <span className="text-sm font-medium">{m.label}</span>
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{m.label}</span>
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* 7 Branches */}
       <div>
-        <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Cabang Usaha</h2>
-        <div className="grid grid-cols-2 gap-3">
+        <h2 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-1">Cabang Usaha</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {BRANCHES.map((b) => {
             const Icon = b.icon;
             return (
-              <button
-                key={b.slug}
-                onClick={() => router.push(`/buku-usaha/${b.slug}/dashboard`)}
-                className={"flex items-center gap-3 p-4 rounded-2xl " + b.bg + " border border-slate-800/40 active:scale-[0.97] transition-all text-left"}
-              >
-                <div className={"size-10 rounded-xl " + b.bg + " flex items-center justify-center shrink-0"}>
-                  <Icon className={"size-5 " + b.color} />
+              <div key={b.slug} className="premium-card overflow-hidden">
+                <button onClick={() => router.push(`/buku-usaha/${b.slug}/dashboard`)}
+                  className="w-full flex items-center gap-3 p-4 active:scale-[0.97] transition-all text-left">
+                  <div className={`size-10 rounded-xl bg-gradient-to-r ${b.color} flex items-center justify-center shrink-0 shadow-md`}>
+                    <Icon className="size-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{b.label}</span>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[9px] text-slate-400">Dashboard</span>
+                    </div>
+                  </div>
+                  <LayoutDashboard className="size-4 text-slate-300 dark:text-slate-600" />
+                </button>
+                <div className="flex border-t border-slate-100 dark:border-slate-800/60">
+                  <button onClick={() => router.push(`/buku-usaha/${b.slug}/dashboard`)}
+                    className="flex-1 py-2.5 text-[10px] text-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors font-medium">
+                    Dashboard
+                  </button>
+                  <button onClick={() => router.push(`/buku-usaha/${b.slug}/kasir`)}
+                    className="flex-1 py-2.5 text-[10px] text-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors font-medium border-x border-slate-100 dark:border-slate-800/60">
+                    Kasir
+                  </button>
+                  <button onClick={() => router.push(`/buku-usaha/${b.slug}/transaksi`)}
+                    className="flex-1 py-2.5 text-[10px] text-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors font-medium">
+                    Aktivitas
+                  </button>
                 </div>
-                <span className={"text-sm font-medium " + b.color}>{b.label}</span>
-              </button>
+              </div>
             );
           })}
         </div>

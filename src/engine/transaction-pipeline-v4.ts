@@ -1,4 +1,4 @@
-import { db, type BookOrBranch, type DbTransaction, type DbTransactionItem } from "@/lib/db-v4";
+import { db, type BookOrBranch, type DbTransaction, type DbTransactionItem, BOOK_LABELS } from "@/lib/db-v4";
 import { writeAuditLog } from "@/lib/audit-logger";
 
 export interface PipelineInputV4 {
@@ -28,6 +28,39 @@ export interface PipelineResultV4 {
   piutangId?: string;
   poinTerpakai?: number;
   error?: string;
+}
+
+/* ─── Auto-init default wallets per branch ─── */
+export async function ensureBranchWallets(branch: BookOrBranch): Promise<void> {
+  if (branch === "usaha" || branch === "pribadi" || branch === "keluarga") return;
+  const existing = await db.wallets.where("bookOrBranchId").equals(branch).toArray();
+  if (existing.length >= 2) return;
+  const label = BOOK_LABELS[branch] || branch;
+  const now = new Date().toISOString();
+  if (!existing.find((w) => w.namaDompet.includes("Kas Laci"))) {
+    await db.wallets.add({
+      id: `wallet-kas-${branch}-${crypto.randomUUID().slice(0, 8)}`,
+      bookOrBranchId: branch,
+      namaDompet: `Kas Laci ${label}`,
+      saldo: 0,
+      tipe: "KasTunai",
+      catatan: `Dompet kas tunai ${label}`,
+      isActive: true,
+      createdAt: now,
+    });
+  }
+  if (!existing.find((w) => w.namaDompet.includes("Bank"))) {
+    await db.wallets.add({
+      id: `wallet-bank-${branch}-${crypto.randomUUID().slice(0, 8)}`,
+      bookOrBranchId: branch,
+      namaDompet: `Bank/QRIS ${label}`,
+      saldo: 0,
+      tipe: "Bank",
+      catatan: `Dompet non-tunai ${label}`,
+      isActive: true,
+      createdAt: now,
+    });
+  }
 }
 
 async function findOrCreateCustomer(branch: BookOrBranch, nama: string, wa: string): Promise<string> {
@@ -106,6 +139,34 @@ async function updateWalletBalance(walletId: string, nominal: number) {
   await db.wallets.update(walletId, { saldo: wallet.saldo + nominal });
 }
 
+/* ─── Cashflow recording (Step 4b) ─── */
+async function recordCashflow(data: {
+  branch: BookOrBranch;
+  walletId: string;
+  walletNama: string;
+  nominal: number;
+  referensiId: string;
+  catatan: string;
+}) {
+  const wallet = await db.wallets.get(data.walletId);
+  if (!wallet) return;
+  await db.cashflows.add({
+    id: crypto.randomUUID(),
+    bookOrBranchId: data.branch,
+    tipe: "masuk",
+    kategori: "Pendapatan Usaha",
+    nominal: data.nominal,
+    saldoSebelum: wallet.saldo - data.nominal,
+    saldoSesudah: wallet.saldo,
+    walletId: data.walletId,
+    walletNama: data.walletNama,
+    referensiId: data.referensiId,
+    referensiTipe: "transaction",
+    catatan: data.catatan,
+    createdAt: new Date().toISOString(),
+  });
+}
+
 async function createPiutang(data: {
   branch: BookOrBranch;
   transactionId: string;
@@ -143,6 +204,7 @@ export async function executeTransactionPipelineV4(input: PipelineInputV4): Prom
   try {
     return await db.transaction("rw", [
       db.wallets,
+      db.cashflows,
       db.inventory,
       db.inventoryMutations,
       db.customers,
@@ -154,7 +216,10 @@ export async function executeTransactionPipelineV4(input: PipelineInputV4): Prom
       let poinTerpakai = 0;
       let customerId: string | undefined;
 
-      /* 0. Cross-branch poin redemption */
+      /* 0. Ensure branch wallets exist */
+      await ensureBranchWallets(branch);
+
+      /* 1. Cross-branch poin redemption */
       if (input.poinDigunakan && input.poinDigunakan > 0 && input.customerWA) {
         const crossCust = await findCustomerCrossBranch(input.customerWA);
         if (crossCust && crossCust.poin >= input.poinDigunakan) {
@@ -163,17 +228,17 @@ export async function executeTransactionPipelineV4(input: PipelineInputV4): Prom
         }
       }
 
-      /* 1. Cut inventory stock */
+      /* 2. Cut inventory stock */
       if (input.inventoryLinks?.length) {
         await cutInventoryStock(branch, input.inventoryLinks);
       }
 
-      /* 2. Find or create customer */
+      /* 3. Find or create customer */
       if (input.customerNama.trim()) {
         customerId = await findOrCreateCustomer(branch, input.customerNama, input.customerWA);
       }
 
-      /* 3. Save transaction */
+      /* 4. Save transaction */
       const sisaTagihan = Math.max(input.totalBruto - input.dpDibayar, 0);
       const status = sisaTagihan <= 0 ? "LUNAS" : "DP";
 
@@ -196,17 +261,30 @@ export async function executeTransactionPipelineV4(input: PipelineInputV4): Prom
       };
       await db.transactions.add(transaction);
 
-      /* 4. Update wallet balance */
+      /* 5a. Update wallet balance */
       const nominalWallet = input.dpDibayar > 0 ? input.dpDibayar : input.totalBruto;
       await updateWalletBalance(input.walletIdTarget, nominalWallet);
 
-      /* 5. Update customer metrics */
+      /* 5b. Record cashflow (Step 4 — Sinkronisasi Cashflow) */
+      const walletTarget = await db.wallets.get(input.walletIdTarget);
+      if (walletTarget) {
+        await recordCashflow({
+          branch,
+          walletId: input.walletIdTarget,
+          walletNama: walletTarget.namaDompet,
+          nominal: nominalWallet,
+          referensiId: input.id,
+          catatan: `Pendapatan ${BOOK_LABELS[branch]} — ${input.invoiceNumber}`,
+        });
+      }
+
+      /* 6. Update customer metrics */
       if (customerId) {
         const poinBertambah = input.poinDigunakan ? 0 : Math.floor(input.totalBruto * 0.01);
         await updateCustomerMetrics(customerId, input.totalBruto, poinBertambah);
       }
 
-      /* 6. Auto-create piutang if sisa > 0 */
+      /* 7. Auto-create piutang if sisa > 0 */
       let piutangId: string | undefined;
       if (sisaTagihan > 0 && customerId) {
         piutangId = await createPiutang({
@@ -220,7 +298,7 @@ export async function executeTransactionPipelineV4(input: PipelineInputV4): Prom
         });
       }
 
-      /* 7. Audit log */
+      /* 8. Audit log */
       if (input.userId) {
         await writeAuditLog({
           bookOrBranchId: branch,

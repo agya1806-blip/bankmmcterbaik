@@ -9,14 +9,14 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 }
 
 const variantStyles: Record<string, string> = {
-  default: "bg-muted text-muted-foreground",
-  secondary: "bg-secondary text-secondary-foreground",
-  destructive: "bg-destructive text-destructive-foreground",
+  default: "bg-[#7B61FF]/10 text-[#7B61FF] dark:text-[#7B61FF]",
+  secondary: "bg-[#FF5C00]/10 text-[#FF5C00] dark:text-[#FF5C00]",
+  destructive: "bg-red-100/80 dark:bg-red-900/30 text-red-600 dark:text-red-400",
   success: "bg-emerald-100/80 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
   warning: "bg-amber-100/80 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
   danger: "bg-red-100/80 dark:bg-red-900/30 text-red-600 dark:text-red-400",
-  info: "bg-blue-100/80 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400",
-  outline: "border border-border text-muted-foreground",
+  info: "bg-[#7B61FF]/10 text-[#7B61FF] dark:text-[#7B61FF]",
+  outline: "border border-slate-200/60 dark:border-slate-800/60 text-muted-foreground",
 };
 
 export function Badge({ variant = "default", className, children, ...props }: BadgeProps) {

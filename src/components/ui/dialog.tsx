@@ -31,10 +31,10 @@ function Dialog({ open, onOpenChange, trigger, children }: {
             className="fixed inset-0 bg-black/30 backdrop-blur-sm animate-fade-in"
             onClick={() => setOpen(false)}
           />
-          <div ref={contentRef} className="relative z-10 w-full sm:max-w-lg bg-white/95 dark:bg-[var(--card)]/95 backdrop-blur-2xl border border-border/50 shadow-2xl sm:rounded-2xl rounded-t-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto pb-4 sm:pb-6">
+          <div ref={contentRef} className="relative z-10 w-full sm:max-w-lg bg-white/95 dark:bg-[#131527]/95 backdrop-blur-2xl border border-slate-200/60 dark:border-slate-800/60 shadow-[0_8px_30px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.25)] sm:rounded-2xl rounded-t-2xl p-6 animate-scale-in max-h-[90vh] overflow-y-auto pb-4 sm:pb-6">
             <button
               onClick={() => setOpen(false)}
-              className="absolute top-4 right-4 flex items-center justify-center size-11 rounded-xl hover:bg-muted/50 transition-colors text-muted-foreground active:scale-90"
+              className="absolute top-4 right-4 flex items-center justify-center size-9 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors text-slate-400 dark:text-slate-500 active:scale-90"
             >
               <X className="size-4" />
             </button>
@@ -59,11 +59,11 @@ function DialogTitle({ children, className }: { children: React.ReactNode; class
 }
 
 function DialogDescription({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <p className={`text-sm text-muted-foreground/70 ${className ?? ""}`}>{children}</p>;
+  return <p className={`text-sm text-slate-500 dark:text-slate-400 ${className ?? ""}`}>{children}</p>;
 }
 
 function DialogFooter({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={`flex items-center justify-end gap-3 pt-4 border-t border-border/50 mt-6 ${className ?? ""}`}>{children}</div>;
+  return <div className={`flex items-center justify-end gap-3 pt-4 border-t border-slate-200/60 dark:border-slate-800/60 mt-6 ${className ?? ""}`}>{children}</div>;
 }
 
 function DialogContent({ children, className }: { children: React.ReactNode; className?: string }) {

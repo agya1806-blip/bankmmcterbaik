@@ -1,16 +1,16 @@
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
-import { LayoutDashboard, Briefcase, ArrowRightLeft, Bot, Lock, User, Users } from "lucide-react";
+import { LayoutDashboard, Briefcase, ArrowRightLeft, Bot, Globe, User, Users } from "lucide-react";
 
 const ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard, color: "text-emerald-400" },
   { href: "/buku-pribadi", label: "Pribadi", icon: User, color: "text-sky-400" },
   { href: "/buku-keluarga", label: "Keluarga", icon: Users, color: "text-amber-400" },
   { href: "/buku-usaha", label: "Usaha", icon: Briefcase, color: "text-violet-400" },
+  { href: "/buku-global", label: "Global", icon: Globe, color: "text-emerald-400" },
   { href: "/mutasi-antar-buku", label: "Transfer", icon: ArrowRightLeft, color: "text-cyan-400" },
   { href: "/asisten-ai", label: "AI Chat", icon: Bot, color: "text-purple-400" },
-  { href: "/kiosk", label: "Kios", icon: Lock, color: "text-rose-400" },
 ];
 
 const NAV_HEIGHT = 64;

@@ -12,29 +12,29 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<string, string> = {
   default:
-    "bg-gradient-to-br from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:brightness-110 active:brightness-95 active:scale-[0.97]",
+    "bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white hover:opacity-90 active:scale-[0.97]",
   primary:
-    "bg-gradient-to-br from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:brightness-110 active:brightness-95 active:scale-[0.97]",
+    "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white hover:opacity-90 active:scale-[0.97]",
   secondary:
-    "bg-foreground/5 text-foreground hover:bg-foreground/10 active:scale-[0.97]",
+    "bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700/60 active:scale-[0.97]",
   outline:
-    "border border-border bg-transparent text-foreground hover:bg-muted/50 active:scale-[0.97]",
+    "border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/40 active:scale-[0.97]",
   ghost:
-    "text-muted-foreground hover:text-foreground hover:bg-muted/50 active:scale-[0.97]",
+    "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 active:scale-[0.97]",
   danger:
-    "bg-gradient-to-br from-red-600 to-red-500 text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:brightness-110 active:brightness-95 active:scale-[0.97]",
+    "bg-gradient-to-r from-red-600 to-red-500 text-white hover:opacity-90 active:scale-[0.97]",
   destructive:
-    "bg-gradient-to-br from-red-600 to-red-500 text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:brightness-110 active:brightness-95 active:scale-[0.97]",
+    "bg-gradient-to-r from-red-600 to-red-500 text-white hover:opacity-90 active:scale-[0.97]",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  xs: "h-8 px-3 text-xs rounded-xl gap-1",
-  sm: "h-10 px-4 text-sm rounded-xl gap-1.5",
-  md: "h-11 px-5 text-sm rounded-2xl gap-2",
-  lg: "h-12 px-6 text-base rounded-2xl gap-2",
+  xs: "h-8 px-3 text-xs rounded-xl gap-1 font-medium",
+  sm: "h-9 px-4 text-sm rounded-xl gap-1.5 font-medium",
+  md: "h-10 px-5 text-sm rounded-xl gap-2 font-semibold",
+  lg: "h-11 px-6 text-base rounded-2xl gap-2 font-semibold",
   "icon-xs": "size-8 rounded-xl",
-  "icon-sm": "size-10 rounded-xl",
-  icon: "size-11 rounded-2xl",
+  "icon-sm": "size-9 rounded-xl",
+  icon: "size-10 rounded-xl",
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -42,9 +42,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     <button
       ref={ref}
       disabled={disabled}
-      className={`btn-premium ${variantStyles[variant]} ${sizeStyles[size]} ${
-        disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"
-      } ${className ?? ""}`}
+      className={`inline-flex items-center justify-center relative overflow-hidden transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF]/40 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ${variantStyles[variant]} ${sizeStyles[size]} ${className ?? ""}`}
       {...props}
     >
       {children}

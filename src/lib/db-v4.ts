@@ -221,6 +221,35 @@ export interface DbAuditLog {
   createdAt: string;
 }
 
+export interface DbCashflow {
+  id: string;
+  bookOrBranchId: BookOrBranch;
+  tipe: "masuk" | "keluar";
+  kategori: string;
+  nominal: number;
+  saldoSebelum: number;
+  saldoSesudah: number;
+  walletId: string;
+  walletNama: string;
+  referensiId: string;
+  referensiTipe: "transaction" | "mutasi" | "adjustment";
+  catatan: string;
+  createdAt: string;
+}
+
+export type ProductionStatus = "antre" | "diproduksi" | "selesai";
+
+export interface DbProduction {
+  id: string;
+  bookOrBranchId: BookOrBranch;
+  transactionId: string;
+  invoiceNumber: string;
+  status: ProductionStatus;
+  catatan: string;
+  updatedAt: string;
+  createdAt: string;
+}
+
 export interface DbSedekahBalance {
   id: string;
   bookOrBranchId: BookOrBranch;
@@ -256,6 +285,8 @@ class MmcBankDB extends Dexie {
   sedekahBalances!: Table<DbSedekahBalance, string>;
   invoiceCounters!: Table<DbInvoiceCounter, string>;
   auditLogs!: Table<DbAuditLog, string>;
+  cashflows!: Table<DbCashflow, string>;
+  productions!: Table<DbProduction, string>;
 
   constructor() {
     super("mmcbank-v4");
@@ -277,6 +308,8 @@ class MmcBankDB extends Dexie {
       sedekahBalances: "id, bookOrBranchId",
       invoiceCounters: "id, bookOrBranchId, prefix",
       auditLogs: "id, bookOrBranchId, action, entityType, entityId, createdAt",
+      cashflows: "id, bookOrBranchId, tipe, kategori, walletId, referensiId, createdAt",
+      productions: "id, bookOrBranchId, transactionId, status, updatedAt",
     });
   }
 }
