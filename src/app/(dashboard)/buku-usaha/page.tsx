@@ -5,9 +5,12 @@ import { Printer, Smartphone, Coffee, Shirt, Wallet, Settings, BarChart3, Packag
 
 const UNIT_LIST: { id: string; label: string; icon: React.ElementType; grad: string; glow: string; }[] = [
   { id: "percetakan", label: "Percetakan", icon: Printer, grad: "from-indigo-500 to-purple-600", glow: "shadow-indigo-500/25" },
-  { id: "gadget-laptop", label: "Gadget & Laptop", icon: Smartphone, grad: "from-cyan-500 to-blue-600", glow: "shadow-cyan-500/25" },
-  { id: "warkop-kelontong", label: "Warkop & Kelontong", icon: Coffee, grad: "from-emerald-500 to-emerald-600", glow: "shadow-emerald-500/25" },
-  { id: "pakaian-konveksi", label: "Pakaian & Konveksi", icon: Shirt, grad: "from-rose-500 to-pink-600", glow: "shadow-rose-500/25" },
+  { id: "gadget", label: "Gadget", icon: Smartphone, grad: "from-cyan-500 to-blue-600", glow: "shadow-cyan-500/25" },
+  { id: "laptop", label: "Laptop & Service", icon: Smartphone, grad: "from-blue-500 to-indigo-600", glow: "shadow-blue-500/25" },
+  { id: "warkop", label: "Warkop", icon: Coffee, grad: "from-emerald-500 to-emerald-600", glow: "shadow-emerald-500/25" },
+  { id: "kelontong", label: "Kelontong", icon: Coffee, grad: "from-violet-500 to-purple-600", glow: "shadow-violet-500/25" },
+  { id: "konveksi", label: "Konveksi", icon: Shirt, grad: "from-rose-500 to-pink-600", glow: "shadow-rose-500/25" },
+  { id: "toko-pakaian", label: "Toko Pakaian", icon: Shirt, grad: "from-orange-500 to-rose-600", glow: "shadow-orange-500/25" },
 ];
 
 export default function BukuUsahaPage() {
