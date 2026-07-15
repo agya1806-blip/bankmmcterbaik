@@ -166,7 +166,8 @@ Terima kasih — ${profil.nama}`;
         {/* ─── HEADER DINAMIS ─── */}
         <div className="text-center border-b border-gray-200 pb-5 mb-5">
           {profil.logo ? (
-            <img src={profil.logo} alt="Logo" className="h-16 mx-auto mb-3 object-contain" />
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={profil.logo} alt="" className="h-16 mx-auto mb-3 object-contain" />
           ) : (
             <div className="size-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
               <Smartphone className="size-8 text-white" />
@@ -369,6 +370,7 @@ Terima kasih — ${profil.nama}`;
         <button onClick={handleExportPNG}
           className="px-4 py-2.5 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 text-white text-[10px] font-bold shadow-lg shadow-cyan-500/20 hover:shadow-xl hover:shadow-cyan-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
         >
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
           <Image className="size-4" /> Ekspor PNG
         </button>
         <button onClick={handleExportPDF}

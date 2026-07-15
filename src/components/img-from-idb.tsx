@@ -4,7 +4,7 @@ import { getImage, isRefKey } from "@/lib/image-store";
 
 interface ImgFromIdbProps {
   src: string;
-  alt: string;
+  alt?: string;
   className?: string;
 }
 
@@ -19,5 +19,6 @@ export function ImgFromIdb({ src, alt, className }: ImgFromIdbProps) {
     }
   }, [src]);
   if (!resolved) return null;
-  return <img src={resolved} alt={alt} className={className} />;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={resolved} alt={alt || ""} className={className} />;
 }

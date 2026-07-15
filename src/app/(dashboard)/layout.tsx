@@ -1,19 +1,18 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
 import Header from "@/components/layout/header";
 import BottomNav from "@/components/layout/bottom-nav";
 import OnboardingGuard from "@/components/onboarding-guard";
-import PWA from "@/components/pwa";
 
 const PUBLIC_ROUTES = ["/login", "/register", "/forgot-pin"];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentUser, isLoggedIn, onboardingCompleted } = useSessionStore();
+  const { isLoggedIn } = useSessionStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);

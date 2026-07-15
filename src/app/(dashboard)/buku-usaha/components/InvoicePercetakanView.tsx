@@ -171,7 +171,8 @@ Terima kasih — ${profil.nama}`;
         {/* ─── HEADER BRANDING DINAMIS ─── */}
         <div className="text-center border-b border-gray-200 pb-5 mb-5">
           {profil.logo ? (
-            <img src={profil.logo} alt="Logo" className="h-16 mx-auto mb-3 object-contain" />
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={profil.logo} alt="" className="h-16 mx-auto mb-3 object-contain" />
           ) : (
             <div className="size-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
               <Printer className="size-8 text-white" />
@@ -357,6 +358,7 @@ Terima kasih — ${profil.nama}`;
           onClick={handleExportPNG}
           className="px-4 py-2.5 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white text-[10px] font-bold shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
         >
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
           <Image className="size-4" /> Ekspor PNG
         </button>
         <button

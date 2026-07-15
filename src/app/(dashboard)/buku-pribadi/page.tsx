@@ -4,8 +4,8 @@ import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   Wallet, TrendingUp, Plus, X, Download,
   Coffee, Car, ShoppingBag, Zap, Home, Heart, BookOpen,
-  ArrowUpRight, ArrowDownRight, PiggyBank, Lightbulb,
-  Shield, Trash2, FileDown, Target, Calendar,
+  ArrowUpRight, ArrowDownRight, PiggyBank,
+  Trash2, FileDown, Target, Calendar,
   Send,
 } from "lucide-react";
 import toast from "react-hot-toast";

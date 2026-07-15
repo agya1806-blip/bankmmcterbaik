@@ -47,7 +47,7 @@ export default function LoginPage() {
 
       setSession(found);
       router.replace("/");
-    } catch (e) {
+    } catch {
       setError("Terjadi kesalahan");
     } finally {
       setLoading(false);

@@ -54,7 +54,7 @@ export default function RegisterPage() {
       await db.users.add(newUser);
       setSession(newUser);
       router.replace("/");
-    } catch (e) {
+    } catch {
       setError("Gagal mendaftar");
     } finally {
       setLoading(false);

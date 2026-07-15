@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { CreditCard, Copy, Eye, EyeOff, Maximize2, Minimize2, X } from "lucide-react";
+import { CreditCard, Copy, Eye, EyeOff, Maximize2, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { useBusinessStore } from "@/store/useBusinessStore";
 import { ImgFromIdb } from "@/components/img-from-idb";

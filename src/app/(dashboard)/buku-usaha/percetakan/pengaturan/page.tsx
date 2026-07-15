@@ -31,7 +31,7 @@ export default function PengaturanProfil() {
     if (profil.logo && isRefKey(profil.logo)) {
       getImage(profil.logo).then((img) => { if (img) setPreviewLogo(img); }).catch(() => {});
     }
-  }, []);
+  }, [profil.logo]);
 
   const handleLogoUpload = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,6 +124,7 @@ export default function PengaturanProfil() {
         {/* ─── Logo ─── */}
         <div className="floating-card p-5 space-y-3">
           <p className="text-xs font-semibold flex items-center gap-1.5">
+            {/* eslint-disable-next-line jsx-a11y/alt-text */}
             <Image className="size-3.5 text-indigo-500" /> Logo Usaha
           </p>
           <div className="flex items-center gap-4">
@@ -334,6 +335,7 @@ export default function PengaturanProfil() {
         <div className="flex items-center gap-3">
           <div className="size-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md overflow-hidden shrink-0">
             {previewLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img src={previewLogo} alt="" className="size-full object-contain" />
             ) : (
               <Building2 className="size-5 text-white" />

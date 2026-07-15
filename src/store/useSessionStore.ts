@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { DbUser, BookOrBranch } from "@/lib/db-v4";
+import type { DbUser } from "@/lib/db-v4";
 
 interface SessionState {
   currentUserId: string | null;

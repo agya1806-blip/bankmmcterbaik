@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Printer, Monitor, Smartphone, Coffee, Store, Shirt, Tags, ArrowLeft,
+  Printer, Monitor, Smartphone, Coffee, Store, Shirt, Tags,
   Wallet, BarChart3, Settings, Users, Sigma,
 } from "lucide-react";
 
@@ -28,10 +28,6 @@ export default function BukuUsahaLayout({ children }: { children: React.ReactNod
   const router = useRouter();
 
   const isRoot = pathname === "/buku-usaha";
-  const segments = pathname.split("/").filter(Boolean);
-  const currentBranch = segments[1] ? BRANCHES.find((b) => b.slug === segments[1]) : null;
-  const currentHub = segments[1] ? HUB_MENUS.find((h) => h.slug === segments[1]) : null;
-  const title = currentBranch?.label ?? currentHub?.label ?? "Buku Usaha";
 
   if (!isRoot) {
     return <>{children}</>;

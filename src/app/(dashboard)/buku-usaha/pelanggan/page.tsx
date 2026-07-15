@@ -4,10 +4,10 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Users, ArrowLeft, Star, Search, ChevronRight, X,
-  Phone, ShoppingCart, Calendar, Upload, FileSpreadsheet,
+  Phone, ShoppingCart, Calendar, Upload,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { useBusinessStore, CustomerRecord, CustomerTransaction, BizUnit, BIZ_UNIT_LABELS } from "@/store/useBusinessStore";
+import { useBusinessStore, CustomerRecord, BizUnit, BIZ_UNIT_LABELS } from "@/store/useBusinessStore";
 import { CardSkeleton } from "@/components/ui/skeleton";
 
 declare global {
@@ -32,7 +32,7 @@ function getPoinBadge(poin: number) {
 export default function PelangganPage() {
   const router = useRouter();
   const store = useBusinessStore();
-  const { customers, customerTransactions, recordCustomerTransaction, addCustomerRecord, getCustomerByWA } = store;
+  const { customers, customerTransactions, addCustomerRecord, getCustomerByWA } = store;
 
   const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState("");

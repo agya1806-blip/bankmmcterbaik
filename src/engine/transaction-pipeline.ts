@@ -1,4 +1,4 @@
-import { mmcDB, type MmcTransaction, type MmcTransactionItem, type MmcCustomer, type BizUnit } from "@/lib/db/mmcbank-db";
+import { mmcDB, type MmcTransaction, type MmcTransactionItem, type BizUnit } from "@/lib/db/mmcbank-db";
 
 export interface PipelineInput {
   id: string;

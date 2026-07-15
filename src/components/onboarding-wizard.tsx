@@ -207,6 +207,7 @@ export default function OnboardingWizard() {
                 <div className="flex items-center gap-4">
                   {logoPreview ? (
                     <div className="relative size-16 rounded-xl overflow-hidden ring-2 ring-emerald-200 dark:ring-emerald-800">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={logoPreview}
                         alt="Logo preview"
@@ -400,6 +401,7 @@ export default function OnboardingWizard() {
                 <div className="flex items-center gap-3">
                   {pmQris ? (
                     <div className="relative size-16 rounded-xl overflow-hidden ring-2 ring-emerald-200 dark:ring-emerald-800">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={pmQris}
                         alt="QRIS preview"

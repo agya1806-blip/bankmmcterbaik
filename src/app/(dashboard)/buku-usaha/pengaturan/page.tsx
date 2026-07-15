@@ -215,7 +215,7 @@ export default function PengaturanBukuUsaha() {
       toast.success("Metode pembayaran ditambahkan");
     }
     resetPmForm();
-  }, [pmNama, pmBank, pmNoRek, pmAn, pmQrisUrl, pmEditId, newPmId, store]);
+  }, [pmNama, pmBank, pmNoRek, pmAn, pmQrisUrl, pmEditId, newPmId, store, resetPmForm]);
 
   const handleEditPm = useCallback(async (pm: PaymentMethod) => {
     setPmNama(pm.namaMetode);
@@ -358,12 +358,14 @@ export default function PengaturanBukuUsaha() {
           {/* Logo */}
           <div className="floating-card p-5 space-y-3">
             <p className="text-xs font-semibold flex items-center gap-1.5">
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
               <Image className="size-3.5 text-violet-500" /> Logo Usaha
             </p>
             <div className="flex items-center gap-4">
               <div className="size-20 rounded-2xl border-2 border-dashed border-muted-foreground/20 flex items-center justify-center overflow-hidden bg-muted/10 shrink-0">
                 {localLogo ? (
-                  <img src={localLogo} alt="Logo" className="size-full object-contain p-1" />
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={localLogo} alt="" className="size-full object-contain p-1" />
                 ) : (
                   <Building2 className="size-8 text-muted-foreground/30" />
                 )}
@@ -458,7 +460,12 @@ export default function PengaturanBukuUsaha() {
             <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-2">Live Preview</p>
             <div className="flex items-center gap-3">
               <div className="size-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md overflow-hidden shrink-0">
-                {localLogo ? <img src={localLogo} alt="" className="size-full object-contain" /> : <Building2 className="size-5 text-white" />}
+                {localLogo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={localLogo} alt="" className="size-full object-contain" />
+                ) : (
+                  <Building2 className="size-5 text-white" />
+                )}
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-bold font-heading truncate">{localNama || "Nama Usaha"}</p>
@@ -514,7 +521,8 @@ export default function PengaturanBukuUsaha() {
                 </label>
                 {pmQrisUrl && (
                   <div className="flex items-center gap-2">
-                    <img src={pmQrisPreview} alt="QRIS" className="size-10 rounded-lg object-contain border border-border/40" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={pmQrisPreview} alt="" className="size-10 rounded-lg object-contain border border-border/40" />
                     <button type="button" onClick={() => {
                       if (pmQrisUrl && isRefKey(pmQrisUrl)) deleteImage(pmQrisUrl).catch(() => {});
                       setPmQrisUrl("");
@@ -558,6 +566,7 @@ export default function PengaturanBukuUsaha() {
                       <p className="text-[9px] text-muted-foreground/50">{pm.bankName} — {pm.accountNo}</p>
                       {pm.accountName && <p className="text-[9px] text-muted-foreground/40">a.n {pm.accountName}</p>}
                       {resolvedQris[pm.id] && (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img src={resolvedQris[pm.id]} alt="QRIS" className="size-8 mt-1 rounded-lg border border-border/30 object-contain" />
                       )}
                     </div>

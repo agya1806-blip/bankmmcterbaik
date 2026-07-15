@@ -223,7 +223,7 @@ export default function KasirGadgetLaptop() {
       rekeningNomor: defaultPayment?.accountNo || "",
       rekeningAtasNama: defaultPayment?.accountName || profil.nama || "",
     };
-  }, [selectedProduct, customerNama, customerWA, invoiceId, kondisi, garansi,
+  }, [selectedProduct, customerNama, customerWA, invoiceId, kondisi,
       garansiLabel, statusBayar, tradeIn, subtotal, potonganTradeIn, total, dpNumber, sisa, profil.nama,
       imeiSn, defaultPayment]);
 

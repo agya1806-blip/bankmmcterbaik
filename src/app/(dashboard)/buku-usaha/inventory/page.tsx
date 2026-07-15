@@ -14,10 +14,6 @@ function formatRupiah(n: number) {
   return `IDR ${n.toLocaleString("id-ID")}`;
 }
 
-function genId(): string {
-  return `inv_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-}
-
 const UNIT_FILTERS: { key: "all" | BizUnit; label: string }[] = [
   { key: "all", label: "Semua" },
   ...(Object.entries(BIZ_UNIT_LABELS) as [BizUnit, string][]).map(([k, v]) => ({

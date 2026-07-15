@@ -308,9 +308,9 @@ export default function PercetakanForm() {
     setSelectedOrderId(no);
     toast.success(`Order ${no} masuk antrean produksi`);
   }, [mode, mBahan, mPanjang, mLebar, mQty, mHargaJual, mHargaModal, hasilMeteran,
-      bHalaman, bKertasIsi, bCetakIsi, bKertasCover, bLaminasi, bJilid, bQty, bHargaJual,
-      bHargaModalKertas, bHargaModalCover, bBiayaLaminasi, bBiayaJilid, hasilBuku,
-      noInvoice, customerName, customerPhone, paymentMethod]);
+      bHalaman, bKertasIsi, bCetakIsi, bKertasCover, bLaminasi, bJilid, bQty,
+      hasilBuku,
+      noInvoice, customerName]);
 
   /* update status antrean */
   const updateStatus = useCallback((id: string) => {
@@ -431,6 +431,7 @@ ${customerPhone ? `\nKonfirmasi via: wa.me/${customerPhone}` : ""}`;
         </div>
         <div className="flex gap-1.5">
           <button onClick={exportPNG} className="size-8 rounded-lg bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors" title="Export PNG">
+            {/* eslint-disable-next-line jsx-a11y/alt-text */}
             <Image className="size-3.5 text-muted-foreground/60" />
           </button>
           <button onClick={exportPDF} className="size-8 rounded-lg bg-muted/30 flex items-center justify-center hover:bg-muted/50 transition-colors" title="Cetak PDF">

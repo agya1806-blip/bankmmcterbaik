@@ -133,7 +133,8 @@ ${profil.nama} — ${noRef || "MUGHIS BANK v3"}`;
         {/* ─── HEADER ─── */}
         <div className="text-center border-b-2 border-dashed border-gray-300 pb-4 mb-4">
           {profil.logo ? (
-            <img src={profil.logo} alt="Logo" className="h-12 mx-auto mb-2 object-contain" />
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={profil.logo} alt="" className="h-12 mx-auto mb-2 object-contain" />
           ) : (
             <div className="size-12 mx-auto mb-2 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-md">
               <Coffee className="size-6 text-white" />
@@ -260,6 +261,7 @@ ${profil.nama} — ${noRef || "MUGHIS BANK v3"}`;
         <button onClick={handleExportPNG}
           className="px-4 py-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white text-[10px] font-bold shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
         >
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
           <Image className="size-4" /> Ekspor PNG (Foto WA)
         </button>
         <button onClick={handleExportPDF}

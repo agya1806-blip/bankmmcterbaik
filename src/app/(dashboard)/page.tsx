@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { db, BOOK_LABELS, BRANCH_SLUGS, type BookOrBranch } from "@/lib/db-v4";
 import {
-  Wallet, TrendingUp, BookUser, Briefcase, HeartHandshake,
-  BookOpen, ArrowRight, Plus, Building2,
+  Wallet, BookUser, Briefcase, HeartHandshake,
+  BookOpen, ArrowRight, Building2,
 } from "lucide-react";
 
 interface BookCard {
@@ -71,7 +71,7 @@ export default function BukuKeuanganGlobal() {
         }
         grouped["usaha"] = (grouped["usaha"] ?? 0) + usahaTotal;
         setSaldoPerBuku(grouped);
-      } catch (e) {
+      } catch {
         // DB might be empty — that's fine
       } finally {
         setLoading(false);

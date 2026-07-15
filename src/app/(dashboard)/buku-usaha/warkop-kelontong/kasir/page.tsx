@@ -100,7 +100,7 @@ export default function KasirWarkopKelontong() {
       items = items.filter((m) => m.nama.toLowerCase().includes(q));
     }
     return items;
-  }, [activeKategori, search]);
+  }, [activeKategori, search, menuItems]);
 
   /* ─── Cart Ops ─── */
   const addToCart = useCallback((menu: MenuItem) => {
@@ -194,7 +194,7 @@ export default function KasirWarkopKelontong() {
     if (bayar > 0) tambahSaldoWallet(walletPenerimaanId, bayar);
     setLoading(false);
     toast.success(`Bill ${liveBillData.id} berhasil dicetak`);
-  }, [cart, bayar, subtotal, kembalian, bahan, noMeja, pelanggan, tipeOrder, liveBillData,
+  }, [cart, bayar, subtotal, bahan, liveBillData,
       kurangiSaldoWallet, tambahSaldoWallet, walletModalId, walletPenerimaanId]);
 
   const resetForm = useCallback(() => {

@@ -93,7 +93,7 @@ export default function KasirPercetakan() {
   /* Generated invoice ID */
   const [invoiceId, setInvoiceId] = useState("");
   const [showInvoice, setShowInvoice] = useState(false);
-  const { wallets, tambahSaldoWallet, kurangiSaldoWallet, addCustomerRecord, recordCustomerTransaction, getCustomerByWA, addQuickOrder, deleteQuickOrder, setLastKasirUnit } = useBusinessStore();
+  const { wallets, tambahSaldoWallet, kurangiSaldoWallet, addCustomerRecord, recordCustomerTransaction, getCustomerByWA, addQuickOrder, setLastKasirUnit } = useBusinessStore();
   const { profil } = useProfilUsahaStore();
   const [walletPenerimaanId, setWalletPenerimaanId] = useState(wallets[0]?.id || "wallet-kas");
   const [walletModalId, setWalletModalId] = useState(wallets[1]?.id || "wallet-bsi");
@@ -180,8 +180,9 @@ export default function KasirPercetakan() {
       if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 200);
   }, [customerNama, totalJual, invoiceId, mode, bahanTerpilih, mPanjang, mLebar, mQty,
-      bHalaman, bQty, dpNumber, hasilMeteran.totalHPP, hasilMeteran,
-      kurangiSaldoWallet, tambahSaldoWallet, walletModalId, walletPenerimaanId]);
+      bHalaman, bQty, dpNumber, hasilMeteran,
+      kurangiSaldoWallet, tambahSaldoWallet, walletModalId, walletPenerimaanId,
+      addCustomerRecord, customerWA, getCustomerByWA, recordCustomerTransaction]);
 
   const resetForm = useCallback(() => {
     setMode("meteran");
