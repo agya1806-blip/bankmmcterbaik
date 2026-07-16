@@ -14,7 +14,7 @@ async function deriveKey(password: string, salt: Uint8Array): Promise<CryptoKey>
   return crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt,
+      salt: salt as BufferSource,
       iterations: 100000,
       hash: "SHA-256",
     },
@@ -39,7 +39,7 @@ async function encrypt(data: string, password: string): Promise<string> {
   result.set(salt, 0);
   result.set(iv, salt.length);
   result.set(new Uint8Array(encrypted), salt.length + iv.length);
-  return btoa(String.fromCharCode(...result));
+  return btoa(String.fromCharCode.apply(null, Array.from(result)));
 }
 
 async function decrypt(encryptedBase64: string, password: string): Promise<string> {
@@ -51,7 +51,7 @@ async function decrypt(encryptedBase64: string, password: string): Promise<strin
   const decrypted = await crypto.subtle.decrypt(
     { name: "AES-GCM", iv },
     key,
-    encrypted
+    encrypted as BufferSource
   );
   return new TextDecoder().decode(decrypted);
 }

@@ -19,6 +19,8 @@ import {
   Package,
   ArrowRight,
   Clock,
+  Wallet,
+  BarChart3,
 } from "lucide-react";
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
@@ -97,7 +99,7 @@ export default function CabangDashboardPage() {
       .filter((tx) => tx.sisaTagihan > 0)
       .reduce((sum, tx) => sum + tx.sisaTagihan, 0);
     const stokMenipis = inventory.filter(
-      (item) => item.stock <= item.safetyStock
+      (item) => item.stok <= item.stokMin
     );
     const cashflowMasuk = cashflows
       .filter((c) => c.tipe === "masuk")
@@ -236,16 +238,16 @@ export default function CabangDashboardPage() {
                 key={item.id}
                 className="flex justify-between text-[11px] font-medium"
               >
-                <span className="line-clamp-1">{item.name}</span>
+                <span className="line-clamp-1">{item.nama}</span>
                 <span className="text-rose-500 font-bold shrink-0 ml-2">
-                  {item.stock} left
+                  {item.stok} left
                 </span>
               </div>
             ))}
           </div>
           {stats.stokMenipisCount > 3 && (
             <button
-              onClick={() => router.push("/buku-usaha/inventory")}
+              onClick={() => router.push(`/buku-usaha/${cabangSlug}/inventory`)}
               className="mt-2 text-[10px] font-bold text-[#7B61FF] flex items-center gap-1"
             >
               Lihat semua <ArrowRight className="w-3 h-3" />
@@ -266,7 +268,7 @@ export default function CabangDashboardPage() {
           <span className="text-[10px] font-bold">Kasir</span>
         </button>
         <button
-          onClick={() => router.push("/buku-usaha/inventory")}
+          onClick={() => router.push(`/buku-usaha/${cabangSlug}/inventory`)}
           className="premium-card p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
         >
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white">
@@ -275,15 +277,40 @@ export default function CabangDashboardPage() {
           <span className="text-[10px] font-bold">Barang</span>
         </button>
         <button
-          onClick={() =>
-            router.push(`/buku-usaha/${cabangSlug}/pelanggan`)
-          }
+          onClick={() => router.push(`/buku-usaha/${cabangSlug}/pelanggan`)}
           className="premium-card p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
         >
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white">
             <DollarSign className="w-4 h-4" />
           </div>
           <span className="text-[10px] font-bold">CRM</span>
+        </button>
+        <button
+          onClick={() => router.push(`/buku-usaha/${cabangSlug}/cashflow`)}
+          className="premium-card p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+        >
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white">
+            <Wallet className="w-4 h-4" />
+          </div>
+          <span className="text-[10px] font-bold">Cashflow</span>
+        </button>
+        <button
+          onClick={() => router.push(`/buku-usaha/${cabangSlug}/transaksi`)}
+          className="premium-card p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+        >
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white">
+            <Clock className="w-4 h-4" />
+          </div>
+          <span className="text-[10px] font-bold">Transaksi</span>
+        </button>
+        <button
+          onClick={() => router.push(`/buku-usaha/${cabangSlug}/laporan`)}
+          className="premium-card p-3 flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+        >
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-400 to-violet-500 flex items-center justify-center text-white">
+            <BarChart3 className="w-4 h-4" />
+          </div>
+          <span className="text-[10px] font-bold">Laporan</span>
         </button>
       </div>
 

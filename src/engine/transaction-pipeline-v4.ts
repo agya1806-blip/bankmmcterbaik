@@ -77,12 +77,12 @@ export async function executeTransactionPipelineV4(
       const product = await db.inventory
         .where("bookOrBranchId")
         .equals(bookOrBranchId)
-        .filter((p) => p.name === item.namaItem)
+        .filter((p) => p.nama === item.namaItem)
         .first();
 
       if (product) {
-        const newStock = product.stock - item.qty;
-        await db.inventory.update(product.id, { stock: Math.max(0, newStock) });
+        const newStock = product.stok - item.qty;
+        await db.inventory.update(product.id, { stok: Math.max(0, newStock) });
       }
     }
 

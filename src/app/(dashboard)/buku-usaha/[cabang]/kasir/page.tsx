@@ -280,7 +280,7 @@ export default function PosKasirPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <button
-          onClick={() => router.push("/(dashboard)/buku-usaha")}
+          onClick={() => router.push("/buku-usaha")}
           className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md"
         >
           <ArrowLeft className="w-5 h-5" />

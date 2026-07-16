@@ -5,13 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type BookOrBranch } from "@/lib/db-v4";
 import {
-  ArrowLeft,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  FileSpreadsheet,
-  Calendar,
-  PieChart,
+  ArrowLeft, TrendingUp, TrendingDown, DollarSign,
 } from "lucide-react";
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
@@ -35,31 +29,19 @@ export default function LaporanPage() {
 
   const transactions =
     useLiveQuery(
-      () =>
-        db.transactions
-          .where("bookOrBranchId")
-          .equals(bookOrBranchId)
-          .toArray(),
+      () => db.transactions.where("bookOrBranchId").equals(bookOrBranchId).toArray(),
       [bookOrBranchId]
     ) || [];
 
   const cashflows =
     useLiveQuery(
-      () =>
-        db.cashflows
-          .where("bookOrBranchId")
-          .equals(bookOrBranchId)
-          .toArray(),
+      () => db.cashflows.where("bookOrBranchId").equals(bookOrBranchId).toArray(),
       [bookOrBranchId]
     ) || [];
 
   const inventory =
     useLiveQuery(
-      () =>
-        db.inventory
-          .where("bookOrBranchId")
-          .equals(bookOrBranchId)
-          .toArray(),
+      () => db.inventory.where("bookOrBranchId").equals(bookOrBranchId).toArray(),
       [bookOrBranchId]
     ) || [];
 
@@ -110,27 +92,25 @@ export default function LaporanPage() {
     let totalHpp = 0;
 
     filteredTx.forEach((tx) => {
-      totalPendapatan += tx.total;
-      try {
-        const items = JSON.parse(tx.items);
-        items.forEach((item: any) => {
-          totalHpp += (item.hpp || 0) * item.qty;
-        });
-      } catch {}
+      totalPendapatan += tx.totalBruto;
+      const items = Array.isArray(tx.items) ? tx.items : [];
+      items.forEach((item: any) => {
+        totalHpp += (item.hargaModal || 0) * item.qty;
+      });
     });
 
     const cashflowMasuk = filteredCashflow
       .filter((c) => c.tipe === "masuk")
-      .reduce((sum, c) => sum + c.jumlah, 0);
+      .reduce((sum, c) => sum + c.nominal, 0);
     const cashflowKeluar = filteredCashflow
       .filter((c) => c.tipe === "keluar")
-      .reduce((sum, c) => sum + c.jumlah, 0);
+      .reduce((sum, c) => sum + c.nominal, 0);
 
     const labaKotor = totalPendapatan - totalHpp;
     const labaBersih = cashflowMasuk - cashflowKeluar;
     const piutangAktif = filteredTx
-      .filter((tx) => tx.status === "PIUTANG")
-      .reduce((sum, tx) => sum + tx.remainingDebt, 0);
+      .filter((tx) => tx.sisaTagihan > 0)
+      .reduce((sum, tx) => sum + tx.sisaTagihan, 0);
 
     return {
       totalPendapatan,
@@ -147,40 +127,24 @@ export default function LaporanPage() {
 
   const exportCSV = () => {
     if (filteredTx.length === 0) return alert("Tidak ada data untuk diekspor!");
-
-    const headers = [
-      "No Invoice",
-      "Pelanggan",
-      "Status",
-      "Total",
-      "DP",
-      "Sisa Piutang",
-      "Tanggal",
-    ];
+    const headers = ["No Invoice", "Pelanggan", "Status", "Total", "DP", "Sisa Piutang", "Tanggal"];
     const rows = filteredTx.map((tx) => [
       tx.invoiceNumber,
-      tx.customerName,
+      tx.customerNama,
       tx.status,
-      tx.total,
-      tx.dpAmount,
-      tx.remainingDebt,
+      tx.totalBruto,
+      tx.dpDibayar,
+      tx.sisaTagihan,
       new Date(tx.tanggal).toLocaleString("id-ID"),
     ]);
-
     let csv = "data:text/csv;charset=utf-8,";
     csv += headers.join(",") + "\n";
     rows.forEach((row) => {
-      csv +=
-        row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",") +
-        "\n";
+      csv += row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",") + "\n";
     });
-
     const link = document.createElement("a");
     link.setAttribute("href", encodeURI(csv));
-    link.setAttribute(
-      "download",
-      `Laporan_${cabangSlug}_${new Date().toISOString().slice(0, 10)}.csv`
-    );
+    link.setAttribute("download", `Laporan_${cabangSlug}_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -195,7 +159,6 @@ export default function LaporanPage() {
 
   return (
     <div className="flex flex-col gap-4 pt-2 pb-4 animate-fade-in">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <button
           onClick={() => router.push(`/buku-usaha/${cabangSlug}`)}
@@ -204,10 +167,14 @@ export default function LaporanPage() {
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="text-lg font-extrabold tracking-tight">Laporan Keuangan</h1>
-        <div className="w-9 h-9" />
+        <button
+          onClick={exportCSV}
+          className="px-3 py-1.5 bg-[#7B61FF] text-white rounded-xl text-[10px] font-bold"
+        >
+          Export CSV
+        </button>
       </div>
 
-      {/* Period Filter */}
       <div className="flex gap-2 bg-slate-100 dark:bg-zinc-800 p-1 rounded-2xl">
         {PERIODS.map((p) => (
           <button
@@ -224,115 +191,38 @@ export default function LaporanPage() {
         ))}
       </div>
 
-      {/* Revenue Cards */}
       <div className="grid grid-cols-2 gap-3">
         <div className="premium-card p-4 flex flex-col gap-1">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-              <DollarSign className="w-4 h-4 text-emerald-500" />
-            </div>
-          </div>
-          <span className="text-[10px] text-slate-400 font-bold uppercase">
-            Pendapatan
-          </span>
-          <span className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">
+          <span className="text-[10px] text-slate-400 font-bold uppercase">Pendapatan</span>
+          <span className="text-sm font-extrabold text-emerald-600">
             Rp{report.totalPendapatan.toLocaleString()}
           </span>
         </div>
-
         <div className="premium-card p-4 flex flex-col gap-1">
-          <div className="flex items-center gap-2 mb-1">
-            <div
-              className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                report.labaBersih >= 0
-                  ? "bg-emerald-100 dark:bg-emerald-900/30"
-                  : "bg-rose-100 dark:bg-rose-900/30"
-              }`}
-            >
-              {report.labaBersih >= 0 ? (
-                <TrendingUp className="w-4 h-4 text-emerald-500" />
-              ) : (
-                <TrendingDown className="w-4 h-4 text-rose-500" />
-              )}
-            </div>
-          </div>
-          <span className="text-[10px] text-slate-400 font-bold uppercase">
-            Laba Bersih
-          </span>
-          <span
-            className={`text-sm font-extrabold ${
-              report.labaBersih >= 0
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-rose-600 dark:text-rose-400"
-            }`}
-          >
+          <span className="text-[10px] text-slate-400 font-bold uppercase">Laba Bersih</span>
+          <span className={`text-sm font-extrabold ${report.labaBersih >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
             Rp{report.labaBersih.toLocaleString()}
           </span>
         </div>
       </div>
 
-      {/* Detailed Breakdown */}
       <div className="premium-card p-4 space-y-3">
-        <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">
-          Rincian Keuangan
-        </h3>
-        <div className="space-y-2">
-          <div className="flex justify-between text-xs font-medium border-b pb-2 border-slate-100 dark:border-slate-800">
-            <span>Jumlah Transaksi</span>
-            <span className="font-bold">{report.jumlahTransaksi}</span>
+        <h3 className="text-xs font-extrabold text-slate-400 uppercase">Rincian Keuangan</h3>
+        {[
+          { label: "Jumlah Transaksi", value: String(report.jumlahTransaksi), color: "" },
+          { label: "Total HPP", value: `Rp${report.totalHpp.toLocaleString()}`, color: "text-rose-500" },
+          { label: "Laba Kotor", value: `Rp${report.labaKotor.toLocaleString()}`, color: "text-[#7B61FF]" },
+          { label: "Cashflow Masuk", value: `Rp${report.cashflowMasuk.toLocaleString()}`, color: "text-emerald-500" },
+          { label: "Cashflow Keluar", value: `Rp${report.cashflowKeluar.toLocaleString()}`, color: "text-rose-500" },
+          { label: "Piutang Aktif", value: `Rp${report.piutangAktif.toLocaleString()}`, color: "text-amber-500" },
+          { label: "Total Produk", value: String(report.jumlahProduk), color: "" },
+        ].map((row, i) => (
+          <div key={i} className="flex justify-between text-xs font-medium border-b pb-2 border-slate-100 dark:border-slate-800">
+            <span>{row.label}</span>
+            <span className={`font-bold ${row.color}`}>{row.value}</span>
           </div>
-          <div className="flex justify-between text-xs font-medium border-b pb-2 border-slate-100 dark:border-slate-800">
-            <span>Total HPP Produk</span>
-            <span className="font-bold text-rose-500">
-              Rp{report.totalHpp.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex justify-between text-xs font-medium border-b pb-2 border-slate-100 dark:border-slate-800">
-            <span>Laba Kotor</span>
-            <span className="font-bold text-[#7B61FF]">
-              Rp{report.labaKotor.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex justify-between text-xs font-medium border-b pb-2 border-slate-100 dark:border-slate-800">
-            <span>Cashflow Masuk</span>
-            <span className="font-bold text-emerald-500">
-              Rp{report.cashflowMasuk.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex justify-between text-xs font-medium border-b pb-2 border-slate-100 dark:border-slate-800">
-            <span>Cashflow Keluar</span>
-            <span className="font-bold text-rose-500">
-              Rp{report.cashflowKeluar.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex justify-between text-xs font-medium">
-            <span>Piutang Aktif</span>
-            <span className="font-bold text-amber-500">
-              Rp{report.piutangAktif.toLocaleString()}
-            </span>
-          </div>
-        </div>
+        ))}
       </div>
-
-      {/* Inventory Summary */}
-      <div className="premium-card p-4">
-        <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">
-          Inventaris
-        </h3>
-        <div className="flex justify-between text-xs font-medium">
-          <span>Total SKU Aktif</span>
-          <span className="font-bold">{report.jumlahProduk}</span>
-        </div>
-      </div>
-
-      {/* Export Button */}
-      <button
-        onClick={exportCSV}
-        className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white font-extrabold text-sm shadow-lg shadow-indigo-500/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
-      >
-        <FileSpreadsheet className="w-4 h-4" />
-        Ekspor Semua Transaksi (.CSV)
-      </button>
     </div>
   );
 }
