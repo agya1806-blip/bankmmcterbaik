@@ -87,7 +87,7 @@ export default function LaporanPage() {
   const filteredCashflow = useMemo(() => {
     const now = new Date();
     return cashflows.filter((cf) => {
-      const cfDate = new Date(cf.tanggal);
+      const cfDate = new Date(cf.createdAt);
       if (period === "today") {
         return cfDate.toISOString().slice(0, 10) === now.toISOString().slice(0, 10);
       }
