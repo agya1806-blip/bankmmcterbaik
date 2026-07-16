@@ -32,9 +32,7 @@ export const BRANCH_SLUGS: BookOrBranch[] = [
   "usaha-laptop",
   "usaha-gadget",
   "usaha-warkop",
-  "usaha-kelontong",
   "usaha-konveksi",
-  "usaha-toko-pakaian",
 ];
 
 /* ─── Enums ─── */
@@ -127,6 +125,7 @@ export interface DbTransaction {
   status: TransStatus;
   walletIdTarget: string;
   catatan: string;
+  buktiBayar?: string;
   createdAt: string;
 }
 

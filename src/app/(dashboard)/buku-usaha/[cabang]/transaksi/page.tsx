@@ -5,11 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type BookOrBranch, type Transaction, type ProductionStatus } from '@/lib/db-v4';
 import {
-  ArrowLeft,
-  Printer,
-  Layers,
-  ClipboardList,
-  Send,
+  ArrowLeft, Printer, Layers, ClipboardList, Send,
+  Image, FileText, FileSpreadsheet, Phone,
 } from 'lucide-react';
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
@@ -17,9 +14,7 @@ const BRANCH_MAP: Record<string, BookOrBranch> = {
   laptop: 'usaha-laptop',
   gadget: 'usaha-gadget',
   warkop: 'usaha-warkop',
-  kelontong: 'usaha-kelontong',
   konveksi: 'usaha-konveksi',
-  'toko-pakaian': 'usaha-toko-pakaian',
 };
 
 export default function TransaksiDanProduksiPage() {
@@ -129,6 +124,96 @@ export default function TransaksiDanProduksiPage() {
     window.open(waUrl, '_blank');
   };
 
+  const handleExportPng = async (tx: Transaction) => {
+    try {
+      const { default: html2canvas } = await import("html2canvas");
+      const tempDiv = document.createElement("div");
+      tempDiv.style.padding = "20px";
+      tempDiv.style.background = "#fff";
+      tempDiv.style.color = "#000";
+      tempDiv.style.fontFamily = "monospace";
+      tempDiv.style.width = "320px";
+      tempDiv.innerHTML = `
+        <div style="text-align:center;font-size:14px;font-weight:bold;margin-bottom:8px;">MMCBANK BUKU USAHA</div>
+        <div style="text-align:center;font-size:10px;margin-bottom:12px;">Cabang: ${cabangSlug.toUpperCase()}</div>
+        <div style="font-size:10px;margin-bottom:8px;">
+          <div>No: ${tx.invoiceNumber}</div>
+          <div>Tgl: ${new Date(tx.tanggal).toLocaleString("id-ID")}</div>
+          <div>Pelanggan: ${tx.customerNama}</div>
+        </div>
+        <div style="border-top:1px dashed #000;margin:6px 0;"></div>
+        ${tx.items.map((item) => `<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;"><span>${item.namaItem} x${item.qty}</span><span>Rp${item.subtotal.toLocaleString()}</span></div>`).join("")}
+        <div style="border-top:1px dashed #000;margin:6px 0;"></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:bold;"><span>Total</span><span>Rp${tx.totalBruto.toLocaleString()}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;"><span>Dibayar</span><span>Rp${tx.dpDibayar.toLocaleString()}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;"><span>Sisa</span><span>Rp${tx.sisaTagihan.toLocaleString()}</span></div>
+      `;
+      document.body.appendChild(tempDiv);
+      const canvas = await html2canvas(tempDiv, { scale: 2, useCORS: true });
+      const link = document.createElement("a");
+      link.download = `Invoice-${tx.invoiceNumber}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      document.body.removeChild(tempDiv);
+    } catch {
+      alert("Gagal export PNG. Pastikan html2canvas terinstall.");
+    }
+  };
+
+  const handleExportPdf = async (tx: Transaction) => {
+    try {
+      const { default: jsPDF } = await import("jspdf");
+      const doc = new jsPDF("p", "mm", "a4");
+      let y = 20;
+      const write = (text: string, bold = false) => {
+        if (bold) doc.setFont("helvetica", "bold");
+        else doc.setFont("helvetica", "normal");
+        doc.text(text, 15, y);
+        y += 6;
+      };
+      write("MMCBANK BUKU USAHA", true);
+      write(`Cabang: ${cabangSlug.toUpperCase()}`);
+      write(`Invoice: ${tx.invoiceNumber}`);
+      write(`Tanggal: ${new Date(tx.tanggal).toLocaleString("id-ID")}`);
+      write(`Pelanggan: ${tx.customerNama}`);
+      write("─".repeat(50));
+      tx.items.forEach((item) => {
+        write(`${item.namaItem} x${item.qty}  Rp${item.subtotal.toLocaleString()}`);
+      });
+      write("─".repeat(50));
+      write(`Total: Rp${tx.totalBruto.toLocaleString()}`, true);
+      write(`Dibayar: Rp${tx.dpDibayar.toLocaleString()}`);
+      write(`Sisa: Rp${tx.sisaTagihan.toLocaleString()}`);
+      doc.save(`Invoice-${tx.invoiceNumber}.pdf`);
+    } catch {
+      alert("Gagal export PDF. Pastikan jspdf terinstall.");
+    }
+  };
+
+  const handleExportExcel = async (tx: Transaction) => {
+    try {
+      const XLSX = await import("xlsx");
+      const headers = ["Item", "Qty", "Harga Satuan", "Subtotal", "Spesifikasi"];
+      const rows = tx.items.map((item) => [item.namaItem, item.qty, item.hargaSatuan, item.subtotal, item.spesifikasi]);
+      const summary = [
+        [],
+        ["No Invoice", tx.invoiceNumber],
+        ["Pelanggan", tx.customerNama],
+        ["Tanggal", new Date(tx.tanggal).toLocaleString("id-ID")],
+        ["Total", tx.totalBruto],
+        ["Dibayar", tx.dpDibayar],
+        ["Sisa", tx.sisaTagihan],
+        ["Status", tx.status],
+      ];
+      const ws = XLSX.utils.aoa_to_sheet([headers, ...rows, [], ...summary]);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Invoice");
+      XLSX.writeFile(wb, `Invoice-${tx.invoiceNumber}.xlsx`);
+    } catch {
+      alert("Gagal export Excel. Pastikan xlsx terinstall.");
+    }
+  };
+
   const handlePrintReceipt = (tx: Transaction) => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -193,7 +278,7 @@ export default function TransaksiDanProduksiPage() {
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-lg font-extrabold tracking-tight capitalize">Hub Transaksi</h1>
+        <h1 className="text-lg font-heading font-extrabold tracking-tight capitalize">Hub Transaksi</h1>
         <div className="w-9 h-9" />
       </div>
 
@@ -227,43 +312,46 @@ export default function TransaksiDanProduksiPage() {
           {transactions.length === 0 ? (
             <div className="text-center py-12 text-slate-400 text-xs">Belum ada riwayat transaksi.</div>
           ) : (
-            transactions.map((tx) => {
+            transactions.map((tx, idx) => {
               const tanggal = new Date(tx.tanggal);
               return (
                 <div
                   key={tx.id}
                   onClick={() => setSelectedTx(selectedTx?.id === tx.id ? null : tx)}
-                  className="premium-card p-4 cursor-pointer hover:border-[#7B61FF]/40 transition-all space-y-2"
+                  className={`premium-card premium-card-glow p-4 cursor-pointer transition-all duration-200 space-y-2 animate-slide-up ${
+                    selectedTx?.id === tx.id ? 'border-[#7B61FF]/40 ring-1 ring-[#7B61FF]/20' : ''
+                  }`}
+                  style={{ animationDelay: `${idx * 40}ms`, animationFillMode: "backwards" }}
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <span className="text-[10px] bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md text-slate-500 font-extrabold uppercase">
+                      <span className="text-[10px] font-heading font-bold bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md text-slate-500 uppercase tracking-wider">
                         {tx.invoiceNumber}
                       </span>
-                      <h4 className="text-sm font-extrabold mt-1">{tx.customerNama}</h4>
+                      <h4 className="text-sm font-heading font-extrabold mt-1">{tx.customerNama}</h4>
                     </div>
                     <div className="text-right">
-                      <span className="text-xs font-extrabold text-[#7B61FF]">
+                      <span className="text-xs font-heading font-extrabold text-[#7B61FF]">
                         Rp{tx.totalBruto.toLocaleString()}
                       </span>
-                      <p className="text-[9px] text-slate-400 mt-0.5">
-                        {tanggal.toLocaleDateString('id-ID')}
+                      <p className="text-[9px] text-slate-400 font-medium mt-0.5">
+                        {tanggal.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <span
-                      className={`text-[9px] px-2 py-0.5 rounded-full font-extrabold ${
+                      className={`text-[9px] px-2.5 py-0.5 rounded-full font-extrabold ${
                         tx.status === 'LUNAS'
-                          ? 'bg-emerald-100 text-emerald-600'
-                          : 'bg-amber-100 text-amber-600'
+                          ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                          : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400'
                       }`}
                     >
                       {tx.status}
                     </span>
                     {tx.sisaTagihan > 0 && (
-                      <span className="text-[9px] text-rose-500 font-bold">
+                      <span className="text-[9px] text-rose-500 font-extrabold bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 rounded-lg">
                         Sisa: Rp{tx.sisaTagihan.toLocaleString()}
                       </span>
                     )}
@@ -285,7 +373,14 @@ export default function TransaksiDanProduksiPage() {
                         ))}
                       </div>
 
-                      <div className="grid grid-cols-3 gap-2 pt-1">
+                      {tx.buktiBayar && (
+                        <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 dark:bg-zinc-900">
+                          <img src={tx.buktiBayar} alt="Bukti Bayar" className="w-12 h-12 object-cover rounded-lg" />
+                          <span className="text-[10px] text-slate-400 font-medium">Bukti Pembayaran QRIS</span>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-2 pt-1">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -304,14 +399,39 @@ export default function TransaksiDanProduksiPage() {
                         >
                           <Printer className="w-3.5 h-3.5 text-slate-500" /> Struk
                         </button>
+                      </div>
+                      <div className="grid grid-cols-4 gap-1.5 pt-1">
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            sendWhatsAppBilling(tx);
-                          }}
-                          className="py-2 bg-emerald-500 text-white rounded-xl flex items-center justify-center gap-1 font-bold text-[10px]"
+                          onClick={(e) => { e.stopPropagation(); handleExportPng(tx); }}
+                          className="py-2 bg-amber-400 text-white text-[9px] font-bold rounded-xl active:scale-95 transition-all flex flex-col items-center leading-tight"
+                          title="Export Gambar PNG"
                         >
-                          <Send className="w-3.5 h-3.5" /> WA Struk
+                          <Image className="w-3 h-3 mb-0.5" />
+                          PNG
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleExportPdf(tx); }}
+                          className="py-2 bg-rose-500 text-white text-[9px] font-bold rounded-xl active:scale-95 transition-all flex flex-col items-center leading-tight"
+                          title="Export PDF"
+                        >
+                          <FileText className="w-3 h-3 mb-0.5" />
+                          PDF
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); sendWhatsAppBilling(tx); }}
+                          className="py-2 bg-emerald-500 text-white text-[9px] font-bold rounded-xl active:scale-95 transition-all flex flex-col items-center leading-tight"
+                          title="Kirim WhatsApp"
+                        >
+                          <Phone className="w-3 h-3 mb-0.5" />
+                          WA
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleExportExcel(tx); }}
+                          className="py-2 bg-blue-500 text-white text-[9px] font-bold rounded-xl active:scale-95 transition-all flex flex-col items-center leading-tight"
+                          title="Export Excel"
+                        >
+                          <FileSpreadsheet className="w-3 h-3 mb-0.5" />
+                          XLSX
                         </button>
                       </div>
                     </div>

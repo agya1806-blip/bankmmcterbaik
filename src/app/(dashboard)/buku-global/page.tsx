@@ -7,7 +7,7 @@ import { createBackup, restoreBackup, downloadBlob } from "@/lib/backup";
 import { executeTransfer, type TransferInput } from "@/engine/double-entry";
 import { exportTransactionsExcel, exportCashflowExcel } from "@/lib/export-utils";
 import { db, type BookOrBranch } from "@/lib/db-v4";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useLiveQuery } from "@/hooks/useLiveQuery";
 import {
   LogOut, Download, Upload, ArrowRightLeft, FileSpreadsheet,
   Moon, Sun, Shield, Database, AlertTriangle,
@@ -17,7 +17,7 @@ import PinLock from "@/components/pin-lock";
 
 const BRANCH_LIST: BookOrBranch[] = [
   "usaha-percetakan", "usaha-laptop", "usaha-gadget",
-  "usaha-warkop", "usaha-kelontong", "usaha-konveksi", "usaha-toko-pakaian",
+  "usaha-warkop", "usaha-konveksi",
 ];
 
 export default function BukuGlobalPage() {
@@ -143,12 +143,12 @@ export default function BukuGlobalPage() {
     <div className="flex-1 flex flex-col pt-4 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-extrabold tracking-tight">Pengaturan Global</h1>
-          <p className="text-[10px] text-slate-400">Kelola seluruh sistem</p>
+          <h1 className="text-lg font-heading font-extrabold tracking-tight">Pengaturan Global</h1>
+          <p className="text-[10px] text-slate-400 font-medium">Kelola seluruh sistem</p>
         </div>
         <div className="text-right">
-          <span className="text-[10px] text-slate-400">Login sebagai</span>
-          <p className="text-xs font-extrabold">{currentUser}</p>
+          <span className="text-[10px] text-slate-400 font-medium">Login sebagai</span>
+          <p className="text-xs font-heading font-extrabold gradient-text">{currentUser}</p>
         </div>
       </div>
 
@@ -161,15 +161,15 @@ export default function BukuGlobalPage() {
             <div key={s.key}>
               <button
                 onClick={() => setActiveSection(isActive ? "none" : s.key)}
-                className={`w-full premium-card p-3 flex items-center gap-3 transition-all ${
+                className={`w-full premium-card premium-card-glow p-3 flex items-center gap-3 transition-all duration-200 ${
                   isActive ? "border-[#7B61FF]/40" : ""
                 }`}
               >
                 <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center text-white shadow-md`}>
                   <Icon className="w-5 h-5" />
                 </div>
-                <span className="text-xs font-bold flex-1 text-left">{s.label}</span>
-                <span className="text-xs text-slate-400">{isActive ? "▲" : "▼"}</span>
+                <span className="text-xs font-heading font-bold flex-1 text-left">{s.label}</span>
+                <span className={`text-xs text-slate-400 transition-transform duration-200 ${isActive ? "rotate-180" : ""}`}>▼</span>
               </button>
 
               <AnimatePresence>

@@ -11,9 +11,7 @@ const BRANCH_MAP: Record<string, BookOrBranch> = {
   laptop: 'usaha-laptop',
   gadget: 'usaha-gadget',
   warkop: 'usaha-warkop',
-  kelontong: 'usaha-kelontong',
   konveksi: 'usaha-konveksi',
-  'toko-pakaian': 'usaha-toko-pakaian',
 };
 
 export default function PelangganCRMPage() {
@@ -106,39 +104,43 @@ export default function PelangganCRMPage() {
         {filteredCustomers.length === 0 ? (
           <div className="text-center py-8 text-slate-400 text-xs">Belum ada data pelanggan.</div>
         ) : (
-          filteredCustomers.map((c) => (
+          filteredCustomers.map((c, i) => (
             <div
               key={c.id}
               onClick={() => setSelectedCustomer(selectedCustomer?.id === c.id ? null : c)}
-              className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                selectedCustomer?.id === c.id
-                  ? 'border-[#7B61FF] bg-[#7B61FF]/5'
-                  : 'bg-white dark:bg-[#131527] border-slate-100 dark:border-zinc-800'
+              className={`premium-card premium-card-glow p-4 cursor-pointer transition-all duration-200 animate-slide-up ${
+                selectedCustomer?.id === c.id ? 'border-[#7B61FF] ring-1 ring-[#7B61FF]/30' : ''
               }`}
+              style={{ animationDelay: `${i * 60}ms`, animationFillMode: "backwards" }}
             >
               <div className="flex justify-between items-start">
-                <div>
-                  <h4 className="text-xs font-extrabold">{c.nama}</h4>
-                  <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-1">
-                    <Phone className="w-3 h-3" /> {c.noWA}
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center text-white text-xs font-extrabold shadow-md">
+                    {c.nama.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-heading font-extrabold">{c.nama}</h4>
+                    <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
+                      <Phone className="w-3 h-3" /> {c.noWA}
+                    </p>
+                  </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-[9px] uppercase font-bold text-slate-400">Total Belanja</span>
-                  <p className="text-xs font-extrabold text-[#FF5C00] flex items-center gap-1">
+                  <span className="text-[8px] uppercase font-bold text-slate-400 tracking-wider">Total Belanja</span>
+                  <p className="text-xs font-heading font-extrabold text-[#FF5C00] flex items-center gap-1 justify-end">
                     <DollarSign className="w-3 h-3" /> Rp{c.totalBelanja.toLocaleString()}
                   </p>
                 </div>
               </div>
 
               {selectedCustomer?.id === c.id && (
-                <div className="pt-3 mt-3 border-t border-slate-100 dark:border-zinc-800 space-y-2 text-xs">
+                <div className="pt-3 mt-3 border-t border-slate-100 dark:border-zinc-800 space-y-2 animate-fade-in">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleBroadcast(c);
                     }}
-                    className="w-full py-2 bg-emerald-500 text-white rounded-xl flex items-center justify-center gap-1 font-bold text-[10px]"
+                    className="w-full py-2.5 bg-emerald-500 text-white rounded-xl flex items-center justify-center gap-1.5 font-bold text-[10px] hover:bg-emerald-600 active:scale-[0.97] transition-all duration-200"
                   >
                     <MessageSquare className="w-3.5 h-3.5" /> Kirim WA Promosi
                   </button>

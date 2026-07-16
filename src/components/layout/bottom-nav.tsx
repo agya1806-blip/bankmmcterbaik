@@ -19,9 +19,9 @@ export default function BottomNav() {
   };
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[390px] h-16 bg-black/95 dark:bg-zinc-900/95 backdrop-blur-md rounded-full px-3 flex items-center justify-between shadow-2xl border border-white/10 z-40 pb-safe">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[390px] h-16 glass-pill rounded-full px-3 flex items-center justify-between shadow-2xl z-40 pb-safe transition-all duration-300">
       {/* 1. Global Settings */}
-      <Link href="/buku-global" className="flex flex-col items-center justify-center w-12 h-12 text-zinc-400 hover:text-white transition-colors relative">
+      <Link href="/buku-global" className="flex flex-col items-center justify-center w-12 h-12 text-zinc-400 hover:text-white transition-all duration-200 active:scale-90 relative">
         <Settings className={`w-5 h-5 ${isActive('/buku-global') ? 'text-indigo-400' : ''}`} />
         <span className="text-[9px] mt-0.5">Global</span>
         {isActive('/buku-global') && (
@@ -30,7 +30,7 @@ export default function BottomNav() {
       </Link>
 
       {/* 2. Main Dashboard Unit Bisnis */}
-      <Link href={activeBranch ? `/buku-usaha/${activeBranch}` : '/buku-usaha'} className="flex flex-col items-center justify-center w-12 h-12 text-zinc-400 hover:text-white transition-colors relative">
+      <Link href={activeBranch ? `/buku-usaha/${activeBranch}` : '/buku-usaha'} className="flex flex-col items-center justify-center w-12 h-12 text-zinc-400 hover:text-white transition-all duration-200 active:scale-90 relative">
         <Home className={`w-5 h-5 ${pathname === `/buku-usaha/${activeBranch}` || pathname === '/buku-usaha' ? 'text-indigo-400' : ''}`} />
         <span className="text-[9px] mt-0.5">Beranda</span>
         {(pathname === `/buku-usaha/${activeBranch}` || pathname === '/buku-usaha') && (
@@ -61,7 +61,7 @@ export default function BottomNav() {
       </Link>
 
       {/* 4. Riwayat Transaksi */}
-      <Link href={getBranchUrl('transaksi')} className="flex flex-col items-center justify-center w-12 h-12 text-zinc-400 hover:text-white transition-colors relative">
+      <Link href={getBranchUrl('transaksi')} className="flex flex-col items-center justify-center w-12 h-12 text-zinc-400 hover:text-white transition-all duration-200 active:scale-90 relative">
         <Receipt className={`w-5 h-5 ${pathname.includes('/transaksi') ? 'text-indigo-400' : ''}`} />
         <span className="text-[9px] mt-0.5">Transaksi</span>
         {pathname.includes('/transaksi') && (
@@ -70,7 +70,7 @@ export default function BottomNav() {
       </Link>
 
       {/* 5. Inventory */}
-      <Link href={getBranchUrl('inventory')} className="flex flex-col items-center justify-center w-12 h-12 text-zinc-400 hover:text-white transition-colors relative">
+      <Link href={getBranchUrl('inventory')} className="flex flex-col items-center justify-center w-12 h-12 text-zinc-400 hover:text-white transition-all duration-200 active:scale-90 relative">
         <FolderGit2 className={`w-5 h-5 ${pathname.includes('/inventory') ? 'text-indigo-400' : ''}`} />
         <span className="text-[9px] mt-0.5">Barang</span>
         {pathname.includes('/inventory') && (

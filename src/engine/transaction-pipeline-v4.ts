@@ -28,6 +28,7 @@ export interface PipelineInputV4 {
   customerWA: string;
   walletIdTarget: string;
   catatan?: string;
+  buktiBayar?: string;
 }
 
 /* ─── Result Type ─── */
@@ -55,6 +56,7 @@ export async function executeTransactionPipelineV4(
     customerWA,
     walletIdTarget,
     catatan,
+    buktiBayar,
   } = input;
 
   if (!items || items.length === 0) {
@@ -111,6 +113,7 @@ export async function executeTransactionPipelineV4(
       status,
       walletIdTarget,
       catatan: catatan ?? "",
+      buktiBayar: input.buktiBayar || "",
       createdAt: now,
     };
 

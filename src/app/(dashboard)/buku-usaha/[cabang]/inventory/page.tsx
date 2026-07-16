@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type BookOrBranch, type Inventory } from "@/lib/db-v4";
 import {
   ArrowLeft, Plus, Search, Edit3, Trash2, Package,
@@ -15,9 +15,7 @@ const BRANCH_MAP: Record<string, BookOrBranch> = {
   laptop: "usaha-laptop",
   gadget: "usaha-gadget",
   warkop: "usaha-warkop",
-  kelontong: "usaha-kelontong",
   konveksi: "usaha-konveksi",
-  "toko-pakaian": "usaha-toko-pakaian",
 };
 
 interface FormData {
@@ -168,14 +166,19 @@ export default function InventoryPage() {
         </button>
       </div>
 
-      <div className="premium-card p-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Package className="w-4 h-4 text-[#7B61FF]" />
-          <span className="text-xs font-bold">{products.length} Produk</span>
+      <div className="premium-card premium-card-glow p-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center text-white shadow-md">
+            <Package className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-xs font-heading font-extrabold">{products.length} Produk</span>
+            <p className="text-[9px] text-slate-400 font-medium">Total inventaris</p>
+          </div>
         </div>
         <div className="text-right">
-          <span className="text-[9px] text-slate-400">Total Nilai Stok</span>
-          <p className="text-xs font-extrabold text-[#7B61FF]">Rp{totalValue.toLocaleString()}</p>
+          <span className="text-[9px] text-slate-400 font-medium">Total Nilai Stok</span>
+          <p className="text-xs font-heading font-extrabold text-[#7B61FF]">Rp{totalValue.toLocaleString()}</p>
         </div>
       </div>
 
@@ -218,38 +221,39 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-2 max-h-[400px] pr-1">
+      <div className="flex-1 overflow-y-auto space-y-2.5 max-h-[400px] pr-1">
         {filtered.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 text-xs">
+          <div className="text-center py-12 text-slate-400 text-xs animate-fade-in">
+            <Package className="w-10 h-10 mx-auto mb-3 stroke-[1.5] opacity-40" />
             {products.length === 0 ? "Belum ada produk. Tap + untuk menambah." : "Tidak ditemukan."}
           </div>
         ) : (
-          filtered.map((p) => (
-            <div key={p.id} className="premium-card p-3 flex items-center justify-between">
+          filtered.map((p, i) => (
+            <div key={p.id} className="premium-card premium-card-glow p-3 flex items-center justify-between animate-slide-up" style={{ animationDelay: `${i * 50}ms`, animationFillMode: "backwards" }}>
               <div className="flex-1 min-w-0">
-                <h4 className="text-xs font-extrabold line-clamp-1">{p.nama}</h4>
-                <div className="flex items-center gap-3 mt-1">
-                  <span className="text-[10px] text-[#7B61FF] font-bold">
+                <h4 className="text-xs font-heading font-bold line-clamp-1">{p.nama}</h4>
+                <div className="flex items-center gap-3 mt-1.5">
+                  <span className="text-[10px] text-[#7B61FF] font-extrabold">
                     Rp{p.hargaJual.toLocaleString()}
                   </span>
-                  <span className={`text-[10px] font-bold ${p.stok <= p.stokMin ? "text-amber-500" : "text-slate-400"}`}>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${p.stok <= p.stokMin ? "bg-amber-50 dark:bg-amber-950/30 text-amber-500" : "text-slate-400"}`}>
                     Stok: {p.stok}
                   </span>
-                  <span className="text-[10px] text-slate-400">
+                  <span className="text-[10px] text-slate-400 font-medium">
                     HPP: Rp{p.hargaModal.toLocaleString()}
                   </span>
                 </div>
               </div>
-              <div className="flex gap-1.5">
+              <div className="flex gap-1.5 shrink-0 ml-2">
                 <button
                   onClick={() => openEdit(p)}
-                  className="p-1.5 bg-slate-100 dark:bg-zinc-800 rounded-lg"
+                  className="p-1.5 bg-slate-100 dark:bg-zinc-800 rounded-lg hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors duration-200 active:scale-90"
                 >
                   <Edit3 className="w-3.5 h-3.5 text-slate-500" />
                 </button>
                 <button
                   onClick={() => handleDelete(p.id)}
-                  className="p-1.5 bg-rose-50 rounded-lg"
+                  className="p-1.5 bg-rose-50 dark:bg-rose-950/30 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950/50 transition-colors duration-200 active:scale-90"
                 >
                   <Trash2 className="w-3.5 h-3.5 text-rose-500" />
                 </button>

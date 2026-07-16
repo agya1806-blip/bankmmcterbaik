@@ -6,12 +6,10 @@ import { useSessionStore } from "@/store/useSessionStore";
 
 const branches = [
   { slug: "percetakan", label: "Percetakan", color: "from-blue-500 to-blue-600", icon: "🖨️" },
-  { slug: "laptop", label: "Laptop & Servis", color: "from-violet-500 to-purple-600", icon: "💻" },
   { slug: "gadget", label: "Gadget", color: "from-indigo-500 to-indigo-600", icon: "📱" },
-  { slug: "warkop", label: "Warkop & Kuliner", color: "from-orange-400 to-orange-500", icon: "☕" },
-  { slug: "kelontong", label: "Kelontong", color: "from-emerald-400 to-emerald-500", icon: "🛒" },
-  { slug: "konveksi", label: "Konveksi", color: "from-pink-400 to-pink-500", icon: "🧵" },
-  { slug: "toko-pakaian", label: "Toko Pakaian", color: "from-rose-400 to-rose-500", icon: "👔" },
+  { slug: "laptop", label: "Komputer & Laptop", color: "from-violet-500 to-purple-600", icon: "💻" },
+  { slug: "warkop", label: "Kedai Kopi", color: "from-orange-400 to-orange-500", icon: "☕" },
+  { slug: "konveksi", label: "Fashion & Konveksi", color: "from-pink-400 to-pink-500", icon: "👔" },
 ];
 
 export default function BukuUsahaPage() {
@@ -33,16 +31,17 @@ export default function BukuUsahaPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        {branches.map((b) => (
+        {branches.map((b, i) => (
           <button
             key={b.slug}
             onClick={() => handleSelect(b.slug)}
-            className={`premium-card p-4 flex flex-col items-center gap-2 active:scale-[0.97] transition-transform cursor-pointer`}
+            className="premium-card premium-card-glow p-4 flex flex-col items-center gap-2 scale-press cursor-pointer animate-fade-in"
+            style={{ animationDelay: `${i * 80}ms`, animationFillMode: "backwards" }}
           >
-            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${b.color} flex items-center justify-center text-xl shadow-lg`}>
+            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${b.color} flex items-center justify-center text-2xl shadow-lg transition-transform duration-300 hover:scale-110`}>
               {b.icon}
             </div>
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{b.label}</span>
+            <span className="text-xs font-heading font-bold text-slate-800 dark:text-slate-200">{b.label}</span>
           </button>
         ))}
       </div>

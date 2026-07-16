@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useLiveQuery } from "@/hooks/useLiveQuery";
 import {
   db,
   type BookOrBranch,
@@ -17,8 +17,9 @@ import {
 import {
   ArrowLeft, ShoppingBag, Search, Plus, Minus, Trash2,
   CreditCard, Sparkles, Sliders, X, CirclePlus,
-  Banknote, Wallet, Smartphone, QrCode,
+  Banknote, Wallet, Smartphone, QrCode, Upload, Image, Calculator,
 } from "lucide-react";
+import KalkulatorHarga from "@/components/business/kalkulator-harga";
 import { motion, AnimatePresence } from "framer-motion";
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
@@ -26,9 +27,7 @@ const BRANCH_MAP: Record<string, BookOrBranch> = {
   laptop: "usaha-laptop",
   gadget: "usaha-gadget",
   warkop: "usaha-warkop",
-  kelontong: "usaha-kelontong",
   konveksi: "usaha-konveksi",
-  "toko-pakaian": "usaha-toko-pakaian",
 };
 
 interface CartItem {
@@ -84,11 +83,19 @@ export default function PosKasirPage() {
   const [specInput2, setSpecInput2] = useState("");
   const [specInput3, setSpecInput3] = useState("");
 
+  const [showCalculator, setShowCalculator] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [newProdName, setNewProdName] = useState("");
   const [newProdHargaJual, setNewProdHargaJual] = useState(0);
   const [newProdHargaModal, setNewProdHargaModal] = useState(0);
   const [newProdStok, setNewProdStok] = useState(10);
+
+  const [buktiBayar, setBuktiBayar] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCalcResult = (namaItem: string, hargaJual: number, spesifikasi: string) => {
+    setCart((prev) => [...prev, { id: crypto.randomUUID(), namaItem, qty: 1, hargaSatuan: hargaJual, spesifikasi }]);
+  };
 
   const filteredProducts = useMemo(() => {
     return products.filter((p) =>
@@ -229,6 +236,14 @@ export default function PosKasirPage() {
     setShowQuickAdd(false);
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setBuktiBayar(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const handleCheckout = async () => {
     if (cart.length === 0) return alert("Keranjang belanja kosong!");
     if (isProcessing) return;
@@ -255,6 +270,7 @@ export default function PosKasirPage() {
         customerNama: currentCustomer?.nama || "Pelanggan Umum",
         customerWA: currentCustomer?.noWA || "",
         catatan,
+        buktiBayar: paymentMethod === "QRIS" ? buktiBayar : undefined,
       });
 
       if (res.ok) {
@@ -264,6 +280,7 @@ export default function PosKasirPage() {
         setSelectedCustomerId("");
         setSelectedWalletId("");
         setCatatan("");
+        setBuktiBayar("");
       } else {
         alert(`Transaksi Gagal: ${res.error}`);
       }
@@ -285,15 +302,24 @@ export default function PosKasirPage() {
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-lg font-extrabold tracking-tight capitalize">
+        <h1 className="text-lg font-heading font-extrabold tracking-tight capitalize">
           Kasir {cabangSlug}
         </h1>
-        <button
-          onClick={() => setShowQuickAdd(true)}
-          className="p-2 bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white rounded-full shadow-md"
-        >
-          <CirclePlus className="w-5 h-5" />
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowCalculator(true)}
+            className="p-2 bg-emerald-500 text-white rounded-full shadow-md"
+            title="Kalkulator Harga"
+          >
+            <Calculator className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setShowQuickAdd(true)}
+            className="p-2 bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white rounded-full shadow-md"
+          >
+            <CirclePlus className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Search */}
@@ -309,20 +335,21 @@ export default function PosKasirPage() {
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-2 gap-2 max-h-[180px] overflow-y-auto mb-4 pr-1">
-        {filteredProducts.map((prod) => (
+      <div className="grid grid-cols-2 gap-2.5 max-h-[200px] overflow-y-auto mb-4 pr-1">
+        {filteredProducts.map((prod, i) => (
           <button
             key={prod.id}
             onClick={() => addToCart(prod)}
             disabled={prod.stok <= 0}
-            className="flex flex-col justify-between p-3 text-left rounded-2xl bg-white dark:bg-[#131527] border border-slate-200/60 dark:border-slate-800/60 active:scale-95 transition-transform disabled:opacity-40"
+            className="premium-card premium-card-glow p-3 text-left scale-press disabled:opacity-40 disabled:scale-100 animate-fade-in"
+            style={{ animationDelay: `${i * 40}ms`, animationFillMode: "backwards" }}
           >
-            <span className="text-xs font-bold line-clamp-1">{prod.nama}</span>
+            <span className="text-xs font-heading font-bold line-clamp-1">{prod.nama}</span>
             <div className="flex items-center justify-between w-full mt-2">
-              <span className="text-[11px] text-[#7B61FF] font-semibold">
+              <span className="text-[11px] text-[#7B61FF] font-extrabold">
                 Rp{prod.hargaJual.toLocaleString()}
               </span>
-              <span className="text-[10px] text-slate-400 font-medium">
+              <span className={`text-[10px] font-bold ${prod.stok <= prod.stokMin ? "text-amber-500" : "text-slate-400"}`}>
                 Stok: {prod.stok}
               </span>
             </div>
@@ -346,11 +373,11 @@ export default function PosKasirPage() {
             <span className="text-xs">Keranjang masih kosong</span>
           </div>
         ) : (
-          cart.map((item) => (
-            <div key={item.id} className="premium-card p-3 flex flex-col gap-2">
+          cart.map((item, i) => (
+            <div key={item.id} className="premium-card premium-card-glow p-3 flex flex-col gap-2 animate-slide-up" style={{ animationDelay: `${i * 60}ms`, animationFillMode: "backwards" }}>
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-extrabold line-clamp-1">
+                  <h4 className="text-sm font-heading font-extrabold line-clamp-1">
                     {item.namaItem}
                   </h4>
                   {item.spesifikasi && (
@@ -361,7 +388,7 @@ export default function PosKasirPage() {
                 </div>
                 <button
                   onClick={() => removeItem(item.id)}
-                  className="text-rose-500 p-1 shrink-0"
+                  className="text-rose-500 p-1.5 shrink-0 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors duration-200 active:scale-90"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -374,28 +401,28 @@ export default function PosKasirPage() {
                   onChange={(e) =>
                     updateCartItemHarga(item.id, Number(e.target.value))
                   }
-                  className="w-24 bg-slate-100 dark:bg-zinc-800 px-2 py-1 rounded-lg text-xs font-bold text-[#7B61FF] focus:outline-none"
+                  className="w-24 input-premium text-xs font-extrabold text-[#7B61FF]"
                 />
 
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => updateQty(item.id, -1)}
-                    className="p-1 bg-slate-100 dark:bg-zinc-800 rounded-full"
+                    className="p-1.5 bg-slate-100 dark:bg-zinc-800 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors duration-200 active:scale-90"
                   >
                     <Minus className="w-3.5 h-3.5" />
                   </button>
-                  <span className="text-xs font-extrabold min-w-[20px] text-center">
+                  <span className="text-sm font-heading font-extrabold min-w-[24px] text-center tabular-nums">
                     {item.qty}
                   </span>
                   <button
                     onClick={() => updateQty(item.id, 1)}
-                    className="p-1 bg-slate-100 dark:bg-zinc-800 rounded-full"
+                    className="p-1.5 bg-slate-100 dark:bg-zinc-800 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors duration-200 active:scale-90"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => openSpecModal(item)}
-                    className="p-1 bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white rounded-full ml-1"
+                    className="p-1.5 bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white rounded-full ml-1 hover:shadow-lg hover:shadow-indigo-500/20 transition-all duration-200 active:scale-90"
                   >
                     <Sliders className="w-3.5 h-3.5" />
                   </button>
@@ -407,28 +434,50 @@ export default function PosKasirPage() {
       </div>
 
       {/* Checkout Area */}
-      <div className="premium-card p-4 space-y-3">
-        {/* Total */}
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-400">Subtotal</span>
-          <span className="font-bold">Rp{totalBruto.toLocaleString()}</span>
+      <div className="premium-card premium-card-glow p-4 space-y-3">
+        {/* Payment Method Selector */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {PAYMENT_METHODS.map((pm) => {
+            const Icon = pm.icon;
+            const isActive = paymentMethod === pm.key;
+            return (
+              <button
+                key={pm.key}
+                onClick={() => setPaymentMethod(pm.key)}
+                className={`py-2 rounded-xl text-[9px] font-bold transition-all duration-200 flex flex-col items-center gap-1 ${
+                  isActive
+                    ? `bg-gradient-to-r ${pm.color} text-white shadow-md scale-105`
+                    : "bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-700"
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {pm.label}
+              </button>
+            );
+          })}
         </div>
-        <div className="flex items-center justify-between text-xs border-t border-slate-200 dark:border-slate-800 pt-2">
-          <span className="font-extrabold">TOTAL</span>
-          <span className="text-base font-extrabold text-[#7B61FF]">
+
+        {/* Total */}
+        <div className="flex items-center justify-between py-2">
+          <span className="text-xs text-slate-400 font-medium">Subtotal</span>
+          <span className="text-sm font-heading font-bold">Rp{totalBruto.toLocaleString()}</span>
+        </div>
+        <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+          <span className="text-xs font-heading font-extrabold">TOTAL</span>
+          <span className="text-lg font-heading font-extrabold text-[#7B61FF] tracking-tight">
             Rp{totalBruto.toLocaleString()}
           </span>
         </div>
 
         {/* DP */}
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-400">DP Dibayar</span>
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-slate-400 font-bold">DP Dibayar</span>
           <input
             type="number"
             value={dpDibayar || ""}
             onChange={(e) => setDpDibayar(Number(e.target.value))}
             placeholder="0"
-            className="w-24 text-right bg-slate-100 dark:bg-zinc-800 px-2 py-1 rounded-lg text-xs font-bold focus:outline-none"
+            className="w-24 text-right input-premium font-bold"
           />
         </div>
 
@@ -436,7 +485,7 @@ export default function PosKasirPage() {
         <select
           value={selectedWalletId}
           onChange={(e) => setSelectedWalletId(e.target.value)}
-          className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold border-none"
+          className="w-full input-premium font-bold"
         >
           <option value="">Pilih Dompet</option>
           {wallets.map((w) => (
@@ -450,7 +499,7 @@ export default function PosKasirPage() {
         <select
           value={selectedCustomerId}
           onChange={(e) => setSelectedCustomerId(e.target.value)}
-          className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold border-none"
+          className="w-full input-premium font-bold"
         >
           <option value="">Pelanggan Umum</option>
           {customers.map((c) => (
@@ -466,14 +515,35 @@ export default function PosKasirPage() {
           value={catatan}
           onChange={(e) => setCatatan(e.target.value)}
           placeholder="Catatan transaksi..."
-          className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold border-none"
+          className="w-full input-premium font-bold"
         />
+
+        {/* QRIS Upload */}
+        {paymentMethod === "QRIS" && (
+          <div>
+            {buktiBayar ? (
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-100 dark:bg-zinc-800">
+                <Image className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span className="text-[10px] font-bold truncate flex-1">Bukti terupload ✓</span>
+                <button onClick={() => setBuktiBayar("")} className="text-[10px] text-rose-500 font-bold">Hapus</button>
+              </div>
+            ) : (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full py-2 rounded-xl border-2 border-dashed border-slate-300 dark:border-zinc-700 text-xs font-bold text-slate-400 flex items-center justify-center gap-1.5"
+              >
+                <Upload className="w-3.5 h-3.5" /> Upload Bukti QRIS
+              </button>
+            )}
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+          </div>
+        )}
 
         {/* Checkout */}
         <button
           onClick={handleCheckout}
           disabled={cart.length === 0 || isProcessing}
-          className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white font-extrabold text-sm shadow-lg shadow-indigo-500/20 hover:opacity-95 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 disabled:opacity-50"
+          className="btn-primary w-full py-3.5 text-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed"
         >
           {isProcessing ? (
             <Sparkles className="w-4 h-4 animate-spin" />
@@ -602,6 +672,18 @@ export default function PosKasirPage() {
               </button>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Kalkulator Harga */}
+      <AnimatePresence>
+        {showCalculator && (
+          <KalkulatorHarga
+            cabangSlug={cabangSlug}
+            open={showCalculator}
+            onClose={() => setShowCalculator(false)}
+            onResult={handleCalcResult}
+          />
         )}
       </AnimatePresence>
 

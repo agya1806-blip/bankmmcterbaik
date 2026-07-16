@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type BookOrBranch, type Cashflow } from "@/lib/db-v4";
 import {
   ArrowLeft, Plus, TrendingUp, TrendingDown, Wallet,
@@ -15,9 +15,7 @@ const BRANCH_MAP: Record<string, BookOrBranch> = {
   laptop: "usaha-laptop",
   gadget: "usaha-gadget",
   warkop: "usaha-warkop",
-  kelontong: "usaha-kelontong",
   konveksi: "usaha-konveksi",
-  "toko-pakaian": "usaha-toko-pakaian",
 };
 
 export default function CashflowPage() {
@@ -94,28 +92,25 @@ export default function CashflowPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        <div className="premium-card p-3 text-center space-y-1">
-          <TrendingUp className="w-4 h-4 text-emerald-500 mx-auto" />
-          <span className="text-[9px] font-bold text-slate-400 block">Masuk</span>
-          <p className="text-[11px] font-extrabold text-emerald-600">
-            Rp{stats.masuk.toLocaleString()}
-          </p>
-        </div>
-        <div className="premium-card p-3 text-center space-y-1">
-          <TrendingDown className="w-4 h-4 text-rose-500 mx-auto" />
-          <span className="text-[9px] font-bold text-slate-400 block">Keluar</span>
-          <p className="text-[11px] font-extrabold text-rose-600">
-            Rp{stats.keluar.toLocaleString()}
-          </p>
-        </div>
-        <div className="premium-card p-3 text-center space-y-1">
-          <Wallet className="w-4 h-4 text-[#7B61FF] mx-auto" />
-          <span className="text-[9px] font-bold text-slate-400 block">Selisih</span>
-          <p className={`text-[11px] font-extrabold ${stats.selisih >= 0 ? "text-[#7B61FF]" : "text-rose-600"}`}>
-            Rp{stats.selisih.toLocaleString()}
-          </p>
-        </div>
+      <div className="grid grid-cols-3 gap-2.5">
+        {[
+          { label: "Masuk", value: stats.masuk, icon: TrendingUp, color: "emerald" },
+          { label: "Keluar", value: stats.keluar, icon: TrendingDown, color: "rose" },
+          { label: "Selisih", value: stats.selisih, icon: Wallet, color: stats.selisih >= 0 ? "indigo" : "rose" },
+        ].map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <div key={s.label} className="premium-card premium-card-glow p-3 text-center space-y-1.5 animate-slide-up" style={{ animationDelay: `${i * 80}ms`, animationFillMode: "backwards" }}>
+              <div className={`w-7 h-7 rounded-lg bg-${s.color}-100 dark:bg-${s.color}-900/30 flex items-center justify-center mx-auto`}>
+                <Icon className={`w-4 h-4 text-${s.color}-500`} />
+              </div>
+              <span className="text-[9px] font-heading font-bold text-slate-400 block uppercase tracking-wider">{s.label}</span>
+              <p className={`text-[11px] font-heading font-extrabold text-${s.color}-600 dark:text-${s.color}-400`}>
+                Rp{s.value.toLocaleString()}
+              </p>
+            </div>
+          );
+        })}
       </div>
 
       <div className="flex gap-1">
@@ -140,13 +135,13 @@ export default function CashflowPage() {
             {cashflows.length === 0 ? "Belum ada cashflow. Tap + untuk menambah." : "Tidak ada data."}
           </div>
         ) : (
-          filtered.map((cf) => {
+          filtered.map((cf, i) => {
             const tanggal = cf.createdAt ? new Date(cf.createdAt) : new Date();
             return (
-              <div key={cf.id} className="premium-card p-3 flex items-center justify-between">
+              <div key={cf.id} className="premium-card premium-card-glow p-3 flex items-center justify-between animate-slide-up" style={{ animationDelay: `${i * 50}ms`, animationFillMode: "backwards" }}>
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    cf.tipe === "masuk" ? "bg-emerald-50" : "bg-rose-50"
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+                    cf.tipe === "masuk" ? "bg-emerald-50 dark:bg-emerald-950/30" : "bg-rose-50 dark:bg-rose-950/30"
                   }`}>
                     {cf.tipe === "masuk" ? (
                       <TrendingUp className="w-4 h-4 text-emerald-500" />
@@ -155,13 +150,13 @@ export default function CashflowPage() {
                     )}
                   </div>
                   <div>
-                    <h4 className="text-xs font-extrabold line-clamp-1">{cf.catatan}</h4>
-                    <p className="text-[9px] text-slate-400">
+                    <h4 className="text-xs font-heading font-extrabold line-clamp-1">{cf.catatan}</h4>
+                    <p className="text-[9px] text-slate-400 font-medium">
                       {tanggal.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                     </p>
                   </div>
                 </div>
-                <span className={`text-xs font-extrabold ${cf.tipe === "masuk" ? "text-emerald-600" : "text-rose-600"}`}>
+                <span className={`text-xs font-heading font-extrabold tabular-nums ${cf.tipe === "masuk" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                   {cf.tipe === "masuk" ? "+" : "-"}Rp{cf.nominal.toLocaleString()}
                 </span>
               </div>

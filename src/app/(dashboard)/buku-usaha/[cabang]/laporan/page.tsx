@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useLiveQuery } from "dexie-react-hooks";
+import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type BookOrBranch } from "@/lib/db-v4";
 import {
   ArrowLeft, TrendingUp, TrendingDown, DollarSign,
@@ -13,9 +13,7 @@ const BRANCH_MAP: Record<string, BookOrBranch> = {
   laptop: "usaha-laptop",
   gadget: "usaha-gadget",
   warkop: "usaha-warkop",
-  kelontong: "usaha-kelontong",
   konveksi: "usaha-konveksi",
-  "toko-pakaian": "usaha-toko-pakaian",
 };
 
 type Period = "all" | "today" | "week" | "month";
@@ -166,10 +164,10 @@ export default function LaporanPage() {
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-lg font-extrabold tracking-tight">Laporan Keuangan</h1>
+        <h1 className="text-lg font-heading font-extrabold tracking-tight">Laporan Keuangan</h1>
         <button
           onClick={exportCSV}
-          className="px-3 py-1.5 bg-[#7B61FF] text-white rounded-xl text-[10px] font-bold"
+          className="px-4 py-2 bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white rounded-xl text-[10px] font-bold shadow-md hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 transition-all duration-200"
         >
           Export CSV
         </button>
@@ -192,34 +190,36 @@ export default function LaporanPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="premium-card p-4 flex flex-col gap-1">
-          <span className="text-[10px] text-slate-400 font-bold uppercase">Pendapatan</span>
-          <span className="text-sm font-extrabold text-emerald-600">
-            Rp{report.totalPendapatan.toLocaleString()}
-          </span>
-        </div>
-        <div className="premium-card p-4 flex flex-col gap-1">
-          <span className="text-[10px] text-slate-400 font-bold uppercase">Laba Bersih</span>
-          <span className={`text-sm font-extrabold ${report.labaBersih >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
-            Rp{report.labaBersih.toLocaleString()}
-          </span>
-        </div>
+        {[
+          { label: "Pendapatan", value: report.totalPendapatan, color: "emerald" },
+          { label: "Laba Bersih", value: report.labaBersih, color: report.labaBersih >= 0 ? "emerald" : "rose" },
+        ].map((s, i) => (
+          <div key={s.label} className="premium-card premium-card-glow p-4 flex flex-col gap-1.5 animate-slide-up" style={{ animationDelay: `${i * 80}ms`, animationFillMode: "backwards" }}>
+            <span className="text-[10px] font-heading font-bold text-slate-400 uppercase tracking-wider">{s.label}</span>
+            <span className={`text-lg font-heading font-extrabold tracking-tight text-${s.color}-600 dark:text-${s.color}-400`}>
+              Rp{s.value.toLocaleString()}
+            </span>
+          </div>
+        ))}
       </div>
 
-      <div className="premium-card p-4 space-y-3">
-        <h3 className="text-xs font-extrabold text-slate-400 uppercase">Rincian Keuangan</h3>
+      <div className="premium-card premium-card-glow p-4 space-y-2.5 animate-slide-up" style={{ animationDelay: "200ms", animationFillMode: "backwards" }}>
+        <h3 className="text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-wider">Rincian Keuangan</h3>
         {[
-          { label: "Jumlah Transaksi", value: String(report.jumlahTransaksi), color: "" },
-          { label: "Total HPP", value: `Rp${report.totalHpp.toLocaleString()}`, color: "text-rose-500" },
-          { label: "Laba Kotor", value: `Rp${report.labaKotor.toLocaleString()}`, color: "text-[#7B61FF]" },
-          { label: "Cashflow Masuk", value: `Rp${report.cashflowMasuk.toLocaleString()}`, color: "text-emerald-500" },
-          { label: "Cashflow Keluar", value: `Rp${report.cashflowKeluar.toLocaleString()}`, color: "text-rose-500" },
-          { label: "Piutang Aktif", value: `Rp${report.piutangAktif.toLocaleString()}`, color: "text-amber-500" },
-          { label: "Total Produk", value: String(report.jumlahProduk), color: "" },
+          { label: "Jumlah Transaksi", value: String(report.jumlahTransaksi), color: "", icon: "📊" },
+          { label: "Total HPP", value: `Rp${report.totalHpp.toLocaleString()}`, color: "text-rose-500", icon: "💰" },
+          { label: "Laba Kotor", value: `Rp${report.labaKotor.toLocaleString()}`, color: "text-[#7B61FF]", icon: "📈" },
+          { label: "Cashflow Masuk", value: `Rp${report.cashflowMasuk.toLocaleString()}`, color: "text-emerald-500", icon: "📥" },
+          { label: "Cashflow Keluar", value: `Rp${report.cashflowKeluar.toLocaleString()}`, color: "text-rose-500", icon: "📤" },
+          { label: "Piutang Aktif", value: `Rp${report.piutangAktif.toLocaleString()}`, color: "text-amber-500", icon: "⏳" },
+          { label: "Total Produk", value: String(report.jumlahProduk), color: "", icon: "📦" },
         ].map((row, i) => (
-          <div key={i} className="flex justify-between text-xs font-medium border-b pb-2 border-slate-100 dark:border-slate-800">
-            <span>{row.label}</span>
-            <span className={`font-bold ${row.color}`}>{row.value}</span>
+          <div key={i} className="flex justify-between items-center text-xs font-medium border-b pb-2.5 border-slate-100 dark:border-slate-800 last:border-0 last:pb-0 hover:bg-slate-50 dark:hover:bg-zinc-900/50 rounded-lg px-2 -mx-2 transition-colors duration-200">
+            <span className="flex items-center gap-2">
+              <span className="text-[11px]">{row.icon}</span>
+              <span className="text-slate-600 dark:text-slate-300">{row.label}</span>
+            </span>
+            <span className={`font-heading font-extrabold ${row.color}`}>{row.value}</span>
           </div>
         ))}
       </div>
