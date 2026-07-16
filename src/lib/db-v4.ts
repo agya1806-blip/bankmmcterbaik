@@ -340,3 +340,14 @@ export function branchPrefix(slug: BookOrBranch): string {
   };
   return map[slug] ?? "USR";
 }
+
+/* ─── Type Aliases (for backward compatibility) ─── */
+export type Customer = DbCustomer;
+export type Transaction = DbTransaction;
+export type Cashflow = DbCashflow;
+export type AuditLog = DbAuditLog;
+export type Production = DbProduction;
+export type Wallet = DbWallet;
+export type Piutang = DbPiutang;
+
+export type Inventory = DbInventoryItem;

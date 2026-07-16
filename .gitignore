@@ -1,9 +1,5 @@
-node_modules/
-.next/
-*.local
-.DS_Store
-*.log
-.env
-.env.local
-out/
-_write-kasir.js
+node_modules
+
+.next
+node_modules
+.env*

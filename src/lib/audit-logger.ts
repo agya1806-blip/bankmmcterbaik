@@ -1,22 +1,20 @@
 import { db, type BookOrBranch, type DbAuditLog } from "@/lib/db-v4";
 
-type AuditAction = DbAuditLog["action"];
-type EntityType = DbAuditLog["entityType"];
-
-interface AuditInput {
+export interface AuditInput {
   bookOrBranchId: BookOrBranch;
-  action: AuditAction;
-  entityType: EntityType;
+  action: DbAuditLog["action"];
+  entityType: DbAuditLog["entityType"];
   entityId: string;
   userId: string;
   userName: string;
-  dataBefore?: unknown;
-  dataAfter?: unknown;
+  dataBefore?: string;
+  dataAfter?: string;
   nominal?: number;
   alasan?: string;
 }
 
-export async function writeAuditLog(input: AuditInput) {
+export async function writeAuditLog(input: AuditInput): Promise<void> {
+  const now = new Date().toISOString();
   const log: DbAuditLog = {
     id: crypto.randomUUID(),
     bookOrBranchId: input.bookOrBranchId,
@@ -25,19 +23,18 @@ export async function writeAuditLog(input: AuditInput) {
     entityId: input.entityId,
     userId: input.userId,
     userName: input.userName,
-    dataBefore: input.dataBefore ? JSON.stringify(input.dataBefore) : "",
-    dataAfter: input.dataAfter ? JSON.stringify(input.dataAfter) : "",
+    dataBefore: input.dataBefore ?? "",
+    dataAfter: input.dataAfter ?? "",
     nominal: input.nominal ?? 0,
     alasan: input.alasan ?? "",
-    createdAt: new Date().toISOString(),
+    createdAt: now,
   };
   await db.auditLogs.add(log);
-  return log;
 }
 
 export async function getAuditLogs(
   branch?: BookOrBranch,
-  entityType?: EntityType,
+  entityType?: DbAuditLog["entityType"],
   entityId?: string,
   limit = 50
 ): Promise<DbAuditLog[]> {

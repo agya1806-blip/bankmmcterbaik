@@ -1,143 +1,79 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
-import { db } from "@/lib/db-v4";
-import { ArrowRight, Eye, EyeOff, KeyRound } from "lucide-react";
-
-async function hashPin(pin: string): Promise<string> {
-  const enc = new TextEncoder();
-  const buf = await crypto.subtle.digest("SHA-256", enc.encode(pin));
-  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-}
+import { Lock, User } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { currentUser, setSession } = useSessionStore();
-  const [isInitializing, setIsInitializing] = useState(true);
+  const { login, completeOnboarding } = useSessionStore();
+  const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showPin, setShowPin] = useState(false);
 
-  useEffect(() => {
-    const t = setTimeout(() => setIsInitializing(false), 150);
-    return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    if (!isInitializing && currentUser) {
-      document.body.style.filter = "blur(0px)";
-      router.replace("/");
-    }
-  }, [currentUser, router, isInitializing]);
-
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (pin.length < 4) { setError("PIN minimal 4 digit"); return; }
-    setLoading(true);
-    setError("");
-
-    try {
-      if (document.activeElement instanceof HTMLElement) {
-        document.activeElement.blur();
-      }
-
-      const users = await db.users.toArray();
-      if (users.length === 0) {
-        router.replace("/register");
-        return;
-      }
-
-      const hash = await hashPin(pin);
-      const found = users.find((u) => u.pinHash === hash && u.isActive);
-      if (!found) {
-        setError("PIN salah");
-        setLoading(false);
-        return;
-      }
-
-      setSession(found);
-
-      document.body.style.filter = "blur(4px)";
-      setTimeout(() => {
-        document.body.style.filter = "blur(0px)";
-        router.replace("/");
-      }, 150);
-    } catch {
-      setError("Terjadi kesalahan");
-      setLoading(false);
+    if (!username.trim()) {
+      setError("Username harus diisi");
+      return;
     }
-  }, [pin, router, setSession]);
-
-  if (isInitializing) {
-    return <div className="flex h-[100dvh] items-center justify-center bg-[#F8F9FD] dark:bg-[#0B0C16]" />;
-  }
+    if (pin.length < 4) {
+      setError("PIN minimal 4 digit");
+      return;
+    }
+    login(username.trim());
+    completeOnboarding();
+    router.push("/buku-usaha");
+  };
 
   return (
-    <div className="flex h-[100dvh] items-center justify-center p-6 bg-[#F8F9FD] dark:bg-[#0B0C16] animate-fade-in">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col items-center mb-8">
-          <div className="size-14 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] flex items-center justify-center text-white font-bold text-xl shadow-xl shadow-[#7B61FF]/20 mb-4">
-            M
-          </div>
-          <h1 className="text-xl font-bold font-heading">MMCBANK</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Masukkan PIN untuk masuk</p>
+    <div className="min-h-screen bg-[#F8F9FD] dark:bg-[#0B0C16] flex items-center justify-center px-4">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm premium-card p-8 flex flex-col gap-5 animate-fade-in">
+        <div className="text-center">
+          <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] bg-clip-text text-transparent">
+            MMCBANK
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">Buku Usaha v3</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/30 px-4 py-3">
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-            </div>
-          )}
+        <div className="relative">
+          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => { setUsername(e.target.value); setError(""); }}
+            className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#131527] text-sm focus:outline-none focus:ring-2 focus:ring-[#7B61FF]/40"
+          />
+        </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-500 dark:text-slate-400">PIN Akun</label>
-            <div className="relative">
-              <input
-                type={showPin ? "text" : "password"}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
-                placeholder="6 digit PIN"
-                value={pin}
-                onChange={(e) => { setPin(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }}
-                className="input-premium w-full h-10 pl-10 pr-12 text-base rounded-xl"
-                autoFocus
-              />
-              <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-              <button
-                type="button"
-                onClick={() => setShowPin(!showPin)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-              >
-                {showPin ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-              </button>
-            </div>
-          </div>
+        <div className="relative">
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="password"
+            placeholder="PIN"
+            value={pin}
+            onChange={(e) => { setPin(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }}
+            className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#131527] text-sm focus:outline-none focus:ring-2 focus:ring-[#7B61FF]/40 tracking-[0.3em]"
+            maxLength={6}
+          />
+        </div>
 
-          <button
-            type="submit"
-            disabled={loading || pin.length < 4}
-            className="btn-gradient w-full h-10 rounded-xl text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (
-              <span className="size-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-            ) : (
-              <span className="flex items-center gap-2">Masuk <ArrowRight className="size-4" /></span>
-            )}
-          </button>
-        </form>
+        {error && <p className="text-xs text-red-500 text-center">{error}</p>}
 
-        <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
-          Belum punya akun?{" "}
-          <button onClick={() => router.push("/register")} className="text-[#7B61FF] font-medium hover:underline">
-            Buat Sekarang
-          </button>
-        </p>
-      </div>
+        <button
+          type="submit"
+          className="w-full h-11 rounded-xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white font-bold text-sm shadow-lg shadow-indigo-500/20 active:scale-[0.97] transition-transform"
+        >
+          Masuk
+        </button>
+
+        <div className="flex justify-between text-xs">
+          <button onClick={() => router.push("/register")} className="text-[#7B61FF] font-bold">Daftar Akun Baru</button>
+          <button onClick={() => router.push("/forgot-pin")} className="text-slate-400 font-bold">Lupa PIN?</button>
+        </div>
+      </form>
     </div>
   );
 }

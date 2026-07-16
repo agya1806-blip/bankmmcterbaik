@@ -1,4 +1,3 @@
 {
-  "task.allowAutomaticTasks": "on",
-  "envWatcher.enabled": false
+    "envWatcher.enabled": false
 }

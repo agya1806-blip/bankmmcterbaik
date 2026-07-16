@@ -1,132 +1,165 @@
-/* ─── 4-Format Universal Export Engine ─── */
+import type { BookOrBranch, Transaction, Cashflow } from "@/lib/db-v4";
 
-/**
- * 1. WA Export — format teks ramah WhatsApp, buka URL wa.me
- */
-export function exportWA(
-  phone: string,
-  message: string
-): string {
-  const text = encodeURIComponent(message);
-  const cleaned = (phone ?? "").replace(/[^0-9]/g, "");
-  if (!cleaned) return `https://wa.me/?text=${text}`;
-  return `https://wa.me/${cleaned}?text=${text}`;
+/* ─── Format Helpers ─── */
+
+function formatCurrency(n: number): string {
+  return `Rp${n.toLocaleString("id-ID")}`;
 }
 
-export function formatInvoiceWA(
-  invoiceNumber: string,
-  customerNama: string,
-  items: { namaItem: string; qty: number; subtotal: number }[],
-  total: number,
-  dp: number,
-  sisa: number,
-  profilNama: string
-): string {
-  const safe = (v: unknown, fallback: string) => (typeof v === "string" && v.trim()) || fallback;
-  let msg = `*${safe(profilNama, "Toko")}*\n`;
-  msg += `─────────────────\n`;
-  msg += `*INVOICE #${safe(invoiceNumber, "-")}*\n`;
-  msg += `Kepada: ${safe(customerNama, "Walk-in")}\n\n`;
-  msg += `*Pesanan:*\n`;
-  (items ?? []).forEach((it, i) => {
-    const nama = safe(it?.namaItem, "Item");
-    const qty = it?.qty ?? 0;
-    const sub = it?.subtotal ?? 0;
-    msg += `${i + 1}. ${nama} x${qty} — Rp${sub.toLocaleString()}\n`;
+function formatDate(d: Date | string): string {
+  const date = d instanceof Date ? d : new Date(d);
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
-  msg += `─────────────────\n`;
-  msg += `*Total: Rp${(total ?? 0).toLocaleString()}*\n`;
-  if (dp > 0) msg += `DP: Rp${dp.toLocaleString()}\n`;
-  if (sisa > 0) msg += `Sisa: Rp${sisa.toLocaleString()}\n`;
-  msg += `─────────────────\n`;
-  msg += `Terima kasih 🙏`;
-  return msg;
 }
 
-/**
- * 2. Photo Export — html2canvas → PNG download
- */
-export async function exportPhoto(
-  element: HTMLElement,
-  filename: string = "nota"
+/* ─── WA Text Export ─── */
+
+export function formatTransactionWA(tx: Transaction, branchName: string): string {
+  const itemsList = tx.items
+    .map((item) => `  • ${item.namaItem} x${item.qty}  ${formatCurrency(item.hargaSatuan * item.qty)}`)
+    .join("\n");
+
+  return (
+    `📋 *INVOICE ${tx.invoiceNumber}*\n` +
+    ` Cabang: ${branchName}\n` +
+    ` Tanggal: ${formatDate(tx.tanggal)}\n` +
+    ` Pelanggan: ${tx.customerNama}\n` +
+    `\n${"─".repeat(30)}\n` +
+    `${itemsList}\n` +
+    `${"─".repeat(30)}\n` +
+    ` *Total:* ${formatCurrency(tx.totalBruto)}\n` +
+    ` *Dibayar:* ${formatCurrency(tx.dpDibayar)}\n` +
+    (tx.sisaTagihan > 0
+      ? ` *Sisa Piutang:* ${formatCurrency(tx.sisaTagihan)}\n`
+      : ` ✅ *LUNAS*\n`) +
+    `\nTerima kasih atas kunjungan Anda! 🙏`
+  );
+}
+
+export function formatCashflowWA(cashflows: Cashflow[], branchName: string, period: string): string {
+  const masuk = cashflows.filter((c) => c.tipe === "masuk");
+  const keluar = cashflows.filter((c) => c.tipe === "keluar");
+  const totalMasuk = masuk.reduce((s, c) => s + c.nominal, 0);
+  const totalKeluar = keluar.reduce((s, c) => s + c.nominal, 0);
+
+  const lines = [
+    `📊 *LAPORAN CASHFLOW*`,
+    ` Cabang: ${branchName}`,
+    ` Periode: ${period}`,
+    `\n${"─".repeat(30)}`,
+    `\n💰 *PEMASUKAN (${masuk.length} transaksi):*`,
+    ...masuk.slice(0, 10).map((c) => `  • ${c.catatan}: ${formatCurrency(c.nominal)}`),
+    `\n💸 *PENGELUARAN (${keluar.length} transaksi):*`,
+    ...keluar.slice(0, 10).map((c) => `  • ${c.catatan}: ${formatCurrency(c.nominal)}`),
+    `\n${"─".repeat(30)}`,
+    ` Total Masuk: ${formatCurrency(totalMasuk)}`,
+    ` Total Keluar: ${formatCurrency(totalKeluar)}`,
+    ` *Selisih:* ${formatCurrency(totalMasuk - totalKeluar)}`,
+  ];
+
+  return lines.join("\n");
+}
+
+/* ─── Open WA ─── */
+
+export function openWhatsApp(phone: string, message: string): void {
+  const cleanPhone = phone.replace(/[^0-9]/g, "");
+  const url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
+  window.open(url, "_blank");
+}
+
+/* ─── PDF Export ─── */
+
+export async function exportPDF(
+  filename: string,
+  html: string
 ): Promise<void> {
-  const html2canvas = (await import("html2canvas")).default;
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    logging: false,
-    backgroundColor: "#ffffff",
+  const { default: jsPDF } = await import("jspdf");
+  const doc = new jsPDF("p", "mm", "a4");
+  doc.setFont("helvetica");
+  doc.setFontSize(10);
+
+  const lines = html.split("\n");
+  let y = 20;
+  lines.forEach((line) => {
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+    doc.text(line, 15, y);
+    y += 5;
   });
+
+  doc.save(`${filename}.pdf`);
+}
+
+/* ─── PNG Export (html2canvas) ─── */
+
+export async function exportPNG(
+  elementId: string,
+  filename: string
+): Promise<void> {
+  const { default: html2canvas } = await import("html2canvas");
+  const el = document.getElementById(elementId);
+  if (!el) return alert("Element tidak ditemukan!");
+  const canvas = await html2canvas(el, { scale: 2, useCORS: true });
   const link = document.createElement("a");
   link.download = `${filename}.png`;
   link.href = canvas.toDataURL("image/png");
   link.click();
 }
 
-/**
- * 3. PDF Export — jspdf dari canvas atau html
- */
-export async function exportPDF(
-  element: HTMLElement,
-  filename: string = "nota"
-): Promise<void> {
-  const html2canvas = (await import("html2canvas")).default;
-  const { default: jsPDF } = await import("jspdf");
+/* ─── Excel Export (xlsx) ─── */
 
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    logging: false,
-    backgroundColor: "#ffffff",
-  });
-
-  const imgData = canvas.toDataURL("image/png");
-  const imgWidth = 210;
-  const pageHeight = 297;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-  const pdf = new jsPDF("p", "mm", "a4");
-  let heightLeft = imgHeight;
-  let position = 0;
-
-  pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-  heightLeft -= pageHeight;
-
-  while (heightLeft > 0) {
-    position = heightLeft - imgHeight;
-    pdf.addPage();
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-  }
-
-  pdf.save(`${filename}.pdf`);
-}
-
-/**
- * 4. Excel Export — SheetJS xlsx
- */
 export async function exportExcel(
-  data: Record<string, unknown>[],
-  sheetName: string = "Sheet1",
-  filename: string = "laporan"
+  filename: string,
+  headers: string[],
+  rows: (string | number)[][]
 ): Promise<void> {
   const XLSX = await import("xlsx");
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
   const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.json_to_sheet(data);
-  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  XLSX.utils.book_append_sheet(wb, ws, "Data");
   XLSX.writeFile(wb, `${filename}.xlsx`);
 }
 
-/* ─── Format helpers ─── */
+/* ─── Transaction Excel Helper ─── */
 
-export function formatRupiah(n: number): string {
-  return `Rp${n.toLocaleString("id-ID")}`;
+export function exportTransactionsExcel(
+  transactions: Transaction[],
+  branchName: string
+): void {
+  const headers = ["No", "Invoice", "Tanggal", "Pelanggan", "Total", "Dibayar", "Sisa", "Status"];
+  const rows = transactions.map((tx, i) => [
+    i + 1,
+    tx.invoiceNumber,
+    formatDate(tx.tanggal),
+    tx.customerNama,
+    tx.totalBruto,
+    tx.dpDibayar,
+    tx.sisaTagihan,
+    tx.status,
+  ]);
+  exportExcel(`Transaksi-${branchName}-${Date.now()}`, headers, rows);
 }
 
-export function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
-}
+/* ─── Cashflow Excel Helper ─── */
 
-export function nowISO(): string {
-  return new Date().toISOString();
+export function exportCashflowExcel(
+  cashflows: Cashflow[],
+  branchName: string
+): void {
+  const headers = ["No", "Tanggal", "Tipe", "Kategori", "Nominal", "Catatan"];
+  const rows = cashflows.map((cf, i) => [
+    i + 1,
+    formatDate(cf.createdAt),
+    cf.tipe === "masuk" ? "Pemasukan" : "Pengeluaran",
+    cf.kategori,
+    cf.nominal,
+    cf.catatan,
+  ]);
+  exportExcel(`Cashflow-${branchName}-${Date.now()}`, headers, rows);
 }
