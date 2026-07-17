@@ -10,7 +10,6 @@ import { exportTransactionsExcel, exportCashflowExcel } from "@/lib/export-utils
 import { db, type BookOrBranch, BOOK_LABELS } from "@/lib/db-v4";
 import { useLiveQuery } from "dexie-react-hooks";
 import { motion, AnimatePresence } from "framer-motion";
-import PinLock from "@/components/pin-lock";
 import { BarChart3, CreditCard, Users, ScrollText, Settings, Sun, Moon, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Search, Wallet, Download, Upload, ArrowRightLeft, Zap, Plus, Trash2, LogOut, X, Database } from "lucide-react";
 
 const BRANCH_LIST: BookOrBranch[] = [
@@ -22,11 +21,10 @@ type TabKey = "dashboard" | "piutang" | "pelanggan" | "audit" | "settings";
 
 export default function BukuGlobalPage() {
   const router = useRouter();
-  const { currentUser, logout, isPinVerified, verifyPin, resetPinVerification } = useSessionStore();
+  const { currentUser, logout } = useSessionStore();
   const { theme, toggleTheme } = useThemeStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [showPin, setShowPin] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>("dashboard");
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -70,17 +68,6 @@ export default function BukuGlobalPage() {
   const allInventory = useLiveQuery(() => db.inventory.toArray()) || [];
   const allAuditLogs = useLiveQuery(() => db.auditLogs.orderBy("createdAt").reverse().toArray()) || [];
   const allQuickOrders = useLiveQuery(() => db.quickOrders.toArray()) || [];
-
-  /* ─── Auth Gate ─── */
-  if (!isPinVerified && showPin) {
-    return (
-      <PinLock
-        onSuccess={() => { verifyPin(); setShowPin(false); }}
-        title="Akses Pengaturan Global"
-        subtitle="Masukkan PIN admin"
-      />
-    );
-  }
 
   /* ═══════════════════════════════════════════════════════ */
   /* DASHBOARD COMPUTATIONS                                 */
@@ -258,7 +245,6 @@ export default function BukuGlobalPage() {
   const handleLogout = () => {
     if (!confirm("Yakin ingin logout?")) return;
     logout();
-    resetPinVerification();
     router.push("/login");
   };
 
