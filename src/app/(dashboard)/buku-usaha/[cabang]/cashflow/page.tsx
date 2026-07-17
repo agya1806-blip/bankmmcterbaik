@@ -7,6 +7,8 @@ import { db, type BookOrBranch, type Cashflow } from "@/lib/db-v4";
 import { motion, AnimatePresence } from "framer-motion";
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
+  pribadi: "pribadi",
+  keluarga: "keluarga",
   percetakan: "usaha-percetakan",
   laptop: "usaha-laptop",
   gadget: "usaha-gadget",

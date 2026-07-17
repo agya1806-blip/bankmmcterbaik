@@ -6,6 +6,8 @@ import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type BookOrBranch } from "@/lib/db-v4";
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
+  pribadi: "pribadi",
+  keluarga: "keluarga",
   percetakan: "usaha-percetakan",
   laptop: "usaha-laptop",
   gadget: "usaha-gadget",

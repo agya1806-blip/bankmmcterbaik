@@ -18,8 +18,34 @@ import {
 
 import KalkulatorHarga from "@/components/business/kalkulator-harga";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Clock,
+  Calculator,
+  Plus,
+  Search,
+  Trash2,
+  ShoppingBag,
+  AlertTriangle,
+  Zap,
+  ChevronDown,
+  X,
+  Image,
+  Upload,
+  Banknote,
+  Wallet,
+  Smartphone,
+  QrCode,
+  FileText,
+  Settings,
+  Tag,
+  Receipt,
+  Minus,
+  CreditCard,
+} from "lucide-react";
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
+  pribadi: "pribadi",
+  keluarga: "keluarga",
   percetakan: "usaha-percetakan",
   laptop: "usaha-laptop",
   gadget: "usaha-gadget",
@@ -39,10 +65,10 @@ interface CartItem {
 }
 
 const PAYMENT_METHODS = [
-  { key: "CASH" as const, label: "Tunai", icon: "💵", color: "from-emerald-500 to-teal-500" },
-  { key: "TRANSFER" as const, label: "Transfer", icon: "👛", color: "from-blue-500 to-indigo-500" },
-  { key: "DEPOSIT" as const, label: "Deposit", icon: "📱", color: "from-purple-500 to-pink-500" },
-  { key: "QRIS" as const, label: "QRIS", icon: "📱", color: "from-orange-500 to-red-500" },
+  { key: "CASH" as const, label: "Tunai", icon: <Banknote className="w-4 h-4" />, color: "from-emerald-500 to-teal-500" },
+  { key: "TRANSFER" as const, label: "Transfer", icon: <Wallet className="w-4 h-4" />, color: "from-blue-500 to-indigo-500" },
+  { key: "DEPOSIT" as const, label: "Deposit", icon: <Smartphone className="w-4 h-4" />, color: "from-purple-500 to-pink-500" },
+  { key: "QRIS" as const, label: "QRIS", icon: <Smartphone className="w-4 h-4" />, color: "from-orange-500 to-red-500" },
 ];
 
 const PPN_RATE = 11;
@@ -400,7 +426,7 @@ export default function PosKasirPage() {
           onClick={() => router.push("/buku-usaha")}
           className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md active:scale-95 transition-transform"
         >
-          ◀️
+          <ChevronDown className="w-4 h-4 rotate-90" />
         </button>
         <h1 className="text-lg font-heading font-extrabold tracking-tight capitalize">
           Kasir {cabangSlug}

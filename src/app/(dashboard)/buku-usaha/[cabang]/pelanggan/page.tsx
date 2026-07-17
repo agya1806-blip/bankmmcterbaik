@@ -7,6 +7,8 @@ import { db, type BookOrBranch, type Customer } from '@/lib/db-v4';
 
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
+  pribadi: 'pribadi',
+  keluarga: 'keluarga',
   percetakan: 'usaha-percetakan',
   laptop: 'usaha-laptop',
   gadget: 'usaha-gadget',
