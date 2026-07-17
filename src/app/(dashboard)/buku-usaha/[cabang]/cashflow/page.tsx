@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type BookOrBranch, type Cashflow } from "@/lib/db-v4";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, TrendingUp, TrendingDown, Wallet, X, Save } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Wallet, X, Save, ArrowLeft } from "lucide-react";
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
   pribadi: "pribadi",
@@ -80,7 +80,7 @@ export default function CashflowPage() {
           onClick={() => router.push(`/buku-usaha/${cabangSlug}`)}
           className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md"
         >
-          <span className="text-sm">◀️</span>
+          <ArrowLeft className="w-4 h-4" />
         </button>
         <h1 className="text-lg font-extrabold tracking-tight">Cashflow</h1>
         <button

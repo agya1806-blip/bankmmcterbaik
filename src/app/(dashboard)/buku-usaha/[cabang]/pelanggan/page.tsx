@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type BookOrBranch, type Customer } from '@/lib/db-v4';
-import { User, Search, Phone, DollarSign, MessageCircle, Plus, X, Send } from "lucide-react";
+import { User, Search, Phone, DollarSign, MessageCircle, Plus, X, Send, ArrowLeft } from "lucide-react";
 
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
@@ -81,7 +81,7 @@ export default function PelangganCRMPage() {
           onClick={() => router.push(`/buku-usaha/${cabangSlug}`)}
           className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md"
         >
-          ◀️
+          <ArrowLeft className="w-4 h-4" />
         </button>
         <h1 className="text-lg font-extrabold tracking-tight capitalize">CRM Pelanggan</h1>
         <button
