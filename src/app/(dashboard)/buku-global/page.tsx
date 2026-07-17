@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useMemo, useCallback } from "react";
+import React, { useState, useRef, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
 import { useThemeStore } from "@/store/useThemeStore";
@@ -10,14 +10,14 @@ import { exportTransactionsExcel, exportCashflowExcel } from "@/lib/export-utils
 import { db, type BookOrBranch, BOOK_LABELS } from "@/lib/db-v4";
 import { useLiveQuery } from "dexie-react-hooks";
 import { motion, AnimatePresence } from "framer-motion";
-import { BarChart3, CreditCard, Users, ScrollText, Settings, Sun, Moon, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Search, Wallet, Download, Upload, ArrowRightLeft, Zap, Plus, Trash2, LogOut, X, Database } from "lucide-react";
+import { BarChart3, CreditCard, Users, ScrollText, Settings, Sun, Moon, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Search, Wallet, Download, Upload, ArrowRightLeft, Zap, Plus, Trash2, LogOut, X, Database, UserCircle, Landmark, Smartphone, Save, Edit3, Pencil, Building } from "lucide-react";
 
 const BRANCH_LIST: BookOrBranch[] = [
   "usaha-percetakan", "usaha-laptop", "usaha-gadget",
   "usaha-warkop", "usaha-kelontong", "usaha-konveksi", "usaha-toko-pakaian",
 ];
 
-type TabKey = "dashboard" | "piutang" | "pelanggan" | "audit" | "settings";
+type TabKey = "dashboard" | "piutang" | "pelanggan" | "audit" | "settings" | "dompet" | "profil";
 
 export default function BukuGlobalPage() {
   const router = useRouter();
@@ -68,6 +68,19 @@ export default function BukuGlobalPage() {
   const allInventory = useLiveQuery(() => db.inventory.toArray()) || [];
   const allAuditLogs = useLiveQuery(() => db.auditLogs.orderBy("createdAt").reverse().toArray()) || [];
   const allQuickOrders = useLiveQuery(() => db.quickOrders.toArray()) || [];
+  const allWallets = useLiveQuery(() => db.wallets.toArray()) || [];
+
+  /* ─── Dompet State ─── */
+  const [walletName, setWalletName] = useState("");
+  const [walletTipe, setWalletTipe] = useState<"KasTunai" | "Bank" | "EWallet">("Bank");
+  const [walletSaldo, setWalletSaldo] = useState(0);
+  const [walletCatatan, setWalletCatatan] = useState("");
+  const [editingWallet, setEditingWallet] = useState<string | null>(null);
+
+  /* ─── Profil State ─── */
+  const [profileNama, setProfileNama] = useState("");
+  const [profileNoHP, setProfileNoHP] = useState("");
+  const [profileAlamat, setProfileAlamat] = useState("");
 
   /* ═══════════════════════════════════════════════════════ */
   /* DASHBOARD COMPUTATIONS                                 */
@@ -248,6 +261,68 @@ export default function BukuGlobalPage() {
     router.push("/login");
   };
 
+  const handleSaveWallet = async () => {
+    if (!walletName.trim()) return alert("Nama dompet wajib diisi!");
+    if (editingWallet) {
+      await db.wallets.update(editingWallet, {
+        namaDompet: walletName.trim(),
+        tipe: walletTipe,
+        saldo: walletSaldo,
+        catatan: walletCatatan,
+      });
+      setEditingWallet(null);
+    } else {
+      await db.wallets.add({
+        id: crypto.randomUUID(),
+        bookOrBranchId: "usaha",
+        namaDompet: walletName.trim(),
+        saldo: walletSaldo,
+        tipe: walletTipe,
+        catatan: walletCatatan,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+      });
+    }
+    setWalletName(""); setWalletSaldo(0); setWalletCatatan(""); setWalletTipe("Bank");
+    alert(editingWallet ? "Dompet diperbarui!" : "Dompet ditambahkan!");
+  };
+
+  const handleEditWallet = (w: typeof allWallets[0]) => {
+    setEditingWallet(w.id);
+    setWalletName(w.namaDompet);
+    setWalletTipe(w.tipe);
+    setWalletSaldo(w.saldo);
+    setWalletCatatan(w.catatan);
+  };
+
+  const handleDeleteWallet = async (id: string) => {
+    if (!confirm("Hapus dompet ini?")) return;
+    await db.wallets.delete(id);
+    if (editingWallet === id) { setEditingWallet(null); setWalletName(""); setWalletSaldo(0); setWalletCatatan(""); }
+  };
+
+  const handleSaveProfile = () => {
+    const profile = { nama: profileNama, noHP: profileNoHP, alamat: profileAlamat };
+    localStorage.setItem("mmcbank_profile", JSON.stringify(profile));
+    alert("Profil tersimpan!");
+  };
+
+  const handleLoadProfile = useCallback(() => {
+    try {
+      const saved = localStorage.getItem("mmcbank_profile");
+      if (saved) {
+        const p = JSON.parse(saved);
+        setProfileNama(p.nama || "");
+        setProfileNoHP(p.noHP || "");
+        setProfileAlamat(p.alamat || "");
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "profil") handleLoadProfile();
+  }, [activeTab, handleLoadProfile]);
+
   /* ═══════════════════════════════════════════════════════ */
   /* FILTERED DATA                                          */
   /* ═══════════════════════════════════════════════════════ */
@@ -285,8 +360,10 @@ export default function BukuGlobalPage() {
     { key: "dashboard", label: "Ringkasan", icon: <TrendingUp className="w-5 h-5" /> },
     { key: "piutang", label: "Piutang", icon: <CreditCard className="w-5 h-5" /> },
     { key: "pelanggan", label: "Pelanggan", icon: <Users className="w-5 h-5" /> },
+    { key: "dompet", label: "Dompet", icon: <Wallet className="w-5 h-5" /> },
     { key: "audit", label: "Audit Log", icon: <ScrollText className="w-5 h-5" /> },
     { key: "settings", label: "Pengaturan", icon: <Settings className="w-5 h-5" /> },
+    { key: "profil", label: "Profil", icon: <UserCircle className="w-5 h-5" /> },
   ];
 
   /* ═══════════════════════════════════════════════════════ */
@@ -839,6 +916,168 @@ export default function BukuGlobalPage() {
             <span className="text-sm"><LogOut className="w-5 h-5" /></span>
             <span className="text-xs font-bold">Keluar dari Akun</span>
           </button>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* TAB: DOMPET                                            */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      {activeTab === "dompet" && (
+        <div className="space-y-3 animate-fade-in">
+          <div className="premium-card p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center text-white shadow-md">
+                <span className="text-sm"><Wallet className="w-5 h-5" /></span>
+              </div>
+              <div>
+                <span className="text-xs font-bold">{editingWallet ? "Edit Dompet" : "Tambah Dompet"}</span>
+                <p className="text-[10px] text-slate-400">Bank, E-Wallet, Kas Tunai</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <input type="text" placeholder="Nama dompet (contoh: BCA, Dana, Kas)" value={walletName}
+                onChange={(e) => setWalletName(e.target.value)}
+                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
+              <div className="grid grid-cols-3 gap-2">
+                {(["KasTunai", "Bank", "EWallet"] as const).map((t) => (
+                  <button key={t} onClick={() => setWalletTipe(t)}
+                    className={`py-2 rounded-xl text-[10px] font-bold transition-all ${walletTipe === t ? "bg-[#008CEB] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
+                    {t === "KasTunai" ? <><Landmark className="w-5 h-5" /><span className="mt-1 block">Kas Tunai</span></> : t === "Bank" ? <><Building className="w-5 h-5" /><span className="mt-1 block">Bank</span></> : <><Smartphone className="w-5 h-5" /><span className="mt-1 block">E-Wallet</span></>}
+                  </button>
+                ))}
+              </div>
+              <input type="number" placeholder="Saldo awal (Rp)" value={walletSaldo || ""}
+                onChange={(e) => setWalletSaldo(Number(e.target.value))}
+                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
+              <input type="text" placeholder="Catatan (opsional)" value={walletCatatan}
+                onChange={(e) => setWalletCatatan(e.target.value)}
+                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
+              <div className="flex gap-2">
+                <button onClick={handleSaveWallet}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-bold text-xs active:scale-[0.98] flex items-center justify-center gap-1.5">
+                  <span className="text-sm"><Save className="w-5 h-5" /></span>
+                  {editingWallet ? "Update" : "Simpan"}
+                </button>
+                {editingWallet && (
+                  <button onClick={() => { setEditingWallet(null); setWalletName(""); setWalletSaldo(0); setWalletCatatan(""); }}
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-400 text-xs font-bold">
+                    Batal
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="premium-card p-3 space-y-2">
+            <div className="flex items-center gap-2 mb-1">
+              <Wallet className="w-4 h-4 text-[#008CEB]" />
+              <span className="text-xs font-bold">Semua Dompet</span>
+              <span className="text-[10px] text-slate-400 ml-auto">({allWallets.length})</span>
+            </div>
+            {allWallets.length === 0 ? (
+              <p className="text-[10px] text-slate-400 py-4 text-center">Belum ada dompet. Tambahkan dompet di atas.</p>
+            ) : (
+              <div className="space-y-1.5">
+                {allWallets.map((w) => {
+                  const tipeIcons: Record<string, React.ReactNode> = {
+                    Bank: <Landmark className="w-4 h-4" />,
+                    EWallet: <Smartphone className="w-4 h-4" />,
+                    KasTunai: <DollarSign className="w-4 h-4" />,
+                  };
+                  return (
+                    <div key={w.id} className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/50 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#008CEB]/10 flex items-center justify-center text-[#008CEB]">
+                        {tipeIcons[w.tipe] || <Wallet className="w-4 h-4" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-bold truncate">{w.namaDompet}</p>
+                        <p className="text-[9px] text-slate-400">{w.tipe} {w.catatan && `· ${w.catatan}`}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-[10px] font-extrabold text-[#008CEB]">Rp{w.saldo.toLocaleString()}</p>
+                        <div className="flex gap-1 mt-0.5">
+                          <button onClick={() => handleEditWallet(w)} className="p-0.5 text-slate-400 hover:text-[#008CEB]">
+                            <span className="text-[10px]"><Pencil className="w-5 h-5" /></span>
+                          </button>
+                          <button onClick={() => handleDeleteWallet(w.id)} className="p-0.5 text-slate-400 hover:text-rose-500">
+                            <span className="text-[10px]"><Trash2 className="w-5 h-5" /></span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* TAB: PROFIL                                            */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      {activeTab === "profil" && (
+        <div className="space-y-3 animate-fade-in">
+          <div className="premium-card p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center text-white shadow-md">
+                <span className="text-xl"><UserCircle className="w-5 h-5" /></span>
+              </div>
+              <div>
+                <span className="text-xs font-bold">Profil Pengguna</span>
+                <p className="text-[10px] text-slate-400">Kelola informasi akun</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nama Lengkap</label>
+                <input type="text" placeholder="Nama Anda" value={profileNama}
+                  onChange={(e) => setProfileNama(e.target.value)}
+                  className="w-full px-3 py-2.5 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-[10px] text-slate-400 font-bold uppercase mb-1 block">No. HP / WhatsApp</label>
+                <input type="tel" placeholder="08xxxxxxxxxx" value={profileNoHP}
+                  onChange={(e) => setProfileNoHP(e.target.value)}
+                  className="w-full px-3 py-2.5 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
+              </div>
+              <div>
+                <label className="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Alamat</label>
+                <input type="text" placeholder="Alamat lengkap" value={profileAlamat}
+                  onChange={(e) => setProfileAlamat(e.target.value)}
+                  className="w-full px-3 py-2.5 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
+              </div>
+              <button onClick={handleSaveProfile}
+                className="w-full py-3 rounded-xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-bold text-xs active:scale-[0.98] flex items-center justify-center gap-2">
+                <span className="text-sm"><Save className="w-5 h-5" /></span> Simpan Profil
+              </button>
+            </div>
+          </div>
+
+          <div className="premium-card p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Building className="w-4 h-4 text-[#008CEB]" />
+              <span className="text-xs font-bold">Informasi Akun</span>
+            </div>
+            <div className="space-y-2 text-[11px]">
+              <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+                <span className="text-slate-400 font-medium">Username</span>
+                <span className="font-extrabold">{currentUser}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+                <span className="text-slate-400 font-medium">Tipe Lisensi</span>
+                <span className="font-extrabold text-[#008CEB]">FREE</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+                <span className="text-slate-400 font-medium">Cabang Aktif</span>
+                <span className="font-extrabold">2</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span className="text-slate-400 font-medium">Total Dompet</span>
+                <span className="font-extrabold">{allWallets.length}</span>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

@@ -12,11 +12,12 @@ import {
   Bell, Wallet, TrendingUp, TrendingDown, Plus, Clock,
   BarChart3, AlertTriangle, ArrowUpRight, ArrowDownRight,
   Calendar, FileText, ChevronRight, X, Save, DollarSign,
+  Landmark, Smartphone, Pencil, Trash2,
 } from "lucide-react";
 
 const BOOK_ID: BookOrBranch = "pribadi";
 
-type TabKey = "ringkasan" | "catat" | "hutang" | "laporan" | "riwayat";
+type TabKey = "ringkasan" | "catat" | "hutang" | "laporan" | "riwayat" | "dompet";
 
 export default function BukuPribadiPage() {
   const router = useRouter();
@@ -28,6 +29,13 @@ export default function BukuPribadiPage() {
   const [catatNominal, setCatatNominal] = useState("");
   const [catatKeterangan, setCatatCatatan] = useState("");
   const [showCatatSuccess, setShowCatatSuccess] = useState(false);
+
+  /* ─── Dompet State ─── */
+  const [walletName, setWalletName] = useState("");
+  const [walletTipe, setWalletTipe] = useState<"KasTunai" | "Bank" | "EWallet">("KasTunai");
+  const [walletSaldo, setWalletSaldo] = useState(0);
+  const [walletCatatan, setWalletCatatan] = useState("");
+  const [editingWallet, setEditingWallet] = useState<string | null>(null);
 
   const transactions = useLiveQuery(() => db.transactions.where("bookOrBranchId").equals(BOOK_ID).toArray(), []) || [];
   const cashflows = useLiveQuery(() => db.cashflows.where("bookOrBranchId").equals(BOOK_ID).toArray(), []) || [];
@@ -105,6 +113,31 @@ export default function BukuPribadiPage() {
     setTimeout(() => setShowCatatSuccess(false), 2000);
   };
 
+  const handleSaveWallet = async () => {
+    if (!walletName.trim()) return alert("Nama dompet wajib diisi!");
+    if (editingWallet) {
+      await db.wallets.update(editingWallet, { namaDompet: walletName.trim(), tipe: walletTipe, saldo: walletSaldo, catatan: walletCatatan });
+      setEditingWallet(null);
+    } else {
+      await db.wallets.add({
+        id: crypto.randomUUID(), bookOrBranchId: BOOK_ID,
+        namaDompet: walletName.trim(), saldo: walletSaldo, tipe: walletTipe,
+        catatan: walletCatatan, isActive: true, createdAt: new Date().toISOString(),
+      });
+    }
+    setWalletName(""); setWalletSaldo(0); setWalletCatatan(""); setWalletTipe("KasTunai");
+  };
+
+  const handleEditWallet = (w: typeof wallets[0]) => {
+    setEditingWallet(w.id); setWalletName(w.namaDompet); setWalletTipe(w.tipe); setWalletSaldo(w.saldo); setWalletCatatan(w.catatan);
+  };
+
+  const handleDeleteWallet = async (id: string) => {
+    if (!confirm("Hapus dompet ini?")) return;
+    await db.wallets.delete(id);
+    if (editingWallet === id) { setEditingWallet(null); setWalletName(""); setWalletSaldo(0); setWalletCatatan(""); }
+  };
+
   return (
     <div className="flex flex-col gap-4 pt-2 pb-4 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -148,9 +181,9 @@ export default function BukuPribadiPage() {
       </div>
 
       <div className="flex gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-x-auto">
-        {([ "ringkasan", "catat", "hutang", "laporan", "riwayat" ] as TabKey[]).map((tab) => (
+        {([ "ringkasan", "catat", "hutang", "laporan", "riwayat", "dompet" ] as TabKey[]).map((tab) => (
           <button key={tab} onClick={() => setActiveTab(tab)} className={`px-3 py-2 rounded-lg text-[10px] font-bold whitespace-nowrap transition-all flex-1 ${activeTab === tab ? "bg-white dark:bg-[#0F1926] text-[#008CEB] shadow-sm" : "text-slate-400"}`}>
-            {tab === "ringkasan" ? "Ringkasan" : tab === "catat" ? "Catat" : tab === "hutang" ? "Hutang" : tab === "laporan" ? "Laporan" : "Riwayat"}
+            {tab === "ringkasan" ? "Ringkasan" : tab === "catat" ? "Catat" : tab === "hutang" ? "Hutang" : tab === "laporan" ? "Laporan" : tab === "riwayat" ? "Riwayat" : "Dompet"}
           </button>
         ))}
       </div>
@@ -355,6 +388,93 @@ export default function BukuPribadiPage() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === "dompet" && (
+        <div className="flex flex-col gap-3">
+          <div className="premium-card p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center text-white shadow-md">
+                <span className="text-sm"><Wallet className="w-5 h-5" /></span>
+              </div>
+              <div>
+                <span className="text-xs font-bold">{editingWallet ? "Edit Dompet" : "Tambah Dompet"}</span>
+                <p className="text-[10px] text-slate-400">Kas tunai, rekening, e-wallet</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <input type="text" placeholder="Nama dompet (contoh: Kas, BCA, Dana)" value={walletName}
+                onChange={(e) => setWalletName(e.target.value)}
+                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
+              <div className="grid grid-cols-3 gap-2">
+                {(["KasTunai", "Bank", "EWallet"] as const).map((t) => (
+                  <button key={t} onClick={() => setWalletTipe(t)}
+                    className={`py-2 rounded-xl text-[10px] font-bold flex flex-col items-center gap-1 transition-all ${walletTipe === t ? "bg-[#008CEB] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
+                    {t === "KasTunai" ? <DollarSign className="w-4 h-4" /> : t === "Bank" ? <Landmark className="w-4 h-4" /> : <Smartphone className="w-4 h-4" />}
+                    {t === "KasTunai" ? "Kas" : t === "Bank" ? "Bank" : "E-Wallet"}
+                  </button>
+                ))}
+              </div>
+              <input type="number" placeholder="Saldo awal (Rp)" value={walletSaldo || ""}
+                onChange={(e) => setWalletSaldo(Number(e.target.value))}
+                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
+              <input type="text" placeholder="Catatan (opsional)" value={walletCatatan}
+                onChange={(e) => setWalletCatatan(e.target.value)}
+                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
+              <div className="flex gap-2">
+                <button onClick={handleSaveWallet}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-bold text-xs active:scale-[0.98] flex items-center justify-center gap-1.5">
+                  <span className="text-sm"><Save className="w-5 h-5" /></span> {editingWallet ? "Update" : "Simpan"}
+                </button>
+                {editingWallet && (
+                  <button onClick={() => { setEditingWallet(null); setWalletName(""); setWalletSaldo(0); setWalletCatatan(""); }}
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-400 text-xs font-bold">
+                    Batal
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="premium-card p-3 space-y-2">
+            <div className="flex items-center gap-2 mb-1">
+              <Wallet className="w-4 h-4 text-[#008CEB]" />
+              <span className="text-xs font-bold">Dompet Saya</span>
+              <span className="text-[10px] text-slate-400 ml-auto">({wallets.length})</span>
+            </div>
+            {wallets.length === 0 ? (
+              <p className="text-[10px] text-slate-400 py-4 text-center">Belum ada dompet. Tambahkan dompet di atas.</p>
+            ) : (
+              <div className="space-y-1.5">
+                {wallets.map((w) => {
+                  const tipeIcons: Record<string, React.ReactNode> = { Bank: <Landmark className="w-4 h-4" />, EWallet: <Smartphone className="w-4 h-4" />, KasTunai: <DollarSign className="w-4 h-4" /> };
+                  return (
+                    <div key={w.id} className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/50 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#008CEB]/10 flex items-center justify-center text-[#008CEB]">
+                        {tipeIcons[w.tipe] || <Wallet className="w-4 h-4" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-bold truncate">{w.namaDompet}</p>
+                        <p className="text-[9px] text-slate-400">{w.tipe}{w.catatan && ` · ${w.catatan}`}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-[10px] font-extrabold text-[#008CEB]">Rp{w.saldo.toLocaleString()}</p>
+                        <div className="flex gap-1 mt-0.5">
+                          <button onClick={() => handleEditWallet(w)} className="p-0.5 text-slate-400 hover:text-[#008CEB]">
+                            <span className="text-[10px]"><Pencil className="w-5 h-5" /></span>
+                          </button>
+                          <button onClick={() => handleDeleteWallet(w.id)} className="p-0.5 text-slate-400 hover:text-rose-500">
+                            <span className="text-[10px]"><Trash2 className="w-5 h-5" /></span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

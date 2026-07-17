@@ -5,21 +5,22 @@ import { useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type BookOrBranch } from "@/lib/db-v4";
 import { useSessionStore } from "@/store/useSessionStore";
+import { Printer, Smartphone, Monitor, Coffee, Shirt, ArrowLeft, ChevronRight, Building } from "lucide-react";
 
 interface UnitUsaha {
   slug: string;
   label: string;
-  icon: string;
+  icon: React.ReactNode;
   color: string;
   bookId: BookOrBranch;
 }
 
 const USAHA_UNITS: UnitUsaha[] = [
-  { slug: "percetakan", label: "Percetakan", icon: "🖨️", color: "from-blue-500 to-blue-600", bookId: "usaha-percetakan" },
-  { slug: "gadget", label: "Gadget", icon: "📱", color: "from-indigo-500 to-indigo-600", bookId: "usaha-gadget" },
-  { slug: "laptop", label: "Komputer & Laptop", icon: "💻", color: "from-violet-500 to-purple-600", bookId: "usaha-laptop" },
-  { slug: "warkop", label: "Kedai Kopi", icon: "☕", color: "from-orange-400 to-orange-500", bookId: "usaha-warkop" },
-  { slug: "konveksi", label: "Fashion & Konveksi", icon: "👔", color: "from-pink-400 to-pink-500", bookId: "usaha-konveksi" },
+  { slug: "percetakan", label: "Percetakan", icon: <Printer className="w-5 h-5" />, color: "from-blue-500 to-blue-600", bookId: "usaha-percetakan" },
+  { slug: "gadget", label: "Gadget", icon: <Smartphone className="w-5 h-5" />, color: "from-indigo-500 to-indigo-600", bookId: "usaha-gadget" },
+  { slug: "laptop", label: "Komputer & Laptop", icon: <Monitor className="w-5 h-5" />, color: "from-violet-500 to-purple-600", bookId: "usaha-laptop" },
+  { slug: "warkop", label: "Kedai Kopi", icon: <Coffee className="w-5 h-5" />, color: "from-orange-400 to-orange-500", bookId: "usaha-warkop" },
+  { slug: "konveksi", label: "Fashion & Konveksi", icon: <Shirt className="w-5 h-5" />, color: "from-pink-400 to-pink-500", bookId: "usaha-konveksi" },
 ];
 
 export default function BukuUsahaListPage() {
@@ -61,10 +62,13 @@ export default function BukuUsahaListPage() {
           onClick={() => router.push("/buku-usaha")}
           className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md active:scale-95 transition-transform"
         >
-          <span className="text-sm">◀️</span>
+          <ArrowLeft className="w-5 h-5 text-slate-500" />
         </button>
         <div className="text-center">
-          <h1 className="text-lg font-heading font-extrabold tracking-tight">🏢 Buku Usaha</h1>
+          <h1 className="text-lg font-heading font-extrabold tracking-tight flex items-center gap-2 justify-center">
+            <Building className="w-5 h-5 text-[#008CEB]" />
+            Buku Usaha
+          </h1>
           <p className="text-[9px] text-slate-400">{USAHA_UNITS.length} unit usaha</p>
         </div>
         <div className="w-9 h-9" />
@@ -104,14 +108,14 @@ export default function BukuUsahaListPage() {
             style={{ animationDelay: `${100 + i * 60}ms`, animationFillMode: "backwards" }}
           >
             <div className="flex items-center gap-2 mb-2">
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${u.color} flex items-center justify-center text-lg shadow-md`}>
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${u.color} flex items-center justify-center text-white shadow-md`}>
                 {u.icon}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[11px] font-heading font-bold line-clamp-1">{u.label}</p>
                 <p className="text-[9px] text-slate-400">{u.jumlahTx} transaksi</p>
               </div>
-              <span className="text-xs text-slate-300">▶</span>
+              <ChevronRight className="w-4 h-4 text-slate-300" />
             </div>
             <div className="grid grid-cols-2 gap-1.5">
               <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-lg px-2 py-1">

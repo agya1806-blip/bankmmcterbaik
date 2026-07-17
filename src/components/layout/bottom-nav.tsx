@@ -2,14 +2,12 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname, useParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { BarChart3, User, ShoppingCart, Home, Building2 } from 'lucide-react';
+import { BarChart3, User, Building2, Home, LayoutGrid } from 'lucide-react';
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const params = useParams();
-  const activeBranch = (params?.cabang as string) || '';
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
 
@@ -31,7 +29,7 @@ export default function BottomNav() {
         )}
       </Link>
 
-      <Link href="/buku-usaha" className="relative group">
+      <Link href="/buku-usaha/usaha" className="relative group">
         <motion.div
           whileTap={{ scale: 0.95 }}
           className={`h-11 px-5 rounded-full flex items-center gap-1.5 transition-all ${
@@ -54,7 +52,7 @@ export default function BottomNav() {
       </Link>
 
       <Link href="/buku-usaha" className="flex flex-col items-center justify-center w-12 h-12 text-zinc-400 hover:text-white transition-all duration-200 active:scale-90 relative">
-        <ShoppingCart className={`w-5 h-5 ${pathname === '/buku-usaha' ? 'drop-shadow-[0_0_6px_rgba(255,255,255,0.4)] text-[#008CEB]' : ''}`} />
+        <LayoutGrid className={`w-5 h-5 ${pathname === '/buku-usaha' ? 'drop-shadow-[0_0_6px_rgba(255,255,255,0.4)] text-[#008CEB]' : ''}`} />
         <span className="text-[9px] mt-0.5">Beranda</span>
         {pathname === '/buku-usaha' && (
           <motion.div layoutId="nav-dot" className="absolute -bottom-1 w-1.5 h-1.5 bg-[#008CEB] rounded-full" />
