@@ -31,6 +31,7 @@ interface ManualCartItem {
   namaItem: string;
   qty: number;
   harga: number;
+  hargaModal: number;
 }
 
 interface GridCartItem {
@@ -38,6 +39,7 @@ interface GridCartItem {
   namaItem: string;
   qty: number;
   hargaSatuan: number;
+  hargaModal: number;
 }
 
 export default function PosKasirPage() {
@@ -109,7 +111,7 @@ export default function PosKasirPage() {
         if (existing.qty >= prod.stok) return prev;
         return prev.map(i => i.productId === prod.id ? { ...i, qty: i.qty + 1 } : i);
       }
-      return [...prev, { productId: prod.id, namaItem: prod.nama, qty: 1, hargaSatuan: prod.hargaJual }];
+      return [...prev, { productId: prod.id, namaItem: prod.nama, qty: 1, hargaSatuan: prod.hargaJual, hargaModal: prod.hargaModal }];
     });
   };
 
@@ -130,7 +132,7 @@ export default function PosKasirPage() {
   const [manualCart, setManualCart] = useState<ManualCartItem[]>([]);
   const [spesifikasi, setSpesifikasi] = useState("");
 
-  const addManualItem = () => setManualCart(prev => [...prev, { tempId: crypto.randomUUID(), namaItem: "", qty: 1, harga: 0 }]);
+  const addManualItem = () => setManualCart(prev => [...prev, { tempId: crypto.randomUUID(), namaItem: "", qty: 1, harga: 0, hargaModal: 0 }]);
   const updateManualItem = (tempId: string, field: keyof ManualCartItem, value: string | number) => setManualCart(prev => prev.map(i => i.tempId === tempId ? { ...i, [field]: value } : i));
   const removeManualItem = (tempId: string) => setManualCart(prev => prev.filter(i => i.tempId !== tempId));
   const manualTotal = useMemo(() => manualCart.reduce((s, i) => s + i.qty * i.harga, 0), [manualCart]);
@@ -153,8 +155,8 @@ export default function PosKasirPage() {
     setIsProcessing(true);
     try {
       const items: PosCartItem[] = isGridMode
-        ? gridCart.map(i => ({ namaItem: i.namaItem, qty: i.qty, hargaSatuan: i.hargaSatuan, diskonPersen: 0, spesifikasi: "" }))
-        : manualCart.map(i => ({ namaItem: i.namaItem.trim(), qty: i.qty, hargaSatuan: i.harga, diskonPersen: 0, spesifikasi }));
+        ? gridCart.map(i => ({ namaItem: i.namaItem, qty: i.qty, hargaSatuan: i.hargaSatuan, hargaModal: i.hargaModal, diskonPersen: 0, spesifikasi: "" }))
+        : manualCart.map(i => ({ namaItem: i.namaItem.trim(), qty: i.qty, hargaSatuan: i.harga, hargaModal: i.hargaModal, diskonPersen: 0, spesifikasi }));
 
       const res = await executeTransactionPipelineV4({
         id: crypto.randomUUID(),

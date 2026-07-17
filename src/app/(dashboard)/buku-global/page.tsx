@@ -427,10 +427,13 @@ export default function BukuGlobalPage() {
           <button onClick={toggleTheme} className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md">
             {theme === "dark" ? <span className="text-sm text-amber-400"><Sun className="w-5 h-5" /></span> : <span className="text-sm text-slate-600"><Moon className="w-5 h-5" /></span>}
           </button>
-          <div className="text-right">
-            <span className="text-[10px] text-slate-400">Admin</span>
-            <p className="text-xs font-extrabold">{currentUser?.nama}</p>
-          </div>
+          <button onClick={() => router.push("/profile")} className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center text-white text-sm font-extrabold overflow-hidden shadow-md scale-press">
+            {currentUser?.fotoUrl ? (
+              <img src={currentUser.fotoUrl} alt="Profil" className="w-full h-full object-cover" />
+            ) : (
+              currentUser?.nama?.charAt(0)?.toUpperCase() || "?"
+            )}
+          </button>
         </div>
       </div>
 

@@ -91,8 +91,7 @@ export default function LaporanPage() {
 
     filteredTx.forEach((tx) => {
       totalPendapatan += tx.totalBruto;
-      const items = Array.isArray(tx.items) ? tx.items : [];
-      items.forEach((item: any) => {
+      tx.items.forEach((item) => {
         totalHpp += (item.hargaModal || 0) * item.qty;
       });
     });

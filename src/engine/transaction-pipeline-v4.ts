@@ -14,6 +14,7 @@ export interface PosCartItem {
   namaItem: string;
   qty: number;
   hargaSatuan: number;
+  hargaModal: number;
   diskonPersen: number;
   spesifikasi: string;
 }
@@ -100,6 +101,7 @@ export async function executeTransactionPipelineV4(
         namaItem: item.namaItem,
         qty: item.qty,
         hargaSatuan: item.hargaSatuan,
+        hargaModal: item.hargaModal,
         diskonPersen: item.diskonPersen,
         subtotal: subtotalSebelumDiskon - diskonNominal,
         spesifikasi: item.spesifikasi,
@@ -166,7 +168,7 @@ export async function executeTransactionPipelineV4(
       });
     }
 
-    /* Step 5: Create cashflow entry */
+    /* Step 5: Create cashflow entry & update wallet saldo */
     const wallet = await db.wallets.get(walletIdTarget);
     const walletNama = wallet?.namaDompet ?? "";
     const saldoSebelum = wallet?.saldo ?? 0;
@@ -187,6 +189,31 @@ export async function executeTransactionPipelineV4(
       catatan: `Penjualan ${invoiceNumber}`,
       createdAt: now,
     });
+
+    /* Step 5b: Update wallet saldo */
+    if (walletIdTarget && dpDibayar > 0) {
+      await db.wallets.update(walletIdTarget, { saldo: saldoSesudah });
+    }
+
+    /* Step 5c: Create piutang record if DP (sisa tagihan > 0) */
+    if (status === "DP" && sisaTagihan > 0) {
+      const jatuhTempo = new Date();
+      jatuhTempo.setDate(jatuhTempo.getDate() + 30);
+      await db.piutang.add({
+        id: crypto.randomUUID(),
+        bookOrBranchId,
+        transactionId: invId,
+        customerId: "",
+        customerNama: customerNama || "Pelanggan Umum",
+        customerWA: customerWA || "",
+        totalPiutang: grandTotal,
+        sisaPiutang: sisaTagihan,
+        jatuhTempo: jatuhTempo.toISOString(),
+        status: "AKTIF",
+        catatan: `Piutang dari ${invoiceNumber}`,
+        createdAt: now,
+      });
+    }
 
     /* Step 6: Write audit log */
     await writeAuditLog({

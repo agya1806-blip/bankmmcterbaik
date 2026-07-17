@@ -107,6 +107,7 @@ export interface DbTransactionItem {
   namaItem: string;
   qty: number;
   hargaSatuan: number;
+  hargaModal: number;
   diskonPersen: number;
   subtotal: number;
   spesifikasi: string;
