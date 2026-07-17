@@ -1,77 +1,35 @@
 "use client";
 
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import {
-  db,
-  type BookOrBranch,
-  type DbInventoryItem,
-  type DbCustomer,
-  type DbTransaction,
+  db, type BookOrBranch, type DbTransaction, type DbCustomer, type DbProduction,
 } from "@/lib/db-v4";
 import {
-  executeTransactionPipelineV4,
-  type PosCartItem,
-  type PipelineResultV4,
+  executeTransactionPipelineV4, type PosCartItem,
 } from "@/engine/transaction-pipeline-v4";
-
-import KalkulatorHarga from "@/components/business/kalkulator-harga";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Clock,
-  Calculator,
-  Plus,
-  Search,
-  Trash2,
-  ShoppingBag,
-  AlertTriangle,
-  Zap,
-  ChevronDown,
-  X,
-  Image,
-  Upload,
-  Banknote,
-  Wallet,
-  Smartphone,
-  QrCode,
-  FileText,
-  Settings,
-  Tag,
-  Receipt,
-  Minus,
-  CreditCard,
+  ChevronDown, Plus, Trash2, Search, Wallet, FileText,
+  ArrowLeft, Edit3, Save, X, Clock, CheckCircle2, AlertTriangle,
+  User, Phone, MapPin, StickyNote, Package, Banknote,
 } from "lucide-react";
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
-  pribadi: "pribadi",
-  keluarga: "keluarga",
-  percetakan: "usaha-percetakan",
-  laptop: "usaha-laptop",
-  gadget: "usaha-gadget",
-  warkop: "usaha-warkop",
-  kelontong: "usaha-kelontong",
-  konveksi: "usaha-konveksi",
-  "toko-pakaian": "usaha-toko-pakaian",
+  percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
+  warkop: "usaha-warkop", konveksi: "usaha-konveksi",
 };
 
-interface CartItem {
-  id: string;
+type TabType = "order" | "riwayat";
+type StatusPesanan = "baru" | "diproses" | "selesai";
+
+interface CartItemInput {
+  tempId: string;
   namaItem: string;
   qty: number;
-  hargaSatuan: number;
-  diskonPersen: number;
-  spesifikasi: string;
+  harga: number;
 }
-
-const PAYMENT_METHODS = [
-  { key: "CASH" as const, label: "Tunai", icon: <Banknote className="w-4 h-4" />, color: "from-emerald-500 to-teal-500" },
-  { key: "TRANSFER" as const, label: "Transfer", icon: <Wallet className="w-4 h-4" />, color: "from-blue-500 to-indigo-500" },
-  { key: "DEPOSIT" as const, label: "Deposit", icon: <Smartphone className="w-4 h-4" />, color: "from-purple-500 to-pink-500" },
-  { key: "QRIS" as const, label: "QRIS", icon: <Smartphone className="w-4 h-4" />, color: "from-orange-500 to-red-500" },
-];
-
-const PPN_RATE = 11;
 
 export default function PosKasirPage() {
   const params = useParams();
@@ -79,1060 +37,470 @@ export default function PosKasirPage() {
   const cabangSlug = (params?.cabang as string) || "";
   const bookOrBranchId: BookOrBranch = BRANCH_MAP[cabangSlug] || "usaha-warkop";
 
-  const products =
-    useLiveQuery(
-      () => db.inventory.where("bookOrBranchId").equals(bookOrBranchId).toArray(),
-      [bookOrBranchId]
-    ) || [];
+  const customers = useLiveQuery(() => db.customers.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
+  const wallets = useLiveQuery(() => db.wallets.where("bookOrBranchId").equals(bookOrBranchId).filter(w => w.isActive).toArray(), [bookOrBranchId]) || [];
+  const transactions = useLiveQuery(() => db.transactions.where("bookOrBranchId").equals(bookOrBranchId).reverse().toArray(), [bookOrBranchId]) || [];
+  const productions = useLiveQuery(() => db.productions.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
 
-  const customers =
-    useLiveQuery(
-      () => db.customers.where("bookOrBranchId").equals(bookOrBranchId).toArray(),
-      [bookOrBranchId]
-    ) || [];
+  const [tab, setTab] = useState<TabType>("order");
 
-  const wallets =
-    useLiveQuery(
-      () => db.wallets.where("bookOrBranchId").equals(bookOrBranchId).toArray(),
-      [bookOrBranchId]
-    ) || [];
-
-  const recentTransactions =
-    useLiveQuery(
-      () =>
-        db.transactions
-          .where("bookOrBranchId")
-          .equals(bookOrBranchId)
-          .reverse()
-          .limit(5)
-          .toArray(),
-      [bookOrBranchId]
-    ) || [];
-
-  const quickOrders =
-    useLiveQuery(
-      () => db.quickOrders.where("bookOrBranchId").equals(bookOrBranchId).toArray(),
-      [bookOrBranchId]
-    ) || [];
-
-  // ─── Search & Filter ───
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedKategori, setSelectedKategori] = useState("Semua");
-
-  const kategoriList = useMemo(() => {
-    const cats = new Set(products.map((p) => p.kategori).filter(Boolean));
-    return ["Semua", ...Array.from(cats)];
-  }, [products]);
-
-  const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
-      const matchSearch = p.nama.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchKategori = selectedKategori === "Semua" || p.kategori === selectedKategori;
-      return matchSearch && matchKategori;
-    });
-  }, [products, searchQuery, selectedKategori]);
-
-  // ─── Cart State ───
-  const [cart, setCart] = useState<CartItem[]>([]);
+  // ─── Customer State ───
+  const [customerSearch, setCustomerSearch] = useState("");
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
-  const [selectedWalletId, setSelectedWalletId] = useState("");
-  const [catatan, setCatatan] = useState("");
-  const [dpDibayar, setDpDibayar] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState<"CASH" | "DEPOSIT" | "TRANSFER" | "QRIS">("CASH");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [manualNama, setManualNama] = useState("");
+  const [manualWA, setManualWA] = useState("");
+  const [manualAlamat, setManualAlamat] = useState("");
+  const [isManual, setIsManual] = useState(false);
 
-  // ─── Diskon & PPN ───
-  const [diskonGlobalPersen, setDiskonGlobalPersen] = useState(0);
-  const [ppnEnabled, setPpnEnabled] = useState(true);
-
-  // ─── Spec Modal ───
-  const [activeSpecItem, setActiveSpecItem] = useState<CartItem | null>(null);
-  const [specInput1, setSpecInput1] = useState("");
-  const [specInput2, setSpecInput2] = useState("");
-  const [specInput3, setSpecInput3] = useState("");
-
-  // ─── Modals ───
-  const [showCalculator, setShowCalculator] = useState(false);
-  const [showQuickAdd, setShowQuickAdd] = useState(false);
-  const [showQuickOrder, setShowQuickOrder] = useState(false);
-  const [showRiwayat, setShowRiwayat] = useState(false);
-
-  // ─── Quick Add ───
-  const [newProdName, setNewProdName] = useState("");
-  const [newProdHargaJual, setNewProdHargaJual] = useState(0);
-  const [newProdHargaModal, setNewProdHargaModal] = useState(0);
-  const [newProdStok, setNewProdStok] = useState(10);
-
-  // ─── QRIS Upload ───
-  const [buktiBayar, setBuktiBayar] = useState<string>("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // ─── Cart Calculations ───
-  const totalBruto = useMemo(
-    () => cart.reduce((sum, item) => sum + item.qty * item.hargaSatuan, 0),
-    [cart]
-  );
-
-  const totalDiskonItem = useMemo(
-    () =>
-      cart.reduce(
-        (sum, item) => sum + item.qty * item.hargaSatuan * (item.diskonPersen / 100),
-        0
-      ),
-    [cart]
-  );
-
-  const subtotalAfterItemDiskon = totalBruto - totalDiskonItem;
-
-  const totalDiskonGlobal = subtotalAfterItemDiskon * (diskonGlobalPersen / 100);
-  const subtotalAfterDiskon = subtotalAfterItemDiskon - totalDiskonGlobal;
-  const ppnNominal = ppnEnabled ? subtotalAfterDiskon * (PPN_RATE / 100) : 0;
-  const grandTotal = subtotalAfterDiskon + ppnNominal;
+  const filteredCustomers = useMemo(() => {
+    if (!customerSearch) return customers.slice(0, 20);
+    const q = customerSearch.toLowerCase();
+    return customers.filter(c => c.nama.toLowerCase().includes(q) || c.noWA.includes(q)).slice(0, 20);
+  }, [customers, customerSearch]);
 
   const currentCustomer = useMemo(() => {
-    if (!selectedCustomerId) return null;
-    return customers.find((c) => c.id === selectedCustomerId) || null;
-  }, [customers, selectedCustomerId]);
+    if (isManual) return null;
+    return customers.find(c => c.id === selectedCustomerId) || null;
+  }, [customers, selectedCustomerId, isManual]);
 
-  // ─── Cart Actions ───
-  const addToCart = (product: DbInventoryItem) => {
-    setCart((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
-        if (existing.qty >= product.stok) return prev;
-        return prev.map((item) =>
-          item.id === product.id ? { ...item, qty: item.qty + 1 } : item
-        );
-      }
-      return [
-        ...prev,
-        {
-          id: product.id,
-          namaItem: product.nama,
-          qty: 1,
-          hargaSatuan: product.hargaJual,
-          diskonPersen: 0,
-          spesifikasi: product.catatan || "",
-        },
-      ];
-    });
+  const selectCustomer = (c: DbCustomer) => {
+    setSelectedCustomerId(c.id);
+    setCustomerSearch("");
+    setIsManual(false);
   };
 
-  const updateQty = (id: string, delta: number) => {
-    setCart((prev) =>
-      prev
-        .map((item) => {
-          if (item.id === id) {
-            const newQty = item.qty + delta;
-            return newQty > 0 ? { ...item, qty: newQty } : null;
-          }
-          return item;
-        })
-        .filter(Boolean) as CartItem[]
-    );
+  const switchToManual = () => {
+    setSelectedCustomerId("");
+    setIsManual(true);
+    setManualNama("");
+    setManualWA("");
+    setManualAlamat("");
   };
 
-  const updateCartItemHarga = (id: string, newHarga: number) => {
-    setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, hargaSatuan: newHarga } : item))
-    );
+  // ─── Cart State ───
+  const [cart, setCart] = useState<CartItemInput[]>([]);
+  const [spesifikasi, setSpesifikasi] = useState("");
+  const [catatan, setCatatan] = useState("");
+  const [dpDibayar, setDpDibayar] = useState(0);
+  const [walletIdTarget, setWalletIdTarget] = useState("");
+  const [statusPesanan, setStatusPesanan] = useState<StatusPesanan>("baru");
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const addItem = () => {
+    setCart(prev => [...prev, { tempId: crypto.randomUUID(), namaItem: "", qty: 1, harga: 0 }]);
   };
 
-  const updateCartItemDiskon = (id: string, diskon: number) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, diskonPersen: Math.min(100, Math.max(0, diskon)) } : item
-      )
-    );
+  const updateItem = (tempId: string, field: keyof CartItemInput, value: string | number) => {
+    setCart(prev => prev.map(item => item.tempId === tempId ? { ...item, [field]: value } : item));
   };
 
-  const removeItem = (id: string) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
+  const removeItem = (tempId: string) => {
+    setCart(prev => prev.filter(item => item.tempId !== tempId));
   };
 
-  const clearCart = () => {
-    setCart([]);
-    setDiskonGlobalPersen(0);
-    setDpDibayar(0);
-  };
-
-  // ─── Spec Modal ───
-  const openSpecModal = (item: CartItem) => {
-    setActiveSpecItem(item);
-    const parts = item.spesifikasi.split(" | ");
-    setSpecInput1(parts[0]?.split(": ")[1] || "");
-    setSpecInput2(parts[1]?.split(": ")[1] || "");
-    setSpecInput3(parts[2]?.split(": ")[1] || "");
-  };
-
-  const saveSpecifications = () => {
-    if (!activeSpecItem) return;
-
-    let formattedSpec = "";
-    if (cabangSlug === "percetakan" || cabangSlug === "konveksi") {
-      formattedSpec = `Ukuran: ${specInput1 || "-"} | Bahan: ${specInput2 || "-"} | Finishing: ${specInput3 || "-"}`;
-    } else if (cabangSlug === "laptop" || cabangSlug === "gadget") {
-      if (!specInput1.trim()) {
-        alert("SN / IMEI Wajib diisi untuk unit ini!");
-        return;
-      }
-      formattedSpec = `SN/IMEI: ${specInput1} | Spek: ${specInput2 || "-"} | Kondisi: ${specInput3 || "-"}`;
-    } else {
-      formattedSpec = `Catatan: ${specInput1}`;
-    }
-
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === activeSpecItem.id ? { ...item, spesifikasi: formattedSpec } : item
-      )
-    );
-    setActiveSpecItem(null);
-  };
-
-  // ─── Quick Add Product ───
-  const handleQuickAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newProdName) return;
-
-    const newId = crypto.randomUUID();
-    await db.inventory.add({
-      id: newId,
-      bookOrBranchId,
-      sku: `SKU-${Date.now()}`,
-      nama: newProdName,
-      kategori: "Umum",
-      stok: newProdStok,
-      stokMin: 2,
-      hargaJual: newProdHargaJual,
-      hargaModal: newProdHargaModal,
-      satuan: "pcs",
-      catatan: "",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-
-    setCart((prev) => [
-      ...prev,
-      {
-        id: newId,
-        namaItem: newProdName,
-        qty: 1,
-        hargaSatuan: newProdHargaJual,
-        diskonPersen: 0,
-        spesifikasi: "",
-      },
-    ]);
-
-    setNewProdName("");
-    setNewProdHargaJual(0);
-    setNewProdHargaModal(0);
-    setNewProdStok(10);
-    setShowQuickAdd(false);
-  };
-
-  // ─── Quick Order ───
-  const applyQuickOrder = (template: { id: string; label: string; items: { desc: string; price: number }[] }) => {
-    const newItems: CartItem[] = template.items.map((ti) => ({
-      id: crypto.randomUUID(),
-      namaItem: ti.desc,
-      qty: 1,
-      hargaSatuan: ti.price,
-      diskonPersen: 0,
-      spesifikasi: "",
-    }));
-    setCart((prev) => [...prev, ...newItems]);
-    setShowQuickOrder(false);
-  };
-
-  // ─── QRIS Upload ───
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setBuktiBayar(reader.result as string);
-    reader.readAsDataURL(file);
-  };
-
-  // ─── Kalkulator Result ───
-  const handleCalcResult = (namaItem: string, hargaJual: number, spesifikasi: string) => {
-    setCart((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), namaItem, qty: 1, hargaSatuan: hargaJual, diskonPersen: 0, spesifikasi },
-    ]);
-  };
+  const totalBruto = useMemo(() => cart.reduce((sum, item) => sum + (item.qty * item.harga), 0), [cart]);
+  const grandTotal = totalBruto;
+  const sisaTagihan = Math.max(0, grandTotal - dpDibayar);
 
   // ─── Checkout ───
   const handleCheckout = async () => {
-    if (cart.length === 0) return alert("Keranjang belanja kosong!");
+    if (cart.length === 0) return alert("Belum ada item pesanan!");
+    if (cart.some(item => !item.namaItem.trim())) return alert("Nama item harus diisi!");
+    if (!walletIdTarget) return alert("Pilih dompet penerima!");
     if (isProcessing) return;
 
-    setIsProcessing(true);
+    const namaPelanggan = isManual ? manualNama.trim() : currentCustomer?.nama || "";
+    const waPelanggan = isManual ? manualWA.trim() : currentCustomer?.noWA || "";
+    if (!namaPelanggan) return alert("Nama pelanggan harus diisi!");
 
+    setIsProcessing(true);
     try {
-      const invId = crypto.randomUUID();
-      const items: PosCartItem[] = cart.map((item) => ({
-        namaItem: item.namaItem,
+      const items: PosCartItem[] = cart.map(item => ({
+        namaItem: item.namaItem.trim(),
         qty: item.qty,
-        hargaSatuan: item.hargaSatuan,
-        diskonPersen: item.diskonPersen,
-        spesifikasi: item.spesifikasi,
+        hargaSatuan: item.harga,
+        diskonPersen: 0,
+        spesifikasi: spesifikasi,
       }));
 
-      const res: PipelineResultV4 = await executeTransactionPipelineV4({
-        id: invId,
+      const res = await executeTransactionPipelineV4({
+        id: crypto.randomUUID(),
         bookOrBranchId,
         items,
-        totalBruto,
-        diskonGlobalPersen,
-        ppnPersen: ppnEnabled ? PPN_RATE : 0,
+        totalBruto: grandTotal,
+        diskonGlobalPersen: 0,
+        ppnPersen: 0,
         dpDibayar,
-        paymentMethod,
-        walletIdTarget: selectedWalletId,
-        customerNama: currentCustomer?.nama || "Pelanggan Umum",
-        customerWA: currentCustomer?.noWA || "",
-        catatan,
-        buktiBayar: paymentMethod === "QRIS" ? buktiBayar : undefined,
+        paymentMethod: "CASH",
+        walletIdTarget,
+        customerNama: namaPelanggan,
+        customerWA: waPelanggan,
+        catatan: catatan || `${statusPesanan}`,
       });
 
       if (res.ok) {
-        alert(`Transaksi Berhasil! No Invoice: ${res.invoiceNumber}`);
-        clearCart();
-        setSelectedCustomerId("");
-        setSelectedWalletId("");
-        setCatatan("");
-        setBuktiBayar("");
-        setPpnEnabled(true);
+        // Update production status if needed
+        const currentStatus = statusPesanan;
+        if (currentStatus !== "baru" && res.transactionId) {
+          const prod = productions.find(p => p.transactionId === res.transactionId);
+          if (prod) {
+            await db.productions.update(prod.id, {
+              status: currentStatus === "diproses" ? "diproduksi" : "selesai",
+            });
+          }
+        }
+        alert(`Berhasil! Invoice: ${res.invoiceNumber}`);
+        resetForm();
       } else {
-        alert(`Transaksi Gagal: ${res.error}`);
+        alert(`Gagal: ${res.error}`);
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Unknown error";
-      alert(`Transaksi Gagal: ${message}`);
+      alert(`Gagal: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  // ─── Format Helpers ───
+  const resetForm = () => {
+    setCart([]);
+    setSpesifikasi("");
+    setCatatan("");
+    setDpDibayar(0);
+    setWalletIdTarget("");
+    setStatusPesanan("baru");
+    setSelectedCustomerId("");
+    setIsManual(false);
+    setManualNama("");
+    setManualWA("");
+    setManualAlamat("");
+  };
+
+  // ─── Edit / Delete ───
+  const [editingTx, setEditingTx] = useState<DbTransaction | null>(null);
+  const [editCatatan, setEditCatatan] = useState("");
+  const [editDp, setEditDp] = useState(0);
+
+  const startEdit = (tx: DbTransaction) => {
+    setEditingTx(tx);
+    setEditCatatan(tx.catatan);
+    setEditDp(tx.dpDibayar);
+  };
+
+  const saveEdit = async () => {
+    if (!editingTx) return;
+    const newDp = editDp;
+    const newSisa = Math.max(0, editingTx.grandTotal - newDp);
+    const newStatus = newSisa > 0 ? "DP" as const : "LUNAS" as const;
+
+    await db.transactions.update(editingTx.id, {
+      dpDibayar: newDp,
+      sisaTagihan: newSisa,
+      status: newStatus,
+      catatan: editCatatan,
+    });
+
+    setEditingTx(null);
+    alert("Transaksi diperbarui!");
+  };
+
+  const deleteTx = async (tx: DbTransaction) => {
+    if (!confirm(`Hapus transaksi ${tx.invoiceNumber}?`)) return;
+    await db.transactions.delete(tx.id);
+    const prod = productions.find(p => p.transactionId === tx.id);
+    if (prod) await db.productions.delete(prod.id);
+    alert("Transaksi dihapus!");
+  };
+
+  const getProdStatus = (txId: string): string => {
+    const prod = productions.find(p => p.transactionId === txId);
+    if (!prod) return "";
+    if (prod.status === "antre") return "Baru";
+    if (prod.status === "diproduksi") return "Diproses";
+    return "Selesai";
+  };
+
+  // ─── Invoice Export ───
+  const [showInvoice, setShowInvoice] = useState<DbTransaction | null>(null);
+
   const formatRp = (n: number) => `Rp${n.toLocaleString()}`;
-  const formatTime = (iso: string) =>
-    new Date(iso).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  const formatDate = (iso: string) => new Date(iso).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+  const formatTime = (iso: string) => new Date(iso).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
 
   return (
     <div className="flex-1 flex flex-col pt-4 gap-3">
-      {/* ═══ HEADER ═══ */}
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <button
-          onClick={() => router.push("/buku-usaha")}
-          className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md active:scale-95 transition-transform"
-        >
-          <ChevronDown className="w-4 h-4 rotate-90" />
+        <button onClick={() => router.push("/buku-usaha")} className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md active:scale-95 transition-transform">
+          <ArrowLeft className="w-4 h-4" />
         </button>
-        <h1 className="text-lg font-heading font-extrabold tracking-tight capitalize">
-          Kasir {cabangSlug}
-        </h1>
-        <div className="flex gap-1.5">
-          <button
-            onClick={() => setShowRiwayat(true)}
-            className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md active:scale-95 transition-transform"
-            title="Riwayat Cepat"
-          >
-            <span className="text-xs text-slate-500"><Clock className="w-4 h-4" /></span>
-          </button>
-          <button
-            onClick={() => setShowCalculator(true)}
-            className="p-2 bg-emerald-500 text-white rounded-full shadow-md active:scale-95 transition-transform"
-            title="Kalkulator Harga"
-          >
-            <Calculator className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => setShowQuickAdd(true)}
-            className="p-2 bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white rounded-full shadow-md active:scale-95 transition-transform"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
-        </div>
+        <h1 className="text-lg font-heading font-extrabold tracking-tight capitalize">Kasir {cabangSlug}</h1>
+        <div className="w-9" />
       </div>
 
-      {/* ═══ SEARCH + KATEGORI ═══ */}
-      <div className="space-y-2">
-        <div className="relative">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-slate-400"><Search className="w-4 h-4" /></span>
-          <input
-            type="text"
-            placeholder="Cari produk..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-2xl bg-white dark:bg-[#131527] border border-slate-200/60 dark:border-slate-800/60 focus:outline-none text-sm shadow-inner"
-          />
-        </div>
-
-        {/* Kategori Tabs */}
-        <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-          {kategoriList.map((kat) => (
-            <button
-              key={kat}
-              onClick={() => setSelectedKategori(kat)}
-              className={`shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${
-                selectedKategori === kat
-                  ? "bg-[#008CEB] text-white shadow-md"
-                  : "bg-white dark:bg-[#131527] text-slate-400 border border-slate-200/60 dark:border-slate-800/60"
-              }`}
-            >
-              {kat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ═══ PRODUCT GRID ═══ */}
-      <div className="grid grid-cols-2 gap-2 max-h-[180px] overflow-y-auto pr-1">
-        {filteredProducts.map((prod, i) => (
-          <button
-            key={prod.id}
-            onClick={() => addToCart(prod)}
-            disabled={prod.stok <= 0}
-            className="premium-card p-2.5 text-left active:scale-[0.96] disabled:opacity-40 disabled:scale-100 animate-fade-in"
-            style={{ animationDelay: `${i * 30}ms`, animationFillMode: "backwards" }}
-          >
-            <span className="text-[11px] font-heading font-bold line-clamp-1">{prod.nama}</span>
-            <div className="flex items-center justify-between w-full mt-1.5">
-              <span className="text-[10px] text-[#008CEB] font-extrabold">
-                {formatRp(prod.hargaJual)}
-              </span>
-              <span
-                className={`text-[9px] font-bold ${
-                  prod.stok <= prod.stokMin ? "text-amber-500" : "text-slate-400"
-                }`}
-              >
-                {prod.stok <= prod.stokMin && <span className="text-xs inline mr-0.5"><AlertTriangle className="w-4 h-4" /></span>}
-                {prod.stok}
-              </span>
-            </div>
-          </button>
+      {/* Tab */}
+      <div className="flex gap-2">
+        {([["order", "Order Baru"], ["riwayat", "Riwayat"]] as const).map(([key, label]) => (
+          <button key={key} onClick={() => setTab(key)} className={`flex-1 py-2 rounded-xl text-[11px] font-heading font-bold transition-all ${tab === key ? "bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white shadow-md" : "bg-white dark:bg-[#131527] text-slate-400 border border-slate-200/60 dark:border-slate-800/60"}`}>{label}</button>
         ))}
-        {filteredProducts.length === 0 && (
-          <div className="col-span-2 text-center py-6 text-slate-400 text-xs">
-            Tidak ada produk ditemukan
-          </div>
-        )}
       </div>
 
-      {/* ═══ QUICK ORDER BUTTON ═══ */}
-      {quickOrders.length > 0 && (
-        <button
-          onClick={() => setShowQuickOrder(true)}
-          className="w-full py-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/40 text-[10px] font-bold text-amber-600 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform"
-        >
-           <Zap className="w-5 h-5" />
-           Quick Order ({quickOrders.length} template)
-        </button>
-      )}
-
-      {/* ═══ CART ═══ */}
-      <div className="flex-1 overflow-y-auto max-h-[200px] space-y-2 pr-1">
-        <div className="flex items-center justify-between">
-          <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            Keranjang ({cart.length})
-          </h3>
-          {cart.length > 0 && (
-            <button
-              onClick={clearCart}
-              className="text-[9px] text-rose-500 font-bold flex items-center gap-0.5 active:scale-95 transition-transform"
-            >
-              <Trash2 className="w-4 h-4" /> Kosongkan
-            </button>
-          )}
-        </div>
-
-        {cart.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-6 text-slate-400">
-            <span className="text-3xl mb-1.5"><ShoppingBag className="w-8 h-8" /></span>
-            <span className="text-[11px]">Keranjang kosong</span>
-          </div>
-        ) : (
-          cart.map((item, i) => {
-            const product = products.find((p) => p.id === item.id);
-            const isLowStock = product && product.stok <= product.stokMin;
-            const isOutStock = product && product.stok <= 0;
-            const subtotalItem = item.qty * item.hargaSatuan;
-            const diskonItemNominal = subtotalItem * (item.diskonPersen / 100);
-            const itemTotal = subtotalItem - diskonItemNominal;
-
-            return (
-              <div
-                key={item.id}
-                className="premium-card p-2.5 space-y-1.5 animate-slide-up"
-                style={{ animationDelay: `${i * 40}ms`, animationFillMode: "backwards" }}
-              >
-                {/* Stok Warning */}
-                {isLowStock && (
-                  <div className="flex items-center gap-1 text-[9px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded-lg">
-                    <span className="text-xs"><AlertTriangle className="w-4 h-4" /></span>
-                    {isOutStock ? "STOK HABIS!" : `Stok hampir habis (${product?.stok} tersisa)`}
-                  </div>
-                )}
-
-                {/* Item Header */}
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-[11px] font-heading font-extrabold line-clamp-1">
-                      {item.namaItem}
-                    </h4>
-                    {item.spesifikasi && (
-                      <p className="text-[9px] text-indigo-500 font-medium mt-0.5 truncate">
-                        {item.spesifikasi}
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => removeItem(item.id)}
-                    className="text-rose-500 p-1 shrink-0 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors active:scale-90"
-                  >
-                    <span className="text-xs"><Trash2 className="w-4 h-4" /></span>
-                  </button>
-                </div>
-
-                {/* Harga + Diskon per Item */}
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    value={item.hargaSatuan}
-                    onChange={(e) => updateCartItemHarga(item.id, Number(e.target.value))}
-                    className="w-24 input-premium text-[10px] font-extrabold text-[#008CEB] py-1"
-                  />
-                  <div className="flex items-center gap-1 bg-slate-100 dark:bg-zinc-800 rounded-lg px-1.5 py-0.5">
-                    <span className="text-xs text-slate-400">%</span>
-                    <input
-                      type="number"
-                      value={item.diskonPersen || ""}
-                      onChange={(e) => updateCartItemDiskon(item.id, Number(e.target.value))}
-                      placeholder="0"
-                      className="w-8 text-[9px] font-bold text-center bg-transparent outline-none"
-                    />
-                  </div>
-                  {item.diskonPersen > 0 && (
-                    <span className="text-[8px] text-emerald-600 font-bold">
-                      -{formatRp(diskonItemNominal)}
-                    </span>
-                  )}
-                </div>
-
-                {/* Qty + Spec + Subtotal */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => updateQty(item.id, -1)}
-                      className="p-1 bg-slate-100 dark:bg-zinc-800 rounded-full active:scale-90 transition-transform"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="text-xs font-heading font-extrabold min-w-[20px] text-center tabular-nums">
-                      {item.qty}
-                    </span>
-                    <button
-                      onClick={() => updateQty(item.id, 1)}
-                      className="p-1 bg-slate-100 dark:bg-zinc-800 rounded-full active:scale-90 transition-transform"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => openSpecModal(item)}
-                      className="p-1 bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white rounded-full ml-0.5 active:scale-90 transition-transform"
-                    >
-                      <Settings className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <span className="text-[10px] font-extrabold text-[#008CEB] tabular-nums">
-                    {formatRp(itemTotal)}
-                  </span>
-                </div>
+      {tab === "order" ? (
+        <div className="flex-1 flex flex-col gap-3 overflow-y-auto pb-24">
+          {/* PELANGGAN */}
+          <Section title="Pelanggan" icon={<User className="w-3.5 h-3.5" />}>
+            {isManual ? (
+              <div className="space-y-2">
+                <input type="text" placeholder="Nama pelanggan *" value={manualNama} onChange={e => setManualNama(e.target.value)} className="w-full input-premium text-xs" />
+                <input type="tel" placeholder="No. WhatsApp" value={manualWA} onChange={e => setManualWA(e.target.value)} className="w-full input-premium text-xs" />
+                <input type="text" placeholder="Alamat" value={manualAlamat} onChange={e => setManualAlamat(e.target.value)} className="w-full input-premium text-xs" />
+                <button onClick={() => { setIsManual(false); setSelectedCustomerId(""); }} className="text-[10px] text-[#7B61FF] font-bold">Cari dari daftar</button>
               </div>
-            );
-          })
-        )}
-      </div>
-
-      {/* ═══ CHECKOUT AREA ═══ */}
-      <div className="premium-card p-3 space-y-2.5">
-        {/* Payment Method */}
-        <div className="grid grid-cols-4 gap-1.5">
-          {PAYMENT_METHODS.map((pm) => {
-            const isActive = paymentMethod === pm.key;
-            return (
-              <button
-                key={pm.key}
-                onClick={() => setPaymentMethod(pm.key)}
-                className={`py-1.5 rounded-xl text-[9px] font-bold transition-all flex flex-col items-center gap-0.5 ${
-                  isActive
-                    ? `bg-gradient-to-r ${pm.color} text-white shadow-md scale-105`
-                    : "bg-slate-100 dark:bg-zinc-800 text-slate-400"
-                }`}
-              >
-                <span>{pm.icon}</span>
-                {pm.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Diskon Global + PPN Toggle */}
-        <div className="flex items-center gap-2">
-          <div className="flex-1 flex items-center gap-1.5 bg-slate-100 dark:bg-zinc-800 rounded-xl px-2.5 py-1.5">
-            <Tag className="w-4 h-4" />
-            <input
-              type="number"
-              value={diskonGlobalPersen || ""}
-              onChange={(e) => setDiskonGlobalPersen(Number(e.target.value))}
-              placeholder="0"
-              className="w-10 text-[10px] font-bold bg-transparent outline-none text-center"
-            />
-            <span className="text-[9px] text-slate-400 font-bold">% Diskon</span>
-          </div>
-          <button
-            onClick={() => setPpnEnabled(!ppnEnabled)}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[9px] font-bold transition-all ${
-              ppnEnabled
-                ? "bg-indigo-100 dark:bg-indigo-950/30 text-indigo-600"
-                : "bg-slate-100 dark:bg-zinc-800 text-slate-400"
-            }`}
-          >
-            %
-            PPN {PPN_RATE}%
-          </button>
-        </div>
-
-        {/* Rincian Harga */}
-        <div className="space-y-1 text-[10px]">
-          <div className="flex justify-between">
-            <span className="text-slate-400">Subtotal ({cart.length} item)</span>
-            <span className="font-bold tabular-nums">{formatRp(totalBruto)}</span>
-          </div>
-          {totalDiskonItem > 0 && (
-            <div className="flex justify-between text-emerald-600">
-              <span>Diskon Item</span>
-              <span className="font-bold tabular-nums">-{formatRp(totalDiskonItem)}</span>
-            </div>
-          )}
-          {diskonGlobalPersen > 0 && (
-            <div className="flex justify-between text-emerald-600">
-              <span>Diskon {diskonGlobalPersen}%</span>
-              <span className="font-bold tabular-nums">-{formatRp(totalDiskonGlobal)}</span>
-            </div>
-          )}
-          {ppnEnabled && (
-            <div className="flex justify-between text-slate-500">
-              <span>PPN {PPN_RATE}%</span>
-              <span className="font-bold tabular-nums">+{formatRp(ppnNominal)}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Grand Total */}
-        <div className="flex items-center justify-between pt-1.5 border-t border-slate-100 dark:border-slate-800">
-          <span className="text-xs font-heading font-extrabold">TOTAL</span>
-          <span className="text-lg font-heading font-extrabold gradient-text tracking-tight">
-            {formatRp(grandTotal)}
-          </span>
-        </div>
-
-        {/* DP */}
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] text-slate-400 font-bold">DP Dibayar</span>
-          <input
-            type="number"
-            value={dpDibayar || ""}
-            onChange={(e) => setDpDibayar(Number(e.target.value))}
-            placeholder="0"
-            className="w-24 text-right input-premium font-bold text-[10px]"
-          />
-        </div>
-
-        {/* Wallet */}
-        <select
-          value={selectedWalletId}
-          onChange={(e) => setSelectedWalletId(e.target.value)}
-          className="w-full input-premium font-bold text-[10px]"
-        >
-          <option value="">Pilih Dompet</option>
-          {wallets.map((w) => (
-            <option key={w.id} value={w.id}>
-              {w.namaDompet} ({formatRp(w.saldo)})
-            </option>
-          ))}
-        </select>
-
-        {/* Customer */}
-        <select
-          value={selectedCustomerId}
-          onChange={(e) => setSelectedCustomerId(e.target.value)}
-          className="w-full input-premium font-bold text-[10px]"
-        >
-          <option value="">Pelanggan Umum</option>
-          {customers.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nama} ({c.noWA})
-            </option>
-          ))}
-        </select>
-
-        {/* Catatan */}
-        <input
-          type="text"
-          value={catatan}
-          onChange={(e) => setCatatan(e.target.value)}
-          placeholder="Catatan transaksi..."
-          className="w-full input-premium font-bold text-[10px]"
-        />
-
-        {/* QRIS Upload */}
-        {paymentMethod === "QRIS" && (
-          <div>
-            {buktiBayar ? (
-              <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-100 dark:bg-zinc-800">
-                <Image className="w-4 h-4" />
-                <span className="text-[10px] font-bold truncate flex-1">Bukti terupload ✓</span>
-                <button onClick={() => setBuktiBayar("")} className="text-[10px] text-rose-500 font-bold">
-                  Hapus
-                </button>
+            ) : currentCustomer ? (
+              <div className="flex items-center justify-between bg-emerald-50 dark:bg-emerald-950/20 p-2.5 rounded-xl">
+                <div>
+                  <p className="text-xs font-heading font-bold">{currentCustomer.nama}</p>
+                  <p className="text-[9px] text-slate-400">{currentCustomer.noWA || "Tanpa WA"}</p>
+                </div>
+                <button onClick={() => { setSelectedCustomerId(""); setCustomerSearch(""); }} className="text-rose-500 p-1"><X className="w-4 h-4" /></button>
               </div>
             ) : (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full py-2 rounded-xl border-2 border-dashed border-slate-300 dark:border-zinc-700 text-[10px] font-bold text-slate-400 flex items-center justify-center gap-1.5"
-              >
-                  <Upload className="w-4 h-4" /> Upload Bukti QRIS
-              </button>
+              <div className="space-y-2">
+                <div className="relative">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input type="text" placeholder="Cari nama atau WA..." value={customerSearch} onChange={e => setCustomerSearch(e.target.value)} className="w-full pl-9 pr-4 input-premium text-xs" />
+                </div>
+                {filteredCustomers.length > 0 && (
+                  <div className="max-h-32 overflow-y-auto space-y-1">
+                    {filteredCustomers.map(c => (
+                      <button key={c.id} onClick={() => selectCustomer(c)} className="w-full text-left p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all">
+                        <p className="text-[11px] font-bold">{c.nama}</p>
+                        <p className="text-[9px] text-slate-400">{c.noWA}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <button onClick={switchToManual} className="w-full py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 text-[10px] font-bold text-slate-500 flex items-center justify-center gap-1">
+                  <Plus className="w-3 h-3" /> Input Manual
+                </button>
+              </div>
             )}
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
-          </div>
-        )}
+          </Section>
 
-        {/* Checkout Button */}
-        <button
-          onClick={handleCheckout}
-          disabled={cart.length === 0 || isProcessing}
-          className="btn-primary w-full py-3 text-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed"
-        >
-          {isProcessing ? (
-            <span className="animate-spin inline-block"><Zap className="w-4 h-4" /></span>
-          ) : (
-            <span><CreditCard className="w-4 h-4" /></span>
-          )}
-          {isProcessing ? "Memproses..." : `Bayar ${formatRp(grandTotal)}`}
-        </button>
-      </div>
-
-      {/* ═══ MODALS ═══ */}
-
-      {/* Spec Drawer */}
-      <AnimatePresence>
-        {activeSpecItem && (
-          <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center backdrop-blur-sm">
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 250 }}
-              className="w-full max-w-md bg-white dark:bg-[#131527] rounded-t-[32px] p-5 pb-8 space-y-4 shadow-2xl"
-            >
-              <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
-                <h3 className="text-sm font-extrabold">Spesifikasi Produksi</h3>
-                <button
-                    onClick={() => setActiveSpecItem(null)}
-                    className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-              </div>
-
-              {(cabangSlug === "percetakan" || cabangSlug === "konveksi") && (
-                <div className="space-y-3 text-xs">
-                  <div>
-                    <label className="block mb-1 font-bold text-slate-400">Ukuran</label>
-                    <input
-                      type="text"
-                      placeholder="A3+, 2x1 Meter, XL"
-                      value={specInput1}
-                      onChange={(e) => setSpecInput1(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
-                    />
+          {/* ITEM PESANAN */}
+          <Section title="Item Pesanan" icon={<Package className="w-3.5 h-3.5" />}>
+            <div className="space-y-2">
+              {cart.map((item) => (
+                <div key={item.tempId} className="bg-slate-50 dark:bg-zinc-800/50 p-2.5 rounded-xl space-y-2">
+                  <div className="flex items-start gap-2">
+                    <input type="text" placeholder="Nama item *" value={item.namaItem} onChange={e => updateItem(item.tempId, "namaItem", e.target.value)} className="flex-1 input-premium text-xs" />
+                    <button onClick={() => removeItem(item.tempId)} className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg shrink-0"><Trash2 className="w-4 h-4" /></button>
                   </div>
-                  <div>
-                    <label className="block mb-1 font-bold text-slate-400">Bahan</label>
-                    <input
-                      type="text"
-                      placeholder="Art Carton 260, Flexi Korea"
-                      value={specInput2}
-                      onChange={(e) => setSpecInput2(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-1 font-bold text-slate-400">Finishing</label>
-                    <input
-                      type="text"
-                      placeholder="Laminating Glossy, Jilid Spiral"
-                      value={specInput3}
-                      onChange={(e) => setSpecInput3(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
-                    />
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <label className="text-[8px] text-slate-400 font-bold uppercase">Qty</label>
+                      <input type="number" min="1" value={item.qty} onChange={e => updateItem(item.tempId, "qty", Math.max(1, Number(e.target.value)))} className="w-full input-premium text-xs text-center" />
+                    </div>
+                    <div className="flex-1">
+                      <label className="text-[8px] text-slate-400 font-bold uppercase">Harga</label>
+                      <input type="number" min="0" value={item.harga || ""} onChange={e => updateItem(item.tempId, "harga", Number(e.target.value))} placeholder="0" className="w-full input-premium text-xs text-right" />
+                    </div>
+                    <div className="flex-1">
+                      <label className="text-[8px] text-slate-400 font-bold uppercase">Subtotal</label>
+                      <div className="w-full input-premium text-xs text-right font-extrabold text-[#7B61FF]">{formatRp(item.qty * item.harga)}</div>
+                    </div>
                   </div>
                 </div>
-              )}
-
-              {(cabangSlug === "laptop" || cabangSlug === "gadget") && (
-                <div className="space-y-3 text-xs">
-                  <div>
-                    <label className="block mb-1 font-bold text-slate-400">SN / IMEI (Wajib)</label>
-                    <input
-                      type="text"
-                      placeholder="SN-821739812739"
-                      value={specInput1}
-                      onChange={(e) => setSpecInput1(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-1 font-bold text-slate-400">Detail Spek</label>
-                    <input
-                      type="text"
-                      placeholder="i5-10th, RAM 8GB, SSD 256GB"
-                      value={specInput2}
-                      onChange={(e) => setSpecInput2(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block mb-1 font-bold text-slate-400">Kondisi</label>
-                    <select
-                      value={specInput3}
-                      onChange={(e) => setSpecInput3(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-medium"
-                    >
-                      <option value="Fullset Box">Fullset Box</option>
-                      <option value="Unit Only">Unit Only</option>
-                      <option value="Unit + Charger">Unit + Charger</option>
-                    </select>
-                  </div>
-                </div>
-              )}
-
-              {!["percetakan", "konveksi", "laptop", "gadget"].includes(cabangSlug) && (
-                <div className="space-y-3 text-xs">
-                  <div>
-                    <label className="block mb-1 font-bold text-slate-400">Catatan</label>
-                    <textarea
-                      rows={3}
-                      placeholder="Catatan khusus transaksi..."
-                      value={specInput1}
-                      onChange={(e) => setSpecInput1(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <button
-                onClick={saveSpecifications}
-                className="w-full py-3 rounded-2xl bg-black dark:bg-white text-white dark:text-black font-extrabold text-xs active:scale-[0.98] transition-transform"
-              >
-                Terapkan Spesifikasi
+              ))}
+              <button onClick={addItem} className="w-full py-2.5 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 text-[11px] font-bold text-slate-400 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform hover:border-[#7B61FF] hover:text-[#7B61FF]">
+                <Plus className="w-4 h-4" /> Tambah Item
               </button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+            </div>
+          </Section>
 
-      {/* Kalkulator Harga */}
-      <AnimatePresence>
-        {showCalculator && (
-          <KalkulatorHarga
-            cabangSlug={cabangSlug}
-            open={showCalculator}
-            onClose={() => setShowCalculator(false)}
-            onResult={handleCalcResult}
-          />
-        )}
-      </AnimatePresence>
+          {/* TOTAL */}
+          {cart.length > 0 && (
+            <div className="premium-card p-3 bg-gradient-to-br from-[#7B61FF]/5 to-[#FF5C00]/5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-heading font-bold text-slate-400">Total Orderan</span>
+                <span className="text-lg font-heading font-extrabold gradient-text">{formatRp(grandTotal)}</span>
+              </div>
+            </div>
+          )}
 
-      {/* Quick Add Modal */}
-      <AnimatePresence>
-        {showQuickAdd && (
-          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-xs bg-white dark:bg-[#131527] rounded-3xl p-5 space-y-4 shadow-2xl border border-slate-100 dark:border-slate-800"
-            >
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                <h3 className="text-xs font-extrabold tracking-tight">Tambah Produk Cepat</h3>
-                <button onClick={() => setShowQuickAdd(false)} className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800">
-                  <X className="w-4 h-4" />
+          {/* SPESIFIKASI */}
+          <Section title="Spesifikasi" icon={<FileText className="w-3.5 h-3.5" />}>
+            <textarea placeholder="Contoh: Ukuran A4, 2 sisi, warna hitam..." value={spesifikasi} onChange={e => setSpesifikasi(e.target.value)} rows={3} className="w-full input-premium text-xs resize-none" />
+          </Section>
+
+          {/* CATATAN */}
+          <Section title="Catatan" icon={<StickyNote className="w-3.5 h-3.5" />}>
+            <textarea placeholder="Catatan orderan..." value={catatan} onChange={e => setCatatan(e.target.value)} rows={2} className="w-full input-premium text-xs resize-none" />
+          </Section>
+
+          {/* DP */}
+          <Section title="Down Payment (DP)" icon={<Banknote className="w-3.5 h-3.5" />}>
+            <input type="number" min="0" value={dpDibayar || ""} onChange={e => setDpDibayar(Number(e.target.value))} placeholder="0" className="w-full input-premium text-xs" />
+            {dpDibayar > 0 && (
+              <div className="mt-1.5 flex items-center justify-between text-[10px]">
+                <span className="text-slate-400 font-bold">Sisa tagihan:</span>
+                <span className={`font-extrabold ${sisaTagihan > 0 ? "text-amber-500" : "text-emerald-500"}`}>{formatRp(sisaTagihan)}</span>
+              </div>
+            )}
+          </Section>
+
+          {/* STATUS PESANAN */}
+          <Section title="Status Pesanan" icon={<Clock className="w-3.5 h-3.5" />}>
+            <div className="flex gap-2">
+              {([["baru", "Baru"], ["diproses", "Diproses"], ["selesai", "Selesai"]] as const).map(([key, label]) => (
+                <button key={key} onClick={() => setStatusPesanan(key)} className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all ${statusPesanan === key ? "bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white shadow-md" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>{label}</button>
+              ))}
+            </div>
+          </Section>
+
+          {/* DOMPET PENERIMA */}
+          <Section title="Dompet Penerima" icon={<Wallet className="w-3.5 h-3.5" />}>
+            <div className="grid grid-cols-2 gap-2">
+              {wallets.map(w => (
+                <button key={w.id} onClick={() => setWalletIdTarget(w.id)} className={`p-2.5 rounded-xl text-left transition-all ${walletIdTarget === w.id ? "bg-[#7B61FF]/10 border-2 border-[#7B61FF] shadow-md" : "bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/60 dark:border-slate-700/60"}`}>
+                  <p className="text-[10px] font-heading font-bold">{w.namaDompet}</p>
+                  <p className="text-[9px] text-slate-400">{formatRp(w.saldo)}</p>
                 </button>
+              ))}
+              {wallets.length === 0 && <p className="col-span-2 text-center text-[10px] text-slate-400 py-2">Belum ada dompet</p>}
+            </div>
+          </Section>
+
+          {/* SIMPAN */}
+          <button onClick={handleCheckout} disabled={isProcessing || cart.length === 0} className="w-full py-3.5 rounded-2xl btn-primary text-sm font-heading font-extrabold disabled:opacity-50 disabled:scale-100 active:scale-[0.97] transition-transform">
+            {isProcessing ? "Memproses..." : `Simpan Orderan${grandTotal > 0 ? ` • ${formatRp(grandTotal)}` : ""}`}
+          </button>
+        </div>
+      ) : (
+        /* ═══ RIWAYAT TAB ═══ */
+        <div className="flex-1 overflow-y-auto pb-24 space-y-2">
+          {transactions.length === 0 ? (
+            <div className="text-center py-12 text-slate-400 text-xs">Belum ada transaksi</div>
+          ) : transactions.map(tx => (
+            <div key={tx.id} className="premium-card p-3 space-y-2">
+              <div className="flex items-start justify-between">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-heading font-bold line-clamp-1">{tx.invoiceNumber}</p>
+                  <p className="text-[10px] text-slate-400">{tx.customerNama} • {formatDate(tx.tanggal)}</p>
+                </div>
+                <span className={`text-[8px] px-2 py-0.5 rounded-full font-bold shrink-0 ${tx.status === "LUNAS" ? "bg-emerald-100 text-emerald-600" : tx.status === "DP" ? "bg-amber-100 text-amber-600" : "bg-rose-100 text-rose-600"}`}>{tx.status}</span>
               </div>
 
-              <form onSubmit={handleQuickAdd} className="space-y-3 text-[11px] font-bold">
-                <div>
-                  <label className="block mb-1 text-slate-400">Nama Produk</label>
-                  <input
-                    type="text"
-                    value={newProdName}
-                    onChange={(e) => setNewProdName(e.target.value)}
-                    placeholder="Contoh: Laptop ASUS VivoBook"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block mb-1 text-slate-400">Harga Jual (Rp)</label>
-                    <input
-                      type="number"
-                      value={newProdHargaJual || ""}
-                      onChange={(e) => setNewProdHargaJual(Number(e.target.value))}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
-                      required
-                    />
+              <div className="space-y-1">
+                {tx.items.map((item, idx) => (
+                  <div key={idx} className="flex justify-between text-[10px]">
+                    <span className="text-slate-500">{item.namaItem} x{item.qty}</span>
+                    <span className="font-bold">{formatRp(item.subtotal)}</span>
                   </div>
-                  <div>
-                    <label className="block mb-1 text-slate-400">HPP / Modal (Rp)</label>
-                    <input
-                      type="number"
-                      value={newProdHargaModal || ""}
-                      onChange={(e) => setNewProdHargaModal(Number(e.target.value))}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block mb-1 text-slate-400">Stok Awal</label>
-                  <input
-                    type="number"
-                    value={newProdStok}
-                    onChange={(e) => setNewProdStok(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold shadow-md active:scale-[0.98] transition-all"
-                >
-                  Simpan & Masuk Keranjang
-                </button>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Quick Order Modal */}
-      <AnimatePresence>
-        {showQuickOrder && (
-          <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center backdrop-blur-sm">
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 250 }}
-              className="w-full max-w-md bg-white dark:bg-[#131527] rounded-t-[32px] p-5 pb-8 space-y-3 shadow-2xl"
-            >
-              <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-amber-500"><Zap className="w-5 h-5" /></span>
-                  <h3 className="text-sm font-extrabold">Quick Order Templates</h3>
-                </div>
-                <button onClick={() => setShowQuickOrder(false)} className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {quickOrders.map((qo) => (
-                  <button
-                    key={qo.id}
-                    onClick={() => applyQuickOrder(qo)}
-                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-zinc-900 text-left active:scale-[0.98] transition-transform"
-                  >
-                    <span className="text-xs font-extrabold">{qo.label}</span>
-                    <p className="text-[9px] text-slate-400 mt-0.5">
-                      {qo.items.length} item • Total:{" "}
-                      {formatRp(qo.items.reduce((s, ti) => s + ti.price, 0))}
-                    </p>
-                  </button>
                 ))}
               </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
-      {/* Mini Riwayat Modal */}
-      <AnimatePresence>
-        {showRiwayat && (
-          <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center backdrop-blur-sm">
-            <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 250 }}
-              className="w-full max-w-md bg-white dark:bg-[#131527] rounded-t-[32px] p-5 pb-8 space-y-3 shadow-2xl"
-            >
-              <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-indigo-500"><FileText className="w-4 h-4" /></span>
-                  <h3 className="text-sm font-extrabold">5 Transaksi Terakhir</h3>
+              <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-2">
+                <div>
+                  <p className="text-[10px] text-slate-400">Total: <span className="font-extrabold text-[#7B61FF]">{formatRp(tx.grandTotal)}</span></p>
+                  {tx.dpDibayar > 0 && <p className="text-[9px] text-slate-400">DP: {formatRp(tx.dpDibayar)} • Sisa: <span className="font-bold text-amber-500">{formatRp(tx.sisaTagihan)}</span></p>}
+                  {getProdStatus(tx.id) && <p className="text-[9px] text-indigo-500 font-bold mt-0.5">{getProdStatus(tx.id)}</p>}
                 </div>
-                <button onClick={() => setShowRiwayat(false)} className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800">
-                  <X className="w-4 h-4" />
-                </button>
+                <div className="flex gap-1.5">
+                  <button onClick={() => setShowInvoice(tx)} className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/20 text-blue-500"><FileText className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => startEdit(tx)} className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/20 text-amber-500"><Edit3 className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => deleteTx(tx)} className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/20 text-rose-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                </div>
               </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-              <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {recentTransactions.length === 0 ? (
-                  <div className="text-center py-8 text-slate-400 text-xs">Belum ada riwayat</div>
-                ) : (
-                  recentTransactions.map((tx: DbTransaction) => (
-                    <div key={tx.id} className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-900 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[9px] bg-slate-200 dark:bg-zinc-700 px-2 py-0.5 rounded-md font-extrabold uppercase">
-                          {tx.invoiceNumber}
-                        </span>
-                        <span
-                          className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                            tx.status === "LUNAS"
-                              ? "bg-emerald-100 text-emerald-600"
-                              : "bg-amber-100 text-amber-600"
-                          }`}
-                        >
-                          {tx.status}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold">{tx.customerNama}</span>
-                        <span className="text-[10px] font-extrabold text-[#008CEB]">
-                          {formatRp(tx.grandTotal)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-[9px] text-slate-400">{formatTime(tx.tanggal)}</span>
-                        {tx.sisaTagihan > 0 && (
-                          <span className="text-[9px] text-rose-500 font-bold">
-                            Sisa: {formatRp(tx.sisaTagihan)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                )}
+      {/* ═══ EDIT MODAL ═══ */}
+      <AnimatePresence>
+        {editingTx && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4" onClick={() => setEditingTx(null)}>
+            <motion.div initial={{ y: 200 }} animate={{ y: 0 }} exit={{ y: 200 }} onClick={e => e.stopPropagation()} className="w-full max-w-md bg-white dark:bg-[#131527] rounded-2xl p-4 space-y-3">
+              <h3 className="text-sm font-heading font-extrabold">Edit Transaksi</h3>
+              <p className="text-[10px] text-slate-400">{editingTx.invoiceNumber}</p>
+              <div>
+                <label className="text-[9px] text-slate-400 font-bold uppercase">Catatan</label>
+                <textarea value={editCatatan} onChange={e => setEditCatatan(e.target.value)} rows={2} className="w-full input-premium text-xs resize-none mt-1" />
+              </div>
+              <div>
+                <label className="text-[9px] text-slate-400 font-bold uppercase">DP (Rp)</label>
+                <input type="number" value={editDp} onChange={e => setEditDp(Number(e.target.value))} className="w-full input-premium text-xs mt-1" />
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => setEditingTx(null)} className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-xs font-bold">Batal</button>
+                <button onClick={saveEdit} className="flex-1 py-2.5 rounded-xl btn-primary text-xs font-bold">Simpan</button>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ═══ INVOICE MODAL ═══ */}
+      <AnimatePresence>
+        {showInvoice && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4" onClick={() => setShowInvoice(null)}>
+            <motion.div initial={{ y: 200 }} animate={{ y: 0 }} exit={{ y: 200 }} onClick={e => e.stopPropagation()} className="w-full max-w-md bg-white dark:bg-[#131527] rounded-2xl p-4 space-y-3 max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-heading font-extrabold">Invoice</h3>
+                <button onClick={() => setShowInvoice(null)} className="p-1"><X className="w-4 h-4" /></button>
+              </div>
+              <div className="bg-slate-50 dark:bg-zinc-800 rounded-xl p-4 space-y-3 text-xs" id="invoice-print">
+                <div className="text-center border-b border-slate-200 dark:border-slate-700 pb-3">
+                  <p className="font-heading font-extrabold text-sm gradient-text">MMCBANK</p>
+                  <p className="text-[9px] text-slate-400 capitalize">{cabangSlug}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="flex justify-between"><span className="text-slate-400">Invoice</span><span className="font-bold">{showInvoice.invoiceNumber}</span></p>
+                  <p className="flex justify-between"><span className="text-slate-400">Tanggal</span><span className="font-bold">{formatDate(showInvoice.tanggal)} {formatTime(showInvoice.tanggal)}</span></p>
+                  <p className="flex justify-between"><span className="text-slate-400">Pelanggan</span><span className="font-bold">{showInvoice.customerNama}</span></p>
+                  {showInvoice.customerWA && <p className="flex justify-between"><span className="text-slate-400">WA</span><span className="font-bold">{showInvoice.customerWA}</span></p>}
+                </div>
+                <div className="border-t border-slate-200 dark:border-slate-700 pt-2 space-y-1.5">
+                  {showInvoice.items.map((item, idx) => (
+                    <div key={idx}>
+                      <div className="flex justify-between"><span className="font-bold">{item.namaItem}</span><span>{formatRp(item.subtotal)}</span></div>
+                      <p className="text-[9px] text-slate-400">{item.qty} x {formatRp(item.hargaSatuan)}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t border-slate-200 dark:border-slate-700 pt-2 space-y-1">
+                  <div className="flex justify-between"><span className="text-slate-400">Total</span><span className="font-extrabold text-sm">{formatRp(showInvoice.grandTotal)}</span></div>
+                  {showInvoice.dpDibayar > 0 && <>
+                    <div className="flex justify-between"><span className="text-slate-400">DP</span><span className="font-bold">{formatRp(showInvoice.dpDibayar)}</span></div>
+                    <div className="flex justify-between"><span className="text-slate-400">Sisa</span><span className="font-bold text-amber-500">{formatRp(showInvoice.sisaTagihan)}</span></div>
+                  </>}
+                  <div className="flex justify-between"><span className="text-slate-400">Status</span><span className={`font-bold ${showInvoice.status === "LUNAS" ? "text-emerald-500" : "text-amber-500"}`}>{showInvoice.status}</span></div>
+                </div>
+                {showInvoice.catatan && <div className="border-t border-slate-200 dark:border-slate-700 pt-2"><p className="text-[9px] text-slate-400">Catatan: <span className="font-bold">{showInvoice.catatan}</span></p></div>}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => setShowInvoice(null)} className="py-2.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-xs font-bold">Tutup</button>
+                <button onClick={() => {
+                  const el = document.getElementById("invoice-print");
+                  if (el) { navigator.clipboard.writeText(el.innerText); alert("Invoice disalin ke clipboard!"); }
+                }} className="py-2.5 rounded-xl btn-primary text-xs font-bold">Salin Teks</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function Section({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="premium-card p-3 space-y-2">
+      <div className="flex items-center gap-1.5">
+        <div className="text-[#7B61FF]">{icon}</div>
+        <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-slate-400">{title}</span>
+      </div>
+      {children}
     </div>
   );
 }
