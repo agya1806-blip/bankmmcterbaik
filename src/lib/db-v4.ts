@@ -1,11 +1,12 @@
-import Dexie, { type Table } from "dexie";
+import Dexie, { type Table, type Transaction as DexieTx } from "dexie";
 
-/* ─── Book/Branch ID ─── */
+/* ───────────────────────────────────────────────────────── */
+/* UNIT IDs — Semua cabang & buku non-bisnis                */
+/* ───────────────────────────────────────────────────────── */
 
-export type BookOrBranch =
+export type UnitId =
   | "pribadi"
   | "keluarga"
-  | "usaha"
   | "usaha-percetakan"
   | "usaha-laptop"
   | "usaha-gadget"
@@ -14,10 +15,11 @@ export type BookOrBranch =
   | "usaha-konveksi"
   | "usaha-toko-pakaian";
 
-export const BOOK_LABELS: Record<BookOrBranch, string> = {
-  pribadi: "Buku Pribadi",
-  keluarga: "Buku Keluarga",
-  usaha: "Buku Usaha",
+export type BookOrBranch = UnitId | "GLOBAL";
+
+export const UNIT_LABELS: Record<UnitId, string> = {
+  pribadi: "Pribadi",
+  keluarga: "Keluarga",
   "usaha-percetakan": "Percetakan",
   "usaha-laptop": "Laptop / PC",
   "usaha-gadget": "Gadget",
@@ -27,13 +29,36 @@ export const BOOK_LABELS: Record<BookOrBranch, string> = {
   "usaha-toko-pakaian": "Toko Pakaian",
 };
 
-export const BRANCH_SLUGS: BookOrBranch[] = [
-  "usaha-percetakan",
-  "usaha-laptop",
-  "usaha-gadget",
-  "usaha-warkop",
-  "usaha-konveksi",
+/** Legacy alias */
+export const BOOK_LABELS = UNIT_LABELS as Record<BookOrBranch, string>;
+BOOK_LABELS.GLOBAL = "Global";
+
+/** Unit yang menggunakan POS/Kasir + Inventory */
+export const POS_UNITS: UnitId[] = [
+  "usaha-percetakan", "usaha-laptop", "usaha-gadget",
+  "usaha-warkop", "usaha-kelontong", "usaha-konveksi", "usaha-toko-pakaian",
 ];
+
+/** Unit yang menggunakan modul Produksi */
+export const PRODUCTION_UNITS: UnitId[] = [
+  "usaha-percetakan", "usaha-konveksi", "usaha-toko-pakaian",
+];
+
+/** Unit buku non-bisnis (hanya Cashflow) */
+export const NON_BIZ_UNITS: UnitId[] = ["pribadi", "keluarga"];
+
+/** Unit yang bisa dibuat dompet (maks 4 aktif) */
+export const MAX_WALLET_PER_UNIT = 4;
+
+export const ALL_UNITS: UnitId[] = [
+  "pribadi", "keluarga",
+  "usaha-percetakan", "usaha-laptop", "usaha-gadget",
+  "usaha-warkop", "usaha-kelontong", "usaha-konveksi", "usaha-toko-pakaian",
+];
+
+/* Legacy aliases */
+export const BRANCH_SLUGS = POS_UNITS;
+export const BRANCH_LIST = POS_UNITS;
 
 /* ─── Enums ─── */
 
@@ -42,12 +67,16 @@ export type UserRole = "admin" | "kasir" | "viewer";
 export type TransStatus = "LUNAS" | "DP" | "BATAL";
 export type PiutangStatus = "AKTIF" | "LUNAS" | "DIHAPUS";
 export type InvTipe = "masuk" | "keluar" | "penyesuaian";
+export type ProductionStatus = "antre" | "diproduksi" | "selesai";
+export type SedekahType = "zakatMal" | "zakatFitrah" | "infakTerikat" | "sedekahSubuh";
 
-/* ─── Row Types (each has bookOrBranchId) ─── */
+/* ───────────────────────────────────────────────────────── */
+/* 18 TABLE INTERFACES                                      */
+/* ───────────────────────────────────────────────────────── */
 
 export interface DbUser {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
   nama: string;
   pinHash: string;
   fotoUrl: string;
@@ -59,7 +88,7 @@ export interface DbUser {
 
 export interface DbProfile {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
   namaUsaha: string;
   logoUrl: string;
   alamat: string;
@@ -69,9 +98,12 @@ export interface DbProfile {
   updatedAt: string;
 }
 
+/* ─── DOMPET ─── */
+
 export interface DbWallet {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
+  unitId: UnitId;
   namaDompet: string;
   saldo: number;
   tipe: WalletTipe;
@@ -82,7 +114,7 @@ export interface DbWallet {
 
 export interface DbWalletMutation {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
   dariWalletId: string;
   keWalletId: string;
   nominal: number;
@@ -90,9 +122,11 @@ export interface DbWalletMutation {
   createdAt: string;
 }
 
+/* ─── PELANGGAN ─── */
+
 export interface DbCustomer {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
   nama: string;
   noWA: string;
   totalTransaksi: number;
@@ -101,6 +135,8 @@ export interface DbCustomer {
   terakhirTransaksi: string;
   createdAt: string;
 }
+
+/* ─── TRANSAKSI ─── */
 
 export interface DbTransactionItem {
   id: string;
@@ -115,7 +151,9 @@ export interface DbTransactionItem {
 
 export interface DbTransaction {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
+  unitId: UnitId;
+  userId: string;
   invoiceNumber: string;
   customerId?: string;
   customerNama: string;
@@ -132,6 +170,7 @@ export interface DbTransaction {
   grandTotal: number;
   dpDibayar: number;
   sisaTagihan: number;
+  sedekahNominal: number;
   status: TransStatus;
   walletIdTarget: string;
   catatan: string;
@@ -139,9 +178,12 @@ export interface DbTransaction {
   createdAt: string;
 }
 
+/* ─── PIUTANG ─── */
+
 export interface DbPiutang {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
+  unitId: UnitId;
   transactionId: string;
   customerId: string;
   customerNama: string;
@@ -156,7 +198,7 @@ export interface DbPiutang {
 
 export interface DbPiutangInstallment {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
   piutangId: string;
   jumlah: number;
   metode: string;
@@ -164,9 +206,12 @@ export interface DbPiutangInstallment {
   catatan: string;
 }
 
+/* ─── INVENTORY ─── */
+
 export interface DbInventoryItem {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
+  unitId: UnitId;
   sku: string;
   nama: string;
   kategori: string;
@@ -182,7 +227,7 @@ export interface DbInventoryItem {
 
 export interface DbInventoryMutation {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
   itemId: string;
   tipe: InvTipe;
   qty: number;
@@ -192,9 +237,11 @@ export interface DbInventoryMutation {
   createdAt: string;
 }
 
+/* ─── LABEL ─── */
+
 export interface DbLabel {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
   label: string;
   warna: string;
   createdAt: string;
@@ -202,24 +249,28 @@ export interface DbLabel {
 
 export interface DbLabelTag {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
   transaksiRef: string;
   labelId: string;
 }
 
+/* ─── QUICK ORDER ─── */
+
 export interface DbQuickOrder {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
   label: string;
   items: { desc: string; price: number }[];
   createdAt: string;
 }
 
+/* ─── AUDIT LOG ─── */
+
 export interface DbAuditLog {
   id: string;
-  bookOrBranchId: BookOrBranch;
-  action: "CREATE" | "UPDATE" | "DELETE" | "BATAL" | "TRANSFER_KELUAR" | "TRANSFER_MASUK";
-  entityType: "transaction" | "piutang" | "wallet" | "customer" | "inventory" | "transfer";
+  bookOrBranchId: UnitId;
+  action: "CREATE" | "UPDATE" | "DELETE" | "BATAL" | "RETUR" | "TRANSFER_KELUAR" | "TRANSFER_MASUK";
+  entityType: "transaction" | "piutang" | "wallet" | "customer" | "inventory" | "transfer" | "sedekah";
   entityId: string;
   userId: string;
   userName: string;
@@ -230,9 +281,12 @@ export interface DbAuditLog {
   createdAt: string;
 }
 
+/* ─── CASHPLOW ─── */
+
 export interface DbCashflow {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
+  unitId: UnitId;
   tipe: "masuk" | "keluar";
   kategori: string;
   nominal: number;
@@ -241,16 +295,17 @@ export interface DbCashflow {
   walletId: string;
   walletNama: string;
   referensiId: string;
-  referensiTipe: "transaction" | "mutasi" | "adjustment";
+  referensiTipe: "transaction" | "mutasi" | "adjustment" | "retur" | "sedekah";
   catatan: string;
   createdAt: string;
 }
 
-export type ProductionStatus = "antre" | "diproduksi" | "selesai";
+/* ─── PRODUKSI ─── */
 
 export interface DbProduction {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
+  unitId: UnitId;
   transactionId: string;
   invoiceNumber: string;
   status: ProductionStatus;
@@ -259,23 +314,29 @@ export interface DbProduction {
   createdAt: string;
 }
 
+/* ─── SEDEKAH ─── */
+
 export interface DbSedekahBalance {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
   zakatMal: number;
   zakatFitrah: number;
   infakTerikat: number;
   sedekahSubuh: number;
 }
 
+/* ─── INVOICE COUNTER ─── */
+
 export interface DbInvoiceCounter {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
   prefix: string;
   counter: number;
 }
 
-/* ─── Dexie DB ─── */
+/* ───────────────────────────────────────────────────────── */
+/* DEXIE DATABASE                                           */
+/* ───────────────────────────────────────────────────────── */
 
 class MmcBankDB extends Dexie {
   users!: Table<DbUser, string>;
@@ -300,16 +361,16 @@ class MmcBankDB extends Dexie {
   constructor() {
     super("mmcbank-v4");
 
-    this.version(1).stores({
+    this.version(2).stores({
       users: "id, &nama, role, bookOrBranchId",
       profiles: "id, bookOrBranchId",
-      wallets: "id, bookOrBranchId, tipe, isActive",
+      wallets: "id, bookOrBranchId, unitId, tipe, isActive",
       walletMutations: "id, bookOrBranchId, dariWalletId, keWalletId, createdAt",
       customers: "id, bookOrBranchId, &[bookOrBranchId+noWA], nama",
-      transactions: "id, bookOrBranchId, customerId, tanggal, status, walletIdTarget, invoiceNumber",
-      piutang: "id, bookOrBranchId, customerId, status, jatuhTempo",
+      transactions: "id, bookOrBranchId, unitId, userId, customerId, tanggal, status, walletIdTarget, invoiceNumber",
+      piutang: "id, bookOrBranchId, unitId, customerId, status, jatuhTempo, transactionId",
       piutangInstallments: "id, bookOrBranchId, piutangId, tanggal",
-      inventory: "id, bookOrBranchId, sku, kategori",
+      inventory: "id, bookOrBranchId, unitId, sku, kategori",
       inventoryMutations: "id, bookOrBranchId, itemId, tipe, createdAt",
       labels: "id, bookOrBranchId",
       labelTags: "id, bookOrBranchId, transaksiRef, labelId",
@@ -317,15 +378,33 @@ class MmcBankDB extends Dexie {
       sedekahBalances: "id, bookOrBranchId",
       invoiceCounters: "id, bookOrBranchId, prefix",
       auditLogs: "id, bookOrBranchId, action, entityType, entityId, createdAt",
-      cashflows: "id, bookOrBranchId, tipe, kategori, walletId, referensiId, createdAt",
-      productions: "id, bookOrBranchId, transactionId, status, updatedAt",
+      cashflows: "id, bookOrBranchId, unitId, tipe, kategori, walletId, referensiId, createdAt",
+      productions: "id, bookOrBranchId, unitId, transactionId, status, updatedAt",
     });
+
+    this.on("populate", (tx) => this.seedDefaultData(tx as unknown as DexieTx));
+  }
+
+  private async seedDefaultData(tx: DexieTx) {
+    for (const unit of ALL_UNITS) {
+      const tbl = tx.table("sedekahBalances") as Table<DbSedekahBalance>;
+      await tbl.add({
+        id: `sedekah-${unit}`,
+        bookOrBranchId: unit,
+        zakatMal: 0,
+        zakatFitrah: 0,
+        infakTerikat: 0,
+        sedekahSubuh: 0,
+      });
+    }
   }
 }
 
 export const db = new MmcBankDB();
 
-/* ─── Helpers ─── */
+/* ───────────────────────────────────────────────────────── */
+/* HELPERS                                                  */
+/* ───────────────────────────────────────────────────────── */
 
 export function generateInvoiceNumber(
   prefix: string,
@@ -337,8 +416,8 @@ export function generateInvoiceNumber(
   return `${prefix}/${y}${m}${d}/`;
 }
 
-export function branchPrefix(slug: BookOrBranch): string {
-  const map: Partial<Record<BookOrBranch, string>> = {
+export function branchPrefix(slug: UnitId): string {
+  const map: Partial<Record<UnitId, string>> = {
     "usaha-percetakan": "PRT",
     "usaha-laptop": "LPT",
     "usaha-gadget": "GDG",
@@ -346,11 +425,13 @@ export function branchPrefix(slug: BookOrBranch): string {
     "usaha-kelontong": "KLN",
     "usaha-konveksi": "KNV",
     "usaha-toko-pakaian": "TPK",
+    pribadi: "PRB",
+    keluarga: "KLG",
   };
   return map[slug] ?? "USR";
 }
 
-/* ─── Type Aliases (for backward compatibility) ─── */
+/* ─── Type Aliases (backward compat) ─── */
 export type Customer = DbCustomer;
 export type Transaction = DbTransaction;
 export type Cashflow = DbCashflow;
@@ -358,5 +439,4 @@ export type AuditLog = DbAuditLog;
 export type Production = DbProduction;
 export type Wallet = DbWallet;
 export type Piutang = DbPiutang;
-
 export type Inventory = DbInventoryItem;

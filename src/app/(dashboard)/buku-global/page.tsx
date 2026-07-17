@@ -7,15 +7,12 @@ import { useThemeStore } from "@/store/useThemeStore";
 import { createBackup, restoreBackup, downloadBlob } from "@/lib/backup";
 import { executeTransfer } from "@/engine/double-entry";
 import { exportTransactionsExcel, exportCashflowExcel } from "@/lib/export-utils";
-import { db, type BookOrBranch, BOOK_LABELS } from "@/lib/db-v4";
+import { db, type BookOrBranch, type UnitId, BOOK_LABELS, ALL_UNITS, POS_UNITS } from "@/lib/db-v4";
 import { useLiveQuery } from "dexie-react-hooks";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart3, CreditCard, Users, ScrollText, Settings, Sun, Moon, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Search, Wallet, Download, Upload, ArrowRightLeft, Zap, Plus, Trash2, LogOut, X, Database, UserCircle, Landmark, Smartphone, Save, Edit3, Pencil, Building, RotateCcw } from "lucide-react";
 
-const BRANCH_LIST: BookOrBranch[] = [
-  "usaha-percetakan", "usaha-laptop", "usaha-gadget",
-  "usaha-warkop", "usaha-kelontong", "usaha-konveksi", "usaha-toko-pakaian",
-];
+const BRANCH_LIST: UnitId[] = POS_UNITS;
 
 type TabKey = "dashboard" | "piutang" | "pelanggan" | "audit" | "settings" | "dompet" | "profil";
 
@@ -32,31 +29,31 @@ export default function BukuGlobalPage() {
   const [backupPassword, setBackupPassword] = useState("");
 
   /* ─── Transfer State ─── */
-  const [transferFrom, setTransferFrom] = useState<BookOrBranch>("usaha-warkop");
-  const [transferTo, setTransferTo] = useState<BookOrBranch>("usaha-percetakan");
+  const [transferFrom, setTransferFrom] = useState<UnitId>("usaha-warkop");
+  const [transferTo, setTransferTo] = useState<UnitId>("usaha-percetakan");
   const [transferAmount, setTransferAmount] = useState(0);
   const [transferDesc, setTransferDesc] = useState("");
 
   /* ─── Piutang State ─── */
   const [piutangSearch, setPiutangSearch] = useState("");
-  const [piutangBranchFilter, setPiutangBranchFilter] = useState<BookOrBranch | "semua">("semua");
+  const [piutangBranchFilter, setPiutangBranchFilter] = useState<UnitId | "semua">("semua");
   const [selectedPiutang, setSelectedPiutang] = useState<string | null>(null);
   const [bayarPiutangAmount, setBayarPiutangAmount] = useState(0);
 
   /* ─── Pelanggan State ─── */
   const [pelangganSearch, setPelangganSearch] = useState("");
-  const [pelangganBranch, setPelangganBranch] = useState<BookOrBranch | "semua">("semua");
+  const [pelangganBranch, setPelangganBranch] = useState<UnitId | "semua">("semua");
 
   /* ─── Audit State ─── */
   const [auditSearch, setAuditSearch] = useState("");
-  const [auditBranch, setAuditBranch] = useState<BookOrBranch | "semua">("semua");
+  const [auditBranch, setAuditBranch] = useState<UnitId | "semua">("semua");
   const [auditType, setAuditType] = useState<string>("semua");
 
   /* ─── Quick Order State ─── */
   const [showQuickOrderModal, setShowQuickOrderModal] = useState(false);
   const [quickOrderLabel, setQuickOrderLabel] = useState("");
   const [quickOrderItems, setQuickOrderItems] = useState<{ desc: string; price: number }[]>([]);
-  const [quickOrderBranch, setQuickOrderBranch] = useState<BookOrBranch>("usaha-warkop");
+  const [quickOrderBranch, setQuickOrderBranch] = useState<UnitId>("usaha-warkop");
   const [qoItemDesc, setQoItemDesc] = useState("");
   const [qoItemPrice, setQoItemPrice] = useState(0);
 
@@ -84,7 +81,7 @@ export default function BukuGlobalPage() {
 
   /* ─── Reset Data State ─── */
   const [showResetModal, setShowResetModal] = useState(false);
-  const [resetScope, setResetScope] = useState<"all" | BookOrBranch>("all");
+  const [resetScope, setResetScope] = useState<"all" | UnitId>("all");
   const [resetTypes, setResetTypes] = useState<Record<string, boolean>>({
     transactions: false, cashflows: false, piutang: false, inventory: false,
     customers: false, wallets: false, auditLogs: false, quickOrders: false,
@@ -282,7 +279,8 @@ export default function BukuGlobalPage() {
     } else {
       await db.wallets.add({
         id: crypto.randomUUID(),
-        bookOrBranchId: "usaha",
+        bookOrBranchId: "usaha-percetakan",
+        unitId: "usaha-percetakan",
         namaDompet: walletName.trim(),
         saldo: walletSaldo,
         tipe: walletTipe,
@@ -871,14 +869,14 @@ export default function BukuGlobalPage() {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-[10px] font-bold text-slate-400 mb-1">Dari</label>
-                <select value={transferFrom} onChange={(e) => setTransferFrom(e.target.value as BookOrBranch)}
+                <select value={transferFrom} onChange={(e) => setTransferFrom(e.target.value as UnitId)}
                   className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none">
                   {BRANCH_LIST.map((b) => <option key={b} value={b}>{BOOK_LABELS[b]}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-slate-400 mb-1">Ke</label>
-                <select value={transferTo} onChange={(e) => setTransferTo(e.target.value as BookOrBranch)}
+                <select value={transferTo} onChange={(e) => setTransferTo(e.target.value as UnitId)}
                   className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none">
                   {BRANCH_LIST.map((b) => <option key={b} value={b}>{BOOK_LABELS[b]}</option>)}
                 </select>
@@ -1163,7 +1161,7 @@ export default function BukuGlobalPage() {
               <input type="text" placeholder="Label template" value={quickOrderLabel}
                 onChange={(e) => setQuickOrderLabel(e.target.value)}
                 className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
-              <select value={quickOrderBranch} onChange={(e) => setQuickOrderBranch(e.target.value as BookOrBranch)}
+              <select value={quickOrderBranch} onChange={(e) => setQuickOrderBranch(e.target.value as UnitId)}
                 className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none">
                 {BRANCH_LIST.map((b) => <option key={b} value={b}>{BOOK_LABELS[b]}</option>)}
               </select>
@@ -1240,7 +1238,7 @@ export default function BukuGlobalPage() {
                     <Database className="w-4 h-4" />
                     SEMUA Buku & Cabang
                   </button>
-                  {(["pribadi", "keluarga", "usaha", ...BRANCH_LIST] as BookOrBranch[]).map((b) => (
+                  {(["pribadi", "keluarga", ...ALL_UNITS] as UnitId[]).map((b) => (
                     <button key={b} onClick={() => setResetScope(b)}
                       className={`w-full p-2 rounded-xl text-[10px] font-bold text-left flex items-center gap-2 transition-all ${resetScope === b ? "bg-rose-500 text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
                       <Building className="w-4 h-4" />

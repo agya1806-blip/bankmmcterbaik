@@ -3,10 +3,10 @@
 import React, { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type BookOrBranch } from "@/lib/db-v4";
+import { db, type UnitId } from "@/lib/db-v4";
 import { ArrowLeft, BarChart3, DollarSign, TrendingUp, ArrowDownToLine, ArrowUpFromLine, Clock, Package } from "lucide-react";
 
-const BRANCH_MAP: Record<string, BookOrBranch> = {
+const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi",
   keluarga: "keluarga",
   percetakan: "usaha-percetakan",
@@ -90,23 +90,31 @@ export default function LaporanPage() {
     let totalHpp = 0;
 
     filteredTx.forEach((tx) => {
-      totalPendapatan += tx.totalBruto;
+      if (tx.status === "BATAL") return;
+      const pendapatanBersih = tx.grandTotal - (tx.sedekahNominal || 0);
+      if (tx.status === "LUNAS") {
+        totalPendapatan += pendapatanBersih;
+      } else if (tx.status === "DP") {
+        totalPendapatan += tx.dpDibayar;
+      }
       tx.items.forEach((item) => {
         totalHpp += (item.hargaModal || 0) * item.qty;
       });
     });
 
+    const EXCLUDE_CF_KATEGORI = new Set(["HPP", "Retur/Batal", "Transfer_Keluar"]);
+
     const cashflowMasuk = filteredCashflow
       .filter((c) => c.tipe === "masuk")
       .reduce((sum, c) => sum + c.nominal, 0);
     const cashflowKeluar = filteredCashflow
-      .filter((c) => c.tipe === "keluar")
+      .filter((c) => c.tipe === "keluar" && !EXCLUDE_CF_KATEGORI.has(c.kategori))
       .reduce((sum, c) => sum + c.nominal, 0);
 
     const labaKotor = totalPendapatan - totalHpp;
-    const labaBersih = cashflowMasuk - cashflowKeluar;
+    const labaBersih = labaKotor - cashflowKeluar;
     const piutangAktif = filteredTx
-      .filter((tx) => tx.sisaTagihan > 0)
+      .filter((tx) => tx.status !== "BATAL" && tx.sisaTagihan > 0)
       .reduce((sum, tx) => sum + tx.sisaTagihan, 0);
 
     return {
@@ -117,7 +125,7 @@ export default function LaporanPage() {
       cashflowMasuk,
       cashflowKeluar,
       piutangAktif,
-      jumlahTransaksi: filteredTx.length,
+      jumlahTransaksi: filteredTx.filter((t) => t.status !== "BATAL").length,
       jumlahProduk: inventory.length,
     };
   }, [filteredTx, filteredCashflow, inventory]);

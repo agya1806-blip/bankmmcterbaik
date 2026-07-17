@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import { format, subDays, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { db, type BookOrBranch } from "@/lib/db-v4";
+import { db, type UnitId } from "@/lib/db-v4";
 import { useSessionStore } from "@/store/useSessionStore";
 import {
   ChevronLeft, Bell, AlertTriangle, Clock, Wallet, Target,
@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 
-const BRANCH_MAP: Record<string, BookOrBranch> = {
+const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi", keluarga: "keluarga",
   percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
   warkop: "usaha-warkop", konveksi: "usaha-konveksi", kelontong: "usaha-kelontong",

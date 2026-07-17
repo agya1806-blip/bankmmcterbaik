@@ -3,11 +3,11 @@
 import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type BookOrBranch, type Cashflow } from "@/lib/db-v4";
+import { db, type UnitId, type Cashflow } from "@/lib/db-v4";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, TrendingUp, TrendingDown, Wallet, X, Save, ArrowLeft } from "lucide-react";
 
-const BRANCH_MAP: Record<string, BookOrBranch> = {
+const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi",
   keluarga: "keluarga",
   percetakan: "usaha-percetakan",
@@ -21,7 +21,7 @@ export default function CashflowPage() {
   const params = useParams();
   const router = useRouter();
   const cabangSlug = (params?.cabang as string) || "";
-  const bookOrBranchId: BookOrBranch = BRANCH_MAP[cabangSlug] || "usaha-warkop";
+  const bookOrBranchId: UnitId = BRANCH_MAP[cabangSlug] || "usaha-warkop";
 
   const cashflows =
     useLiveQuery(
@@ -66,6 +66,7 @@ export default function CashflowPage() {
     await db.cashflows.add({
       id: crypto.randomUUID(),
       bookOrBranchId,
+      unitId: bookOrBranchId,
       tipe,
       kategori,
       nominal,

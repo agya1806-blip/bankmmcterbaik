@@ -6,7 +6,7 @@ import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, parseISO, startOfMonth, endOfMonth } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { db, type BookOrBranch } from "@/lib/db-v4";
+import { db, type UnitId } from "@/lib/db-v4";
 import { useSessionStore } from "@/store/useSessionStore";
 import {
   Bell, Wallet, TrendingUp, TrendingDown, Clock,
@@ -14,7 +14,7 @@ import {
   FileText, Save, Home, DollarSign, Landmark, Smartphone, Pencil, Trash2,
 } from "lucide-react";
 
-const BOOK_ID: BookOrBranch = "keluarga";
+const BOOK_ID: UnitId = "keluarga";
 
 type TabKey = "ringkasan" | "catat" | "hutang" | "laporan" | "riwayat" | "dompet";
 
@@ -87,6 +87,7 @@ export default function BukuKeluargaPage() {
     await db.cashflows.add({
       id: crypto.randomUUID(),
       bookOrBranchId: BOOK_ID,
+      unitId: BOOK_ID,
       tipe: catatTipe,
       kategori: catatTipe === "masuk" ? "Pemasukan Keluarga" : "Pengeluaran Keluarga",
       nominal,
@@ -117,7 +118,7 @@ export default function BukuKeluargaPage() {
       setEditingWallet(null);
     } else {
       await db.wallets.add({
-        id: crypto.randomUUID(), bookOrBranchId: BOOK_ID,
+        id: crypto.randomUUID(), bookOrBranchId: BOOK_ID, unitId: BOOK_ID,
         namaDompet: walletName.trim(), saldo: walletSaldo, tipe: walletTipe,
         catatan: walletCatatan, isActive: true, createdAt: new Date().toISOString(),
       });

@@ -3,10 +3,10 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type BookOrBranch, type Transaction, type ProductionStatus } from '@/lib/db-v4';
+import { db, type UnitId, type Transaction, type ProductionStatus } from '@/lib/db-v4';
 import { ArrowLeft, ClipboardList, FileText, Printer, Image, Phone, BarChart3, X, Search } from "lucide-react";
 
-const BRANCH_MAP: Record<string, BookOrBranch> = {
+const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: 'pribadi',
   keluarga: 'keluarga',
   percetakan: 'usaha-percetakan',
@@ -86,6 +86,7 @@ export default function TransaksiDanProduksiPage() {
     await db.productions.add({
       id: crypto.randomUUID(),
       bookOrBranchId,
+      unitId: bookOrBranchId,
       transactionId: txId,
       invoiceNumber: transactions.find((t) => t.id === txId)?.invoiceNumber || '',
       status: 'antre',

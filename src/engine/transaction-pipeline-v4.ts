@@ -1,8 +1,12 @@
 import {
   db,
-  type BookOrBranch,
+  type UnitId,
   type DbTransaction,
   type DbTransactionItem,
+  type DbCashflow,
+  type DbWallet,
+  PRODUCTION_UNITS,
+  MAX_WALLET_PER_UNIT,
   branchPrefix,
   generateInvoiceNumber,
 } from "@/lib/db-v4";
@@ -21,12 +25,14 @@ export interface PosCartItem {
 
 export interface PipelineInputV4 {
   id: string;
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
+  userId: string;
   items: PosCartItem[];
   totalBruto: number;
   diskonGlobalPersen: number;
   ppnPersen: number;
   dpDibayar: number;
+  sedekahNominal: number;
   paymentMethod: "CASH" | "DEPOSIT" | "TRANSFER" | "QRIS";
   customerNama: string;
   customerWA: string;
@@ -44,6 +50,20 @@ export interface PipelineResultV4 {
   error?: string;
 }
 
+/* ─── Wallet Limit Check ─── */
+
+async function checkWalletLimit(unitId: UnitId): Promise<{ ok: boolean; error?: string }> {
+  const count = await db.wallets
+    .where("unitId")
+    .equals(unitId)
+    .filter((w) => w.isActive)
+    .count();
+  if (count >= MAX_WALLET_PER_UNIT) {
+    return { ok: false, error: `Maksimum ${MAX_WALLET_PER_UNIT} dompet aktif per unit! (${count} sudah terpakai)` };
+  }
+  return { ok: true };
+}
+
 /* ─── Execute Pipeline ─── */
 
 export async function executeTransactionPipelineV4(
@@ -52,11 +72,13 @@ export async function executeTransactionPipelineV4(
   const {
     id: invId,
     bookOrBranchId,
+    userId,
     items,
     totalBruto,
     diskonGlobalPersen,
     ppnPersen,
     dpDibayar,
+    sedekahNominal,
     paymentMethod,
     customerNama,
     customerWA,
@@ -73,22 +95,50 @@ export async function executeTransactionPipelineV4(
     return { ok: false, error: "Total transaksi harus lebih dari 0!" };
   }
 
+  if (sedekahNominal < 0) {
+    return { ok: false, error: "Sedekah tidak boleh negatif!" };
+  }
+
+  if (sedekahNominal > totalBruto) {
+    return { ok: false, error: "Sedekah tidak boleh melebihi total transaksi!" };
+  }
+
+  const unitId = bookOrBranchId as UnitId;
+
+  /* Pre-flight: wallet limit */
+  const walletCheck = await checkWalletLimit(unitId);
+  if (!walletCheck.ok) {
+    return { ok: false, error: walletCheck.error };
+  }
+
   try {
-    const prefix = branchPrefix(bookOrBranchId);
+    const prefix = branchPrefix(unitId);
     const invoiceNumber = generateInvoiceNumber(prefix);
     const now = new Date().toISOString();
 
     /* Step 1: Deduct inventory stock */
     for (const item of items) {
       const product = await db.inventory
-        .where("bookOrBranchId")
-        .equals(bookOrBranchId)
+        .where("unitId")
+        .equals(unitId)
         .filter((p) => p.nama === item.namaItem)
         .first();
 
       if (product) {
         const newStock = product.stok - item.qty;
         await db.inventory.update(product.id, { stok: Math.max(0, newStock) });
+
+        await db.inventoryMutations.add({
+          id: crypto.randomUUID(),
+          bookOrBranchId: unitId,
+          itemId: product.id,
+          tipe: "keluar",
+          qty: item.qty,
+          stokSebelum: product.stok,
+          stokSesudah: Math.max(0, newStock),
+          alasan: `Penjualan ${invoiceNumber}`,
+          createdAt: now,
+        });
       }
     }
 
@@ -121,10 +171,12 @@ export async function executeTransactionPipelineV4(
     const sisaTagihan = Math.max(0, grandTotal - dpDibayar);
     const status: DbTransaction["status"] = sisaTagihan > 0 ? "DP" : "LUNAS";
 
-    /* Step 4: Create transaction */
+    /* Step 4: Build transaction record */
     const transaction: DbTransaction = {
       id: invId,
-      bookOrBranchId,
+      bookOrBranchId: unitId,
+      unitId,
+      userId,
       invoiceNumber,
       customerNama: customerNama || "Pelanggan Umum",
       customerWA: customerWA || "",
@@ -140,68 +192,38 @@ export async function executeTransactionPipelineV4(
       grandTotal,
       dpDibayar,
       sisaTagihan,
+      sedekahNominal,
       status,
       walletIdTarget,
       catatan: catatan ?? "",
-      buktiBayar: input.buktiBayar || "",
+      buktiBayar: buktiBayar || "",
       createdAt: now,
     };
 
-    await db.transactions.add(transaction);
+    /* Step 5: Wallet & cashflow updates */
+    let saldoSebelum = 0;
+    let saldoSesudah = 0;
+    let walletNama = "";
 
-    /* Step 4: Create production record for branches that need it */
-    const productionBranches: BookOrBranch[] = [
-      "usaha-percetakan",
-      "usaha-konveksi",
-      "usaha-toko-pakaian",
-    ];
-    if (productionBranches.includes(bookOrBranchId)) {
-      await db.productions.add({
-        id: crypto.randomUUID(),
-        bookOrBranchId,
-        transactionId: invId,
-        invoiceNumber,
-        status: "antre",
-        catatan: "",
-        updatedAt: now,
-        createdAt: now,
-      });
+    if (walletIdTarget) {
+      const wallet = await db.wallets.get(walletIdTarget);
+      walletNama = wallet?.namaDompet ?? "";
+      saldoSebelum = wallet?.saldo ?? 0;
+      saldoSesudah = saldoSebelum + dpDibayar;
     }
 
-    /* Step 5: Create cashflow entry & update wallet saldo */
-    const wallet = await db.wallets.get(walletIdTarget);
-    const walletNama = wallet?.namaDompet ?? "";
-    const saldoSebelum = wallet?.saldo ?? 0;
-    const saldoSesudah = saldoSebelum + dpDibayar;
+    /* Step 6: Production record (if unit requires it) */
+    const needsProduction = PRODUCTION_UNITS.includes(unitId);
 
-    await db.cashflows.add({
-      id: crypto.randomUUID(),
-      bookOrBranchId,
-      tipe: "masuk",
-      kategori: "Penjualan",
-      nominal: dpDibayar,
-      saldoSebelum,
-      saldoSesudah,
-      walletId: walletIdTarget,
-      walletNama,
-      referensiId: invId,
-      referensiTipe: "transaction",
-      catatan: `Penjualan ${invoiceNumber}`,
-      createdAt: now,
-    });
-
-    /* Step 5b: Update wallet saldo */
-    if (walletIdTarget && dpDibayar > 0) {
-      await db.wallets.update(walletIdTarget, { saldo: saldoSesudah });
-    }
-
-    /* Step 5c: Create piutang record if DP (sisa tagihan > 0) */
+    /* Step 7: Piutang record (if DP) */
+    let piutangRecord = undefined;
     if (status === "DP" && sisaTagihan > 0) {
       const jatuhTempo = new Date();
       jatuhTempo.setDate(jatuhTempo.getDate() + 30);
-      await db.piutang.add({
+      piutangRecord = {
         id: crypto.randomUUID(),
-        bookOrBranchId,
+        bookOrBranchId: unitId,
+        unitId,
         transactionId: invId,
         customerId: "",
         customerNama: customerNama || "Pelanggan Umum",
@@ -209,20 +231,77 @@ export async function executeTransactionPipelineV4(
         totalPiutang: grandTotal,
         sisaPiutang: sisaTagihan,
         jatuhTempo: jatuhTempo.toISOString(),
-        status: "AKTIF",
+        status: "AKTIF" as const,
         catatan: `Piutang dari ${invoiceNumber}`,
         createdAt: now,
-      });
+      };
     }
 
-    /* Step 6: Write audit log */
+    /* ─── Atomic Write via db.transaction() ─── */
+    await db.transaction(
+      "rw",
+      db.transactions,
+      db.cashflows,
+      db.wallets,
+      db.productions,
+      db.piutang,
+      async () => {
+        /* 4a: Transaction */
+        await db.transactions.add(transaction);
+
+        /* 4b: Cashflow entry */
+        if (walletIdTarget && dpDibayar > 0) {
+          await db.cashflows.add({
+            id: crypto.randomUUID(),
+            bookOrBranchId: unitId,
+            unitId,
+            tipe: "masuk",
+            kategori: "Penjualan",
+            nominal: dpDibayar,
+            saldoSebelum,
+            saldoSesudah,
+            walletId: walletIdTarget,
+            walletNama,
+            referensiId: invId,
+            referensiTipe: "transaction",
+            catatan: `Penjualan ${invoiceNumber}`,
+            createdAt: now,
+          });
+
+          /* 4c: Update wallet saldo */
+          await db.wallets.update(walletIdTarget, { saldo: saldoSesudah });
+        }
+
+        /* 4d: Production */
+        if (needsProduction) {
+          await db.productions.add({
+            id: crypto.randomUUID(),
+            bookOrBranchId: unitId,
+            unitId,
+            transactionId: invId,
+            invoiceNumber,
+            status: "antre",
+            catatan: "",
+            updatedAt: now,
+            createdAt: now,
+          });
+        }
+
+        /* 4e: Piutang */
+        if (piutangRecord) {
+          await db.piutang.add(piutangRecord);
+        }
+      }
+    );
+
+    /* 5: Audit log (outside tx) */
     await writeAuditLog({
-      bookOrBranchId,
+      bookOrBranchId: unitId,
       action: "CREATE",
       entityType: "transaction",
       entityId: invId,
-      userId: "system",
-      userName: "System",
+      userId,
+      userName: userId,
       dataAfter: JSON.stringify(transaction),
       nominal: grandTotal,
       alasan: `Transaksi ${invoiceNumber} - ${customerNama || "Umum"} - Rp${grandTotal.toLocaleString()} (${status})`,

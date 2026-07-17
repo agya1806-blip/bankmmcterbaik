@@ -3,11 +3,11 @@
 import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type BookOrBranch, type Inventory } from "@/lib/db-v4";
+import { db, type UnitId, type Inventory } from "@/lib/db-v4";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Plus, Package, Search, ArrowRightLeft, Pencil, Trash2, X, Save } from "lucide-react";
 
-const BRANCH_MAP: Record<string, BookOrBranch> = {
+const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi",
   keluarga: "keluarga",
   percetakan: "usaha-percetakan",
@@ -45,7 +45,7 @@ export default function InventoryPage() {
   const params = useParams();
   const router = useRouter();
   const cabangSlug = (params?.cabang as string) || "";
-  const bookOrBranchId: BookOrBranch = BRANCH_MAP[cabangSlug] || "usaha-warkop";
+  const bookOrBranchId: UnitId = BRANCH_MAP[cabangSlug] || "usaha-warkop";
 
   const products =
     useLiveQuery(
@@ -123,6 +123,7 @@ export default function InventoryPage() {
       await db.inventory.add({
         id: crypto.randomUUID(),
         bookOrBranchId,
+        unitId: bookOrBranchId,
         sku: form.sku,
         nama: form.nama,
         kategori: form.kategori,

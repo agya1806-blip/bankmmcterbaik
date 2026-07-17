@@ -3,10 +3,10 @@
 import React, { useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, type BookOrBranch, type Customer } from "@/lib/db-v4";
+import { db, type UnitId, type Customer } from "@/lib/db-v4";
 import * as XLSX from "xlsx";
 
-const BRANCH_MAP: Record<string, BookOrBranch> = {
+const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi",
   keluarga: "keluarga",
   percetakan: "usaha-percetakan",

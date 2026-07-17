@@ -3,8 +3,9 @@
 import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
+import { useSessionStore } from "@/store/useSessionStore";
 import {
-  db, type BookOrBranch, type DbTransaction, type DbCustomer, type DbProduction, type DbInventoryItem,
+  db, type UnitId, type DbTransaction, type DbCustomer, type DbProduction, type DbInventoryItem,
 } from "@/lib/db-v4";
 import {
   executeTransactionPipelineV4, type PosCartItem,
@@ -16,7 +17,7 @@ import {
   User, StickyNote, Package, Banknote, Minus,
 } from "lucide-react";
 
-const BRANCH_MAP: Record<string, BookOrBranch> = {
+const BRANCH_MAP: Record<string, UnitId> = {
   percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
   warkop: "usaha-warkop", konveksi: "usaha-konveksi", kelontong: "usaha-kelontong",
 };
@@ -45,8 +46,9 @@ interface GridCartItem {
 export default function PosKasirPage() {
   const params = useParams();
   const router = useRouter();
+  const { currentUser } = useSessionStore();
   const cabangSlug = (params?.cabang as string) || "";
-  const bookOrBranchId: BookOrBranch = BRANCH_MAP[cabangSlug] || "usaha-warkop";
+  const bookOrBranchId: UnitId = BRANCH_MAP[cabangSlug] || "usaha-warkop";
   const isGridMode = GRID_BRANCHES.includes(cabangSlug);
 
   const products = useLiveQuery(() => db.inventory.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
@@ -161,11 +163,13 @@ export default function PosKasirPage() {
       const res = await executeTransactionPipelineV4({
         id: crypto.randomUUID(),
         bookOrBranchId,
+        userId: currentUser?.id || "system",
         items,
         totalBruto: grandTotal,
         diskonGlobalPersen: 0,
         ppnPersen: 0,
         dpDibayar,
+        sedekahNominal: 0,
         paymentMethod: "CASH",
         walletIdTarget,
         customerNama: namaPelanggan,

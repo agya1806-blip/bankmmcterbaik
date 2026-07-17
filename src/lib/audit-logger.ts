@@ -1,7 +1,7 @@
-import { db, type BookOrBranch, type DbAuditLog } from "@/lib/db-v4";
+import { db, type UnitId, type DbAuditLog } from "@/lib/db-v4";
 
 export interface AuditInput {
-  bookOrBranchId: BookOrBranch;
+  bookOrBranchId: UnitId;
   action: DbAuditLog["action"];
   entityType: DbAuditLog["entityType"];
   entityId: string;
@@ -33,7 +33,7 @@ export async function writeAuditLog(input: AuditInput): Promise<void> {
 }
 
 export async function getAuditLogs(
-  branch?: BookOrBranch,
+  branch?: UnitId,
   entityType?: DbAuditLog["entityType"],
   entityId?: string,
   limit = 50

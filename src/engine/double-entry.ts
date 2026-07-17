@@ -1,11 +1,11 @@
-import { db, type BookOrBranch, type DbTransaction, type DbTransactionItem, type DbCashflow, type DbAuditLog } from "@/lib/db-v4";
+import { db, type UnitId, type DbTransaction, type DbTransactionItem, type DbCashflow, type DbAuditLog } from "@/lib/db-v4";
 import { writeAuditLog } from "@/lib/audit-logger";
 
 /* ─── Double-Entry Transfer Input ─── */
 
 export interface TransferInput {
-  fromBranch: BookOrBranch;
-  toBranch: BookOrBranch;
+  fromBranch: UnitId;
+  toBranch: UnitId;
   amount: number;
   description: string;
   userId?: string;
@@ -68,8 +68,9 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
     const outgoing: DbCashflow = {
       id: crypto.randomUUID(),
       bookOrBranchId: fromBranch,
+      unitId: fromBranch,
       tipe: "keluar",
-      kategori: "transfer",
+      kategori: "Transfer_Keluar",
       nominal: amount,
       saldoSebelum: sourceSaldoSebelum,
       saldoSesudah: sourceSaldoSesudah,
@@ -77,7 +78,7 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
       walletNama: sourceWallet?.namaDompet ?? "",
       referensiId: transferId,
       referensiTipe: "adjustment",
-      catatan: `[TRANSFER] ${description} → ${toBranch.replace("usaha-", "")}`,
+      catatan: `[TRANSFER] ${description} → ${toBranch}`,
       createdAt: now,
     };
     await db.cashflows.add(outgoing);
@@ -95,8 +96,9 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
     const incoming: DbCashflow = {
       id: crypto.randomUUID(),
       bookOrBranchId: toBranch,
+      unitId: toBranch,
       tipe: "masuk",
-      kategori: "transfer",
+      kategori: "Transfer_Masuk",
       nominal: amount,
       saldoSebelum: destSaldoSebelum,
       saldoSesudah: destSaldoSesudah,
@@ -104,7 +106,7 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
       walletNama: destWallet?.namaDompet ?? "",
       referensiId: transferId,
       referensiTipe: "adjustment",
-      catatan: `[TRANSFER] ${description} ← ${fromBranch.replace("usaha-", "")}`,
+      catatan: `[TRANSFER] ${description} ← ${fromBranch}`,
       createdAt: now,
     };
     await db.cashflows.add(incoming);
@@ -117,8 +119,10 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
     const sourceTx: DbTransaction = {
       id: transferId,
       bookOrBranchId: fromBranch,
+      unitId: fromBranch,
+      userId: userId || "system",
       invoiceNumber: `TRF-${Date.now()}`,
-      customerNama: `Transfer ke ${toBranch.replace("usaha-", "")}`,
+      customerNama: `Transfer ke ${toBranch}`,
       customerWA: "",
       tanggal: now,
       items: [outgoingItem],
@@ -132,6 +136,7 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
       grandTotal: amount,
       dpDibayar: amount,
       sisaTagihan: 0,
+      sedekahNominal: 0,
       status: "LUNAS",
       walletIdTarget: "",
       catatan: description,
@@ -142,8 +147,10 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
     const destTx: DbTransaction = {
       id: crypto.randomUUID(),
       bookOrBranchId: toBranch,
+      unitId: toBranch,
+      userId: userId || "system",
       invoiceNumber: `TRF-${Date.now()}-IN`,
-      customerNama: `Transfer dari ${fromBranch.replace("usaha-", "")}`,
+      customerNama: `Transfer dari ${fromBranch}`,
       customerWA: "",
       tanggal: now,
       items: [incomingItem],
@@ -157,6 +164,7 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
       grandTotal: amount,
       dpDibayar: amount,
       sisaTagihan: 0,
+      sedekahNominal: 0,
       status: "LUNAS",
       walletIdTarget: "",
       catatan: description,
@@ -173,7 +181,7 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
       userId,
       userName,
       nominal: amount,
-      alasan: `Transfer keluar Rp${amount.toLocaleString()} ke ${toBranch.replace("usaha-", "")}: ${description}`,
+      alasan: `Transfer keluar Rp${amount.toLocaleString()} ke ${toBranch}: ${description}`,
     });
 
     await writeAuditLog({
@@ -184,7 +192,7 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
       userId,
       userName,
       nominal: amount,
-      alasan: `Transfer masuk Rp${amount.toLocaleString()} dari ${fromBranch.replace("usaha-", "")}: ${description}`,
+      alasan: `Transfer masuk Rp${amount.toLocaleString()} dari ${fromBranch}: ${description}`,
     });
 
     return { ok: true, transferId };

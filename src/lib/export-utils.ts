@@ -1,4 +1,4 @@
-import type { BookOrBranch, Transaction, Cashflow } from "@/lib/db-v4";
+import type { UnitId, Transaction, Cashflow } from "@/lib/db-v4";
 
 /* ─── Format Helpers ─── */
 
