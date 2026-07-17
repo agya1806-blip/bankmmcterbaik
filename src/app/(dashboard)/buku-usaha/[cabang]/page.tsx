@@ -26,18 +26,18 @@ import {
 const BRANCH_MAP: Record<string, BookOrBranch> = {
   pribadi: "pribadi", keluarga: "keluarga",
   percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
-  warkop: "usaha-warkop", konveksi: "usaha-konveksi",
+  warkop: "usaha-warkop", konveksi: "usaha-konveksi", kelontong: "usaha-kelontong",
 };
 const BRANCH_LABELS: Record<string, string> = {
   pribadi: "Buku Pribadi", keluarga: "Buku Keluarga",
   percetakan: "Percetakan", gadget: "Gadget", laptop: "Komputer & Laptop",
-  warkop: "Kedai Kopi", konveksi: "Fashion & Konveksi",
+  warkop: "Kedai Kopi", konveksi: "Fashion & Konveksi", kelontong: "Kelontong",
 };
 const BRANCH_COLORS: Record<string, string> = {
   pribadi: "from-slate-500 to-slate-600", keluarga: "from-rose-400 to-rose-500",
   percetakan: "from-blue-500 to-blue-600", laptop: "from-violet-500 to-purple-600",
   gadget: "from-indigo-500 to-indigo-600", warkop: "from-orange-400 to-orange-500",
-  konveksi: "from-pink-400 to-pink-500",
+  konveksi: "from-pink-400 to-pink-500", kelontong: "from-emerald-400 to-emerald-500",
 };
 const TARGET_PENJUALAN = 10_000_000;
 

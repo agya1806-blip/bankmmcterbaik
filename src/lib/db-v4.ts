@@ -50,6 +50,7 @@ export interface DbUser {
   bookOrBranchId: BookOrBranch;
   nama: string;
   pinHash: string;
+  fotoUrl: string;
   role: UserRole;
   allowedUnits: string[];
   isActive: boolean;

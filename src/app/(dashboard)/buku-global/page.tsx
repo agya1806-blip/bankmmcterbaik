@@ -10,7 +10,7 @@ import { exportTransactionsExcel, exportCashflowExcel } from "@/lib/export-utils
 import { db, type BookOrBranch, BOOK_LABELS } from "@/lib/db-v4";
 import { useLiveQuery } from "dexie-react-hooks";
 import { motion, AnimatePresence } from "framer-motion";
-import { BarChart3, CreditCard, Users, ScrollText, Settings, Sun, Moon, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Search, Wallet, Download, Upload, ArrowRightLeft, Zap, Plus, Trash2, LogOut, X, Database, UserCircle, Landmark, Smartphone, Save, Edit3, Pencil, Building } from "lucide-react";
+import { BarChart3, CreditCard, Users, ScrollText, Settings, Sun, Moon, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Search, Wallet, Download, Upload, ArrowRightLeft, Zap, Plus, Trash2, LogOut, X, Database, UserCircle, Landmark, Smartphone, Save, Edit3, Pencil, Building, RotateCcw } from "lucide-react";
 
 const BRANCH_LIST: BookOrBranch[] = [
   "usaha-percetakan", "usaha-laptop", "usaha-gadget",
@@ -81,6 +81,14 @@ export default function BukuGlobalPage() {
   const [profileNama, setProfileNama] = useState("");
   const [profileNoHP, setProfileNoHP] = useState("");
   const [profileAlamat, setProfileAlamat] = useState("");
+
+  /* ─── Reset Data State ─── */
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetScope, setResetScope] = useState<"all" | BookOrBranch>("all");
+  const [resetTypes, setResetTypes] = useState<Record<string, boolean>>({
+    transactions: false, cashflows: false, piutang: false, inventory: false,
+    customers: false, wallets: false, auditLogs: false, quickOrders: false,
+  });
 
   /* ═══════════════════════════════════════════════════════ */
   /* DASHBOARD COMPUTATIONS                                 */
@@ -322,6 +330,40 @@ export default function BukuGlobalPage() {
   useEffect(() => {
     if (activeTab === "profil") handleLoadProfile();
   }, [activeTab, handleLoadProfile]);
+
+  const toggleResetType = (key: string) => setResetTypes((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const handleResetData = async () => {
+    const selectedTypes = Object.entries(resetTypes).filter(([, v]) => v);
+    if (selectedTypes.length === 0) return alert("Pilih minimal satu jenis data!");
+    const scopeLabel = resetScope === "all" ? "SEMUA buku & cabang" : BOOK_LABELS[resetScope];
+    if (!confirm(`Yakin reset ${selectedTypes.map(([k]) => k).join(", ")} pada ${scopeLabel}? Tindakan ini TIDAK bisa dibatalkan!`)) return;
+    setIsProcessing(true);
+    try {
+      const tableMap: Record<string, keyof typeof db> = {
+        transactions: "transactions", cashflows: "cashflows", piutang: "piutang",
+        inventory: "inventory", customers: "customers", wallets: "wallets",
+        auditLogs: "auditLogs", quickOrders: "quickOrders",
+      };
+      for (const [key] of selectedTypes) {
+        const table = db[tableMap[key] as keyof typeof db] as any;
+        if (!table) continue;
+        if (resetScope === "all") {
+          await table.clear();
+        } else {
+          await table.where("bookOrBranchId").equals(resetScope).delete();
+        }
+      }
+      alert(`Berhasil reset data pada ${scopeLabel}!`);
+      setShowResetModal(false);
+      setResetTypes({ transactions: false, cashflows: false, piutang: false, inventory: false, customers: false, wallets: false, auditLogs: false, quickOrders: false });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      alert(`Gagal reset: ${message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   /* ═══════════════════════════════════════════════════════ */
   /* FILTERED DATA                                          */
@@ -910,6 +952,23 @@ export default function BukuGlobalPage() {
             </div>
           </div>
 
+          {/* Reset Data */}
+          <div className="premium-card p-3 space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center text-white shadow-md">
+                <span className="text-sm"><RotateCcw className="w-5 h-5" /></span>
+              </div>
+              <div>
+                <span className="text-xs font-bold">Reset Data</span>
+                <p className="text-[10px] text-slate-400">Pilih data & cabang yang ingin direset</p>
+              </div>
+            </div>
+            <button onClick={() => setShowResetModal(true)}
+              className="w-full py-2.5 rounded-xl bg-rose-500 text-white font-bold text-xs active:scale-[0.98] flex items-center justify-center gap-1.5">
+              <span className="text-sm"><RotateCcw className="w-5 h-5" /></span> Reset Data
+            </button>
+          </div>
+
           {/* Logout */}
           <button onClick={handleLogout}
             className="premium-card p-3 flex items-center gap-3 text-rose-500 active:scale-[0.98] w-full">
@@ -1132,6 +1191,100 @@ export default function BukuGlobalPage() {
               <button onClick={handleSaveQuickOrder}
                 className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs shadow-lg active:scale-[0.98]">
                 Simpan Template
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* MODAL: Reset Data                                      */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {showResetModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-end justify-center">
+            <motion.div
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 250 }}
+              className="w-full max-w-md bg-white dark:bg-[#131527] rounded-t-[32px] p-5 pb-8 space-y-3 shadow-2xl"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-rose-500/10 flex items-center justify-center">
+                    <RotateCcw className="w-4 h-4 text-rose-500" />
+                  </div>
+                  <h3 className="text-sm font-extrabold">Reset Data</h3>
+                </div>
+                <button onClick={() => setShowResetModal(false)} className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="premium-card p-3 border-rose-300/40 dark:border-rose-700/40">
+                <div className="flex items-center gap-2 mb-1">
+                  <AlertTriangle className="w-4 h-4 text-rose-500" />
+                  <span className="text-[10px] font-bold text-rose-500">PERINGATAN</span>
+                </div>
+                <p className="text-[10px] text-slate-400">Data yang direset tidak dapat dikembalikan. Pastikan sudah melakukan backup sebelum reset.</p>
+              </div>
+
+              {/* Scope Selection */}
+              <div>
+                <label className="text-[10px] text-slate-400 font-bold uppercase mb-1.5 block">Cakupan Reset</label>
+                <div className="space-y-1.5 max-h-[120px] overflow-y-auto">
+                  <button onClick={() => setResetScope("all")}
+                    className={`w-full p-2.5 rounded-xl text-[10px] font-bold text-left flex items-center gap-2 transition-all ${resetScope === "all" ? "bg-rose-500 text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
+                    <Database className="w-4 h-4" />
+                    SEMUA Buku & Cabang
+                  </button>
+                  {(["pribadi", "keluarga", "usaha", ...BRANCH_LIST] as BookOrBranch[]).map((b) => (
+                    <button key={b} onClick={() => setResetScope(b)}
+                      className={`w-full p-2 rounded-xl text-[10px] font-bold text-left flex items-center gap-2 transition-all ${resetScope === b ? "bg-rose-500 text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
+                      <Building className="w-4 h-4" />
+                      {BOOK_LABELS[b]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Data Type Selection */}
+              <div>
+                <label className="text-[10px] text-slate-400 font-bold uppercase mb-1.5 block">Jenis Data</label>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {([
+                    { key: "transactions", label: "Transaksi", icon: <BarChart3 className="w-3.5 h-3.5" /> },
+                    { key: "cashflows", label: "Cashflow", icon: <DollarSign className="w-3.5 h-3.5" /> },
+                    { key: "piutang", label: "Piutang", icon: <CreditCard className="w-3.5 h-3.5" /> },
+                    { key: "inventory", label: "Inventaris", icon: <Search className="w-3.5 h-3.5" /> },
+                    { key: "customers", label: "Pelanggan", icon: <Users className="w-3.5 h-3.5" /> },
+                    { key: "wallets", label: "Dompet", icon: <Wallet className="w-3.5 h-3.5" /> },
+                    { key: "auditLogs", label: "Audit Log", icon: <ScrollText className="w-3.5 h-3.5" /> },
+                    { key: "quickOrders", label: "Template Cepat", icon: <Zap className="w-3.5 h-3.5" /> },
+                  ]).map((item) => (
+                    <button key={item.key} onClick={() => toggleResetType(item.key)}
+                      className={`p-2 rounded-xl text-[10px] font-bold flex items-center gap-1.5 transition-all ${resetTypes[item.key] ? "bg-rose-500 text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
+                      {item.icon} {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Select All / None */}
+              <div className="flex gap-2">
+                <button onClick={() => setResetTypes({ transactions: true, cashflows: true, piutang: true, inventory: true, customers: true, wallets: true, auditLogs: true, quickOrders: true })}
+                  className="flex-1 py-1.5 rounded-lg bg-slate-100 dark:bg-zinc-800 text-[10px] font-bold text-slate-400">
+                  Pilih Semua
+                </button>
+                <button onClick={() => setResetTypes({ transactions: false, cashflows: false, piutang: false, inventory: false, customers: false, wallets: false, auditLogs: false, quickOrders: false })}
+                  className="flex-1 py-1.5 rounded-lg bg-slate-100 dark:bg-zinc-800 text-[10px] font-bold text-slate-400">
+                  Hapus Pilihan
+                </button>
+              </div>
+
+              <button onClick={handleResetData} disabled={isProcessing}
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-red-600 text-white font-extrabold text-xs shadow-lg active:scale-[0.98] flex items-center justify-center gap-2">
+                <RotateCcw className="w-4 h-4" />
+                {isProcessing ? "Mereset..." : "Reset Sekarang"}
               </button>
             </motion.div>
           </div>

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type BookOrBranch } from "@/lib/db-v4";
 import { useSessionStore } from "@/store/useSessionStore";
-import { Printer, Smartphone, Monitor, Coffee, Shirt, ArrowLeft, ChevronRight, Building } from "lucide-react";
+import { Printer, Smartphone, Monitor, Coffee, Shirt, ArrowLeft, ChevronRight, Building, ShoppingCart } from "lucide-react";
 
 interface UnitUsaha {
   slug: string;
@@ -21,6 +21,7 @@ const USAHA_UNITS: UnitUsaha[] = [
   { slug: "laptop", label: "Komputer & Laptop", icon: <Monitor className="w-5 h-5" />, color: "from-violet-500 to-purple-600", bookId: "usaha-laptop" },
   { slug: "warkop", label: "Kedai Kopi", icon: <Coffee className="w-5 h-5" />, color: "from-orange-400 to-orange-500", bookId: "usaha-warkop" },
   { slug: "konveksi", label: "Fashion & Konveksi", icon: <Shirt className="w-5 h-5" />, color: "from-pink-400 to-pink-500", bookId: "usaha-konveksi" },
+  { slug: "kelontong", label: "Kelontong", icon: <ShoppingCart className="w-5 h-5" />, color: "from-emerald-400 to-emerald-500", bookId: "usaha-kelontong" },
 ];
 
 export default function BukuUsahaListPage() {
