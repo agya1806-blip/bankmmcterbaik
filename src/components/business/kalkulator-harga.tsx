@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { X, Ruler, Smartphone, Monitor, Coffee, Shirt, AlertTriangle } from "lucide-react";
 
 
 interface KalkulatorProps {
@@ -37,7 +38,7 @@ function ModalWrapper({ children, onClose, title, icon }: { children: React.Reac
             <h3 className="text-sm font-extrabold">{title}</h3>
           </div>
           <button onClick={onClose} className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800">
-            <span className="text-xs">✕</span>
+            <X className="w-4 h-4" />
           </button>
         </div>
         {children}
@@ -90,7 +91,7 @@ function PrintingCalc({ onClose, onResult }: { onClose: () => void; onResult: (n
     : `Cetak Buku | ${halaman}hlm x${kertasPerLembar} kertas | Cover+Jilid`;
 
   return (
-    <ModalWrapper onClose={onClose} title="Kalkulator Percetakan" icon={<span className="text-blue-500 text-sm">📏</span>}>
+    <ModalWrapper onClose={onClose} title="Kalkulator Percetakan" icon={<Ruler className="w-5 h-5 text-blue-500" />}>
       <div className="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-zinc-800 p-1 rounded-2xl">
         <button onClick={() => setTipe("meteran")} className={`py-2 rounded-xl text-[10px] font-bold transition-all ${tipe === "meteran" ? "bg-white dark:bg-[#131527] shadow-sm" : "text-slate-400"}`}>Cetak Meteran</button>
         <button onClick={() => setTipe("buku")} className={`py-2 rounded-xl text-[10px] font-bold transition-all ${tipe === "buku" ? "bg-white dark:bg-[#131527] shadow-sm" : "text-slate-400"}`}>Cetak Buku</button>
@@ -120,11 +121,11 @@ function PrintingCalc({ onClose, onResult }: { onClose: () => void; onResult: (n
 
       <div className="bg-slate-50 dark:bg-zinc-900 p-3 rounded-xl space-y-1">
         <p className="text-[10px] text-slate-400">Estimasi Harga Jual <span className="text-amber-500">(+5% waste + {margin}% margin)</span></p>
-        <p className="text-lg font-extrabold text-[#7B61FF]">Rp{hasil.toLocaleString()}</p>
+        <p className="text-lg font-extrabold text-[#008CEB]">Rp{hasil.toLocaleString()}</p>
       </div>
 
       <button onClick={() => { onResult(`Cetak ${tipe === "meteran" ? "Meteran" : "Buku"}`, hasil, spec); onClose(); }}
-        className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white font-extrabold text-xs active:scale-[0.98] transition-transform">
+        className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs active:scale-[0.98] transition-transform">
         Tambahkan ke Keranjang
       </button>
     </ModalWrapper>
@@ -154,7 +155,7 @@ function GadgetCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: 
   ].filter(Boolean).join(" | ");
 
   return (
-    <ModalWrapper onClose={onClose} title="Kalkulator Gadget" icon={<span className="text-indigo-500 text-sm">📱</span>}>
+    <ModalWrapper onClose={onClose} title="Kalkulator Gadget" icon={<Smartphone className="w-5 h-5 text-indigo-500" />}>
       <div className="space-y-3 text-xs">
         <InputRow label="Nama Unit" value={namaUnit} onChange={(v) => setNamaUnit(String(v))} type="text" placeholder="iPhone 14 Pro Max" />
         <div className="grid grid-cols-2 gap-3">
@@ -171,12 +172,12 @@ function GadgetCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: 
         </div>
 
         <div className="flex items-center gap-2">
-          <input type="checkbox" id="tradein" checked={tradeIn} onChange={(e) => setTradeIn(e.target.checked)} className="w-4 h-4 accent-[#7B61FF]" />
+          <input type="checkbox" id="tradein" checked={tradeIn} onChange={(e) => setTradeIn(e.target.checked)} className="w-4 h-4 accent-[#008CEB]" />
           <label htmlFor="tradein" className="text-[10px] font-bold text-slate-400">Tukar Tambah (Trade-in)</label>
         </div>
 
         {tradeIn && (
-          <div className="pl-4 border-l-2 border-[#7B61FF]/30 space-y-3">
+          <div className="pl-4 border-l-2 border-[#008CEB]/30 space-y-3">
             <InputRow label="Harga Taksir Unit Lama" value={hargaTaksir} onChange={setHargaTaksir} suffix="Rp" />
             <p className="text-[9px] text-amber-500 font-medium">Unit bekas otomatis menjadi stok HPP baru senilai Rp{hargaTaksir.toLocaleString()}</p>
           </div>
@@ -184,13 +185,13 @@ function GadgetCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: 
 
         <div className="bg-slate-50 dark:bg-zinc-900 p-3 rounded-xl space-y-1">
           <p className="text-[10px] text-slate-400">Harga Jual <span className="text-amber-500">{tradeIn ? "(setelah tukar tambah)" : ""}</span></p>
-          <p className="text-lg font-extrabold text-[#7B61FF]">Rp{hasil.toLocaleString()}</p>
+          <p className="text-lg font-extrabold text-[#008CEB]">Rp{hasil.toLocaleString()}</p>
           <p className="text-[9px] text-slate-400">HPP: Rp{hargaModal.toLocaleString()}</p>
         </div>
       </div>
 
       <button onClick={() => { onResult(namaUnit || "Unit Gadget", hasil, specParts); onClose(); }}
-        className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white font-extrabold text-xs active:scale-[0.98] transition-transform">
+        className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs active:scale-[0.98] transition-transform">
         Tambahkan ke Keranjang
       </button>
     </ModalWrapper>
@@ -222,7 +223,7 @@ function LaptopCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: 
   const specParts = parts.map((p) => `${p.nama} (SN:${p.sn}) - Rp${p.harga.toLocaleString()}`).join(" | ");
 
   return (
-    <ModalWrapper onClose={onClose} title="Kalkulator Komputer Rakitan" icon={<span className="text-violet-500 text-sm">💻</span>}>
+    <ModalWrapper onClose={onClose} title="Kalkulator Komputer Rakitan" icon={<Monitor className="w-5 h-5 text-violet-500" />}>
       <div className="space-y-3 text-xs">
         <div className="bg-amber-50 dark:bg-amber-950/20 p-2 rounded-xl text-[9px] text-amber-600 font-medium">
           Masukkan part PC rakitan satu per satu dengan SN-nya
@@ -234,7 +235,7 @@ function LaptopCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: 
             <InputRow label="Serial Number" value={partSn} onChange={(v) => setPartSn(String(v))} type="text" placeholder="SN-XXXX" />
             <InputRow label="Harga Part" value={partHarga} onChange={setPartHarga} suffix="Rp" />
           </div>
-          <button onClick={addPart} className="py-2 rounded-xl bg-[#7B61FF] text-white text-[10px] font-bold active:scale-[0.98] transition-transform">Tambah Part</button>
+          <button onClick={addPart} className="py-2 rounded-xl bg-[#008CEB] text-white text-[10px] font-bold active:scale-[0.98] transition-transform">Tambah Part</button>
         </div>
 
         {parts.length > 0 && (
@@ -245,9 +246,9 @@ function LaptopCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: 
                   <p className="text-[10px] font-bold truncate">{p.nama}</p>
                   <p className="text-[8px] text-slate-400">SN: {p.sn}</p>
                 </div>
-                <span className="text-[10px] font-bold text-[#7B61FF] shrink-0 ml-2">Rp{p.harga.toLocaleString()}</span>
+                <span className="text-[10px] font-bold text-[#008CEB] shrink-0 ml-2">Rp{p.harga.toLocaleString()}</span>
                 <button onClick={() => removePart(i)} className="text-rose-500 ml-1 p-1">
-                  <span className="text-xs">✕</span>
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             ))}
@@ -258,13 +259,13 @@ function LaptopCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: 
 
         <div className="bg-slate-50 dark:bg-zinc-900 p-3 rounded-xl space-y-1">
           <p className="text-[10px] text-slate-400">Total HPP Komponen: Rp{totalHpp.toLocaleString()}</p>
-          <p className="text-lg font-extrabold text-[#7B61FF]">Rp{hasil.toLocaleString()}</p>
+          <p className="text-lg font-extrabold text-[#008CEB]">Rp{hasil.toLocaleString()}</p>
         </div>
       </div>
 
       <button onClick={() => { onResult(`PC Rakitan (${parts.length} part)`, hasil, specParts); onClose(); }}
         disabled={parts.length === 0}
-        className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white font-extrabold text-xs active:scale-[0.98] transition-transform disabled:opacity-50">
+        className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs active:scale-[0.98] transition-transform disabled:opacity-50">
         Tambahkan ke Keranjang
       </button>
     </ModalWrapper>
@@ -296,7 +297,7 @@ function CafeCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: st
   const isLowMargin = hargaJual > 0 && hasil > hargaJual * 1.5;
 
   return (
-    <ModalWrapper onClose={onClose} title="Kalkulator Menu Kedai Kopi" icon={<span className="text-orange-500 text-sm">☕</span>}>
+    <ModalWrapper onClose={onClose} title="Kalkulator Menu Kedai Kopi" icon={<Coffee className="w-5 h-5 text-orange-500" />}>
       <div className="space-y-3 text-xs">
         <InputRow label="Nama Menu" value={namaMenu} onChange={(v) => setNamaMenu(String(v))} type="text" placeholder="Es Kopi Susu" />
         <InputRow label="Harga Jual Ideal" value={hargaJual} onChange={setHargaJual} suffix="Rp" />
@@ -321,7 +322,7 @@ function CafeCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: st
                 <span className="text-[10px] font-bold">{b.nama} ({b.gramasi}g)</span>
                 <div className="flex items-center gap-2">
                   <span className="text-[9px] text-slate-400">Rp{(b.gramasi * b.hargaPerGram).toLocaleString()}</span>
-                  <button onClick={() => removeBahan(i)} className="text-rose-500"><span className="text-xs">✕</span></button>
+                  <button onClick={() => removeBahan(i)} className="text-rose-500"><X className="w-4 h-4" /></button>
                 </div>
               </div>
             ))}
@@ -331,15 +332,15 @@ function CafeCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: st
         <div className="bg-slate-50 dark:bg-zinc-900 p-3 rounded-xl space-y-1">
           <p className="text-[10px] text-slate-400">Total HPP Bahan: Rp{totalHppBahan.toLocaleString()}</p>
           {isLowMargin && (
-            <p className="text-[9px] text-rose-500 font-medium">⚠️ Margin rendah! Harga jual minimal: Rp{Math.round(totalHppBahan * 2.5).toLocaleString()}</p>
+            <p className="text-[9px] text-rose-500 font-medium flex items-center gap-1"><AlertTriangle className="w-4 h-4" /> Margin rendah! Harga jual minimal: Rp{Math.round(totalHppBahan * 2.5).toLocaleString()}</p>
           )}
-          <p className="text-lg font-extrabold text-[#7B61FF]">Rp{Math.max(hargaJual, hasil).toLocaleString()}</p>
+          <p className="text-lg font-extrabold text-[#008CEB]">Rp{Math.max(hargaJual, hasil).toLocaleString()}</p>
         </div>
       </div>
 
       <button onClick={() => { onResult(namaMenu || "Menu Kopi", hasil, `BOM: ${specBahan || "-"}`); onClose(); }}
         disabled={!namaMenu}
-        className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white font-extrabold text-xs active:scale-[0.98] transition-transform disabled:opacity-50">
+        className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs active:scale-[0.98] transition-transform disabled:opacity-50">
         Tambahkan ke Keranjang
       </button>
     </ModalWrapper>
@@ -374,7 +375,7 @@ function FashionCalc({ onClose, onResult }: { onClose: () => void; onResult: (n:
   const hasilPerUnit = qtyProduksi > 0 ? Math.round(hasilKonveksi / qtyProduksi) : 0;
 
   return (
-    <ModalWrapper onClose={onClose} title="Kalkulator Fashion & Konveksi" icon={<span className="text-pink-500 text-sm">👔</span>}>
+    <ModalWrapper onClose={onClose} title="Kalkulator Fashion & Konveksi" icon={<Shirt className="w-5 h-5 text-pink-500" />}>
       <div className="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-zinc-800 p-1 rounded-2xl mb-3">
         <button onClick={() => setTipe("retail")} className={`py-2 rounded-xl text-[10px] font-bold transition-all ${tipe === "retail" ? "bg-white dark:bg-[#131527] shadow-sm" : "text-slate-400"}`}>Retail SKU</button>
         <button onClick={() => setTipe("konveksi")} className={`py-2 rounded-xl text-[10px] font-bold transition-all ${tipe === "konveksi" ? "bg-white dark:bg-[#131527] shadow-sm" : "text-slate-400"}`}>Proyek Konveksi</button>
@@ -387,12 +388,12 @@ function FashionCalc({ onClose, onResult }: { onClose: () => void; onResult: (n:
             <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Warna</label>
             <div className="flex gap-2">
               <input type="text" value={warnaInput} onChange={(e) => setWarnaInput(e.target.value)} placeholder="Hitam" className="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
-              <button onClick={addWarna} className="px-3 py-2 rounded-xl bg-[#7B61FF] text-white text-[10px] font-bold">+</button>
+              <button onClick={addWarna} className="px-3 py-2 rounded-xl bg-[#008CEB] text-white text-[10px] font-bold">+</button>
             </div>
             <div className="flex flex-wrap gap-1 mt-1">
               {warnaArr.map((w, i) => (
                 <span key={i} className="text-[9px] bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full flex items-center gap-1">
-                  {w} <button onClick={() => setWarnaArr(warnaArr.filter((_, idx) => idx !== i))} className="text-rose-500">✕</button>
+                  {w} <button onClick={() => setWarnaArr(warnaArr.filter((_, idx) => idx !== i))} className="text-rose-500"><X className="w-4 h-4" /></button>
                 </span>
               ))}
             </div>
@@ -401,12 +402,12 @@ function FashionCalc({ onClose, onResult }: { onClose: () => void; onResult: (n:
             <label className="block text-[10px] font-bold text-slate-400 mb-1 uppercase">Ukuran</label>
             <div className="flex gap-2">
               <input type="text" value={ukuranInput} onChange={(e) => setUkuranInput(e.target.value)} placeholder="M" className="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
-              <button onClick={addUkuran} className="px-3 py-2 rounded-xl bg-[#7B61FF] text-white text-[10px] font-bold">+</button>
+              <button onClick={addUkuran} className="px-3 py-2 rounded-xl bg-[#008CEB] text-white text-[10px] font-bold">+</button>
             </div>
             <div className="flex flex-wrap gap-1 mt-1">
               {ukuranArr.map((u, i) => (
                 <span key={i} className="text-[9px] bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full flex items-center gap-1">
-                  {u} <button onClick={() => setUkuranArr(ukuranArr.filter((_, idx) => idx !== i))} className="text-rose-500">✕</button>
+                  {u} <button onClick={() => setUkuranArr(ukuranArr.filter((_, idx) => idx !== i))} className="text-rose-500"><X className="w-4 h-4" /></button>
                 </span>
               ))}
             </div>
@@ -433,7 +434,7 @@ function FashionCalc({ onClose, onResult }: { onClose: () => void; onResult: (n:
             <p className="text-[9px] text-slate-400">Biaya Kain (+5% waste): Rp{Math.round(biayaKain).toLocaleString()}</p>
             <p className="text-[9px] text-slate-400">Total HPP Produksi: Rp{Math.round(totalHppKonveksi).toLocaleString()}</p>
             <p className="text-[10px] text-slate-400">Harga Jual Total (x{qtyProduksi} +30% margin)</p>
-            <p className="text-lg font-extrabold text-[#7B61FF]">Rp{hasilKonveksi.toLocaleString()}</p>
+            <p className="text-lg font-extrabold text-[#008CEB]">Rp{hasilKonveksi.toLocaleString()}</p>
             <p className="text-[9px] text-slate-400">Per unit: Rp{hasilPerUnit.toLocaleString()}</p>
           </div>
         </div>
@@ -448,7 +449,7 @@ function FashionCalc({ onClose, onResult }: { onClose: () => void; onResult: (n:
         onClose();
       }}
         disabled={!nama}
-        className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white font-extrabold text-xs active:scale-[0.98] transition-transform disabled:opacity-50">
+        className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs active:scale-[0.98] transition-transform disabled:opacity-50">
         Tambahkan ke Keranjang
       </button>
     </ModalWrapper>

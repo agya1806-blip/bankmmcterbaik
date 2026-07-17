@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type BookOrBranch, type Transaction, type ProductionStatus } from '@/lib/db-v4';
+import { ArrowLeft, ClipboardList, FileText, Printer, Image, Phone, BarChart3, X, Search } from "lucide-react";
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
   pribadi: 'pribadi',
@@ -274,7 +275,7 @@ export default function TransaksiDanProduksiPage() {
           onClick={() => router.push(`/buku-usaha/${cabangSlug}`)}
           className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md"
         >
-          <span className="text-sm">◀️</span>
+          <ArrowLeft className="w-4 h-4" />
         </button>
         <h1 className="text-lg font-heading font-extrabold tracking-tight capitalize">Hub Transaksi</h1>
         <div className="w-9 h-9" />
@@ -289,7 +290,7 @@ export default function TransaksiDanProduksiPage() {
               : 'text-slate-400'
           }`}
         >
-          <span className="text-sm">📋</span>
+          <ClipboardList className="w-5 h-5" />
           Riwayat Kasir
         </button>
         <button
@@ -300,7 +301,7 @@ export default function TransaksiDanProduksiPage() {
               : 'text-slate-400'
           }`}
         >
-          <span className="text-sm">📑</span>
+          <FileText className="w-5 h-5" />
           Kanban Alur Kerja
         </button>
       </div>
@@ -317,7 +318,7 @@ export default function TransaksiDanProduksiPage() {
                   key={tx.id}
                   onClick={() => setSelectedTx(selectedTx?.id === tx.id ? null : tx)}
                   className={`premium-card premium-card-glow p-4 cursor-pointer transition-all duration-200 space-y-2 animate-slide-up ${
-                    selectedTx?.id === tx.id ? 'border-[#7B61FF]/40 ring-1 ring-[#7B61FF]/20' : ''
+                    selectedTx?.id === tx.id ? 'border-[#008CEB]/40 ring-1 ring-[#008CEB]/20' : ''
                   }`}
                   style={{ animationDelay: `${idx * 40}ms`, animationFillMode: "backwards" }}
                 >
@@ -329,7 +330,7 @@ export default function TransaksiDanProduksiPage() {
                       <h4 className="text-sm font-heading font-extrabold mt-1">{tx.customerNama}</h4>
                     </div>
                     <div className="text-right">
-                      <span className="text-xs font-heading font-extrabold text-[#7B61FF]">
+                      <span className="text-xs font-heading font-extrabold text-[#008CEB]">
                         Rp{tx.totalBruto.toLocaleString()}
                       </span>
                       <p className="text-[9px] text-slate-400 font-medium mt-0.5">
@@ -384,7 +385,7 @@ export default function TransaksiDanProduksiPage() {
                             e.stopPropagation();
                             initializeProduction(tx.id);
                           }}
-                          className="py-2 bg-[#7B61FF] text-white text-[10px] font-bold rounded-xl active:scale-95 transition-transform text-center"
+                          className="py-2 bg-[#008CEB] text-white text-[10px] font-bold rounded-xl active:scale-95 transition-transform text-center"
                         >
                           Produksi
                         </button>
@@ -395,7 +396,7 @@ export default function TransaksiDanProduksiPage() {
                           }}
                           className="py-2 bg-slate-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center gap-1 font-bold text-[10px]"
                         >
-                          <span className="text-sm text-slate-500">🖨️</span> Struk
+                          <Printer className="w-4 h-4 text-slate-500" /> Struk
                         </button>
                       </div>
                       <div className="grid grid-cols-4 gap-1.5 pt-1">
@@ -404,7 +405,7 @@ export default function TransaksiDanProduksiPage() {
                           className="py-2 bg-amber-400 text-white text-[9px] font-bold rounded-xl active:scale-95 transition-all flex flex-col items-center leading-tight"
                           title="Export Gambar PNG"
                         >
-                          <span className="text-sm mb-0.5">🖼️</span>
+                          <Image className="w-4 h-4 mb-0.5" />
                           PNG
                         </button>
                         <button
@@ -412,7 +413,7 @@ export default function TransaksiDanProduksiPage() {
                           className="py-2 bg-rose-500 text-white text-[9px] font-bold rounded-xl active:scale-95 transition-all flex flex-col items-center leading-tight"
                           title="Export PDF"
                         >
-                          <span className="text-sm mb-0.5">📄</span>
+                          <FileText className="w-4 h-4 mb-0.5" />
                           PDF
                         </button>
                         <button
@@ -420,7 +421,7 @@ export default function TransaksiDanProduksiPage() {
                           className="py-2 bg-emerald-500 text-white text-[9px] font-bold rounded-xl active:scale-95 transition-all flex flex-col items-center leading-tight"
                           title="Kirim WhatsApp"
                         >
-                          <span className="text-sm mb-0.5">📞</span>
+                          <Phone className="w-4 h-4 mb-0.5" />
                           WA
                         </button>
                         <button
@@ -428,7 +429,7 @@ export default function TransaksiDanProduksiPage() {
                           className="py-2 bg-blue-500 text-white text-[9px] font-bold rounded-xl active:scale-95 transition-all flex flex-col items-center leading-tight"
                           title="Export Excel"
                         >
-                          <span className="text-sm mb-0.5">📊</span>
+                          <BarChart3 className="w-4 h-4 mb-0.5" />
                           XLSX
                         </button>
                       </div>

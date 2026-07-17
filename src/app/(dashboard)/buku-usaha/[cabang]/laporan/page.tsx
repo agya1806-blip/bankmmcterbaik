@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type BookOrBranch } from "@/lib/db-v4";
+import { ArrowLeft, BarChart3, DollarSign, TrendingUp, ArrowDownToLine, ArrowUpFromLine, Clock, Package } from "lucide-react";
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
   pribadi: "pribadi",
@@ -161,12 +162,12 @@ export default function LaporanPage() {
           onClick={() => router.push(`/buku-usaha/${cabangSlug}`)}
           className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md"
         >
-          <span className="text-sm">◀️</span>
+          <ArrowLeft className="w-4 h-4" />
         </button>
         <h1 className="text-lg font-heading font-extrabold tracking-tight">Laporan Keuangan</h1>
         <button
           onClick={exportCSV}
-          className="px-4 py-2 bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white rounded-xl text-[10px] font-bold shadow-md hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 transition-all duration-200"
+          className="px-4 py-2 bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white rounded-xl text-[10px] font-bold shadow-md hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 transition-all duration-200"
         >
           Export CSV
         </button>
@@ -179,7 +180,7 @@ export default function LaporanPage() {
             onClick={() => setPeriod(p.key)}
             className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all ${
               period === p.key
-                ? "bg-white dark:bg-[#131527] text-[#7B61FF] shadow-sm"
+                ? "bg-white dark:bg-[#131527] text-[#008CEB] shadow-sm"
                 : "text-slate-400"
             }`}
           >
@@ -205,13 +206,13 @@ export default function LaporanPage() {
       <div className="premium-card premium-card-glow p-4 space-y-2.5 animate-slide-up" style={{ animationDelay: "200ms", animationFillMode: "backwards" }}>
         <h3 className="text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-wider">Rincian Keuangan</h3>
         {[
-          { label: "Jumlah Transaksi", value: String(report.jumlahTransaksi), color: "", icon: "📊" },
-          { label: "Total HPP", value: `Rp${report.totalHpp.toLocaleString()}`, color: "text-rose-500", icon: "💰" },
-          { label: "Laba Kotor", value: `Rp${report.labaKotor.toLocaleString()}`, color: "text-[#7B61FF]", icon: "📈" },
-          { label: "Cashflow Masuk", value: `Rp${report.cashflowMasuk.toLocaleString()}`, color: "text-emerald-500", icon: "📥" },
-          { label: "Cashflow Keluar", value: `Rp${report.cashflowKeluar.toLocaleString()}`, color: "text-rose-500", icon: "📤" },
-          { label: "Piutang Aktif", value: `Rp${report.piutangAktif.toLocaleString()}`, color: "text-amber-500", icon: "⏳" },
-          { label: "Total Produk", value: String(report.jumlahProduk), color: "", icon: "📦" },
+          { label: "Jumlah Transaksi", value: String(report.jumlahTransaksi), color: "", icon: <BarChart3 className="w-5 h-5" /> },
+          { label: "Total HPP", value: `Rp${report.totalHpp.toLocaleString()}`, color: "text-rose-500", icon: <DollarSign className="w-5 h-5" /> },
+          { label: "Laba Kotor", value: `Rp${report.labaKotor.toLocaleString()}`, color: "text-[#008CEB]", icon: <TrendingUp className="w-5 h-5" /> },
+          { label: "Cashflow Masuk", value: `Rp${report.cashflowMasuk.toLocaleString()}`, color: "text-emerald-500", icon: <ArrowDownToLine className="w-5 h-5" /> },
+          { label: "Cashflow Keluar", value: `Rp${report.cashflowKeluar.toLocaleString()}`, color: "text-rose-500", icon: <ArrowUpFromLine className="w-5 h-5" /> },
+          { label: "Piutang Aktif", value: `Rp${report.piutangAktif.toLocaleString()}`, color: "text-amber-500", icon: <Clock className="w-5 h-5" /> },
+          { label: "Total Produk", value: String(report.jumlahProduk), color: "", icon: <Package className="w-5 h-5" /> },
         ].map((row, i) => (
           <div key={i} className="flex justify-between items-center text-xs font-medium border-b pb-2.5 border-slate-100 dark:border-slate-800 last:border-0 last:pb-0 hover:bg-slate-50 dark:hover:bg-zinc-900/50 rounded-lg px-2 -mx-2 transition-colors duration-200">
             <span className="flex items-center gap-2">

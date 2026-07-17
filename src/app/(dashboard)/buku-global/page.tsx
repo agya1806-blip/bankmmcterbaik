@@ -11,6 +11,7 @@ import { db, type BookOrBranch, BOOK_LABELS } from "@/lib/db-v4";
 import { useLiveQuery } from "dexie-react-hooks";
 import { motion, AnimatePresence } from "framer-motion";
 import PinLock from "@/components/pin-lock";
+import { BarChart3, CreditCard, Users, ScrollText, Settings, Sun, Moon, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Search, Wallet, Download, Upload, ArrowRightLeft, Zap, Plus, Trash2, LogOut, X, Database } from "lucide-react";
 
 const BRANCH_LIST: BookOrBranch[] = [
   "usaha-percetakan", "usaha-laptop", "usaha-gadget",
@@ -294,12 +295,12 @@ export default function BukuGlobalPage() {
   /* TAB CONFIG                                             */
   /* ═══════════════════════════════════════════════════════ */
 
-  const tabs: { key: TabKey; label: string; icon: string }[] = [
-    { key: "dashboard", label: "Ringkasan", icon: "📈" },
-    { key: "piutang", label: "Piutang", icon: "💳" },
-    { key: "pelanggan", label: "Pelanggan", icon: "👥" },
-    { key: "audit", label: "Audit Log", icon: "📜" },
-    { key: "settings", label: "Pengaturan", icon: "⚙️" },
+  const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
+    { key: "dashboard", label: "Ringkasan", icon: <TrendingUp className="w-5 h-5" /> },
+    { key: "piutang", label: "Piutang", icon: <CreditCard className="w-5 h-5" /> },
+    { key: "pelanggan", label: "Pelanggan", icon: <Users className="w-5 h-5" /> },
+    { key: "audit", label: "Audit Log", icon: <ScrollText className="w-5 h-5" /> },
+    { key: "settings", label: "Pengaturan", icon: <Settings className="w-5 h-5" /> },
   ];
 
   /* ═══════════════════════════════════════════════════════ */
@@ -312,14 +313,14 @@ export default function BukuGlobalPage() {
       {/* ─── Header ─── */}
       <div className="flex items-center justify-between px-1">
         <div>
-          <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] bg-clip-text text-transparent">
+          <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-[#008CEB] to-[#00C9A7] bg-clip-text text-transparent">
             Global
           </h1>
           <p className="text-[10px] text-slate-400">Kelola seluruh unit usaha</p>
         </div>
         <div className="flex items-center gap-2">
           <button onClick={toggleTheme} className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md">
-            {theme === "dark" ? <span className="text-sm text-amber-400">☀️</span> : <span className="text-sm text-slate-600">🌙</span>}
+            {theme === "dark" ? <span className="text-sm text-amber-400"><Sun className="w-5 h-5" /></span> : <span className="text-sm text-slate-600"><Moon className="w-5 h-5" /></span>}
           </button>
           <div className="text-right">
             <span className="text-[10px] text-slate-400">Admin</span>
@@ -337,7 +338,7 @@ export default function BukuGlobalPage() {
               onClick={() => setActiveTab(t.key)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-bold whitespace-nowrap transition-all ${
                 activeTab === t.key
-                  ? "bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white shadow-md"
+                  ? "bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white shadow-md"
                   : "bg-white dark:bg-[#131527] text-slate-400"
               }`}
             >
@@ -358,7 +359,7 @@ export default function BukuGlobalPage() {
             <div className="premium-card p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <div className="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                  <span className="text-sm text-emerald-500">💰</span>
+                  <span className="text-sm text-emerald-500"><DollarSign className="w-5 h-5" /></span>
                 </div>
                 <span className="text-[9px] text-slate-400 font-bold uppercase">Pendapatan</span>
               </div>
@@ -367,7 +368,7 @@ export default function BukuGlobalPage() {
             <div className="premium-card p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${dashData.labaBersih >= 0 ? "bg-emerald-100 dark:bg-emerald-900/30" : "bg-rose-100 dark:bg-rose-900/30"}`}>
-                  {dashData.labaBersih >= 0 ? <span className="text-sm text-emerald-500">📈</span> : <span className="text-sm text-rose-500">📉</span>}
+                  {dashData.labaBersih >= 0 ? <span className="text-sm text-emerald-500"><TrendingUp className="w-5 h-5" /></span> : <span className="text-sm text-rose-500"><TrendingDown className="w-5 h-5" /></span>}
                 </div>
                 <span className="text-[9px] text-slate-400 font-bold uppercase">Laba Bersih</span>
               </div>
@@ -378,7 +379,7 @@ export default function BukuGlobalPage() {
             <div className="premium-card p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <div className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                  <span className="text-sm text-amber-500">💳</span>
+                  <span className="text-sm text-amber-500"><CreditCard className="w-5 h-5" /></span>
                 </div>
                 <span className="text-[9px] text-slate-400 font-bold uppercase">Piutang</span>
               </div>
@@ -388,7 +389,7 @@ export default function BukuGlobalPage() {
             <div className="premium-card p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <div className="w-6 h-6 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
-                  <span className="text-sm text-rose-500">⚠️</span>
+                  <span className="text-sm text-rose-500"><AlertTriangle className="w-5 h-5" /></span>
                 </div>
                 <span className="text-[9px] text-slate-400 font-bold uppercase">Stok Alert</span>
               </div>
@@ -417,10 +418,10 @@ export default function BukuGlobalPage() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-1 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-[#7B61FF]" />
+                  <div className="w-2 h-2 rounded-full bg-[#008CEB]" />
                   <span className="text-[9px] text-slate-400">Saldo</span>
                 </div>
-                <p className={`text-xs font-extrabold ${dashData.cashflowMasuk - dashData.cashflowKeluar >= 0 ? "text-[#7B61FF]" : "text-rose-500"}`}>
+                <p className={`text-xs font-extrabold ${dashData.cashflowMasuk - dashData.cashflowKeluar >= 0 ? "text-[#008CEB]" : "text-rose-500"}`}>
                   Rp{(dashData.cashflowMasuk - dashData.cashflowKeluar).toLocaleString()}
                 </p>
               </div>
@@ -432,7 +433,7 @@ export default function BukuGlobalPage() {
             <h3 className="text-[10px] font-bold text-slate-400 uppercase mb-2">Total</h3>
             <div className="grid grid-cols-4 gap-2 text-center">
               <div>
-                <p className="text-sm font-extrabold text-[#7B61FF]">{dashData.totalTransaksi}</p>
+                <p className="text-sm font-extrabold text-[#008CEB]">{dashData.totalTransaksi}</p>
                 <span className="text-[8px] text-slate-400">Transaksi</span>
               </div>
               <div>
@@ -458,7 +459,7 @@ export default function BukuGlobalPage() {
                 <div key={b.branch} className="p-2 rounded-xl bg-slate-50 dark:bg-zinc-900/50 space-y-1">
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-extrabold">{b.label}</span>
-                    <span className="text-[9px] font-bold text-[#7B61FF]">Rp{b.pendapatan.toLocaleString()}</span>
+                    <span className="text-[9px] font-bold text-[#008CEB]">Rp{b.pendapatan.toLocaleString()}</span>
                   </div>
                   <div className="flex gap-3 text-[9px]">
                     <span className="text-emerald-500">+Rp{b.cashMasuk.toLocaleString()}</span>
@@ -485,18 +486,18 @@ export default function BukuGlobalPage() {
           {/* Filters */}
           <div className="space-y-2">
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-sm text-slate-400">🔍</span>
+              <span className="absolute left-3 top-2.5 text-sm text-slate-400"><Search className="w-4 h-4" /></span>
               <input type="text" placeholder="Cari nama pelanggan..." value={piutangSearch} onChange={(e) => setPiutangSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-xs bg-white dark:bg-[#131527] rounded-xl border-none outline-none focus:ring-1 focus:ring-[#7B61FF]" />
+                className="w-full pl-9 pr-4 py-2 text-xs bg-white dark:bg-[#131527] rounded-xl border-none outline-none focus:ring-1 focus:ring-[#008CEB]" />
             </div>
             <div className="flex gap-1 overflow-x-auto pb-1">
               <button onClick={() => setPiutangBranchFilter("semua")}
-                className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${piutangBranchFilter === "semua" ? "bg-[#7B61FF] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
+                className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${piutangBranchFilter === "semua" ? "bg-[#008CEB] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
                 Semua
               </button>
               {BRANCH_LIST.map((b) => (
                 <button key={b} onClick={() => setPiutangBranchFilter(b)}
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${piutangBranchFilter === b ? "bg-[#7B61FF] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
+                  className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${piutangBranchFilter === b ? "bg-[#008CEB] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
                   {BOOK_LABELS[b]}
                 </button>
               ))}
@@ -509,7 +510,7 @@ export default function BukuGlobalPage() {
               <div className="text-center py-8 text-slate-400 text-xs">Tidak ada data piutang.</div>
             ) : (
               filteredPiutang.map((p) => (
-                <div key={p.id} className={`premium-card p-3 space-y-2 ${selectedPiutang === p.id ? "border-[#7B61FF]/40" : ""}`}>
+                <div key={p.id} className={`premium-card p-3 space-y-2 ${selectedPiutang === p.id ? "border-[#008CEB]/40" : ""}`}>
                   <div className="flex justify-between items-start">
                     <div>
                       <h4 className="text-xs font-extrabold">{p.customerNama}</h4>
@@ -528,8 +529,8 @@ export default function BukuGlobalPage() {
                   {p.status === "AKTIF" && (
                     <div className="flex gap-2">
                       <button onClick={() => setSelectedPiutang(selectedPiutang === p.id ? null : p.id)}
-                        className="flex-1 py-1.5 bg-[#7B61FF] text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-1">
-                        <span className="text-sm">💳</span> Bayar
+                        className="flex-1 py-1.5 bg-[#008CEB] text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-1">
+                        <span className="text-sm"><CreditCard className="w-5 h-5" /></span> Bayar
                       </button>
                       <a href={`https://api.whatsapp.com/send?phone=${p.customerWA.replace(/[^0-9]/g, "")}&text=${encodeURIComponent(`Halo ${p.customerNama}, Anda memiliki piutang sebesar Rp${p.sisaPiutang.toLocaleString()}. Mohon segera dilunasi. Terima kasih.`)}`}
                         target="_blank" rel="noopener noreferrer"
@@ -565,18 +566,18 @@ export default function BukuGlobalPage() {
           {/* Filters */}
           <div className="space-y-2">
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-sm text-slate-400">🔍</span>
+              <span className="absolute left-3 top-2.5 text-sm text-slate-400"><Search className="w-4 h-4" /></span>
               <input type="text" placeholder="Cari nama atau nomor HP..." value={pelangganSearch} onChange={(e) => setPelangganSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-xs bg-white dark:bg-[#131527] rounded-xl border-none outline-none focus:ring-1 focus:ring-[#7B61FF]" />
+                className="w-full pl-9 pr-4 py-2 text-xs bg-white dark:bg-[#131527] rounded-xl border-none outline-none focus:ring-1 focus:ring-[#008CEB]" />
             </div>
             <div className="flex gap-1 overflow-x-auto pb-1">
               <button onClick={() => setPelangganBranch("semua")}
-                className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${pelangganBranch === "semua" ? "bg-[#7B61FF] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
+                className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${pelangganBranch === "semua" ? "bg-[#008CEB] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
                 Semua
               </button>
               {BRANCH_LIST.map((b) => (
                 <button key={b} onClick={() => setPelangganBranch(b)}
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${pelangganBranch === b ? "bg-[#7B61FF] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
+                  className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${pelangganBranch === b ? "bg-[#008CEB] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
                   {BOOK_LABELS[b]}
                 </button>
               ))}
@@ -586,12 +587,12 @@ export default function BukuGlobalPage() {
           {/* Stats */}
           <div className="premium-card p-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-[#7B61FF]">👥</span>
+              <span className="text-sm text-[#008CEB]"><Users className="w-5 h-5" /></span>
               <span className="text-xs font-bold">{filteredPelanggan.length} Pelanggan</span>
             </div>
             <div className="text-right">
               <span className="text-[9px] text-slate-400">Total Belanja</span>
-              <p className="text-xs font-extrabold text-[#7B61FF]">
+              <p className="text-xs font-extrabold text-[#008CEB]">
                 Rp{filteredPelanggan.reduce((s, c) => s + c.totalBelanja, 0).toLocaleString()}
               </p>
             </div>
@@ -612,7 +613,7 @@ export default function BukuGlobalPage() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-extrabold text-[#FF5C00]">Rp{c.totalBelanja.toLocaleString()}</p>
+                      <p className="text-xs font-extrabold text-[#00C9A7]">Rp{c.totalBelanja.toLocaleString()}</p>
                       <p className="text-[9px] text-slate-400">{c.totalTransaksi} tx · {c.poin} poin</p>
                     </div>
                   </div>
@@ -638,18 +639,18 @@ export default function BukuGlobalPage() {
           {/* Filters */}
           <div className="space-y-2">
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-sm text-slate-400">🔍</span>
+              <span className="absolute left-3 top-2.5 text-sm text-slate-400"><Search className="w-4 h-4" /></span>
               <input type="text" placeholder="Cari user atau aksi..." value={auditSearch} onChange={(e) => setAuditSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-xs bg-white dark:bg-[#131527] rounded-xl border-none outline-none focus:ring-1 focus:ring-[#7B61FF]" />
+                className="w-full pl-9 pr-4 py-2 text-xs bg-white dark:bg-[#131527] rounded-xl border-none outline-none focus:ring-1 focus:ring-[#008CEB]" />
             </div>
             <div className="flex gap-1 overflow-x-auto pb-1">
               <button onClick={() => setAuditBranch("semua")}
-                className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${auditBranch === "semua" ? "bg-[#7B61FF] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
+                className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${auditBranch === "semua" ? "bg-[#008CEB] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
                 Semua Cabang
               </button>
               {BRANCH_LIST.map((b) => (
                 <button key={b} onClick={() => setAuditBranch(b)}
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${auditBranch === b ? "bg-[#7B61FF] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
+                  className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${auditBranch === b ? "bg-[#008CEB] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
                   {BOOK_LABELS[b]}
                 </button>
               ))}
@@ -657,7 +658,7 @@ export default function BukuGlobalPage() {
             <div className="flex gap-1 overflow-x-auto pb-1">
               {["semua", "CREATE", "UPDATE", "DELETE", "BATAL", "TRANSFER_KELUAR", "TRANSFER_MASUK"].map((t) => (
                 <button key={t} onClick={() => setAuditType(t)}
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${auditType === t ? "bg-[#FF5C00] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
+                  className={`px-3 py-1.5 rounded-xl text-[10px] font-bold whitespace-nowrap ${auditType === t ? "bg-[#00C9A7] text-white" : "bg-slate-100 dark:bg-zinc-800 text-slate-400"}`}>
                   {t === "semua" ? "Semua" : t.replace("_", " ")}
                 </button>
               ))}
@@ -709,13 +710,13 @@ export default function BukuGlobalPage() {
           <button onClick={toggleTheme}
             className="premium-card p-3 flex items-center gap-3 w-full active:scale-[0.98]">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-md">
-              {theme === "dark" ? <span className="text-sm">☀️</span> : <span className="text-sm">🌙</span>}
+              {theme === "dark" ? <span className="text-sm"><Sun className="w-5 h-5" /></span> : <span className="text-sm"><Moon className="w-5 h-5" /></span>}
             </div>
             <div className="flex-1 text-left">
               <span className="text-xs font-bold">Dark Mode</span>
               <p className="text-[10px] text-slate-400">{theme === "dark" ? "Mode gelap aktif" : "Mode terang aktif"}</p>
             </div>
-            <div className={`w-10 h-6 rounded-full transition-all ${theme === "dark" ? "bg-[#7B61FF]" : "bg-slate-200"}`}>
+            <div className={`w-10 h-6 rounded-full transition-all ${theme === "dark" ? "bg-[#008CEB]" : "bg-slate-200"}`}>
               <div className={`w-5 h-5 rounded-full bg-white shadow-md mt-0.5 transition-all ${theme === "dark" ? "ml-5" : "ml-0.5"}`} />
             </div>
           </button>
@@ -724,7 +725,7 @@ export default function BukuGlobalPage() {
           <div className="premium-card p-3 space-y-2">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white shadow-md">
-                <span className="text-sm">🗄️</span>
+                <span className="text-sm"><Database className="w-5 h-5" /></span>
               </div>
               <div>
                 <span className="text-xs font-bold">Backup & Restore</span>
@@ -737,12 +738,12 @@ export default function BukuGlobalPage() {
             <div className="flex gap-2">
               <button onClick={handleBackup} disabled={isProcessing}
                 className="flex-1 py-2.5 rounded-xl bg-blue-500 text-white font-bold text-xs active:scale-[0.98] flex items-center justify-center gap-1.5">
-                <span className="text-sm">⬇️</span>
+                <span className="text-sm"><Download className="w-5 h-5" /></span>
                 {isProcessing ? "..." : "Backup"}
               </button>
               <button onClick={() => fileInputRef.current?.click()} disabled={isProcessing}
                 className="flex-1 py-2.5 rounded-xl bg-emerald-500 text-white font-bold text-xs active:scale-[0.98] flex items-center justify-center gap-1.5">
-                <span className="text-sm">⬆️</span> Restore
+                <span className="text-sm"><Upload className="w-5 h-5" /></span> Restore
               </button>
             </div>
             <input ref={fileInputRef} type="file" accept=".enc" className="hidden" onChange={handleRestore} />
@@ -752,7 +753,7 @@ export default function BukuGlobalPage() {
           <div className="premium-card p-3 space-y-2">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white shadow-md">
-                <span className="text-sm">↔️</span>
+                <span className="text-sm"><ArrowRightLeft className="w-5 h-5" /></span>
               </div>
               <div>
                 <span className="text-xs font-bold">Transfer Antar Cabang</span>
@@ -782,7 +783,7 @@ export default function BukuGlobalPage() {
               onChange={(e) => setTransferDesc(e.target.value)}
               className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
             <button onClick={handleTransfer} disabled={isProcessing}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white font-bold text-xs active:scale-[0.98]">
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-bold text-xs active:scale-[0.98]">
               {isProcessing ? "..." : "Transfer Sekarang"}
             </button>
           </div>
@@ -792,7 +793,7 @@ export default function BukuGlobalPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white shadow-md">
-                  <span className="text-sm">⚡</span>
+                  <span className="text-sm"><Zap className="w-5 h-5" /></span>
                 </div>
                 <div>
                   <span className="text-xs font-bold">Template Cepat</span>
@@ -800,8 +801,8 @@ export default function BukuGlobalPage() {
                 </div>
               </div>
               <button onClick={() => setShowQuickOrderModal(true)}
-                className="p-2 bg-[#7B61FF] text-white rounded-full shadow-md">
-                <span className="text-sm">➕</span>
+                className="p-2 bg-[#008CEB] text-white rounded-full shadow-md">
+                <span className="text-sm"><Plus className="w-5 h-5" /></span>
               </button>
             </div>
             {allQuickOrders.length > 0 && (
@@ -815,7 +816,7 @@ export default function BukuGlobalPage() {
                       </p>
                     </div>
                     <button onClick={() => handleDeleteQuickOrder(qo.id)} className="p-1 text-rose-400">
-                      <span className="text-sm">🗑️</span>
+                      <span className="text-sm"><Trash2 className="w-5 h-5" /></span>
                     </button>
                   </div>
                 ))}
@@ -827,7 +828,7 @@ export default function BukuGlobalPage() {
           <div className="premium-card p-3 space-y-2">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-md">
-                <span className="text-sm">📊</span>
+                <span className="text-sm"><BarChart3 className="w-5 h-5" /></span>
               </div>
               <div>
                 <span className="text-xs font-bold">Export Data</span>
@@ -849,7 +850,7 @@ export default function BukuGlobalPage() {
           {/* Logout */}
           <button onClick={handleLogout}
             className="premium-card p-3 flex items-center gap-3 text-rose-500 active:scale-[0.98] w-full">
-            <span className="text-sm">🚪</span>
+            <span className="text-sm"><LogOut className="w-5 h-5" /></span>
             <span className="text-xs font-bold">Keluar dari Akun</span>
           </button>
         </div>
@@ -869,7 +870,7 @@ export default function BukuGlobalPage() {
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-extrabold">Template Cepat Baru</h3>
                 <button onClick={() => setShowQuickOrderModal(false)} className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800">
-                  <span className="text-sm">✕</span>
+                  <span className="text-sm"><X className="w-4 h-4" /></span>
                 </button>
               </div>
               <input type="text" placeholder="Label template" value={quickOrderLabel}
@@ -884,8 +885,8 @@ export default function BukuGlobalPage() {
                   onChange={(e) => setQoItemDesc(e.target.value)} className="flex-1 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
                 <input type="number" placeholder="Harga" value={qoItemPrice || ""}
                   onChange={(e) => setQoItemPrice(Number(e.target.value))} className="w-24 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
-                <button onClick={handleAddQuickOrder} className="p-2 bg-[#7B61FF] text-white rounded-xl">
-                  <span className="text-sm">➕</span>
+                <button onClick={handleAddQuickOrder} className="p-2 bg-[#008CEB] text-white rounded-xl">
+                  <span className="text-sm"><Plus className="w-5 h-5" /></span>
                 </button>
               </div>
               {quickOrderItems.length > 0 && (
@@ -896,7 +897,7 @@ export default function BukuGlobalPage() {
                       <div className="flex items-center gap-2">
                         <span className="font-bold">Rp{item.price.toLocaleString()}</span>
                         <button onClick={() => setQuickOrderItems((prev) => prev.filter((_, i) => i !== idx))} className="text-rose-400">
-                          <span className="text-sm">🗑️</span>
+                          <span className="text-sm"><Trash2 className="w-5 h-5" /></span>
                         </button>
                       </div>
                     </div>
@@ -904,7 +905,7 @@ export default function BukuGlobalPage() {
                 </div>
               )}
               <button onClick={handleSaveQuickOrder}
-                className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white font-extrabold text-xs shadow-lg active:scale-[0.98]">
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs shadow-lg active:scale-[0.98]">
                 Simpan Template
               </button>
             </motion.div>

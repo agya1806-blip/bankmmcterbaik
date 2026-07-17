@@ -17,8 +17,8 @@ export default function RootPage() {
   }, [currentUser, router]);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FD] dark:bg-[#0B0C16] flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-[#7B61FF] border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen bg-[#F5F9FC] dark:bg-[#0A1628] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#008CEB] border-t-transparent rounded-full animate-spin" />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type BookOrBranch, type Customer } from '@/lib/db-v4';
+import { User, Search, Phone, DollarSign, MessageCircle, Plus, X, Send } from "lucide-react";
 
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
@@ -85,20 +86,20 @@ export default function PelangganCRMPage() {
         <h1 className="text-lg font-extrabold tracking-tight capitalize">CRM Pelanggan</h1>
         <button
           onClick={() => setShowAddModal(true)}
-          className="p-2 bg-[#7B61FF] text-white rounded-full shadow-md hover:scale-105 transition-transform"
+          className="p-2 bg-[#008CEB] text-white rounded-full shadow-md hover:scale-105 transition-transform"
         >
-          👤
+          <User className="w-8 h-8" />
         </button>
       </div>
 
       <div className="relative">
-        <span className="absolute left-3 top-2.5 text-sm text-slate-400">🔍</span>
+        <span className="absolute left-3 top-2.5 text-sm text-slate-400"><Search className="w-4 h-4" /></span>
         <input
           type="text"
           placeholder="Cari nama atau nomor HP..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-9 pr-4 py-2 text-xs bg-slate-100 dark:bg-zinc-900 rounded-xl border-none outline-none focus:ring-1 focus:ring-[#7B61FF]"
+          className="w-full pl-9 pr-4 py-2 text-xs bg-slate-100 dark:bg-zinc-900 rounded-xl border-none outline-none focus:ring-1 focus:ring-[#008CEB]"
         />
       </div>
 
@@ -111,26 +112,26 @@ export default function PelangganCRMPage() {
               key={c.id}
               onClick={() => setSelectedCustomer(selectedCustomer?.id === c.id ? null : c)}
               className={`premium-card premium-card-glow p-4 cursor-pointer transition-all duration-200 animate-slide-up ${
-                selectedCustomer?.id === c.id ? 'border-[#7B61FF] ring-1 ring-[#7B61FF]/30' : ''
+                selectedCustomer?.id === c.id ? 'border-[#008CEB] ring-1 ring-[#008CEB]/30' : ''
               }`}
               style={{ animationDelay: `${i * 60}ms`, animationFillMode: "backwards" }}
             >
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center text-white text-xs font-extrabold shadow-md">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center text-white text-xs font-extrabold shadow-md">
                     {c.nama.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <h4 className="text-xs font-heading font-extrabold">{c.nama}</h4>
                     <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
-                      📞 {c.noWA}
+                      <Phone className="w-4 h-4" /> {c.noWA}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <span className="text-[8px] uppercase font-bold text-slate-400 tracking-wider">Total Belanja</span>
-                  <p className="text-xs font-heading font-extrabold text-[#FF5C00] flex items-center gap-1 justify-end">
-                    💰 Rp{c.totalBelanja.toLocaleString()}
+                  <p className="text-xs font-heading font-extrabold text-[#00C9A7] flex items-center gap-1 justify-end">
+                    <DollarSign className="w-4 h-4" /> Rp{c.totalBelanja.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -144,7 +145,7 @@ export default function PelangganCRMPage() {
                     }}
                     className="w-full py-2.5 bg-emerald-500 text-white rounded-xl flex items-center justify-center gap-1.5 font-bold text-[10px] hover:bg-emerald-600 active:scale-[0.97] transition-all duration-200"
                   >
-                     💬 Kirim WA Promosi
+                     <MessageCircle className="w-4 h-4" /> Kirim WA Promosi
                   </button>
                 </div>
               )}
@@ -154,7 +155,7 @@ export default function PelangganCRMPage() {
       </div>
 
       {selectedCustomer && (
-        <div className="premium-card p-4 space-y-3 border-[#7B61FF]/40">
+        <div className="premium-card p-4 space-y-3 border-[#008CEB]/40">
           <h3 className="text-xs font-extrabold text-indigo-500">
             Kirim Promosi ke: {selectedCustomer.nama}
           </h3>
@@ -167,9 +168,9 @@ export default function PelangganCRMPage() {
             />
             <button
               onClick={() => handleBroadcast(selectedCustomer)}
-              className="px-3 py-1.5 bg-[#7B61FF] text-white rounded-xl text-xs font-bold flex items-center gap-1"
+              className="px-3 py-1.5 bg-[#008CEB] text-white rounded-xl text-xs font-bold flex items-center gap-1"
             >
-               💬 Kirim
+               <MessageCircle className="w-4 h-4" /> Kirim
             </button>
           </div>
         </div>
@@ -220,7 +221,7 @@ export default function PelangganCRMPage() {
               >
                 Batal
               </button>
-              <button type="submit" className="flex-1 py-2.5 bg-[#7B61FF] text-white rounded-xl">
+              <button type="submit" className="flex-1 py-2.5 bg-[#008CEB] text-white rounded-xl">
                 Simpan
               </button>
             </div>

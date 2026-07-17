@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type BookOrBranch, type Inventory } from "@/lib/db-v4";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Plus, Package, Search, ArrowRightLeft, Pencil, Trash2, X, Save } from "lucide-react";
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
   pribadi: "pribadi",
@@ -153,21 +154,21 @@ export default function InventoryPage() {
           onClick={() => router.push(`/buku-usaha/${cabangSlug}`)}
           className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md"
         >
-          <span className="text-sm">◀️</span>
+          <ArrowLeft className="w-4 h-4" />
         </button>
         <h1 className="text-lg font-extrabold tracking-tight">Inventaris</h1>
         <button
           onClick={openAdd}
-          className="p-2 bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white rounded-full shadow-md"
+          className="p-2 bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white rounded-full shadow-md"
         >
-          <span className="text-sm">➕</span>
+          <Plus className="w-5 h-5" />
         </button>
       </div>
 
       <div className="premium-card premium-card-glow p-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center text-white shadow-md">
-            <span className="text-sm">📦</span>
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center text-white shadow-md">
+            <Package className="w-5 h-5" />
           </div>
           <div>
             <span className="text-xs font-heading font-extrabold">{products.length} Produk</span>
@@ -176,13 +177,13 @@ export default function InventoryPage() {
         </div>
         <div className="text-right">
           <span className="text-[9px] text-slate-400 font-medium">Total Nilai Stok</span>
-          <p className="text-xs font-heading font-extrabold text-[#7B61FF]">Rp{totalValue.toLocaleString()}</p>
+          <p className="text-xs font-heading font-extrabold text-[#008CEB]">Rp{totalValue.toLocaleString()}</p>
         </div>
       </div>
 
       <div className="space-y-2">
         <div className="relative">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-slate-400">🔍</span>
+          <Search className="absolute left-3 text-slate-400 w-4 h-4" />
           <input
             type="text"
             placeholder="Cari produk..."
@@ -211,7 +212,7 @@ export default function InventoryPage() {
             onClick={() => setSortField(sortField === "nama" ? "stok" : sortField === "stok" ? "hargaJual" : "nama")}
             className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center gap-1"
           >
-            <span className="text-sm text-slate-400">↔️</span>
+            <ArrowRightLeft className="w-5 h-5 text-slate-400" />
             <span className="text-[10px] font-bold text-slate-400">
               {sortField === "nama" ? "Nama" : sortField === "stok" ? "Stok" : "Harga"}
             </span>
@@ -222,7 +223,7 @@ export default function InventoryPage() {
       <div className="flex-1 overflow-y-auto space-y-2.5 max-h-[400px] pr-1">
         {filtered.length === 0 ? (
           <div className="text-center py-12 text-slate-400 text-xs animate-fade-in">
-            <span className="text-3xl mx-auto mb-3 opacity-40">📦</span>
+            <Package className="w-5 h-5 mx-auto mb-3 opacity-40" />
             {products.length === 0 ? "Belum ada produk. Tap + untuk menambah." : "Tidak ditemukan."}
           </div>
         ) : (
@@ -231,7 +232,7 @@ export default function InventoryPage() {
               <div className="flex-1 min-w-0">
                 <h4 className="text-xs font-heading font-bold line-clamp-1">{p.nama}</h4>
                 <div className="flex items-center gap-3 mt-1.5">
-                  <span className="text-[10px] text-[#7B61FF] font-extrabold">
+                  <span className="text-[10px] text-[#008CEB] font-extrabold">
                     Rp{p.hargaJual.toLocaleString()}
                   </span>
                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${p.stok <= p.stokMin ? "bg-amber-50 dark:bg-amber-950/30 text-amber-500" : "text-slate-400"}`}>
@@ -247,13 +248,13 @@ export default function InventoryPage() {
                   onClick={() => openEdit(p)}
                   className="p-1.5 bg-slate-100 dark:bg-zinc-800 rounded-lg hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors duration-200 active:scale-90"
                 >
-                  <span className="text-sm text-slate-500">✏️</span>
+                  <Pencil className="w-4 h-4 text-slate-500" />
                 </button>
                 <button
                   onClick={() => handleDelete(p.id)}
                   className="p-1.5 bg-rose-50 dark:bg-rose-950/30 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950/50 transition-colors duration-200 active:scale-90"
                 >
-                  <span className="text-sm text-rose-500">🗑️</span>
+                  <Trash2 className="w-4 h-4 text-rose-500" />
                 </button>
               </div>
             </div>
@@ -279,7 +280,7 @@ export default function InventoryPage() {
                   onClick={() => { setShowModal(false); setEditingId(null); }}
                   className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800"
                 >
-                  <span className="text-sm">✕</span>
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
@@ -380,9 +381,9 @@ export default function InventoryPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white font-extrabold text-xs shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
                 >
-                  <span className="text-sm">💾</span>
+                  <Save className="w-4 h-4" />
                   {editingId ? "Simpan Perubahan" : "Tambah Produk"}
                 </button>
               </form>

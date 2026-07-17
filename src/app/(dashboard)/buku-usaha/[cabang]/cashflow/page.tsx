@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type BookOrBranch, type Cashflow } from "@/lib/db-v4";
 import { motion, AnimatePresence } from "framer-motion";
+import { Plus, TrendingUp, TrendingDown, Wallet, X, Save } from "lucide-react";
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
   pribadi: "pribadi",
@@ -84,22 +85,22 @@ export default function CashflowPage() {
         <h1 className="text-lg font-extrabold tracking-tight">Cashflow</h1>
         <button
           onClick={() => setShowModal(true)}
-          className="p-2 bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white rounded-full shadow-md"
+          className="p-2 bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white rounded-full shadow-md"
         >
-          <span className="text-sm">➕</span>
+          <Plus className="w-5 h-5" />
         </button>
       </div>
 
       <div className="grid grid-cols-3 gap-2.5">
         {[
-          { label: "Masuk", value: stats.masuk, icon: "📈", color: "emerald" },
-          { label: "Keluar", value: stats.keluar, icon: "📉", color: "rose" },
-          { label: "Selisih", value: stats.selisih, icon: "👛", color: stats.selisih >= 0 ? "indigo" : "rose" },
+          { label: "Masuk", value: stats.masuk, color: "emerald", iconNode: <TrendingUp className="w-5 h-5" /> },
+          { label: "Keluar", value: stats.keluar, color: "rose", iconNode: <TrendingDown className="w-5 h-5" /> },
+          { label: "Selisih", value: stats.selisih, color: stats.selisih >= 0 ? "indigo" : "rose", iconNode: <Wallet className="w-5 h-5" /> },
         ].map((s, i) => {
           return (
             <div key={s.label} className="premium-card premium-card-glow p-3 text-center space-y-1.5 animate-slide-up" style={{ animationDelay: `${i * 80}ms`, animationFillMode: "backwards" }}>
               <div className={`w-7 h-7 rounded-lg bg-${s.color}-100 dark:bg-${s.color}-900/30 flex items-center justify-center mx-auto`}>
-                <span className={`text-sm`}>{s.icon}</span>
+                {s.iconNode}
               </div>
               <span className="text-[9px] font-heading font-bold text-slate-400 block uppercase tracking-wider">{s.label}</span>
               <p className={`text-[11px] font-heading font-extrabold text-${s.color}-600 dark:text-${s.color}-400`}>
@@ -141,9 +142,9 @@ export default function CashflowPage() {
                     cf.tipe === "masuk" ? "bg-emerald-50 dark:bg-emerald-950/30" : "bg-rose-50 dark:bg-rose-950/30"
                   }`}>
                     {cf.tipe === "masuk" ? (
-                      <span className="text-sm text-emerald-500">📈</span>
+                      <span className="text-emerald-500"><TrendingUp className="w-5 h-5" /></span>
                     ) : (
-                      <span className="text-sm text-rose-500">📉</span>
+                      <span className="text-rose-500"><TrendingDown className="w-5 h-5" /></span>
                     )}
                   </div>
                   <div>
@@ -178,7 +179,7 @@ export default function CashflowPage() {
                   onClick={() => setShowModal(false)}
                   className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800"
                 >
-                  <span className="text-sm">✕</span>
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
@@ -193,7 +194,7 @@ export default function CashflowPage() {
                         : "bg-slate-100 dark:bg-zinc-800 text-slate-400"
                     }`}
                   >
-                    <span className="text-sm">📈</span> Pemasukan
+                    <TrendingUp className="w-5 h-5" /> Pemasukan
                   </button>
                   <button
                     type="button"
@@ -204,7 +205,7 @@ export default function CashflowPage() {
                         : "bg-slate-100 dark:bg-zinc-800 text-slate-400"
                     }`}
                   >
-                    <span className="text-sm">📉</span> Pengeluaran
+                    <TrendingDown className="w-5 h-5" /> Pengeluaran
                   </button>
                 </div>
 
@@ -246,9 +247,9 @@ export default function CashflowPage() {
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white font-extrabold text-xs shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
                 >
-                  <span className="text-sm">💾</span>
+                  <Save className="w-4 h-4" />
                   Simpan
                 </button>
               </form>

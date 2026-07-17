@@ -437,20 +437,20 @@ export default function PosKasirPage() {
             className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md active:scale-95 transition-transform"
             title="Riwayat Cepat"
           >
-            <span className="text-xs text-slate-500">🕐</span>
+            <span className="text-xs text-slate-500"><Clock className="w-4 h-4" /></span>
           </button>
           <button
             onClick={() => setShowCalculator(true)}
             className="p-2 bg-emerald-500 text-white rounded-full shadow-md active:scale-95 transition-transform"
             title="Kalkulator Harga"
           >
-            🧮
+            <Calculator className="w-5 h-5" />
           </button>
           <button
             onClick={() => setShowQuickAdd(true)}
-            className="p-2 bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white rounded-full shadow-md active:scale-95 transition-transform"
+            className="p-2 bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white rounded-full shadow-md active:scale-95 transition-transform"
           >
-            ➕
+            <Plus className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -458,7 +458,7 @@ export default function PosKasirPage() {
       {/* ═══ SEARCH + KATEGORI ═══ */}
       <div className="space-y-2">
         <div className="relative">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-slate-400">🔍</span>
+          <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-slate-400"><Search className="w-4 h-4" /></span>
           <input
             type="text"
             placeholder="Cari produk..."
@@ -476,7 +476,7 @@ export default function PosKasirPage() {
               onClick={() => setSelectedKategori(kat)}
               className={`shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${
                 selectedKategori === kat
-                  ? "bg-[#7B61FF] text-white shadow-md"
+                  ? "bg-[#008CEB] text-white shadow-md"
                   : "bg-white dark:bg-[#131527] text-slate-400 border border-slate-200/60 dark:border-slate-800/60"
               }`}
             >
@@ -498,7 +498,7 @@ export default function PosKasirPage() {
           >
             <span className="text-[11px] font-heading font-bold line-clamp-1">{prod.nama}</span>
             <div className="flex items-center justify-between w-full mt-1.5">
-              <span className="text-[10px] text-[#7B61FF] font-extrabold">
+              <span className="text-[10px] text-[#008CEB] font-extrabold">
                 {formatRp(prod.hargaJual)}
               </span>
               <span
@@ -506,7 +506,7 @@ export default function PosKasirPage() {
                   prod.stok <= prod.stokMin ? "text-amber-500" : "text-slate-400"
                 }`}
               >
-                {prod.stok <= prod.stokMin && <span className="text-xs inline mr-0.5">⚠️</span>}
+                {prod.stok <= prod.stokMin && <span className="text-xs inline mr-0.5"><AlertTriangle className="w-4 h-4" /></span>}
                 {prod.stok}
               </span>
             </div>
@@ -525,8 +525,8 @@ export default function PosKasirPage() {
           onClick={() => setShowQuickOrder(true)}
           className="w-full py-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/40 text-[10px] font-bold text-amber-600 flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform"
         >
-          ⚡
-          Quick Order ({quickOrders.length} template)
+           <Zap className="w-5 h-5" />
+           Quick Order ({quickOrders.length} template)
         </button>
       )}
 
@@ -541,14 +541,14 @@ export default function PosKasirPage() {
               onClick={clearCart}
               className="text-[9px] text-rose-500 font-bold flex items-center gap-0.5 active:scale-95 transition-transform"
             >
-              🗑️ Kosongkan
+              <Trash2 className="w-4 h-4" /> Kosongkan
             </button>
           )}
         </div>
 
         {cart.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-6 text-slate-400">
-            <span className="text-3xl mb-1.5">🛍️</span>
+            <span className="text-3xl mb-1.5"><ShoppingBag className="w-8 h-8" /></span>
             <span className="text-[11px]">Keranjang kosong</span>
           </div>
         ) : (
@@ -569,7 +569,7 @@ export default function PosKasirPage() {
                 {/* Stok Warning */}
                 {isLowStock && (
                   <div className="flex items-center gap-1 text-[9px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded-lg">
-                    <span className="text-xs">⚠️</span>
+                    <span className="text-xs"><AlertTriangle className="w-4 h-4" /></span>
                     {isOutStock ? "STOK HABIS!" : `Stok hampir habis (${product?.stok} tersisa)`}
                   </div>
                 )}
@@ -590,7 +590,7 @@ export default function PosKasirPage() {
                     onClick={() => removeItem(item.id)}
                     className="text-rose-500 p-1 shrink-0 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors active:scale-90"
                   >
-                    <span className="text-xs">🗑️</span>
+                    <span className="text-xs"><Trash2 className="w-4 h-4" /></span>
                   </button>
                 </div>
 
@@ -600,7 +600,7 @@ export default function PosKasirPage() {
                     type="number"
                     value={item.hargaSatuan}
                     onChange={(e) => updateCartItemHarga(item.id, Number(e.target.value))}
-                    className="w-24 input-premium text-[10px] font-extrabold text-[#7B61FF] py-1"
+                    className="w-24 input-premium text-[10px] font-extrabold text-[#008CEB] py-1"
                   />
                   <div className="flex items-center gap-1 bg-slate-100 dark:bg-zinc-800 rounded-lg px-1.5 py-0.5">
                     <span className="text-xs text-slate-400">%</span>
@@ -626,7 +626,7 @@ export default function PosKasirPage() {
                       onClick={() => updateQty(item.id, -1)}
                       className="p-1 bg-slate-100 dark:bg-zinc-800 rounded-full active:scale-90 transition-transform"
                     >
-                      ➖
+                      <Minus className="w-4 h-4" />
                     </button>
                     <span className="text-xs font-heading font-extrabold min-w-[20px] text-center tabular-nums">
                       {item.qty}
@@ -635,16 +635,16 @@ export default function PosKasirPage() {
                       onClick={() => updateQty(item.id, 1)}
                       className="p-1 bg-slate-100 dark:bg-zinc-800 rounded-full active:scale-90 transition-transform"
                     >
-                      ➕
+                      <Plus className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => openSpecModal(item)}
-                      className="p-1 bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white rounded-full ml-0.5 active:scale-90 transition-transform"
+                      className="p-1 bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white rounded-full ml-0.5 active:scale-90 transition-transform"
                     >
-                      ⚙️
+                      <Settings className="w-4 h-4" />
                     </button>
                   </div>
-                  <span className="text-[10px] font-extrabold text-[#7B61FF] tabular-nums">
+                  <span className="text-[10px] font-extrabold text-[#008CEB] tabular-nums">
                     {formatRp(itemTotal)}
                   </span>
                 </div>
@@ -680,7 +680,7 @@ export default function PosKasirPage() {
         {/* Diskon Global + PPN Toggle */}
         <div className="flex items-center gap-2">
           <div className="flex-1 flex items-center gap-1.5 bg-slate-100 dark:bg-zinc-800 rounded-xl px-2.5 py-1.5">
-            🏷️
+            <Tag className="w-4 h-4" />
             <input
               type="number"
               value={diskonGlobalPersen || ""}
@@ -791,7 +791,7 @@ export default function PosKasirPage() {
           <div>
             {buktiBayar ? (
               <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-100 dark:bg-zinc-800">
-                🖼️
+                <Image className="w-4 h-4" />
                 <span className="text-[10px] font-bold truncate flex-1">Bukti terupload ✓</span>
                 <button onClick={() => setBuktiBayar("")} className="text-[10px] text-rose-500 font-bold">
                   Hapus
@@ -802,7 +802,7 @@ export default function PosKasirPage() {
                 onClick={() => fileInputRef.current?.click()}
                 className="w-full py-2 rounded-xl border-2 border-dashed border-slate-300 dark:border-zinc-700 text-[10px] font-bold text-slate-400 flex items-center justify-center gap-1.5"
               >
-                 ⬆️ Upload Bukti QRIS
+                  <Upload className="w-4 h-4" /> Upload Bukti QRIS
               </button>
             )}
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
@@ -816,9 +816,9 @@ export default function PosKasirPage() {
           className="btn-primary w-full py-3 text-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed"
         >
           {isProcessing ? (
-            <span className="animate-spin inline-block">✨</span>
+            <span className="animate-spin inline-block"><Zap className="w-4 h-4" /></span>
           ) : (
-            <span>💳</span>
+            <span><CreditCard className="w-4 h-4" /></span>
           )}
           {isProcessing ? "Memproses..." : `Bayar ${formatRp(grandTotal)}`}
         </button>
@@ -843,7 +843,7 @@ export default function PosKasirPage() {
                     onClick={() => setActiveSpecItem(null)}
                     className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800"
                   >
-                    ✕
+                    <X className="w-4 h-4" />
                   </button>
               </div>
 
@@ -970,7 +970,7 @@ export default function PosKasirPage() {
               <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                 <h3 className="text-xs font-extrabold tracking-tight">Tambah Produk Cepat</h3>
                 <button onClick={() => setShowQuickAdd(false)} className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800">
-                  ✕
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
@@ -1019,7 +1019,7 @@ export default function PosKasirPage() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] text-white font-extrabold shadow-md active:scale-[0.98] transition-all"
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold shadow-md active:scale-[0.98] transition-all"
                 >
                   Simpan & Masuk Keranjang
                 </button>
@@ -1042,11 +1042,11 @@ export default function PosKasirPage() {
             >
               <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-amber-500">⚡</span>
+                  <span className="text-xs text-amber-500"><Zap className="w-5 h-5" /></span>
                   <h3 className="text-sm font-extrabold">Quick Order Templates</h3>
                 </div>
                 <button onClick={() => setShowQuickOrder(false)} className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800">
-                  ✕
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
@@ -1083,11 +1083,11 @@ export default function PosKasirPage() {
             >
               <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-indigo-500">📄</span>
+                  <span className="text-xs text-indigo-500"><FileText className="w-4 h-4" /></span>
                   <h3 className="text-sm font-extrabold">5 Transaksi Terakhir</h3>
                 </div>
                 <button onClick={() => setShowRiwayat(false)} className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800">
-                  ✕
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
@@ -1113,7 +1113,7 @@ export default function PosKasirPage() {
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-bold">{tx.customerNama}</span>
-                        <span className="text-[10px] font-extrabold text-[#7B61FF]">
+                        <span className="text-[10px] font-extrabold text-[#008CEB]">
                           {formatRp(tx.grandTotal)}
                         </span>
                       </div>
