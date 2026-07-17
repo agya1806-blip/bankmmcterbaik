@@ -87,7 +87,7 @@ export default function BukuUsahaListPage() {
           </div>
           <div>
             <p className="text-[9px] text-slate-400 font-bold uppercase">Total Saldo</p>
-            <p className="text-xs font-extrabold text-[#7B61FF]">
+            <p className="text-xs font-extrabold text-[#008CEB]">
               Rp{unitStats.reduce((s, u) => s + u.saldo, 0).toLocaleString()}
             </p>
           </div>

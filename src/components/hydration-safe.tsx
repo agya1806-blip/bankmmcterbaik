@@ -11,7 +11,7 @@ export default function HydrationSafe({ children }: { children: React.ReactNode 
   if (!mounted) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="w-6 h-6 border-2 border-[#7B61FF] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#008CEB] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
