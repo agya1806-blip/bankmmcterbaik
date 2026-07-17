@@ -164,7 +164,7 @@ export default function CabangDashboardPage() {
             {notifCount > 0 && <span className="absolute -top-1 -right-1 badge-alert">{notifCount}</span>}
           </button>
           <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${BRANCH_COLORS[cabangSlug] || "from-[#008CEB] to-[#00C9A7]"} flex items-center justify-center text-white text-sm font-extrabold shadow-lg shadow-[#008CEB]/20`}>
-            {currentUser?.charAt(0)?.toUpperCase() || "?"}
+            {currentUser?.nama?.charAt(0)?.toUpperCase() || "?"}
           </div>
         </div>
       </div>

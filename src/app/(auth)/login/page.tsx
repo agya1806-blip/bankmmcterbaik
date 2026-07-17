@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
-import { Shield, User, Lock } from "lucide-react";
-
+import { db } from "@/lib/db-v4";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,17 +12,16 @@ export default function LoginPage() {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim()) {
-      setError("Username harus diisi");
-      return;
-    }
-    if (pin.length < 4) {
-      setError("PIN minimal 4 digit");
-      return;
-    }
-    login(username.trim());
+    if (!username.trim()) return setError("Username harus diisi");
+    if (pin.length < 4) return setError("PIN minimal 4 digit");
+
+    const user = await db.users.where("nama").equals(username.trim()).first();
+    if (!user) return setError("Username tidak ditemukan");
+    if (user.pinHash !== pin) return setError("PIN salah");
+
+    login({ id: user.id, nama: user.nama, fotoUrl: user.fotoUrl });
     completeOnboarding();
     router.push("/buku-usaha");
   };
@@ -32,8 +30,8 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#F5F9FC] dark:bg-[#0A1628] flex items-center justify-center px-4">
       <form onSubmit={handleSubmit} className="w-full max-w-sm premium-card premium-card-glow p-8 flex flex-col gap-5 animate-fade-in">
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center mx-auto shadow-lg shadow-[#008CEB]/20">
-            <Shield className="w-8 h-8 text-white" />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center mx-auto shadow-lg shadow-[#008CEB]/20 text-2xl">
+            🛡️
           </div>
           <h1 className="text-2xl font-heading font-extrabold tracking-tight gradient-text">
             MMCBANK
@@ -42,7 +40,7 @@ export default function LoginPage() {
         </div>
 
         <div className="relative group">
-          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#008CEB] transition-colors duration-200" />
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 group-focus-within:text-[#008CEB] transition-colors duration-200">👤</span>
           <input
             type="text"
             placeholder="Username"
@@ -53,7 +51,7 @@ export default function LoginPage() {
         </div>
 
         <div className="relative group">
-          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#008CEB] transition-colors duration-200" />
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 group-focus-within:text-[#008CEB] transition-colors duration-200">🔒</span>
           <input
             type="password"
             placeholder="PIN (4-6 digit)"
@@ -70,14 +68,14 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          className="btn-primary w-full h-11 text-sm"
+          className="w-full h-11 rounded-xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-bold text-sm shadow-lg shadow-[#008CEB]/20 active:scale-[0.97] transition-transform"
         >
           Masuk ke Dashboard
         </button>
 
         <div className="flex justify-between text-xs mt-1">
-          <button onClick={() => router.push("/register")} className="text-[#008CEB] font-bold hover:text-[#006BB3] transition-colors duration-200">Daftar Akun Baru</button>
-          <button onClick={() => router.push("/forgot-pin")} className="text-slate-400 font-bold hover:text-slate-600 dark:hover:text-slate-300 transition-colors duration-200">Lupa PIN?</button>
+          <button type="button" onClick={() => router.push("/register")} className="text-[#008CEB] font-bold hover:text-[#006BB3] transition-colors duration-200">Daftar Akun Baru</button>
+          <button type="button" onClick={() => router.push("/forgot-pin")} className="text-slate-400 font-bold hover:text-slate-600 dark:hover:text-slate-300 transition-colors duration-200">Lupa PIN?</button>
         </div>
       </form>
     </div>

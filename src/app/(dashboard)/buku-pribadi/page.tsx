@@ -144,7 +144,7 @@ export default function BukuPribadiPage() {
         <div>
           <p className="text-[10px] text-slate-400 font-bold">Buku Pribadi</p>
           <h1 className="text-xl font-heading font-extrabold tracking-tight">
-            <span className="text-[#008CEB]">{currentUser || "Saya"}</span>
+            <span className="text-[#008CEB]">{currentUser?.nama || "Saya"}</span>
           </h1>
         </div>
         <div className="flex items-center gap-2">

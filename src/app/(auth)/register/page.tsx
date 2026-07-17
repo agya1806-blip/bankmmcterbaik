@@ -3,9 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
-import { User, Lock, Eye, EyeOff } from "lucide-react";
-
-import Link from "next/link";
+import { db } from "@/lib/db-v4";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -16,21 +14,29 @@ export default function RegisterPage() {
   const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim()) return setError("Username harus diisi!");
     if (pin.length < 4) return setError("PIN minimal 4 digit!");
     if (pin !== pinConfirm) return setError("PIN konfirmasi tidak cocok!");
 
-    const users = JSON.parse(localStorage.getItem("mmc_users") || "[]");
-    if (users.find((u: any) => u.username === username.trim())) {
-      return setError("Username sudah digunakan!");
-    }
+    const existing = await db.users.where("nama").equals(username.trim()).first();
+    if (existing) return setError("Username sudah digunakan!");
 
-    users.push({ username: username.trim(), pin, createdAt: new Date().toISOString() });
-    localStorage.setItem("mmc_users", JSON.stringify(users));
+    const userId = crypto.randomUUID();
+    await db.users.add({
+      id: userId,
+      bookOrBranchId: "pribadi",
+      nama: username.trim(),
+      pinHash: pin,
+      fotoUrl: "",
+      role: "admin",
+      allowedUnits: [],
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    });
 
-    login(username.trim());
+    login({ id: userId, nama: username.trim(), fotoUrl: "" });
     completeOnboarding();
     router.push("/buku-usaha");
   };
@@ -46,7 +52,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="relative">
-          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">👤</span>
           <input
             type="text"
             placeholder="Username"
@@ -57,7 +63,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔒</span>
           <input
             type={showPin ? "text" : "password"}
             placeholder="PIN (4-6 digit)"
@@ -67,12 +73,12 @@ export default function RegisterPage() {
             maxLength={6}
           />
           <button type="button" onClick={() => setShowPin(!showPin)} className="absolute right-3 top-1/2 -translate-y-1/2">
-            {showPin ? <EyeOff className="w-4 h-4 text-slate-400" /> : <Eye className="w-4 h-4 text-slate-400" />}
+            <span className="text-sm text-slate-400">{showPin ? "🙈" : "👁️"}</span>
           </button>
         </div>
 
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔒</span>
           <input
             type="password"
             placeholder="Konfirmasi PIN"
@@ -94,7 +100,7 @@ export default function RegisterPage() {
 
         <p className="text-center text-xs text-slate-400">
           Sudah punya akun?{" "}
-          <Link href="/login" className="text-[#008CEB] font-bold">Masuk</Link>
+          <button onClick={() => router.push("/login")} className="text-[#008CEB] font-bold">Masuk</button>
         </p>
       </form>
     </div>

@@ -1,14 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export interface UserInfo {
+  id: string;
+  nama: string;
+  fotoUrl: string;
+}
+
 interface SessionState {
-  currentUser: string | null;
+  currentUser: UserInfo | null;
   currentBranch: string | null;
   onboardingCompleted: boolean;
   isPinVerified: boolean;
   isInitializing: boolean;
   kioskTarget: string | null;
-  login: (username: string) => void;
+  login: (user: UserInfo) => void;
   logout: () => void;
   setBranch: (branch: string) => void;
   completeOnboarding: () => void;
@@ -16,6 +22,7 @@ interface SessionState {
   resetPinVerification: () => void;
   setIsInitializing: (v: boolean) => void;
   setKioskTarget: (target: string | null) => void;
+  updateProfile: (patch: Partial<Pick<UserInfo, "nama" | "fotoUrl">>) => void;
   isLoggedIn: () => boolean;
   isKiosk: () => boolean;
 }
@@ -29,7 +36,7 @@ export const useSessionStore = create<SessionState>()(
       isPinVerified: false,
       isInitializing: false,
       kioskTarget: null,
-      login: (username) => set({ currentUser: username }),
+      login: (user) => set({ currentUser: user }),
       logout: () => set({ currentUser: null, currentBranch: null, isPinVerified: false, kioskTarget: null }),
       setBranch: (branch) => set({ currentBranch: branch }),
       completeOnboarding: () => set({ onboardingCompleted: true }),
@@ -37,6 +44,10 @@ export const useSessionStore = create<SessionState>()(
       resetPinVerification: () => set({ isPinVerified: false }),
       setIsInitializing: (v) => set({ isInitializing: v }),
       setKioskTarget: (target) => set({ kioskTarget: target }),
+      updateProfile: (patch) => {
+        const curr = get().currentUser;
+        if (curr) set({ currentUser: { ...curr, ...patch } });
+      },
       isLoggedIn: () => get().currentUser !== null,
       isKiosk: () => get().kioskTarget !== null,
     }),

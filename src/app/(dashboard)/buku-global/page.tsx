@@ -429,7 +429,7 @@ export default function BukuGlobalPage() {
           </button>
           <div className="text-right">
             <span className="text-[10px] text-slate-400">Admin</span>
-            <p className="text-xs font-extrabold">{currentUser}</p>
+            <p className="text-xs font-extrabold">{currentUser?.nama}</p>
           </div>
         </div>
       </div>
@@ -1121,7 +1121,7 @@ export default function BukuGlobalPage() {
             <div className="space-y-2 text-[11px]">
               <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
                 <span className="text-slate-400 font-medium">Username</span>
-                <span className="font-extrabold">{currentUser}</span>
+                <span className="font-extrabold">{currentUser?.nama}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
                 <span className="text-slate-400 font-medium">Tipe Lisensi</span>
