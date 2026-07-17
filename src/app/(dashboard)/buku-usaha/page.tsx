@@ -11,6 +11,26 @@ import { format, subDays, parseISO } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { db, type BookOrBranch } from "@/lib/db-v4";
 import { useSessionStore } from "@/store/useSessionStore";
+import {
+  Bell, Settings, Wallet, TrendingUp, TrendingDown, ShoppingCart,
+  Clock, BarChart3, BookOpen, User, Home, Building2, ChevronRight,
+} from "lucide-react";
+
+interface BookCard {
+  slug: string;
+  label: string;
+  desc: string;
+  icon: React.ReactNode;
+  color: string;
+  route: string;
+}
+
+const MAIN_BOOKS: BookCard[] = [
+  { slug: "global", label: "Buku Global", desc: "Ringkasan semua data", icon: <BarChart3 className="w-5 h-5 text-white" />, color: "from-[#008CEB] to-[#00C9A7]", route: "/buku-global" },
+  { slug: "pribadi", label: "Buku Pribadi", desc: "Keuangan pribadi", icon: <User className="w-5 h-5 text-white" />, color: "from-slate-500 to-slate-600", route: "/buku-pribadi" },
+  { slug: "keluarga", label: "Buku Keluarga", desc: "Keuangan keluarga", icon: <Home className="w-5 h-5 text-white" />, color: "from-rose-400 to-rose-500", route: "/buku-keluarga" },
+  { slug: "usaha", label: "Buku Usaha", desc: "Unit usaha & bisnis", icon: <Building2 className="w-5 h-5 text-white" />, color: "from-amber-400 to-orange-500", route: "/buku-usaha/usaha" },
+];
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -23,7 +43,7 @@ function getGreeting(): string {
 function MiniCashflowTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[#131527]/95 border border-slate-700/60 rounded-xl px-3 py-2 shadow-xl">
+    <div className="bg-[#0F1926]/95 border border-slate-700/60 rounded-xl px-3 py-2 shadow-xl">
       <p className="text-[9px] text-slate-400 font-bold mb-1">{label}</p>
       {payload.map((p: any, i: number) => (
         <p key={i} className="text-[10px] font-bold" style={{ color: p.color }}>
@@ -34,67 +54,33 @@ function MiniCashflowTooltip({ active, payload, label }: any) {
   );
 }
 
-const MAIN_BOOKS = [
-  { slug: "utama", label: "Buku Utama", desc: "Ringkasan semua data", icon: "📊", color: "from-[#7B61FF] to-[#FF5C00]" },
-  { slug: "pribadi", label: "Buku Pribadi", desc: "Keuangan pribadi", icon: "📒", color: "from-slate-500 to-slate-600" },
-  { slug: "keluarga", label: "Buku Keluarga", desc: "Keuangan keluarga", icon: "👨‍👩‍👧‍👦", color: "from-rose-400 to-rose-500" },
-  { slug: "usaha", label: "Buku Usaha", desc: "Unit usaha & bisnis", icon: "🏢", color: "from-amber-400 to-orange-500" },
-];
-
 export default function BukuUsahaPage() {
   const router = useRouter();
-  const { currentUser, setBranch } = useSessionStore();
+  const { currentUser } = useSessionStore();
   const [showNotif, setShowNotif] = useState(false);
 
   const allTransactions = useLiveQuery(() => db.transactions.toArray()) || [];
-  const allInventory = useLiveQuery(() => db.inventory.toArray()) || [];
   const allCashflows = useLiveQuery(() => db.cashflows.toArray()) || [];
   const allWallets = useLiveQuery(() => db.wallets.toArray()) || [];
-  const allCustomers = useLiveQuery(() => db.customers.toArray()) || [];
   const allPiutang = useLiveQuery(() => db.piutang.toArray()) || [];
 
   const stats = useMemo(() => {
     const now = new Date();
     const todayStr = now.toISOString().slice(0, 10);
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
-
-    const todayTx = allTransactions.filter((tx) => tx.tanggal.slice(0, 10) === todayStr);
-    const monthTx = allTransactions.filter((tx) => {
-      const d = parseISO(tx.tanggal);
-      return d >= monthStart && d <= monthEnd;
-    });
-    const lastMonthTx = allTransactions.filter((tx) => {
-      const d = parseISO(tx.tanggal);
-      return d >= lastMonthStart && d <= lastMonthEnd;
-    });
-
-    const totalHariIni = todayTx.reduce((s, tx) => s + tx.totalBruto, 0);
-    const totalBulanIni = monthTx.reduce((s, tx) => s + tx.totalBruto, 0);
-    const totalBulanLalu = lastMonthTx.reduce((s, tx) => s + tx.totalBruto, 0);
-    const piutangAktif = allTransactions.filter((tx) => tx.sisaTagihan > 0).reduce((s, tx) => s + tx.sisaTagihan, 0);
-    const stokMenipis = allInventory.filter((item) => item.stok <= item.stokMin);
-    const stokHabis = allInventory.filter((item) => item.stok === 0);
+    const totalSaldo = allWallets.reduce((s, w) => s + w.saldo, 0);
     const cashflowMasuk = allCashflows.filter((c) => c.tipe === "masuk").reduce((s, c) => s + c.nominal, 0);
     const cashflowKeluar = allCashflows.filter((c) => c.tipe === "keluar").reduce((s, c) => s + c.nominal, 0);
-    const totalSaldo = allWallets.reduce((s, w) => s + w.saldo, 0);
-    const persentasePerubahan = totalBulanLalu > 0 ? Math.round(((totalBulanIni - totalBulanLalu) / totalBulanLalu) * 100) : totalBulanIni > 0 ? 100 : 0;
-
+    const piutangAktif = allTransactions.filter((tx) => tx.sisaTagihan > 0).reduce((s, tx) => s + tx.sisaTagihan, 0);
+    const todayTx = allTransactions.filter((tx) => tx.tanggal.slice(0, 10) === todayStr);
+    const totalHariIni = todayTx.reduce((s, tx) => s + tx.totalBruto, 0);
     const piutangDueSoon = allPiutang.filter((p) => {
       if (p.status !== "AKTIF") return false;
       const diff = parseISO(p.jatuhTempo).getTime() - now.getTime();
       return diff <= 3 * 24 * 60 * 60 * 1000 && diff >= 0;
     });
 
-    return {
-      totalHariIni, totalBulanIni, totalBulanLalu, jumlahTransaksi: allTransactions.length,
-      piutangAktif, stokMenipisCount: stokMenipis.length, stokHabisCount: stokHabis.length,
-      cashflowMasuk, cashflowKeluar, labaBersih: cashflowMasuk - cashflowKeluar,
-      totalSaldo, piutangDueSoon, persentasePerubahan, jumlahPelanggan: allCustomers.length,
-    };
-  }, [allTransactions, allInventory, allCashflows, allWallets, allCustomers, allPiutang]);
+    return { totalSaldo, cashflowMasuk, cashflowKeluar, labaBersih: cashflowMasuk - cashflowKeluar, piutangAktif, totalHariIni, piutangDueSoon, jumlahTransaksi: allTransactions.length };
+  }, [allTransactions, allCashflows, allWallets, allPiutang]);
 
   const chartData = useMemo(() => {
     const days = 7;
@@ -113,22 +99,10 @@ export default function BukuUsahaPage() {
     return [...allTransactions].sort((a, b) => b.tanggal.localeCompare(a.tanggal)).slice(0, 5);
   }, [allTransactions]);
 
-  const notifCount = stats.stokMenipisCount + stats.stokHabisCount + stats.piutangDueSoon.length;
-
-  const handleSelectBook = (slug: string) => {
-    if (slug === "utama") {
-      router.push("/buku-global");
-    } else if (slug === "usaha") {
-      router.push("/buku-usaha/usaha");
-    } else {
-      setBranch(slug);
-      router.push(`/buku-usaha/${slug}`);
-    }
-  };
+  const notifCount = stats.piutangDueSoon.length;
 
   return (
     <div className="flex flex-col gap-4 pt-2 pb-4 animate-fade-in">
-      {/* Header */}
       <div className="flex items-center justify-between animate-fade-in">
         <div>
           <p className="text-[10px] text-slate-400 font-bold">{getGreeting()}</p>
@@ -138,74 +112,68 @@ export default function BukuUsahaPage() {
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setShowNotif(!showNotif)} className="relative w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center scale-press">
-            <span className="text-sm">🔔</span>
+            <Bell className="w-5 h-5 text-slate-500" />
             {notifCount > 0 && <span className="absolute -top-1 -right-1 badge-alert">{notifCount}</span>}
           </button>
           <button onClick={() => router.push("/buku-global")} className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center scale-press">
-            <span className="text-sm">⚙️</span>
+            <Settings className="w-5 h-5 text-slate-500" />
           </button>
         </div>
       </div>
 
-      {/* Notifikasi Dropdown */}
       <AnimatePresence>
         {showNotif && notifCount > 0 && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
             <div className="premium-card p-4 border-amber-300/40 dark:border-amber-700/40">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-sm">🔔</span>
+                <Bell className="w-4 h-4 text-slate-500" />
                 <span className="text-xs font-heading font-extrabold">Notifikasi</span>
               </div>
-              {stats.stokMenipisCount > 0 && <p className="text-[11px] py-1 flex items-center gap-2"><span className="badge-alert">{stats.stokMenipisCount}</span> produk stok menipis</p>}
-              {stats.stokHabisCount > 0 && <p className="text-[11px] py-1 flex items-center gap-2"><span className="badge-alert">{stats.stokHabisCount}</span> produk stok habis</p>}
               {stats.piutangDueSoon.length > 0 && <p className="text-[11px] py-1 flex items-center gap-2"><span className="badge-alert">{stats.piutangDueSoon.length}</span> piutang jatuh tempo</p>}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Global Stats */}
-      <div className="premium-card p-4 bg-gradient-to-br from-[#7B61FF]/10 to-[#FF5C00]/10 dark:from-[#7B61FF]/5 dark:to-[#FF5C00]/5 animate-slide-up" style={{ animationDelay: "50ms", animationFillMode: "backwards" }}>
+      <div className="premium-card p-4 bg-gradient-to-br from-[#008CEB]/10 to-[#00C9A7]/10 dark:from-[#008CEB]/5 dark:to-[#00C9A7]/5 animate-slide-up" style={{ animationDelay: "50ms", animationFillMode: "backwards" }}>
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#7B61FF]/20 flex items-center justify-center">
-              <span className="text-xs">👛</span>
+            <div className="w-7 h-7 rounded-lg bg-[#008CEB]/20 flex items-center justify-center">
+              <Wallet className="w-4 h-4 text-[#008CEB]" />
             </div>
             <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Saldo Semua Buku</span>
           </div>
         </div>
-        <p className="text-xl font-heading font-extrabold text-[#7B61FF] dark:text-[#9B81FF] tracking-tight">Rp{stats.totalSaldo.toLocaleString()}</p>
+        <p className="text-xl font-heading font-extrabold text-[#008CEB] dark:text-[#4DA3E0] tracking-tight">Rp{stats.totalSaldo.toLocaleString()}</p>
       </div>
 
-      {/* 4 Buku Utama */}
       <div className="animate-slide-up" style={{ animationDelay: "100ms", animationFillMode: "backwards" }}>
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-sm">📚</span>
+          <BookOpen className="w-4 h-4 text-[#008CEB]" />
           <span className="text-xs font-heading font-extrabold">Pilih Buku</span>
         </div>
         <div className="grid grid-cols-2 gap-2.5">
           {MAIN_BOOKS.map((book, i) => (
             <button
               key={book.slug}
-              onClick={() => handleSelectBook(book.slug)}
+              onClick={() => router.push(book.route)}
               className="premium-card premium-card-glow p-4 text-left scale-press animate-slide-up"
               style={{ animationDelay: `${120 + i * 60}ms`, animationFillMode: "backwards" }}
             >
-              <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${book.color} flex items-center justify-center text-xl shadow-md mb-2`}>
+              <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${book.color} flex items-center justify-center shadow-md mb-2`}>
                 {book.icon}
               </div>
               <p className="text-xs font-heading font-extrabold">{book.label}</p>
               <p className="text-[9px] text-slate-400 mt-0.5">{book.desc}</p>
-              <span className="text-[9px] text-slate-300 mt-2 block">▶ Buka</span>
+              <span className="text-[9px] text-[#008CEB] mt-2 block flex items-center gap-0.5">Buka <ChevronRight className="w-3 h-3" /></span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Chart */}
       <div className="premium-card premium-card-glow p-4 animate-slide-up" style={{ animationDelay: "350ms", animationFillMode: "backwards" }}>
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-sm">📊</span>
+          <BarChart3 className="w-4 h-4 text-[#008CEB]" />
           <span className="text-xs font-heading font-extrabold">Cashflow Global 7 Hari</span>
         </div>
         <div className="h-40">
@@ -231,7 +199,6 @@ export default function BukuUsahaPage() {
         </div>
       </div>
 
-      {/* Riwayat Terakhir */}
       <div className="premium-card premium-card-glow p-4 animate-slide-up" style={{ animationDelay: "400ms", animationFillMode: "backwards" }}>
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-wider">Riwayat Terakhir</h3>
@@ -247,7 +214,7 @@ export default function BukuUsahaPage() {
                   <p className="text-[9px] text-slate-400 font-medium">{tx.items.length} item</p>
                 </div>
                 <div className="text-right shrink-0 ml-2">
-                  <p className="text-xs font-heading font-extrabold text-[#7B61FF]">Rp{tx.totalBruto.toLocaleString()}</p>
+                  <p className="text-xs font-heading font-extrabold text-[#008CEB]">Rp{tx.totalBruto.toLocaleString()}</p>
                   <span className={`inline-block text-[8px] px-2 py-0.5 rounded-full font-bold mt-0.5 ${tx.sisaTagihan === 0 ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400" : "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"}`}>
                     {tx.sisaTagihan === 0 ? "LUNAS" : "PIUTANG"}
                   </span>
@@ -258,7 +225,6 @@ export default function BukuUsahaPage() {
         )}
       </div>
 
-      {/* Cashflow Summary */}
       <div className="grid grid-cols-2 gap-3 animate-slide-up" style={{ animationDelay: "450ms", animationFillMode: "backwards" }}>
         <div className="premium-card p-4 flex flex-col gap-1.5 border-emerald-200/40 dark:border-emerald-900/30">
           <div className="flex items-center gap-2">

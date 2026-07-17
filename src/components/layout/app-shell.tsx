@@ -28,7 +28,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#F8F9FD] dark:bg-[#0B0C16] text-slate-900 dark:text-slate-100 flex flex-col items-center justify-start overflow-x-hidden">
       <div className="w-full max-w-md min-h-screen flex flex-col bg-[#F8F9FD] dark:bg-[#0B0C16] shadow-2xl relative border-x border-slate-100 dark:border-zinc-900">
-        <main className="flex-1 w-full pt-safe pb-[110px] flex flex-col px-4">
+        <main className="flex-1 w-full pt-[calc(env(safe-area-inset-top)+1rem)] pb-[110px] flex flex-col px-4">
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
