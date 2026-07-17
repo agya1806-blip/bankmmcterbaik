@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, ArrowLeft, KeyRound } from "lucide-react";
+
 import Link from "next/link";
 
 export default function ForgotPinPage() {
@@ -43,7 +43,7 @@ export default function ForgotPinPage() {
       <div className="w-full max-w-sm premium-card p-8 flex flex-col gap-5 animate-fade-in">
         <div className="text-center">
           <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center mx-auto mb-3">
-            <KeyRound className="w-6 h-6 text-amber-600" />
+            <span className="text-amber-600 text-2xl">🔑</span>
           </div>
           <h1 className="text-xl font-extrabold tracking-tight">Reset PIN</h1>
           <p className="text-xs text-slate-500 mt-1">Masukkan username untuk reset PIN</p>
@@ -60,7 +60,7 @@ export default function ForgotPinPage() {
         ) : step === "verify" ? (
           <form onSubmit={handleVerify} className="flex flex-col gap-4">
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔒</span>
               <input
                 type="text"
                 placeholder="Username"
@@ -80,7 +80,7 @@ export default function ForgotPinPage() {
         ) : (
           <form onSubmit={handleReset} className="flex flex-col gap-4">
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔒</span>
               <input
                 type="password"
                 placeholder="PIN Baru (4-6 digit)"
@@ -91,7 +91,7 @@ export default function ForgotPinPage() {
               />
             </div>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔒</span>
               <input
                 type="password"
                 placeholder="Konfirmasi PIN Baru"
@@ -112,7 +112,7 @@ export default function ForgotPinPage() {
         )}
 
         <Link href="/login" className="flex items-center justify-center gap-1 text-xs text-slate-400 hover:text-[#7B61FF]">
-          <ArrowLeft className="w-3 h-3" /> Kembali ke Login
+          <span className="text-xs">◀️</span> Kembali ke Login
         </Link>
       </div>
     </div>

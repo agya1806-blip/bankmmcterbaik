@@ -16,11 +16,7 @@ import { format, subDays, startOfMonth, endOfMonth, isWithinInterval, parseISO }
 import { id as idLocale } from "date-fns/locale";
 import { db, type BookOrBranch } from "@/lib/db-v4";
 import { useSessionStore } from "@/store/useSessionStore";
-import {
-  TrendingUp, TrendingDown, DollarSign, ShoppingCart, AlertTriangle,
-  Package, ArrowRight, Clock, Wallet, BarChart3, ChevronLeft, Target,
-  Users, Trophy, Bell, Calendar, Layers,
-} from "lucide-react";
+
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
   percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
@@ -147,7 +143,7 @@ export default function CabangDashboardPage() {
       <div className="flex items-center justify-between animate-fade-in">
         <div className="flex items-center gap-3">
           <button onClick={() => router.push("/buku-usaha")} className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center scale-press">
-            <ChevronLeft className="w-5 h-5" />
+            <span className="text-sm">◀</span>
           </button>
           <div>
             <p className="text-[10px] text-slate-400 font-bold">{getGreeting()}</p>
@@ -156,7 +152,7 @@ export default function CabangDashboardPage() {
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setShowNotif(!showNotif)} className="relative w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center scale-press">
-            <Bell className="w-4 h-4" />
+            <span className="text-sm">🔔</span>
             {notifCount > 0 && <span className="absolute -top-1 -right-1 badge-alert">{notifCount}</span>}
           </button>
           <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${BRANCH_COLORS[cabangSlug] || "from-[#7B61FF] to-[#FF5C00]"} flex items-center justify-center text-white text-sm font-extrabold shadow-lg shadow-indigo-500/20`}>
@@ -170,24 +166,24 @@ export default function CabangDashboardPage() {
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
             <div className="premium-card p-4 border-amber-300/40 dark:border-amber-700/40">
               <div className="flex items-center gap-2 mb-2">
-                <Bell className="w-4 h-4 text-amber-500" />
+                <span className="text-sm">🔔</span>
                 <span className="text-xs font-heading font-extrabold">Notifikasi</span>
               </div>
               {stats.stokMenipisCount > 0 && (
                 <button onClick={() => { router.push(`/buku-usaha/${cabangSlug}/inventory`); setShowNotif(false); }} className="flex items-center gap-2 w-full text-left py-1.5 text-[11px] font-medium hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg px-2 -mx-2 transition-all">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span className="text-sm">⚠️</span>
                   <span>{stats.stokMenipisCount} produk stok menipis</span>
                 </button>
               )}
               {stats.stokHabisCount > 0 && (
                 <button onClick={() => { router.push(`/buku-usaha/${cabangSlug}/inventory`); setShowNotif(false); }} className="flex items-center gap-2 w-full text-left py-1.5 text-[11px] font-medium hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg px-2 -mx-2 transition-all">
-                  <AlertTriangle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                  <span className="text-sm">⚠️</span>
                   <span>{stats.stokHabisCount} produk stok habis</span>
                 </button>
               )}
               {stats.piutangDueSoon.length > 0 && (
                 <button onClick={() => { router.push(`/buku-usaha/${cabangSlug}/transaksi`); setShowNotif(false); }} className="flex items-center gap-2 w-full text-left py-1.5 text-[11px] font-medium hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg px-2 -mx-2 transition-all">
-                  <Clock className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                  <span className="text-sm">🕐</span>
                   <span>{stats.piutangDueSoon.length} piutang jatuh tempo 3 hari</span>
                 </button>
               )}
@@ -200,7 +196,7 @@ export default function CabangDashboardPage() {
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-[#7B61FF]/20 flex items-center justify-center">
-              <Wallet className="w-3.5 h-3.5 text-[#7B61FF]" />
+              <span className="text-sm">👛</span>
             </div>
             <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Saldo</span>
           </div>
@@ -212,7 +208,7 @@ export default function CabangDashboardPage() {
       <div className="premium-card premium-card-glow p-4 animate-slide-up" style={{ animationDelay: "100ms", animationFillMode: "backwards" }}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Target className="w-4 h-4 text-[#FF5C00]" />
+            <span className="text-sm">🎯</span>
             <span className="text-xs font-heading font-extrabold">Target Bulanan</span>
           </div>
           <span className="text-[10px] text-slate-400 font-bold">{format(new Date(), "MMM yyyy", { locale: idLocale })}</span>
@@ -239,15 +235,15 @@ export default function CabangDashboardPage() {
 
       <div className="grid grid-cols-2 gap-3">
         {[
-          { label: "Hari Ini", value: `Rp${stats.totalHariIni.toLocaleString()}`, color: "emerald", icon: DollarSign, key: "hariini" },
-          { label: "Total Tx", value: String(stats.jumlahTransaksi), color: "blue", icon: ShoppingCart, key: "totaltx" },
-          { label: "Piutang", value: `Rp${stats.piutangAktif.toLocaleString()}`, color: "amber", icon: Clock, key: "piutang" },
-          { label: "Laba Bersih", value: `Rp${stats.labaBersih.toLocaleString()}`, color: stats.labaBersih >= 0 ? "emerald" : "rose", icon: stats.labaBersih >= 0 ? TrendingUp : TrendingDown, key: "laba" },
+          { label: "Hari Ini", value: `Rp${stats.totalHariIni.toLocaleString()}`, color: "emerald", icon: "💰", key: "hariini" },
+          { label: "Total Tx", value: String(stats.jumlahTransaksi), color: "blue", icon: "🛒", key: "totaltx" },
+          { label: "Piutang", value: `Rp${stats.piutangAktif.toLocaleString()}`, color: "amber", icon: "🕐", key: "piutang" },
+          { label: "Laba Bersih", value: `Rp${stats.labaBersih.toLocaleString()}`, color: stats.labaBersih >= 0 ? "emerald" : "rose", icon: stats.labaBersih >= 0 ? "📈" : "📉", key: "laba" },
         ].map((s, i) => (
           <div key={s.key} className="premium-card premium-card-glow p-4 flex flex-col gap-1 animate-slide-up" style={{ animationDelay: `${150 + i * 60}ms`, animationFillMode: "backwards" }}>
             <div className="flex items-center gap-2 mb-1">
               <div className={`w-7 h-7 rounded-lg bg-${s.color}-100 dark:bg-${s.color}-900/30 flex items-center justify-center`}>
-                <s.icon className={`w-4 h-4 text-${s.color}-500`} />
+                <span className="text-sm">{s.icon}</span>
               </div>
             </div>
             <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{s.label}</span>
@@ -258,17 +254,17 @@ export default function CabangDashboardPage() {
 
       <div className="premium-card premium-card-glow p-4 animate-slide-up" style={{ animationDelay: "350ms", animationFillMode: "backwards" }}>
         <div className="flex items-center gap-2 mb-3">
-          <Calendar className="w-4 h-4 text-violet-500" />
+          <span className="text-sm">📅</span>
           <span className="text-xs font-heading font-extrabold">Performa Bulanan</span>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-violet-50 dark:bg-violet-950/20 p-3 rounded-xl">
-            <span className="text-[9px] text-violet-600 font-bold uppercase flex items-center gap-1"><Layers className="w-2.5 h-2.5" /> Bulan Ini</span>
+            <span className="text-[9px] text-violet-600 font-bold uppercase flex items-center gap-1">📑 Bulan Ini</span>
             <p className="text-sm font-heading font-extrabold text-violet-600 dark:text-violet-400 mt-1 tracking-tight">Rp{stats.totalBulanIni.toLocaleString()}</p>
             <p className="text-[9px] text-slate-400 font-bold mt-0.5">{stats.jumlahTransaksiBulan} transaksi</p>
           </div>
           <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-            <span className="text-[9px] text-slate-500 font-bold uppercase flex items-center gap-1"><Layers className="w-2.5 h-2.5" /> Bulan Lalu</span>
+            <span className="text-[9px] text-slate-500 font-bold uppercase flex items-center gap-1">📑 Bulan Lalu</span>
             <p className="text-sm font-heading font-extrabold text-slate-600 dark:text-slate-300 mt-1 tracking-tight">Rp{stats.totalBulanLalu.toLocaleString()}</p>
             <p className="text-[9px] text-slate-400 font-bold mt-0.5">{stats.persentasePerubahan >= 0 ? "+" : ""}{stats.persentasePerubahan}% vs sebelumnya</p>
           </div>
@@ -277,7 +273,7 @@ export default function CabangDashboardPage() {
 
       <div className="premium-card premium-card-glow p-4 animate-slide-up" style={{ animationDelay: "400ms", animationFillMode: "backwards" }}>
         <div className="flex items-center gap-2 mb-3">
-          <BarChart3 className="w-4 h-4 text-[#7B61FF]" />
+          <span className="text-sm">📊</span>
           <span className="text-xs font-heading font-extrabold">Cashflow 7 Hari</span>
         </div>
         <div className="h-40">
@@ -307,7 +303,7 @@ export default function CabangDashboardPage() {
         <div className="premium-card p-4 border-amber-300/50 dark:border-amber-700/50 animate-slide-up" style={{ animationDelay: "450ms", animationFillMode: "backwards" }}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-              <AlertTriangle className="w-4 h-4 text-amber-500" />
+              <span className="text-sm">⚠️</span>
             </div>
             <div>
               <span className="text-xs font-heading font-extrabold text-amber-600 dark:text-amber-400">Stok Menipis</span>
@@ -324,7 +320,7 @@ export default function CabangDashboardPage() {
           </div>
           {stats.stokMenipisCount > 3 && (
             <button onClick={() => router.push(`/buku-usaha/${cabangSlug}/inventory`)} className="mt-3 w-full py-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 text-[10px] font-bold text-amber-600 dark:text-amber-400 flex items-center justify-center gap-1 hover:bg-amber-100 dark:hover:bg-amber-950/40 transition-all">
-              Lihat semua ({stats.stokMenipisCount}) <ArrowRight className="w-3 h-3" />
+              ▶️
             </button>
           )}
         </div>
@@ -332,17 +328,17 @@ export default function CabangDashboardPage() {
 
       <div className="grid grid-cols-3 gap-2.5">
         {[
-          { label: "Kasir", slug: "kasir", icon: ShoppingCart, color: "from-[#7B61FF] to-[#FF5C00]", badge: 0 },
-          { label: "Barang", slug: "inventory", icon: Package, color: "from-blue-500 to-indigo-500", badge: stats.stokMenipisCount },
-          { label: "CRM", slug: "pelanggan", icon: Users, color: "from-emerald-400 to-teal-500", badge: 0 },
-          { label: "Cashflow", slug: "cashflow", icon: Wallet, color: "from-amber-400 to-orange-500", badge: 0 },
-          { label: "Transaksi", slug: "transaksi", icon: Clock, color: "from-pink-400 to-rose-500", badge: 0 },
-          { label: "Laporan", slug: "laporan", icon: BarChart3, color: "from-purple-400 to-violet-500", badge: 0 },
+          { label: "Kasir", slug: "kasir", icon: "🛒", color: "from-[#7B61FF] to-[#FF5C00]", badge: 0 },
+          { label: "Barang", slug: "inventory", icon: "📦", color: "from-blue-500 to-indigo-500", badge: stats.stokMenipisCount },
+          { label: "CRM", slug: "pelanggan", icon: "👥", color: "from-emerald-400 to-teal-500", badge: 0 },
+          { label: "Cashflow", slug: "cashflow", icon: "👛", color: "from-amber-400 to-orange-500", badge: 0 },
+          { label: "Transaksi", slug: "transaksi", icon: "🕐", color: "from-pink-400 to-rose-500", badge: 0 },
+          { label: "Laporan", slug: "laporan", icon: "📊", color: "from-purple-400 to-violet-500", badge: 0 },
         ].map((btn, i) => (
           <button key={btn.slug} onClick={() => router.push(`/buku-usaha/${cabangSlug}/${btn.slug}`)} className="premium-card premium-card-glow p-3 flex flex-col items-center gap-1.5 scale-press animate-slide-up relative" style={{ animationDelay: `${500 + i * 60}ms`, animationFillMode: "backwards" }}>
             {btn.badge > 0 && <span className="absolute top-1.5 right-1.5 badge-alert">{btn.badge}</span>}
             <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${btn.color} flex items-center justify-center text-white shadow-md transition-transform duration-300 hover:scale-110`}>
-              <btn.icon className="w-4 h-4" />
+              <span className="text-white text-sm">{btn.icon}</span>
             </div>
             <span className="text-[10px] font-heading font-bold text-slate-600 dark:text-slate-300">{btn.label}</span>
           </button>
@@ -352,7 +348,7 @@ export default function CabangDashboardPage() {
       {topProduk.length > 0 && (
         <div className="premium-card premium-card-glow p-4 animate-slide-up" style={{ animationDelay: "600ms", animationFillMode: "backwards" }}>
           <div className="flex items-center gap-2 mb-3">
-            <Trophy className="w-4 h-4 text-amber-500" />
+            <span className="text-sm">🏆</span>
             <span className="text-xs font-heading font-extrabold">Produk Terlaris</span>
           </div>
           <div className="space-y-2">
@@ -374,7 +370,7 @@ export default function CabangDashboardPage() {
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-wider">Riwayat Terakhir</h3>
           <button onClick={() => router.push(`/buku-usaha/${cabangSlug}/transaksi`)} className="text-[10px] font-bold text-[#7B61FF] flex items-center gap-1 hover:gap-1.5 transition-all">
-            Lihat semua <ArrowRight className="w-3 h-3" />
+            Lihat semua ▶️
           </button>
         </div>
         {recentTx.length === 0 ? (

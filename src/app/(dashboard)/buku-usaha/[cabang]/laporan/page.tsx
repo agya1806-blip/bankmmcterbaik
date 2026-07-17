@@ -4,9 +4,6 @@ import React, { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type BookOrBranch } from "@/lib/db-v4";
-import {
-  ArrowLeft, TrendingUp, TrendingDown, DollarSign,
-} from "lucide-react";
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
   percetakan: "usaha-percetakan",
@@ -162,7 +159,7 @@ export default function LaporanPage() {
           onClick={() => router.push(`/buku-usaha/${cabangSlug}`)}
           className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <span className="text-sm">◀️</span>
         </button>
         <h1 className="text-lg font-heading font-extrabold tracking-tight">Laporan Keuangan</h1>
         <button

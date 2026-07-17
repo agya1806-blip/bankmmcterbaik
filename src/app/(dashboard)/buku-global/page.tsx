@@ -9,13 +9,6 @@ import { executeTransfer } from "@/engine/double-entry";
 import { exportTransactionsExcel, exportCashflowExcel } from "@/lib/export-utils";
 import { db, type BookOrBranch, BOOK_LABELS } from "@/lib/db-v4";
 import { useLiveQuery } from "dexie-react-hooks";
-import {
-  LogOut, Download, Upload, ArrowRightLeft, FileSpreadsheet,
-  Moon, Sun, Shield, Database, AlertTriangle, TrendingUp,
-  TrendingDown, DollarSign, Users, Package, Clock, Eye,
-  ChevronRight, X, Search, Plus, Trash2, CheckCircle,
-  Wallet, CreditCard, History, Settings, Zap, ShoppingCart,
-} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import PinLock from "@/components/pin-lock";
 
@@ -301,12 +294,12 @@ export default function BukuGlobalPage() {
   /* TAB CONFIG                                             */
   /* ═══════════════════════════════════════════════════════ */
 
-  const tabs: { key: TabKey; label: string; icon: React.ElementType }[] = [
-    { key: "dashboard", label: "Ringkasan", icon: TrendingUp },
-    { key: "piutang", label: "Piutang", icon: CreditCard },
-    { key: "pelanggan", label: "Pelanggan", icon: Users },
-    { key: "audit", label: "Audit Log", icon: History },
-    { key: "settings", label: "Pengaturan", icon: Settings },
+  const tabs: { key: TabKey; label: string; icon: string }[] = [
+    { key: "dashboard", label: "Ringkasan", icon: "📈" },
+    { key: "piutang", label: "Piutang", icon: "💳" },
+    { key: "pelanggan", label: "Pelanggan", icon: "👥" },
+    { key: "audit", label: "Audit Log", icon: "📜" },
+    { key: "settings", label: "Pengaturan", icon: "⚙️" },
   ];
 
   /* ═══════════════════════════════════════════════════════ */
@@ -326,7 +319,7 @@ export default function BukuGlobalPage() {
         </div>
         <div className="flex items-center gap-2">
           <button onClick={toggleTheme} className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md">
-            {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+            {theme === "dark" ? <span className="text-sm text-amber-400">☀️</span> : <span className="text-sm text-slate-600">🌙</span>}
           </button>
           <div className="text-right">
             <span className="text-[10px] text-slate-400">Admin</span>
@@ -338,7 +331,6 @@ export default function BukuGlobalPage() {
       {/* ─── Tab Bar ─── */}
       <div className="flex gap-1 overflow-x-auto px-1 pb-1 -mx-1 scrollbar-hide">
         {tabs.map((t) => {
-          const Icon = t.icon;
           return (
             <button
               key={t.key}
@@ -349,7 +341,7 @@ export default function BukuGlobalPage() {
                   : "bg-white dark:bg-[#131527] text-slate-400"
               }`}
             >
-              <Icon className="w-3.5 h-3.5" />
+              <span className="text-sm">{t.icon}</span>
               {t.label}
             </button>
           );
@@ -366,7 +358,7 @@ export default function BukuGlobalPage() {
             <div className="premium-card p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <div className="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-                  <DollarSign className="w-3 h-3 text-emerald-500" />
+                  <span className="text-sm text-emerald-500">💰</span>
                 </div>
                 <span className="text-[9px] text-slate-400 font-bold uppercase">Pendapatan</span>
               </div>
@@ -375,7 +367,7 @@ export default function BukuGlobalPage() {
             <div className="premium-card p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${dashData.labaBersih >= 0 ? "bg-emerald-100 dark:bg-emerald-900/30" : "bg-rose-100 dark:bg-rose-900/30"}`}>
-                  {dashData.labaBersih >= 0 ? <TrendingUp className="w-3 h-3 text-emerald-500" /> : <TrendingDown className="w-3 h-3 text-rose-500" />}
+                  {dashData.labaBersih >= 0 ? <span className="text-sm text-emerald-500">📈</span> : <span className="text-sm text-rose-500">📉</span>}
                 </div>
                 <span className="text-[9px] text-slate-400 font-bold uppercase">Laba Bersih</span>
               </div>
@@ -386,7 +378,7 @@ export default function BukuGlobalPage() {
             <div className="premium-card p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <div className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                  <CreditCard className="w-3 h-3 text-amber-500" />
+                  <span className="text-sm text-amber-500">💳</span>
                 </div>
                 <span className="text-[9px] text-slate-400 font-bold uppercase">Piutang</span>
               </div>
@@ -396,7 +388,7 @@ export default function BukuGlobalPage() {
             <div className="premium-card p-3">
               <div className="flex items-center gap-1.5 mb-1">
                 <div className="w-6 h-6 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
-                  <AlertTriangle className="w-3 h-3 text-rose-500" />
+                  <span className="text-sm text-rose-500">⚠️</span>
                 </div>
                 <span className="text-[9px] text-slate-400 font-bold uppercase">Stok Alert</span>
               </div>
@@ -493,7 +485,7 @@ export default function BukuGlobalPage() {
           {/* Filters */}
           <div className="space-y-2">
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+              <span className="absolute left-3 top-2.5 text-sm text-slate-400">🔍</span>
               <input type="text" placeholder="Cari nama pelanggan..." value={piutangSearch} onChange={(e) => setPiutangSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 text-xs bg-white dark:bg-[#131527] rounded-xl border-none outline-none focus:ring-1 focus:ring-[#7B61FF]" />
             </div>
@@ -537,7 +529,7 @@ export default function BukuGlobalPage() {
                     <div className="flex gap-2">
                       <button onClick={() => setSelectedPiutang(selectedPiutang === p.id ? null : p.id)}
                         className="flex-1 py-1.5 bg-[#7B61FF] text-white rounded-xl text-[10px] font-bold flex items-center justify-center gap-1">
-                        <CreditCard className="w-3 h-3" /> Bayar
+                        <span className="text-sm">💳</span> Bayar
                       </button>
                       <a href={`https://api.whatsapp.com/send?phone=${p.customerWA.replace(/[^0-9]/g, "")}&text=${encodeURIComponent(`Halo ${p.customerNama}, Anda memiliki piutang sebesar Rp${p.sisaPiutang.toLocaleString()}. Mohon segera dilunasi. Terima kasih.`)}`}
                         target="_blank" rel="noopener noreferrer"
@@ -573,7 +565,7 @@ export default function BukuGlobalPage() {
           {/* Filters */}
           <div className="space-y-2">
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+              <span className="absolute left-3 top-2.5 text-sm text-slate-400">🔍</span>
               <input type="text" placeholder="Cari nama atau nomor HP..." value={pelangganSearch} onChange={(e) => setPelangganSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 text-xs bg-white dark:bg-[#131527] rounded-xl border-none outline-none focus:ring-1 focus:ring-[#7B61FF]" />
             </div>
@@ -594,7 +586,7 @@ export default function BukuGlobalPage() {
           {/* Stats */}
           <div className="premium-card p-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-[#7B61FF]" />
+              <span className="text-sm text-[#7B61FF]">👥</span>
               <span className="text-xs font-bold">{filteredPelanggan.length} Pelanggan</span>
             </div>
             <div className="text-right">
@@ -646,7 +638,7 @@ export default function BukuGlobalPage() {
           {/* Filters */}
           <div className="space-y-2">
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+              <span className="absolute left-3 top-2.5 text-sm text-slate-400">🔍</span>
               <input type="text" placeholder="Cari user atau aksi..." value={auditSearch} onChange={(e) => setAuditSearch(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 text-xs bg-white dark:bg-[#131527] rounded-xl border-none outline-none focus:ring-1 focus:ring-[#7B61FF]" />
             </div>
@@ -717,7 +709,7 @@ export default function BukuGlobalPage() {
           <button onClick={toggleTheme}
             className="premium-card p-3 flex items-center gap-3 w-full active:scale-[0.98]">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-md">
-              {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              {theme === "dark" ? <span className="text-sm">☀️</span> : <span className="text-sm">🌙</span>}
             </div>
             <div className="flex-1 text-left">
               <span className="text-xs font-bold">Dark Mode</span>
@@ -732,7 +724,7 @@ export default function BukuGlobalPage() {
           <div className="premium-card p-3 space-y-2">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white shadow-md">
-                <Database className="w-5 h-5" />
+                <span className="text-sm">🗄️</span>
               </div>
               <div>
                 <span className="text-xs font-bold">Backup & Restore</span>
@@ -745,12 +737,12 @@ export default function BukuGlobalPage() {
             <div className="flex gap-2">
               <button onClick={handleBackup} disabled={isProcessing}
                 className="flex-1 py-2.5 rounded-xl bg-blue-500 text-white font-bold text-xs active:scale-[0.98] flex items-center justify-center gap-1.5">
-                <Download className="w-3.5 h-3.5" />
+                <span className="text-sm">⬇️</span>
                 {isProcessing ? "..." : "Backup"}
               </button>
               <button onClick={() => fileInputRef.current?.click()} disabled={isProcessing}
                 className="flex-1 py-2.5 rounded-xl bg-emerald-500 text-white font-bold text-xs active:scale-[0.98] flex items-center justify-center gap-1.5">
-                <Upload className="w-3.5 h-3.5" /> Restore
+                <span className="text-sm">⬆️</span> Restore
               </button>
             </div>
             <input ref={fileInputRef} type="file" accept=".enc" className="hidden" onChange={handleRestore} />
@@ -760,7 +752,7 @@ export default function BukuGlobalPage() {
           <div className="premium-card p-3 space-y-2">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white shadow-md">
-                <ArrowRightLeft className="w-5 h-5" />
+                <span className="text-sm">↔️</span>
               </div>
               <div>
                 <span className="text-xs font-bold">Transfer Antar Cabang</span>
@@ -800,7 +792,7 @@ export default function BukuGlobalPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white shadow-md">
-                  <Zap className="w-5 h-5" />
+                  <span className="text-sm">⚡</span>
                 </div>
                 <div>
                   <span className="text-xs font-bold">Template Cepat</span>
@@ -809,7 +801,7 @@ export default function BukuGlobalPage() {
               </div>
               <button onClick={() => setShowQuickOrderModal(true)}
                 className="p-2 bg-[#7B61FF] text-white rounded-full shadow-md">
-                <Plus className="w-4 h-4" />
+                <span className="text-sm">➕</span>
               </button>
             </div>
             {allQuickOrders.length > 0 && (
@@ -823,7 +815,7 @@ export default function BukuGlobalPage() {
                       </p>
                     </div>
                     <button onClick={() => handleDeleteQuickOrder(qo.id)} className="p-1 text-rose-400">
-                      <Trash2 className="w-3 h-3" />
+                      <span className="text-sm">🗑️</span>
                     </button>
                   </div>
                 ))}
@@ -835,7 +827,7 @@ export default function BukuGlobalPage() {
           <div className="premium-card p-3 space-y-2">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-md">
-                <FileSpreadsheet className="w-5 h-5" />
+                <span className="text-sm">📊</span>
               </div>
               <div>
                 <span className="text-xs font-bold">Export Data</span>
@@ -857,7 +849,7 @@ export default function BukuGlobalPage() {
           {/* Logout */}
           <button onClick={handleLogout}
             className="premium-card p-3 flex items-center gap-3 text-rose-500 active:scale-[0.98] w-full">
-            <LogOut className="w-5 h-5" />
+            <span className="text-sm">🚪</span>
             <span className="text-xs font-bold">Keluar dari Akun</span>
           </button>
         </div>
@@ -877,7 +869,7 @@ export default function BukuGlobalPage() {
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-extrabold">Template Cepat Baru</h3>
                 <button onClick={() => setShowQuickOrderModal(false)} className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800">
-                  <X className="w-4 h-4" />
+                  <span className="text-sm">✕</span>
                 </button>
               </div>
               <input type="text" placeholder="Label template" value={quickOrderLabel}
@@ -893,7 +885,7 @@ export default function BukuGlobalPage() {
                 <input type="number" placeholder="Harga" value={qoItemPrice || ""}
                   onChange={(e) => setQoItemPrice(Number(e.target.value))} className="w-24 px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
                 <button onClick={handleAddQuickOrder} className="p-2 bg-[#7B61FF] text-white rounded-xl">
-                  <Plus className="w-4 h-4" />
+                  <span className="text-sm">➕</span>
                 </button>
               </div>
               {quickOrderItems.length > 0 && (
@@ -904,7 +896,7 @@ export default function BukuGlobalPage() {
                       <div className="flex items-center gap-2">
                         <span className="font-bold">Rp{item.price.toLocaleString()}</span>
                         <button onClick={() => setQuickOrderItems((prev) => prev.filter((_, i) => i !== idx))} className="text-rose-400">
-                          <Trash2 className="w-3 h-3" />
+                          <span className="text-sm">🗑️</span>
                         </button>
                       </div>
                     </div>

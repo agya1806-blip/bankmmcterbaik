@@ -4,10 +4,6 @@ import React, { useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type BookOrBranch, type Transaction, type ProductionStatus } from '@/lib/db-v4';
-import {
-  ArrowLeft, Printer, Layers, ClipboardList, Send,
-  Image, FileText, FileSpreadsheet, Phone,
-} from 'lucide-react';
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
   percetakan: 'usaha-percetakan',
@@ -276,7 +272,7 @@ export default function TransaksiDanProduksiPage() {
           onClick={() => router.push(`/buku-usaha/${cabangSlug}`)}
           className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <span className="text-sm">◀️</span>
         </button>
         <h1 className="text-lg font-heading font-extrabold tracking-tight capitalize">Hub Transaksi</h1>
         <div className="w-9 h-9" />
@@ -291,7 +287,7 @@ export default function TransaksiDanProduksiPage() {
               : 'text-slate-400'
           }`}
         >
-          <ClipboardList className="w-4 h-4" />
+          <span className="text-sm">📋</span>
           Riwayat Kasir
         </button>
         <button
@@ -302,7 +298,7 @@ export default function TransaksiDanProduksiPage() {
               : 'text-slate-400'
           }`}
         >
-          <Layers className="w-4 h-4" />
+          <span className="text-sm">📑</span>
           Kanban Alur Kerja
         </button>
       </div>
@@ -397,7 +393,7 @@ export default function TransaksiDanProduksiPage() {
                           }}
                           className="py-2 bg-slate-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center gap-1 font-bold text-[10px]"
                         >
-                          <Printer className="w-3.5 h-3.5 text-slate-500" /> Struk
+                          <span className="text-sm text-slate-500">🖨️</span> Struk
                         </button>
                       </div>
                       <div className="grid grid-cols-4 gap-1.5 pt-1">
@@ -406,7 +402,7 @@ export default function TransaksiDanProduksiPage() {
                           className="py-2 bg-amber-400 text-white text-[9px] font-bold rounded-xl active:scale-95 transition-all flex flex-col items-center leading-tight"
                           title="Export Gambar PNG"
                         >
-                          <Image className="w-3 h-3 mb-0.5" />
+                          <span className="text-sm mb-0.5">🖼️</span>
                           PNG
                         </button>
                         <button
@@ -414,7 +410,7 @@ export default function TransaksiDanProduksiPage() {
                           className="py-2 bg-rose-500 text-white text-[9px] font-bold rounded-xl active:scale-95 transition-all flex flex-col items-center leading-tight"
                           title="Export PDF"
                         >
-                          <FileText className="w-3 h-3 mb-0.5" />
+                          <span className="text-sm mb-0.5">📄</span>
                           PDF
                         </button>
                         <button
@@ -422,7 +418,7 @@ export default function TransaksiDanProduksiPage() {
                           className="py-2 bg-emerald-500 text-white text-[9px] font-bold rounded-xl active:scale-95 transition-all flex flex-col items-center leading-tight"
                           title="Kirim WhatsApp"
                         >
-                          <Phone className="w-3 h-3 mb-0.5" />
+                          <span className="text-sm mb-0.5">📞</span>
                           WA
                         </button>
                         <button
@@ -430,7 +426,7 @@ export default function TransaksiDanProduksiPage() {
                           className="py-2 bg-blue-500 text-white text-[9px] font-bold rounded-xl active:scale-95 transition-all flex flex-col items-center leading-tight"
                           title="Export Excel"
                         >
-                          <FileSpreadsheet className="w-3 h-3 mb-0.5" />
+                          <span className="text-sm mb-0.5">📊</span>
                           XLSX
                         </button>
                       </div>

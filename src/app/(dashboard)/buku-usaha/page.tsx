@@ -11,12 +11,7 @@ import { format, subDays, parseISO } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { db, type BookOrBranch } from "@/lib/db-v4";
 import { useSessionStore } from "@/store/useSessionStore";
-import {
-  TrendingUp, TrendingDown, DollarSign, ShoppingCart, Clock,
-  Package, ArrowRight, Wallet, BarChart3, ChevronRight,
-  Target, Users, Bell, Calendar, Layers, Store, Settings,
-  ArrowUpRight, ArrowDownRight, Sparkles,
-} from "lucide-react";
+
 
 interface BranchInfo {
   slug: string;
@@ -165,11 +160,11 @@ export default function BukuUsahaPage() {
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setShowNotif(!showNotif)} className="relative w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center scale-press">
-            <Bell className="w-4 h-4" />
+            <span className="text-sm">🔔</span>
             {notifCount > 0 && <span className="absolute -top-1 -right-1 badge-alert">{notifCount}</span>}
           </button>
           <button onClick={() => router.push("/buku-global")} className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center scale-press">
-            <Settings className="w-4 h-4" />
+            <span className="text-sm">⚙️</span>
           </button>
         </div>
       </div>
@@ -180,7 +175,7 @@ export default function BukuUsahaPage() {
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
             <div className="premium-card p-4 border-amber-300/40 dark:border-amber-700/40">
               <div className="flex items-center gap-2 mb-2">
-                <Bell className="w-4 h-4 text-amber-500" />
+                <span className="text-sm">🔔</span>
                 <span className="text-xs font-heading font-extrabold">Notifikasi Global</span>
               </div>
               {stats.stokMenipisCount > 0 && <p className="text-[11px] py-1 flex items-center gap-2"><span className="badge-alert">{stats.stokMenipisCount}</span> produk stok menipis</p>}
@@ -196,7 +191,7 @@ export default function BukuUsahaPage() {
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg bg-[#7B61FF]/20 flex items-center justify-center">
-              <Wallet className="w-3.5 h-3.5 text-[#7B61FF]" />
+              <span className="text-sm">👛</span>
             </div>
             <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Saldo Semua Cabang</span>
           </div>
@@ -207,15 +202,15 @@ export default function BukuUsahaPage() {
       {/* Stats 2x2 */}
       <div className="grid grid-cols-2 gap-3">
         {[
-          { label: "Hari Ini", value: `Rp${stats.totalHariIni.toLocaleString()}`, color: "emerald", icon: DollarSign },
-          { label: "Total Transaksi", value: String(stats.jumlahTransaksi), color: "blue", icon: ShoppingCart },
-          { label: "Piutang Aktif", value: `Rp${stats.piutangAktif.toLocaleString()}`, color: "amber", icon: Clock },
-          { label: "Laba Bersih", value: `Rp${stats.labaBersih.toLocaleString()}`, color: stats.labaBersih >= 0 ? "emerald" : "rose", icon: stats.labaBersih >= 0 ? TrendingUp : TrendingDown },
+          { label: "Hari Ini", value: `Rp${stats.totalHariIni.toLocaleString()}`, color: "emerald", icon: "💰" },
+          { label: "Total Transaksi", value: String(stats.jumlahTransaksi), color: "blue", icon: "🛒" },
+          { label: "Piutang Aktif", value: `Rp${stats.piutangAktif.toLocaleString()}`, color: "amber", icon: "🕐" },
+          { label: "Laba Bersih", value: `Rp${stats.labaBersih.toLocaleString()}`, color: stats.labaBersih >= 0 ? "emerald" : "rose", icon: stats.labaBersih >= 0 ? "📈" : "📉" },
         ].map((s, i) => (
           <div key={s.label} className="premium-card premium-card-glow p-4 flex flex-col gap-1 animate-slide-up" style={{ animationDelay: `${100 + i * 60}ms`, animationFillMode: "backwards" }}>
             <div className="flex items-center gap-2 mb-1">
               <div className={`w-7 h-7 rounded-lg bg-${s.color}-100 dark:bg-${s.color}-900/30 flex items-center justify-center`}>
-                <s.icon className={`w-4 h-4 text-${s.color}-500`} />
+                <span className="text-sm">{s.icon}</span>
               </div>
             </div>
             <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{s.label}</span>
@@ -227,16 +222,16 @@ export default function BukuUsahaPage() {
       {/* Bulan Ini vs Bulan Lalu */}
       <div className="premium-card premium-card-glow p-4 animate-slide-up" style={{ animationDelay: "350ms", animationFillMode: "backwards" }}>
         <div className="flex items-center gap-2 mb-3">
-          <Calendar className="w-4 h-4 text-violet-500" />
+          <span className="text-sm">📅</span>
           <span className="text-xs font-heading font-extrabold">Performa Bulanan</span>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-violet-50 dark:bg-violet-950/20 p-3 rounded-xl">
-            <span className="text-[9px] text-violet-600 font-bold uppercase flex items-center gap-1"><Layers className="w-2.5 h-2.5" /> Bulan Ini</span>
+            <span className="text-[9px] text-violet-600 font-bold uppercase flex items-center gap-1">📑 Bulan Ini</span>
             <p className="text-sm font-heading font-extrabold text-violet-600 dark:text-violet-400 mt-1 tracking-tight">Rp{stats.totalBulanIni.toLocaleString()}</p>
           </div>
           <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
-            <span className="text-[9px] text-slate-500 font-bold uppercase flex items-center gap-1"><Layers className="w-2.5 h-2.5" /> Bulan Lalu</span>
+            <span className="text-[9px] text-slate-500 font-bold uppercase flex items-center gap-1">📑 Bulan Lalu</span>
             <p className="text-sm font-heading font-extrabold text-slate-600 dark:text-slate-300 mt-1 tracking-tight">Rp{stats.totalBulanLalu.toLocaleString()}</p>
             <p className="text-[9px] text-slate-400 font-bold mt-0.5">{stats.persentasePerubahan >= 0 ? "+" : ""}{stats.persentasePerubahan}% vs sebelumnya</p>
           </div>
@@ -246,7 +241,7 @@ export default function BukuUsahaPage() {
       {/* Chart */}
       <div className="premium-card premium-card-glow p-4 animate-slide-up" style={{ animationDelay: "400ms", animationFillMode: "backwards" }}>
         <div className="flex items-center gap-2 mb-3">
-          <BarChart3 className="w-4 h-4 text-[#7B61FF]" />
+          <span className="text-sm">📊</span>
           <span className="text-xs font-heading font-extrabold">Cashflow Global 7 Hari</span>
         </div>
         <div className="h-40">
@@ -275,7 +270,7 @@ export default function BukuUsahaPage() {
       {/* Pilih Unit Usaha */}
       <div className="animate-slide-up" style={{ animationDelay: "450ms", animationFillMode: "backwards" }}>
         <div className="flex items-center gap-2 mb-3">
-          <Store className="w-4 h-4 text-[#FF5C00]" />
+          <span className="text-sm">🏪</span>
           <span className="text-xs font-heading font-extrabold">Unit Usaha</span>
           <span className="text-[9px] text-slate-400 font-bold ml-auto">{BRANCHES.length} cabang</span>
         </div>
@@ -293,7 +288,7 @@ export default function BukuUsahaPage() {
                   <p className="text-[11px] font-heading font-bold line-clamp-1">{b.label}</p>
                   <p className="text-[9px] text-slate-400">{b.jumlahTx} transaksi</p>
                 </div>
-                <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+                <span className="text-sm">▶</span>
               </div>
               <div className="grid grid-cols-2 gap-1.5">
                 <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-lg px-2 py-1">

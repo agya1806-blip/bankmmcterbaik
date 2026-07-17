@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { Lock, Eye, EyeOff, X } from "lucide-react";
+
 import { motion, AnimatePresence } from "framer-motion";
 
 interface PinLockProps {
@@ -62,7 +62,7 @@ export default function PinLock({ onSuccess, onCancel, title = "Masukkan PIN", s
       >
         <div className="text-center space-y-2">
           <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#7B61FF] to-[#FF5C00] flex items-center justify-center mx-auto">
-            <Lock className="w-6 h-6 text-white" />
+            <span className="text-white text-2xl">🔒</span>
           </div>
           <h3 className="text-sm font-extrabold">{title}</h3>
           <p className="text-[10px] text-slate-400">{subtitle}</p>

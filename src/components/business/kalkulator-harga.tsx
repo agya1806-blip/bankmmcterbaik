@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Calculator, Ruler, Smartphone, Cpu, Coffee, Shirt } from "lucide-react";
+
 
 interface KalkulatorProps {
   cabangSlug: string;
@@ -37,7 +37,7 @@ function ModalWrapper({ children, onClose, title, icon }: { children: React.Reac
             <h3 className="text-sm font-extrabold">{title}</h3>
           </div>
           <button onClick={onClose} className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800">
-            <X className="w-4 h-4" />
+            <span className="text-xs">✕</span>
           </button>
         </div>
         {children}
@@ -90,7 +90,7 @@ function PrintingCalc({ onClose, onResult }: { onClose: () => void; onResult: (n
     : `Cetak Buku | ${halaman}hlm x${kertasPerLembar} kertas | Cover+Jilid`;
 
   return (
-    <ModalWrapper onClose={onClose} title="Kalkulator Percetakan" icon={<Ruler className="w-4 h-4 text-blue-500" />}>
+    <ModalWrapper onClose={onClose} title="Kalkulator Percetakan" icon={<span className="text-blue-500 text-sm">📏</span>}>
       <div className="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-zinc-800 p-1 rounded-2xl">
         <button onClick={() => setTipe("meteran")} className={`py-2 rounded-xl text-[10px] font-bold transition-all ${tipe === "meteran" ? "bg-white dark:bg-[#131527] shadow-sm" : "text-slate-400"}`}>Cetak Meteran</button>
         <button onClick={() => setTipe("buku")} className={`py-2 rounded-xl text-[10px] font-bold transition-all ${tipe === "buku" ? "bg-white dark:bg-[#131527] shadow-sm" : "text-slate-400"}`}>Cetak Buku</button>
@@ -154,7 +154,7 @@ function GadgetCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: 
   ].filter(Boolean).join(" | ");
 
   return (
-    <ModalWrapper onClose={onClose} title="Kalkulator Gadget" icon={<Smartphone className="w-4 h-4 text-indigo-500" />}>
+    <ModalWrapper onClose={onClose} title="Kalkulator Gadget" icon={<span className="text-indigo-500 text-sm">📱</span>}>
       <div className="space-y-3 text-xs">
         <InputRow label="Nama Unit" value={namaUnit} onChange={(v) => setNamaUnit(String(v))} type="text" placeholder="iPhone 14 Pro Max" />
         <div className="grid grid-cols-2 gap-3">
@@ -222,7 +222,7 @@ function LaptopCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: 
   const specParts = parts.map((p) => `${p.nama} (SN:${p.sn}) - Rp${p.harga.toLocaleString()}`).join(" | ");
 
   return (
-    <ModalWrapper onClose={onClose} title="Kalkulator Komputer Rakitan" icon={<Cpu className="w-4 h-4 text-violet-500" />}>
+    <ModalWrapper onClose={onClose} title="Kalkulator Komputer Rakitan" icon={<span className="text-violet-500 text-sm">💻</span>}>
       <div className="space-y-3 text-xs">
         <div className="bg-amber-50 dark:bg-amber-950/20 p-2 rounded-xl text-[9px] text-amber-600 font-medium">
           Masukkan part PC rakitan satu per satu dengan SN-nya
@@ -247,7 +247,7 @@ function LaptopCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: 
                 </div>
                 <span className="text-[10px] font-bold text-[#7B61FF] shrink-0 ml-2">Rp{p.harga.toLocaleString()}</span>
                 <button onClick={() => removePart(i)} className="text-rose-500 ml-1 p-1">
-                  <X className="w-3 h-3" />
+                  <span className="text-xs">✕</span>
                 </button>
               </div>
             ))}
@@ -296,7 +296,7 @@ function CafeCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: st
   const isLowMargin = hargaJual > 0 && hasil > hargaJual * 1.5;
 
   return (
-    <ModalWrapper onClose={onClose} title="Kalkulator Menu Kedai Kopi" icon={<Coffee className="w-4 h-4 text-orange-500" />}>
+    <ModalWrapper onClose={onClose} title="Kalkulator Menu Kedai Kopi" icon={<span className="text-orange-500 text-sm">☕</span>}>
       <div className="space-y-3 text-xs">
         <InputRow label="Nama Menu" value={namaMenu} onChange={(v) => setNamaMenu(String(v))} type="text" placeholder="Es Kopi Susu" />
         <InputRow label="Harga Jual Ideal" value={hargaJual} onChange={setHargaJual} suffix="Rp" />
@@ -321,7 +321,7 @@ function CafeCalc({ onClose, onResult }: { onClose: () => void; onResult: (n: st
                 <span className="text-[10px] font-bold">{b.nama} ({b.gramasi}g)</span>
                 <div className="flex items-center gap-2">
                   <span className="text-[9px] text-slate-400">Rp{(b.gramasi * b.hargaPerGram).toLocaleString()}</span>
-                  <button onClick={() => removeBahan(i)} className="text-rose-500"><X className="w-3 h-3" /></button>
+                  <button onClick={() => removeBahan(i)} className="text-rose-500"><span className="text-xs">✕</span></button>
                 </div>
               </div>
             ))}
@@ -374,7 +374,7 @@ function FashionCalc({ onClose, onResult }: { onClose: () => void; onResult: (n:
   const hasilPerUnit = qtyProduksi > 0 ? Math.round(hasilKonveksi / qtyProduksi) : 0;
 
   return (
-    <ModalWrapper onClose={onClose} title="Kalkulator Fashion & Konveksi" icon={<Shirt className="w-4 h-4 text-pink-500" />}>
+    <ModalWrapper onClose={onClose} title="Kalkulator Fashion & Konveksi" icon={<span className="text-pink-500 text-sm">👔</span>}>
       <div className="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-zinc-800 p-1 rounded-2xl mb-3">
         <button onClick={() => setTipe("retail")} className={`py-2 rounded-xl text-[10px] font-bold transition-all ${tipe === "retail" ? "bg-white dark:bg-[#131527] shadow-sm" : "text-slate-400"}`}>Retail SKU</button>
         <button onClick={() => setTipe("konveksi")} className={`py-2 rounded-xl text-[10px] font-bold transition-all ${tipe === "konveksi" ? "bg-white dark:bg-[#131527] shadow-sm" : "text-slate-400"}`}>Proyek Konveksi</button>

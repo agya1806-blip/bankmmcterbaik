@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type BookOrBranch, type Customer } from '@/lib/db-v4';
-import { ArrowLeft, UserPlus, Phone, MessageSquare, Search, DollarSign } from 'lucide-react';
+
 
 const BRANCH_MAP: Record<string, BookOrBranch> = {
   percetakan: 'usaha-percetakan',
@@ -78,19 +78,19 @@ export default function PelangganCRMPage() {
           onClick={() => router.push(`/buku-usaha/${cabangSlug}`)}
           className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md"
         >
-          <ArrowLeft className="w-5 h-5" />
+          ◀️
         </button>
         <h1 className="text-lg font-extrabold tracking-tight capitalize">CRM Pelanggan</h1>
         <button
           onClick={() => setShowAddModal(true)}
           className="p-2 bg-[#7B61FF] text-white rounded-full shadow-md hover:scale-105 transition-transform"
         >
-          <UserPlus className="w-5 h-5" />
+          👤
         </button>
       </div>
 
       <div className="relative">
-        <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+        <span className="absolute left-3 top-2.5 text-sm text-slate-400">🔍</span>
         <input
           type="text"
           placeholder="Cari nama atau nomor HP..."
@@ -121,14 +121,14 @@ export default function PelangganCRMPage() {
                   <div>
                     <h4 className="text-xs font-heading font-extrabold">{c.nama}</h4>
                     <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
-                      <Phone className="w-3 h-3" /> {c.noWA}
+                      📞 {c.noWA}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <span className="text-[8px] uppercase font-bold text-slate-400 tracking-wider">Total Belanja</span>
                   <p className="text-xs font-heading font-extrabold text-[#FF5C00] flex items-center gap-1 justify-end">
-                    <DollarSign className="w-3 h-3" /> Rp{c.totalBelanja.toLocaleString()}
+                    💰 Rp{c.totalBelanja.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -142,7 +142,7 @@ export default function PelangganCRMPage() {
                     }}
                     className="w-full py-2.5 bg-emerald-500 text-white rounded-xl flex items-center justify-center gap-1.5 font-bold text-[10px] hover:bg-emerald-600 active:scale-[0.97] transition-all duration-200"
                   >
-                    <MessageSquare className="w-3.5 h-3.5" /> Kirim WA Promosi
+                     💬 Kirim WA Promosi
                   </button>
                 </div>
               )}
@@ -167,7 +167,7 @@ export default function PelangganCRMPage() {
               onClick={() => handleBroadcast(selectedCustomer)}
               className="px-3 py-1.5 bg-[#7B61FF] text-white rounded-xl text-xs font-bold flex items-center gap-1"
             >
-              <MessageSquare className="w-3.5 h-3.5" /> Kirim
+               💬 Kirim
             </button>
           </div>
         </div>

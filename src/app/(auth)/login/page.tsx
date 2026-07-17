@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
-import { Lock, User } from "lucide-react";
+
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,7 +32,7 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} className="w-full max-w-sm premium-card premium-card-glow p-8 flex flex-col gap-5 animate-fade-in">
         <div className="text-center space-y-2">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#7B61FF] to-[#FF5C00] flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/20">
-            <Lock className="w-7 h-7 text-white" />
+            <span className="text-white text-3xl">🔒</span>
           </div>
           <h1 className="text-2xl font-heading font-extrabold tracking-tight gradient-text">
             MMCBANK
@@ -41,7 +41,7 @@ export default function LoginPage() {
         </div>
 
         <div className="relative group">
-          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#7B61FF] transition-colors duration-200" />
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 group-focus-within:text-[#7B61FF] transition-colors duration-200">👤</span>
           <input
             type="text"
             placeholder="Username"
@@ -52,7 +52,7 @@ export default function LoginPage() {
         </div>
 
         <div className="relative group">
-          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#7B61FF] transition-colors duration-200" />
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 group-focus-within:text-[#7B61FF] transition-colors duration-200">🔒</span>
           <input
             type="password"
             placeholder="PIN (4-6 digit)"
