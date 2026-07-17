@@ -22,6 +22,7 @@ const USAHA_UNITS: UnitUsaha[] = [
   { slug: "warkop", label: "Kedai Kopi", icon: <Coffee className="w-5 h-5" />, color: "from-orange-400 to-orange-500", bookId: "usaha-warkop" },
   { slug: "konveksi", label: "Fashion & Konveksi", icon: <Shirt className="w-5 h-5" />, color: "from-pink-400 to-pink-500", bookId: "usaha-konveksi" },
   { slug: "kelontong", label: "Kelontong", icon: <ShoppingCart className="w-5 h-5" />, color: "from-emerald-400 to-emerald-500", bookId: "usaha-kelontong" },
+  { slug: "toko-pakaian", label: "Toko Pakaian", icon: <Shirt className="w-5 h-5" />, color: "from-rose-400 to-rose-500", bookId: "usaha-toko-pakaian" },
 ];
 
 export default function BukuUsahaListPage() {

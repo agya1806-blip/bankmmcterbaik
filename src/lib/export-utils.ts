@@ -30,7 +30,7 @@ export function formatTransactionWA(tx: Transaction, branchName: string): string
     `\n${"─".repeat(30)}\n` +
     `${itemsList}\n` +
     `${"─".repeat(30)}\n` +
-    ` *Total:* ${formatCurrency(tx.totalBruto)}\n` +
+    ` *Total:* ${formatCurrency(tx.grandTotal)}\n` +
     ` *Dibayar:* ${formatCurrency(tx.dpDibayar)}\n` +
     (tx.sisaTagihan > 0
       ? ` *Sisa Piutang:* ${formatCurrency(tx.sisaTagihan)}\n`

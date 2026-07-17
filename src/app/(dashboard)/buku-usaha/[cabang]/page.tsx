@@ -27,6 +27,7 @@ const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi", keluarga: "keluarga",
   percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
   warkop: "usaha-warkop", konveksi: "usaha-konveksi", kelontong: "usaha-kelontong",
+  "toko-pakaian": "usaha-toko-pakaian",
 };
 const BRANCH_LABELS: Record<string, string> = {
   pribadi: "Buku Pribadi", keluarga: "Buku Keluarga",

@@ -15,6 +15,8 @@ const BRANCH_MAP: Record<string, UnitId> = {
   gadget: "usaha-gadget",
   warkop: "usaha-warkop",
   konveksi: "usaha-konveksi",
+  kelontong: "usaha-kelontong",
+  "toko-pakaian": "usaha-toko-pakaian",
 };
 
 export default function CashflowPage() {

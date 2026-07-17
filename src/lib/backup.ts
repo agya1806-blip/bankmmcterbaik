@@ -68,7 +68,14 @@ interface BackupData {
 /* ─── Export Backup ─── */
 
 export async function createBackup(password: string): Promise<Blob> {
-  const tables = ["transactions", "productions", "cashflows", "inventory", "auditLogs", "customers"];
+  const tables = [
+    "users", "profiles", "wallets", "walletMutations", "customers",
+    "transactions", "piutang", "piutangInstallments",
+    "inventory", "inventoryMutations",
+    "labels", "labelTags", "quickOrders",
+    "sedekahBalances", "invoiceCounters",
+    "auditLogs", "cashflows", "productions",
+  ];
   const data: BackupData = {
     version: 1,
     timestamp: new Date().toISOString(),

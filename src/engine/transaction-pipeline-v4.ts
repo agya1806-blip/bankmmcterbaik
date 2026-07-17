@@ -5,6 +5,7 @@ import {
   type DbTransactionItem,
   type DbCashflow,
   type DbWallet,
+  type SedekahType,
   PRODUCTION_UNITS,
   MAX_WALLET_PER_UNIT,
   branchPrefix,
@@ -33,6 +34,7 @@ export interface PipelineInputV4 {
   ppnPersen: number;
   dpDibayar: number;
   sedekahNominal: number;
+  sedekahType: SedekahType;
   paymentMethod: "CASH" | "DEPOSIT" | "TRANSFER" | "QRIS";
   customerNama: string;
   customerWA: string;
@@ -79,6 +81,7 @@ export async function executeTransactionPipelineV4(
     ppnPersen,
     dpDibayar,
     sedekahNominal,
+    sedekahType,
     paymentMethod,
     customerNama,
     customerWA,
@@ -293,6 +296,46 @@ export async function executeTransactionPipelineV4(
         }
       }
     );
+
+    /* 4f: Sedekah allocation (outside tx — separate atomic) */
+    if (sedekahNominal > 0) {
+      const sedekahRecord = await db.sedekahBalances
+        .where("bookOrBranchId")
+        .equals(unitId)
+        .first();
+      if (sedekahRecord) {
+        const updateField: Record<string, number> = {};
+        updateField[sedekahType] = (sedekahRecord[sedekahType] || 0) + sedekahNominal;
+        await db.sedekahBalances.update(sedekahRecord.id, updateField);
+      }
+
+      /* Sedekah cashflow entry */
+      const sedekahWallet = await db.wallets.get(walletIdTarget);
+      const sedekahSaldoSebelum = sedekahWallet?.saldo ?? 0;
+      const sedekahSaldoSesudah = sedekahSaldoSebelum - sedekahNominal;
+
+      await db.cashflows.add({
+        id: crypto.randomUUID(),
+        bookOrBranchId: unitId,
+        unitId,
+        tipe: "keluar",
+        kategori: "Sedekah",
+        nominal: sedekahNominal,
+        saldoSebelum: sedekahSaldoSebelum,
+        saldoSesudah: sedekahSaldoSesudah,
+        walletId: walletIdTarget,
+        walletNama: sedekahWallet?.namaDompet ?? "",
+        referensiId: invId,
+        referensiTipe: "sedekah",
+        catatan: `Sedekah ${invoiceNumber} — ${sedekahType}`,
+        createdAt: now,
+      });
+
+      /* Deduct from wallet */
+      if (walletIdTarget) {
+        await db.wallets.update(walletIdTarget, { saldo: sedekahSaldoSesudah });
+      }
+    }
 
     /* 5: Audit log (outside tx) */
     await writeAuditLog({

@@ -131,7 +131,21 @@ export async function executeCancelTransaction(
       }
     );
 
-    /* ─── 3. Audit log (outside tx) ─── */
+    /* ─── 3. Reverse sedekah allocation ─── */
+    if ((tx.sedekahNominal || 0) > 0) {
+      const sedekahRecord = await db.sedekahBalances
+        .where("bookOrBranchId")
+        .equals(unitId)
+        .first();
+      if (sedekahRecord) {
+        /* We don't know the sedekahType from old tx, so subtract from zakatMal as default */
+        await db.sedekahBalances.update(sedekahRecord.id, {
+          zakatMal: Math.max(0, (sedekahRecord.zakatMal || 0) - tx.sedekahNominal),
+        });
+      }
+    }
+
+    /* ─── 4. Audit log (outside tx) ─── */
     await writeAuditLog({
       bookOrBranchId: unitId,
       action: "BATAL",

@@ -10,6 +10,7 @@ import {
 import {
   executeTransactionPipelineV4, type PosCartItem,
 } from "@/engine/transaction-pipeline-v4";
+import { executeCancelTransaction } from "@/engine/cancel-transaction";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown, Plus, Trash2, Search, Wallet, FileText,
@@ -18,8 +19,10 @@ import {
 } from "lucide-react";
 
 const BRANCH_MAP: Record<string, UnitId> = {
+  pribadi: "pribadi", keluarga: "keluarga",
   percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
   warkop: "usaha-warkop", konveksi: "usaha-konveksi", kelontong: "usaha-kelontong",
+  "toko-pakaian": "usaha-toko-pakaian",
 };
 
 const GRID_BRANCHES = ["warkop", "kelontong"];
@@ -170,6 +173,7 @@ export default function PosKasirPage() {
         ppnPersen: 0,
         dpDibayar,
         sedekahNominal: 0,
+        sedekahType: "infakTerikat",
         paymentMethod: "CASH",
         walletIdTarget,
         customerNama: namaPelanggan,
@@ -178,6 +182,41 @@ export default function PosKasirPage() {
       });
 
       if (res.ok) {
+        /* Update customer stats */
+        if (currentCustomer) {
+          await db.customers.update(currentCustomer.id, {
+            totalTransaksi: currentCustomer.totalTransaksi + 1,
+            totalBelanja: currentCustomer.totalBelanja + grandTotal,
+            poin: currentCustomer.poin + Math.floor(grandTotal / 10000),
+            terakhirTransaksi: new Date().toISOString(),
+          });
+        } else if (isManual && manualNama.trim() && manualWA.trim()) {
+          const existing = await db.customers
+            .where("bookOrBranchId")
+            .equals(bookOrBranchId)
+            .filter(c => c.noWA === manualWA.trim())
+            .first();
+          if (existing) {
+            await db.customers.update(existing.id, {
+              totalTransaksi: existing.totalTransaksi + 1,
+              totalBelanja: existing.totalBelanja + grandTotal,
+              poin: existing.poin + Math.floor(grandTotal / 10000),
+              terakhirTransaksi: new Date().toISOString(),
+            });
+          } else {
+            await db.customers.add({
+              id: crypto.randomUUID(),
+              bookOrBranchId,
+              nama: manualNama.trim(),
+              noWA: manualWA.trim(),
+              totalTransaksi: 1,
+              totalBelanja: grandTotal,
+              poin: Math.floor(grandTotal / 10000),
+              terakhirTransaksi: new Date().toISOString(),
+              createdAt: new Date().toISOString(),
+            });
+          }
+        }
         alert(`Berhasil! Invoice: ${res.invoiceNumber}`);
         resetForm();
       } else {
@@ -218,10 +257,23 @@ export default function PosKasirPage() {
   };
 
   const deleteTx = async (tx: DbTransaction) => {
-    if (!confirm(`Hapus ${tx.invoiceNumber}?`)) return;
-    await db.transactions.delete(tx.id);
-    const prod = productions.find(p => p.transactionId === tx.id);
-    if (prod) await db.productions.delete(prod.id);
+    if (!confirm(`Batalkan ${tx.invoiceNumber}? Stok, dompet, dan piutang akan dikembalikan.`)) return;
+    setIsProcessing(true);
+    try {
+      const res = await executeCancelTransaction({
+        transactionId: tx.id,
+        unitId: bookOrBranchId,
+        userId: currentUser?.id || "system",
+        userName: currentUser?.nama || "System",
+        alasan: "Dihapus dari kasir",
+      });
+      if (res.ok) alert("Transaksi dibatalkan!");
+      else alert(`Gagal: ${res.error}`);
+    } catch (err: unknown) {
+      alert(`Gagal: ${err instanceof Error ? err.message : "Unknown error"}`);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const getProdStatus = (txId: string) => {

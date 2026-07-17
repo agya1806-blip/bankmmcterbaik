@@ -39,7 +39,7 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
 
     const outgoingItem: DbTransactionItem = {
       id: crypto.randomUUID(),
-      namaItem: `Transfer ke ${toBranch.replace("usaha-", "")}`,
+      namaItem: `Transfer ke ${toBranch}`,
       qty: 1,
       hargaSatuan: amount,
       hargaModal: 0,
@@ -50,7 +50,7 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
 
     const incomingItem: DbTransactionItem = {
       id: crypto.randomUUID(),
-      namaItem: `Transfer dari ${fromBranch.replace("usaha-", "")}`,
+      namaItem: `Transfer dari ${fromBranch}`,
       qty: 1,
       hargaSatuan: amount,
       hargaModal: 0,
@@ -59,63 +59,6 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
       spesifikasi: description,
     };
 
-    /* Step 1: Create outgoing cashflow for source branch */
-    const sourceWallets = await db.wallets.where("bookOrBranchId").equals(fromBranch).filter(w => w.isActive).toArray();
-    const sourceWallet = sourceWallets[0];
-    const sourceSaldoSebelum = sourceWallet?.saldo ?? 0;
-    const sourceSaldoSesudah = sourceSaldoSebelum - amount;
-
-    const outgoing: DbCashflow = {
-      id: crypto.randomUUID(),
-      bookOrBranchId: fromBranch,
-      unitId: fromBranch,
-      tipe: "keluar",
-      kategori: "Transfer_Keluar",
-      nominal: amount,
-      saldoSebelum: sourceSaldoSebelum,
-      saldoSesudah: sourceSaldoSesudah,
-      walletId: sourceWallet?.id ?? "",
-      walletNama: sourceWallet?.namaDompet ?? "",
-      referensiId: transferId,
-      referensiTipe: "adjustment",
-      catatan: `[TRANSFER] ${description} → ${toBranch}`,
-      createdAt: now,
-    };
-    await db.cashflows.add(outgoing);
-
-    if (sourceWallet) {
-      await db.wallets.update(sourceWallet.id, { saldo: sourceSaldoSesudah });
-    }
-
-    /* Step 2: Create incoming cashflow for destination branch */
-    const destWallets = await db.wallets.where("bookOrBranchId").equals(toBranch).filter(w => w.isActive).toArray();
-    const destWallet = destWallets[0];
-    const destSaldoSebelum = destWallet?.saldo ?? 0;
-    const destSaldoSesudah = destSaldoSebelum + amount;
-
-    const incoming: DbCashflow = {
-      id: crypto.randomUUID(),
-      bookOrBranchId: toBranch,
-      unitId: toBranch,
-      tipe: "masuk",
-      kategori: "Transfer_Masuk",
-      nominal: amount,
-      saldoSebelum: destSaldoSebelum,
-      saldoSesudah: destSaldoSesudah,
-      walletId: destWallet?.id ?? "",
-      walletNama: destWallet?.namaDompet ?? "",
-      referensiId: transferId,
-      referensiTipe: "adjustment",
-      catatan: `[TRANSFER] ${description} ← ${fromBranch}`,
-      createdAt: now,
-    };
-    await db.cashflows.add(incoming);
-
-    if (destWallet) {
-      await db.wallets.update(destWallet.id, { saldo: destSaldoSesudah });
-    }
-
-    /* Step 3: Create transaction records (linked pair) */
     const sourceTx: DbTransaction = {
       id: transferId,
       bookOrBranchId: fromBranch,
@@ -142,7 +85,6 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
       catatan: description,
       createdAt: now,
     };
-    await db.transactions.add(sourceTx);
 
     const destTx: DbTransaction = {
       id: crypto.randomUUID(),
@@ -170,9 +112,78 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
       catatan: description,
       createdAt: now,
     };
-    await db.transactions.add(destTx);
 
-    /* Step 4: Audit logs for both branches */
+    /* Step 1: Fetch wallets */
+    const sourceWallets = await db.wallets.where("bookOrBranchId").equals(fromBranch).filter(w => w.isActive).toArray();
+    const sourceWallet = sourceWallets[0];
+    const sourceSaldoSebelum = sourceWallet?.saldo ?? 0;
+    const sourceSaldoSesudah = sourceSaldoSebelum - amount;
+
+    const destWallets = await db.wallets.where("bookOrBranchId").equals(toBranch).filter(w => w.isActive).toArray();
+    const destWallet = destWallets[0];
+    const destSaldoSebelum = destWallet?.saldo ?? 0;
+    const destSaldoSesudah = destSaldoSebelum + amount;
+
+    /* ─── Atomic Write ─── */
+    await db.transaction(
+      "rw",
+      db.transactions,
+      db.cashflows,
+      db.wallets,
+      async () => {
+        /* 2a: Outgoing cashflow */
+        await db.cashflows.add({
+          id: crypto.randomUUID(),
+          bookOrBranchId: fromBranch,
+          unitId: fromBranch,
+          tipe: "keluar",
+          kategori: "Transfer_Keluar",
+          nominal: amount,
+          saldoSebelum: sourceSaldoSebelum,
+          saldoSesudah: sourceSaldoSesudah,
+          walletId: sourceWallet?.id ?? "",
+          walletNama: sourceWallet?.namaDompet ?? "",
+          referensiId: transferId,
+          referensiTipe: "adjustment",
+          catatan: `[TRANSFER] ${description} → ${toBranch}`,
+          createdAt: now,
+        });
+
+        /* 2b: Update source wallet */
+        if (sourceWallet) {
+          await db.wallets.update(sourceWallet.id, { saldo: sourceSaldoSesudah });
+        }
+
+        /* 2c: Incoming cashflow */
+        await db.cashflows.add({
+          id: crypto.randomUUID(),
+          bookOrBranchId: toBranch,
+          unitId: toBranch,
+          tipe: "masuk",
+          kategori: "Transfer_Masuk",
+          nominal: amount,
+          saldoSebelum: destSaldoSebelum,
+          saldoSesudah: destSaldoSesudah,
+          walletId: destWallet?.id ?? "",
+          walletNama: destWallet?.namaDompet ?? "",
+          referensiId: transferId,
+          referensiTipe: "adjustment",
+          catatan: `[TRANSFER] ${description} ← ${fromBranch}`,
+          createdAt: now,
+        });
+
+        /* 2d: Update dest wallet */
+        if (destWallet) {
+          await db.wallets.update(destWallet.id, { saldo: destSaldoSesudah });
+        }
+
+        /* 2e: Create transaction records */
+        await db.transactions.add(sourceTx);
+        await db.transactions.add(destTx);
+      }
+    );
+
+    /* Step 3: Audit logs (outside tx) */
     await writeAuditLog({
       bookOrBranchId: fromBranch,
       action: "TRANSFER_KELUAR",

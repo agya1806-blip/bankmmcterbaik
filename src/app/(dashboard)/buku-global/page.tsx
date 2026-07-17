@@ -72,6 +72,7 @@ export default function BukuGlobalPage() {
   const [walletTipe, setWalletTipe] = useState<"KasTunai" | "Bank" | "EWallet">("Bank");
   const [walletSaldo, setWalletSaldo] = useState(0);
   const [walletCatatan, setWalletCatatan] = useState("");
+  const [walletUnit, setWalletUnit] = useState<UnitId>("usaha-warkop");
   const [editingWallet, setEditingWallet] = useState<string | null>(null);
 
   /* ─── Profil State ─── */
@@ -92,39 +93,51 @@ export default function BukuGlobalPage() {
   /* ═══════════════════════════════════════════════════════ */
 
   const dashData = useMemo(() => {
+    const EXCLUDE_CF_KATEGORI = new Set(["HPP", "Retur/Batal", "Transfer_Keluar", "Transfer_Masuk"]);
     let totalPendapatan = 0;
     let totalHpp = 0;
     let transaksiLunas = 0;
     let transaksiPiutang = 0;
 
     allTransactions.forEach((tx) => {
-      totalPendapatan += tx.totalBruto;
-      if (tx.status === "LUNAS") transaksiLunas++;
-      if (tx.status === "DP") transaksiPiutang++;
+      if (tx.status === "BATAL") return;
+      const pendapatanBersih = tx.grandTotal - (tx.sedekahNominal || 0);
+      if (tx.status === "LUNAS") {
+        totalPendapatan += pendapatanBersih;
+        transaksiLunas++;
+      } else if (tx.status === "DP") {
+        totalPendapatan += tx.dpDibayar;
+        transaksiPiutang++;
+      }
       tx.items.forEach((item) => {
-        const inv = allInventory.find((i) => i.nama === item.namaItem && i.bookOrBranchId === tx.bookOrBranchId);
-        if (inv) totalHpp += inv.hargaModal * item.qty;
+        totalHpp += (item.hargaModal || 0) * item.qty;
       });
     });
 
     const cashflowMasuk = allCashflows.filter((c) => c.tipe === "masuk").reduce((s, c) => s + c.nominal, 0);
-    const cashflowKeluar = allCashflows.filter((c) => c.tipe === "keluar").reduce((s, c) => s + c.nominal, 0);
+    const cashflowKeluar = allCashflows
+      .filter((c) => c.tipe === "keluar" && !EXCLUDE_CF_KATEGORI.has(c.kategori))
+      .reduce((s, c) => s + c.nominal, 0);
     const piutangAktif = allPiutang.filter((p) => p.status === "AKTIF");
     const totalPiutang = piutangAktif.reduce((s, p) => s + p.sisaPiutang, 0);
     const stokMenipis = allInventory.filter((i) => i.stok <= i.stokMin && i.stok > 0);
     const stokHabis = allInventory.filter((i) => i.stok === 0);
     const labaKotor = totalPendapatan - totalHpp;
-    const labaBersih = cashflowMasuk - cashflowKeluar;
+    const labaBersih = labaKotor - cashflowKeluar;
 
     const perBranch = BRANCH_LIST.map((branch) => {
-      const txBranch = allTransactions.filter((t) => t.bookOrBranchId === branch);
-      const cfBranch = allCashflows.filter((c) => c.bookOrBranchId === branch);
-      const piutangBranch = allPiutang.filter((p) => p.bookOrBranchId === branch && p.status === "AKTIF");
-      const invBranch = allInventory.filter((i) => i.bookOrBranchId === branch);
+      const txBranch = allTransactions.filter((t) => t.unitId === branch && t.status !== "BATAL");
+      const cfBranch = allCashflows.filter((c) => c.unitId === branch);
+      const piutangBranch = allPiutang.filter((p) => p.unitId === branch && p.status === "AKTIF");
+      const invBranch = allInventory.filter((i) => i.unitId === branch);
+      const branchPendapatan = txBranch.reduce((s, t) => s + (t.grandTotal - (t.sedekahNominal || 0)), 0);
+      const branchHpp = txBranch.reduce((s, t) => s + t.items.reduce((is2, item) => is2 + (item.hargaModal || 0) * item.qty, 0), 0);
+      const branchPengeluaran = cfBranch.filter((c) => c.tipe === "keluar" && !EXCLUDE_CF_KATEGORI.has(c.kategori)).reduce((s, c) => s + c.nominal, 0);
       return {
         branch,
-        label: BOOK_LABELS[branch],
-        pendapatan: txBranch.reduce((s, t) => s + t.totalBruto, 0),
+        label: BOOK_LABELS[branch] || branch,
+        pendapatan: branchPendapatan,
+        labaBersih: branchPendapatan - branchHpp - branchPengeluaran,
         cashMasuk: cfBranch.filter((c) => c.tipe === "masuk").reduce((s, c) => s + c.nominal, 0),
         cashKeluar: cfBranch.filter((c) => c.tipe === "keluar").reduce((s, c) => s + c.nominal, 0),
         piutang: piutangBranch.reduce((s, p) => s + p.sisaPiutang, 0),
@@ -140,7 +153,7 @@ export default function BukuGlobalPage() {
       totalPiutang, piutangAktifCount: piutangAktif.length,
       stokMenipisCount: stokMenipis.length, stokHabisCount: stokHabis.length,
       transaksiLunas, transaksiPiutang,
-      totalTransaksi: allTransactions.length,
+      totalTransaksi: allTransactions.filter((t) => t.status !== "BATAL").length,
       totalPelanggan: allCustomers.length,
       totalProduk: allInventory.length,
       totalCabang: BRANCH_LIST.length,
@@ -209,6 +222,21 @@ export default function BukuGlobalPage() {
     if (bayarPiutangAmount > piutang.sisaPiutang) return alert("Jumlah melebihi sisa piutang!");
     const newSisa = piutang.sisaPiutang - bayarPiutangAmount;
     await db.piutang.update(piutangId, { sisaPiutang: newSisa, status: newSisa <= 0 ? "LUNAS" : "AKTIF" });
+
+    /* Sync transaction dpDibayar / sisaTagihan */
+    if (piutang.transactionId) {
+      const tx = await db.transactions.get(piutang.transactionId);
+      if (tx) {
+        const newDp = tx.dpDibayar + bayarPiutangAmount;
+        const newSisaTagihan = Math.max(0, tx.grandTotal - newDp);
+        await db.transactions.update(tx.id, {
+          dpDibayar: newDp,
+          sisaTagihan: newSisaTagihan,
+          status: newSisaTagihan <= 0 ? "LUNAS" : "DP",
+        });
+      }
+    }
+
     await db.piutangInstallments.add({
       id: crypto.randomUUID(),
       bookOrBranchId: piutang.bookOrBranchId,
@@ -279,8 +307,8 @@ export default function BukuGlobalPage() {
     } else {
       await db.wallets.add({
         id: crypto.randomUUID(),
-        bookOrBranchId: "usaha-percetakan",
-        unitId: "usaha-percetakan",
+        bookOrBranchId: walletUnit,
+        unitId: walletUnit,
         namaDompet: walletName.trim(),
         saldo: walletSaldo,
         tipe: walletTipe,
@@ -995,6 +1023,10 @@ export default function BukuGlobalPage() {
               </div>
             </div>
             <div className="space-y-2">
+              <select value={walletUnit} onChange={(e) => setWalletUnit(e.target.value as UnitId)}
+                className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none">
+                {POS_UNITS.map((u) => <option key={u} value={u}>{BOOK_LABELS[u]}</option>)}
+              </select>
               <input type="text" placeholder="Nama dompet (contoh: BCA, Dana, Kas)" value={walletName}
                 onChange={(e) => setWalletName(e.target.value)}
                 className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
