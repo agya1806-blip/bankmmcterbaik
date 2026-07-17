@@ -60,16 +60,21 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
     };
 
     /* Step 1: Create outgoing cashflow for source branch */
+    const sourceWallets = await db.wallets.where("bookOrBranchId").equals(fromBranch).filter(w => w.isActive).toArray();
+    const sourceWallet = sourceWallets[0];
+    const sourceSaldoSebelum = sourceWallet?.saldo ?? 0;
+    const sourceSaldoSesudah = sourceSaldoSebelum - amount;
+
     const outgoing: DbCashflow = {
       id: crypto.randomUUID(),
       bookOrBranchId: fromBranch,
       tipe: "keluar",
       kategori: "transfer",
       nominal: amount,
-      saldoSebelum: 0,
-      saldoSesudah: 0,
-      walletId: "",
-      walletNama: "",
+      saldoSebelum: sourceSaldoSebelum,
+      saldoSesudah: sourceSaldoSesudah,
+      walletId: sourceWallet?.id ?? "",
+      walletNama: sourceWallet?.namaDompet ?? "",
       referensiId: transferId,
       referensiTipe: "adjustment",
       catatan: `[TRANSFER] ${description} → ${toBranch.replace("usaha-", "")}`,
@@ -77,23 +82,36 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
     };
     await db.cashflows.add(outgoing);
 
+    if (sourceWallet) {
+      await db.wallets.update(sourceWallet.id, { saldo: sourceSaldoSesudah });
+    }
+
     /* Step 2: Create incoming cashflow for destination branch */
+    const destWallets = await db.wallets.where("bookOrBranchId").equals(toBranch).filter(w => w.isActive).toArray();
+    const destWallet = destWallets[0];
+    const destSaldoSebelum = destWallet?.saldo ?? 0;
+    const destSaldoSesudah = destSaldoSebelum + amount;
+
     const incoming: DbCashflow = {
       id: crypto.randomUUID(),
       bookOrBranchId: toBranch,
       tipe: "masuk",
       kategori: "transfer",
       nominal: amount,
-      saldoSebelum: 0,
-      saldoSesudah: 0,
-      walletId: "",
-      walletNama: "",
+      saldoSebelum: destSaldoSebelum,
+      saldoSesudah: destSaldoSesudah,
+      walletId: destWallet?.id ?? "",
+      walletNama: destWallet?.namaDompet ?? "",
       referensiId: transferId,
       referensiTipe: "adjustment",
       catatan: `[TRANSFER] ${description} ← ${fromBranch.replace("usaha-", "")}`,
       createdAt: now,
     };
     await db.cashflows.add(incoming);
+
+    if (destWallet) {
+      await db.wallets.update(destWallet.id, { saldo: destSaldoSesudah });
+    }
 
     /* Step 3: Create transaction records (linked pair) */
     const sourceTx: DbTransaction = {

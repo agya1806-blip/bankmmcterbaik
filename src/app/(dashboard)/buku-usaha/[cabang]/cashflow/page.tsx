@@ -29,11 +29,18 @@ export default function CashflowPage() {
       [bookOrBranchId]
     ) || [];
 
+  const wallets =
+    useLiveQuery(
+      () => db.wallets.where("bookOrBranchId").equals(bookOrBranchId).filter(w => w.isActive).toArray(),
+      [bookOrBranchId]
+    ) || [];
+
   const [showModal, setShowModal] = useState(false);
   const [tipe, setTipe] = useState<"masuk" | "keluar">("masuk");
   const [nominal, setNominal] = useState(0);
   const [catatan, setCatatan] = useState("");
   const [kategori, setKategori] = useState("Umum");
+  const [walletId, setWalletId] = useState("");
   const [filterType, setFilterType] = useState<"all" | "masuk" | "keluar">("all");
 
   const filtered = useMemo(() => {
@@ -52,25 +59,34 @@ export default function CashflowPage() {
     if (nominal <= 0) return alert("Nominal harus lebih dari 0!");
     if (!catatan.trim()) return alert("Catatan wajib diisi!");
 
+    const selectedWallet = wallets.find(w => w.id === walletId);
+    const saldoSebelum = selectedWallet?.saldo ?? 0;
+    const saldoSesudah = tipe === "masuk" ? saldoSebelum + nominal : saldoSebelum - nominal;
+
     await db.cashflows.add({
       id: crypto.randomUUID(),
       bookOrBranchId,
       tipe,
       kategori,
       nominal,
-      saldoSebelum: 0,
-      saldoSesudah: 0,
-      walletId: "",
-      walletNama: "",
+      saldoSebelum,
+      saldoSesudah,
+      walletId: walletId || "",
+      walletNama: selectedWallet?.namaDompet ?? "",
       referensiId: "",
       referensiTipe: "adjustment",
       catatan: catatan.trim(),
       createdAt: new Date().toISOString(),
     });
 
+    if (walletId && selectedWallet) {
+      await db.wallets.update(walletId, { saldo: saldoSesudah });
+    }
+
     setShowModal(false);
     setNominal(0);
     setCatatan("");
+    setWalletId("");
   };
 
   return (
@@ -229,6 +245,20 @@ export default function CashflowPage() {
                   >
                     {["Umum", "Operasional", "Gaji", "Sewa", "Listrik", "Bahan Baku", "Lainnya"].map((k) => (
                       <option key={k} value={k}>{k}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block mb-1 font-bold text-slate-400">Dompet</label>
+                  <select
+                    value={walletId}
+                    onChange={(e) => setWalletId(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold"
+                  >
+                    <option value="">Pilih dompet...</option>
+                    {wallets.map((w) => (
+                      <option key={w.id} value={w.id}>{w.namaDompet} (Rp{w.saldo.toLocaleString()})</option>
                     ))}
                   </select>
                 </div>
