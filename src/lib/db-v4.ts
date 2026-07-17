@@ -106,6 +106,7 @@ export interface DbTransactionItem {
   namaItem: string;
   qty: number;
   hargaSatuan: number;
+  diskonPersen: number;
   subtotal: number;
   spesifikasi: string;
 }
@@ -120,6 +121,13 @@ export interface DbTransaction {
   tanggal: string;
   items: DbTransactionItem[];
   totalBruto: number;
+  diskonGlobalPersen: number;
+  totalDiskonItem: number;
+  totalDiskonGlobal: number;
+  subtotalAfterDiskon: number;
+  ppnPersen: number;
+  ppnNominal: number;
+  grandTotal: number;
   dpDibayar: number;
   sisaTagihan: number;
   status: TransStatus;

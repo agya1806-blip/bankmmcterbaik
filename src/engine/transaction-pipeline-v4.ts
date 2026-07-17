@@ -14,6 +14,7 @@ export interface PosCartItem {
   namaItem: string;
   qty: number;
   hargaSatuan: number;
+  diskonPersen: number;
   spesifikasi: string;
 }
 
@@ -22,6 +23,8 @@ export interface PipelineInputV4 {
   bookOrBranchId: BookOrBranch;
   items: PosCartItem[];
   totalBruto: number;
+  diskonGlobalPersen: number;
+  ppnPersen: number;
   dpDibayar: number;
   paymentMethod: "CASH" | "DEPOSIT" | "TRANSFER" | "QRIS";
   customerNama: string;
@@ -50,6 +53,8 @@ export async function executeTransactionPipelineV4(
     bookOrBranchId,
     items,
     totalBruto,
+    diskonGlobalPersen,
+    ppnPersen,
     dpDibayar,
     paymentMethod,
     customerNama,
@@ -70,8 +75,6 @@ export async function executeTransactionPipelineV4(
   try {
     const prefix = branchPrefix(bookOrBranchId);
     const invoiceNumber = generateInvoiceNumber(prefix);
-    const sisaTagihan = Math.max(0, totalBruto - dpDibayar);
-    const status: DbTransaction["status"] = sisaTagihan > 0 ? "DP" : "LUNAS";
     const now = new Date().toISOString();
 
     /* Step 1: Deduct inventory stock */
@@ -88,17 +91,35 @@ export async function executeTransactionPipelineV4(
       }
     }
 
-    /* Step 2: Build DbTransactionItem[] */
-    const txItems: DbTransactionItem[] = items.map((item) => ({
-      id: crypto.randomUUID(),
-      namaItem: item.namaItem,
-      qty: item.qty,
-      hargaSatuan: item.hargaSatuan,
-      subtotal: item.qty * item.hargaSatuan,
-      spesifikasi: item.spesifikasi,
-    }));
+    /* Step 2: Build DbTransactionItem[] with diskon per item */
+    const txItems: DbTransactionItem[] = items.map((item) => {
+      const subtotalSebelumDiskon = item.qty * item.hargaSatuan;
+      const diskonNominal = subtotalSebelumDiskon * (item.diskonPersen / 100);
+      return {
+        id: crypto.randomUUID(),
+        namaItem: item.namaItem,
+        qty: item.qty,
+        hargaSatuan: item.hargaSatuan,
+        diskonPersen: item.diskonPersen,
+        subtotal: subtotalSebelumDiskon - diskonNominal,
+        spesifikasi: item.spesifikasi,
+      };
+    });
 
-    /* Step 3: Create transaction */
+    /* Step 3: Calculate totals with diskon & PPN */
+    const totalDiskonItem = txItems.reduce(
+      (sum, item) => sum + item.qty * item.hargaSatuan * (item.diskonPersen / 100),
+      0
+    );
+    const subtotalAfterItemDiskon = totalBruto - totalDiskonItem;
+    const totalDiskonGlobal = subtotalAfterItemDiskon * (diskonGlobalPersen / 100);
+    const subtotalAfterDiskon = subtotalAfterItemDiskon - totalDiskonGlobal;
+    const ppnNominal = subtotalAfterDiskon * (ppnPersen / 100);
+    const grandTotal = subtotalAfterDiskon + ppnNominal;
+    const sisaTagihan = Math.max(0, grandTotal - dpDibayar);
+    const status: DbTransaction["status"] = sisaTagihan > 0 ? "DP" : "LUNAS";
+
+    /* Step 4: Create transaction */
     const transaction: DbTransaction = {
       id: invId,
       bookOrBranchId,
@@ -108,6 +129,13 @@ export async function executeTransactionPipelineV4(
       tanggal: now,
       items: txItems,
       totalBruto,
+      diskonGlobalPersen,
+      totalDiskonItem,
+      totalDiskonGlobal,
+      subtotalAfterDiskon,
+      ppnPersen,
+      ppnNominal,
+      grandTotal,
       dpDibayar,
       sisaTagihan,
       status,
@@ -169,8 +197,8 @@ export async function executeTransactionPipelineV4(
       userId: "system",
       userName: "System",
       dataAfter: JSON.stringify(transaction),
-      nominal: totalBruto,
-      alasan: `Transaksi ${invoiceNumber} - ${customerNama || "Umum"} - Rp${totalBruto.toLocaleString()} (${status})`,
+      nominal: grandTotal,
+      alasan: `Transaksi ${invoiceNumber} - ${customerNama || "Umum"} - Rp${grandTotal.toLocaleString()} (${status})`,
     });
 
     return {
