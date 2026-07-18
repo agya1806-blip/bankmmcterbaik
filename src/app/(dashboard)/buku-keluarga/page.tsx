@@ -24,10 +24,7 @@ export default function BukuKeluargaPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("ringkasan");
   const [showNotif, setShowNotif] = useState(false);
 
-  const [catatTipe, setCatatTipe] = useState<"masuk" | "keluar">("keluar");
-  const [catatNominal, setCatatNominal] = useState("");
-  const [catatKeterangan, setCatatCatatan] = useState("");
-  const [showCatatSuccess, setShowCatatSuccess] = useState(false);
+
 
   /* ─── Dompet State ─── */
   const [walletName, setWalletName] = useState("");
@@ -76,40 +73,6 @@ export default function BukuKeluargaPage() {
   const recentTx = useMemo(() => {
     return [...transactions].sort((a, b) => b.tanggal.localeCompare(a.tanggal)).slice(0, 10);
   }, [transactions]);
-
-  const handleCatat = async () => {
-    if (!catatNominal || Number(catatNominal) <= 0) return;
-    const nominal = Number(catatNominal);
-    const wallet = wallets[0];
-    const saldoSebelum = wallet?.saldo || 0;
-    const saldoSesudah = catatTipe === "masuk" ? saldoSebelum + nominal : saldoSebelum - nominal;
-
-    await db.cashflows.add({
-      id: crypto.randomUUID(),
-      bookOrBranchId: BOOK_ID,
-      unitId: BOOK_ID,
-      tipe: catatTipe,
-      kategori: catatTipe === "masuk" ? "Pemasukan Keluarga" : "Pengeluaran Keluarga",
-      nominal,
-      saldoSebelum,
-      saldoSesudah,
-      walletId: wallet?.id || "",
-      walletNama: wallet?.namaDompet || "Keluarga",
-      referensiId: "",
-      referensiTipe: "adjustment",
-      catatan: "",
-      createdAt: new Date().toISOString(),
-    });
-
-    if (wallet) {
-      await db.wallets.update(wallet.id, { saldo: saldoSesudah });
-    }
-
-    setCatatNominal("");
-    setCatatCatatan("");
-    setShowCatatSuccess(true);
-    setTimeout(() => setShowCatatSuccess(false), 2000);
-  };
 
   const handleSaveWallet = async () => {
     if (!walletName.trim()) return alert("Nama dompet wajib diisi!");
@@ -187,7 +150,7 @@ export default function BukuKeluargaPage() {
 
       <div className="flex gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-x-auto">
         {([ "ringkasan", "catat", "hutang", "laporan", "riwayat", "dompet" ] as TabKey[]).map((tab) => (
-          <button key={tab} onClick={() => setActiveTab(tab)} className={`px-3 py-2 rounded-lg text-[10px] font-bold whitespace-nowrap transition-all flex-1 ${activeTab === tab ? "bg-white dark:bg-[#0F1926] text-rose-500 shadow-sm" : "text-slate-400"}`}>
+          <button key={tab} onClick={() => tab === "catat" ? router.push("/buku-keluarga/cashflow") : setActiveTab(tab)} className={`px-3 py-2 rounded-lg text-[10px] font-bold whitespace-nowrap transition-all flex-1 ${activeTab === tab ? "bg-white dark:bg-[#0F1926] text-rose-500 shadow-sm" : "text-slate-400"}`}>
             {tab === "ringkasan" ? "Ringkasan" : tab === "catat" ? "Catat" : tab === "hutang" ? "Hutang" : tab === "laporan" ? "Laporan" : tab === "riwayat" ? "Riwayat" : "Dompet"}
           </button>
         ))}
@@ -248,44 +211,6 @@ export default function BukuKeluargaPage() {
               ))}
             </div>
           )}
-        </div>
-      )}
-
-      {activeTab === "catat" && (
-        <div className="flex flex-col gap-3">
-          <div className="flex gap-2">
-            <button onClick={() => setCatatTipe("masuk")} className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${catatTipe === "masuk" ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}>
-              <ArrowUpRight className="w-4 h-4" /> Uang Masuk
-            </button>
-            <button onClick={() => setCatatTipe("keluar")} className={`flex-1 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${catatTipe === "keluar" ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}>
-              <ArrowDownRight className="w-4 h-4" /> Uang Keluar
-            </button>
-          </div>
-
-          <div className="premium-card p-4 flex flex-col gap-3">
-            <div>
-              <label className="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Nominal</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">Rp</span>
-                <input type="number" value={catatNominal} onChange={(e) => setCatatNominal(e.target.value)} placeholder="0" className="w-full h-12 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0F1926] text-lg font-heading font-extrabold focus:outline-none focus:ring-2 focus:ring-rose-500/40" />
-              </div>
-            </div>
-            <div>
-              <label className="text-[10px] text-slate-400 font-bold uppercase mb-1 block">Keterangan</label>
-              <input type="text" value={catatKeterangan} onChange={(e) => setCatatCatatan(e.target.value)} placeholder="Contoh: Beli beras" className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0F1926] text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/40" />
-            </div>
-            <button onClick={handleCatat} className={`w-full h-12 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.97] ${catatTipe === "masuk" ? "bg-emerald-500 hover:bg-emerald-600" : "bg-rose-500 hover:bg-rose-600"} text-white`}>
-              <Save className="w-4 h-4" /> Simpan
-            </button>
-          </div>
-
-          <AnimatePresence>
-            {showCatatSuccess && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg shadow-emerald-500/30 z-50">
-                Berhasil dicatat!
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
       )}
 

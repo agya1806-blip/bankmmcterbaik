@@ -339,13 +339,14 @@ export default function CabangDashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-4 gap-2.5">
         {[
           { label: "Kasir", slug: "kasir", icon: <ShoppingCart className="w-5 h-5 text-white" />, color: "from-[#008CEB] to-[#00C9A7]", badge: 0 },
           { label: "Barang", slug: "inventory", icon: <Package className="w-5 h-5 text-white" />, color: "from-blue-500 to-indigo-500", badge: stats.stokMenipisCount },
           { label: "CRM", slug: "pelanggan", icon: <Users className="w-5 h-5 text-white" />, color: "from-emerald-400 to-teal-500", badge: 0 },
           { label: "Cashflow", slug: "cashflow", icon: <Wallet className="w-5 h-5 text-white" />, color: "from-amber-400 to-orange-500", badge: 0 },
           { label: "Transaksi", slug: "transaksi", icon: <Receipt className="w-5 h-5 text-white" />, color: "from-pink-400 to-rose-500", badge: 0 },
+          { label: "Dompet", slug: "dompet", icon: <Wallet className="w-5 h-5 text-white" />, color: "from-cyan-400 to-teal-500", badge: 0 },
           { label: "Laporan", slug: "laporan", icon: <BarChart3 className="w-5 h-5 text-white" />, color: "from-purple-400 to-violet-500", badge: 0 },
         ].map((btn, i) => (
           <button key={btn.slug} onClick={() => router.push(`/buku-usaha/${cabangSlug}/${btn.slug}`)} className="premium-card premium-card-glow p-3 flex flex-col items-center gap-1.5 scale-press animate-slide-up relative" style={{ animationDelay: `${500 + i * 60}ms`, animationFillMode: "backwards" }}>
