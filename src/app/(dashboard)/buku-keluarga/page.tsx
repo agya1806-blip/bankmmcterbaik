@@ -31,6 +31,9 @@ export default function BukuKeluargaPage() {
   const [walletTipe, setWalletTipe] = useState<"KasTunai" | "Bank" | "EWallet">("KasTunai");
   const [walletSaldo, setWalletSaldo] = useState(0);
   const [walletCatatan, setWalletCatatan] = useState("");
+  const [walletNomorRekening, setWalletNomorRekening] = useState("");
+  const [walletAtasNama, setWalletAtasNama] = useState("");
+  const [walletNamaBank, setWalletNamaBank] = useState("");
   const [editingWallet, setEditingWallet] = useState<string | null>(null);
 
   const transactions = useLiveQuery(() => db.transactions.where("bookOrBranchId").equals(BOOK_ID).toArray(), []) || [];
@@ -76,21 +79,24 @@ export default function BukuKeluargaPage() {
 
   const handleSaveWallet = async () => {
     if (!walletName.trim()) return alert("Nama dompet wajib diisi!");
+    const bankData = walletTipe === "Bank" ? { nomorRekening: walletNomorRekening.trim() || undefined, atasNama: walletAtasNama.trim() || undefined, namaBank: walletNamaBank.trim() || undefined } : {};
     if (editingWallet) {
-      await db.wallets.update(editingWallet, { namaDompet: walletName.trim(), tipe: walletTipe, saldo: walletSaldo, catatan: walletCatatan });
+      await db.wallets.update(editingWallet, { namaDompet: walletName.trim(), tipe: walletTipe, saldo: walletSaldo, catatan: walletCatatan, ...bankData });
       setEditingWallet(null);
     } else {
       await db.wallets.add({
         id: crypto.randomUUID(), bookOrBranchId: BOOK_ID, unitId: BOOK_ID,
         namaDompet: walletName.trim(), saldo: walletSaldo, tipe: walletTipe,
-        catatan: walletCatatan, isActive: true, createdAt: new Date().toISOString(),
+        catatan: walletCatatan, isActive: true, createdAt: new Date().toISOString(), ...bankData,
       });
     }
     setWalletName(""); setWalletSaldo(0); setWalletCatatan(""); setWalletTipe("KasTunai");
+    setWalletNomorRekening(""); setWalletAtasNama(""); setWalletNamaBank("");
   };
 
   const handleEditWallet = (w: typeof wallets[0]) => {
     setEditingWallet(w.id); setWalletName(w.namaDompet); setWalletTipe(w.tipe); setWalletSaldo(w.saldo); setWalletCatatan(w.catatan);
+    setWalletNomorRekening(w.nomorRekening || ""); setWalletAtasNama(w.atasNama || ""); setWalletNamaBank(w.namaBank || "");
   };
 
   const handleDeleteWallet = async (id: string) => {
@@ -346,6 +352,17 @@ export default function BukuKeluargaPage() {
                   </button>
                 ))}
               </div>
+              {walletTipe === "Bank" && <>
+                <input type="text" placeholder="Nama Bank (contoh: BCA, Mandiri)" value={walletNamaBank}
+                  onChange={(e) => setWalletNamaBank(e.target.value)}
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
+                <input type="text" placeholder="Atas Nama" value={walletAtasNama}
+                  onChange={(e) => setWalletAtasNama(e.target.value)}
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
+                <input type="text" placeholder="Nomor Rekening" value={walletNomorRekening}
+                  onChange={(e) => setWalletNomorRekening(e.target.value)}
+                  className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
+              </>}
               <input type="number" placeholder="Saldo awal (Rp)" value={walletSaldo || ""}
                 onChange={(e) => setWalletSaldo(Number(e.target.value))}
                 className="w-full px-3 py-2 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
@@ -358,7 +375,7 @@ export default function BukuKeluargaPage() {
                   <span className="text-sm"><Save className="w-5 h-5" /></span> {editingWallet ? "Update" : "Simpan"}
                 </button>
                 {editingWallet && (
-                  <button onClick={() => { setEditingWallet(null); setWalletName(""); setWalletSaldo(0); setWalletCatatan(""); }}
+                  <button onClick={() => { setEditingWallet(null); setWalletName(""); setWalletSaldo(0); setWalletCatatan(""); setWalletNomorRekening(""); setWalletAtasNama(""); setWalletNamaBank(""); }}
                     className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-400 text-xs font-bold">
                     Batal
                   </button>
@@ -386,7 +403,11 @@ export default function BukuKeluargaPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-bold truncate">{w.namaDompet}</p>
-                        <p className="text-[9px] text-slate-400">{w.tipe}{w.catatan && ` · ${w.catatan}`}</p>
+                        {w.tipe === "Bank" && w.namaBank ? (
+                          <p className="text-[9px] text-slate-400">{w.namaBank}{w.atasNama ? ` · ${w.atasNama}` : ""}{w.nomorRekening ? ` · ${w.nomorRekening}` : ""}</p>
+                        ) : (
+                          <p className="text-[9px] text-slate-400">{w.tipe}{w.catatan && ` · ${w.catatan}`}</p>
+                        )}
                       </div>
                       <div className="text-right shrink-0">
                         <p className="text-[10px] font-extrabold text-rose-500">Rp{w.saldo.toLocaleString()}</p>

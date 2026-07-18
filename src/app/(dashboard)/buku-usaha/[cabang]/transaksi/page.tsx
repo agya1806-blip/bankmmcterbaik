@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type UnitId, type Transaction, type ProductionStatus } from '@/lib/db-v4';
 import { ArrowLeft, ClipboardList, FileText, Printer, Image, Phone, BarChart3, X, Search } from "lucide-react";
+import InvoiceA4 from "@/components/invoice-a4";
 
 const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: 'pribadi',
@@ -36,8 +37,13 @@ export default function TransaksiDanProduksiPage() {
       [bookOrBranchId]
     ) || [];
 
+  const wallets = useLiveQuery(() => db.wallets.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
+  const profiles = useLiveQuery(() => db.profiles.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
+  const profile = profiles[0];
+
   const [activeTab, setActiveTab] = useState<'riwayat' | 'produksi'>('riwayat');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  const [showInvoice, setShowInvoice] = useState<Transaction | null>(null);
 
   const kanbanData = useMemo(() => {
     const columns: Record<ProductionStatus, { tx: Transaction; prodId: string }[]> = {
@@ -382,7 +388,7 @@ export default function TransaksiDanProduksiPage() {
                         </div>
                       )}
 
-                      <div className="grid grid-cols-2 gap-2 pt-1">
+                      <div className="grid grid-cols-3 gap-2 pt-1">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -400,6 +406,15 @@ export default function TransaksiDanProduksiPage() {
                           className="py-2 bg-slate-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center gap-1 font-bold text-[10px]"
                         >
                           <Printer className="w-4 h-4 text-slate-500" /> Struk
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowInvoice(tx);
+                          }}
+                          className="py-2 bg-slate-100 dark:bg-zinc-800 rounded-xl flex items-center justify-center gap-1 font-bold text-[10px]"
+                        >
+                          <FileText className="w-4 h-4 text-slate-500" /> Invoice
                         </button>
                       </div>
                       <div className="grid grid-cols-4 gap-1.5 pt-1">
@@ -527,6 +542,18 @@ export default function TransaksiDanProduksiPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Invoice A4 Modal */}
+      {showInvoice && (
+        <InvoiceA4
+          transaction={showInvoice}
+          wallet={wallets.find(w => w.id === showInvoice.walletIdTarget)}
+          profile={profile}
+          cabangSlug={cabangSlug}
+          onClose={() => setShowInvoice(null)}
+          onPrint={() => window.print()}
+        />
       )}
     </div>
   );
