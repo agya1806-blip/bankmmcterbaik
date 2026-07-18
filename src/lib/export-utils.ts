@@ -23,7 +23,7 @@ export function formatTransactionWA(tx: Transaction, branchName: string): string
     .join("\n");
 
   return (
-    `📋 *INVOICE ${tx.invoiceNumber}*\n` +
+    `*INVOICE ${tx.invoiceNumber}*\n` +
     ` Cabang: ${branchName}\n` +
     ` Tanggal: ${formatDate(tx.tanggal)}\n` +
     ` Pelanggan: ${tx.customerNama}\n` +
@@ -34,8 +34,8 @@ export function formatTransactionWA(tx: Transaction, branchName: string): string
     ` *Dibayar:* ${formatCurrency(tx.dpDibayar)}\n` +
     (tx.sisaTagihan > 0
       ? ` *Sisa Piutang:* ${formatCurrency(tx.sisaTagihan)}\n`
-      : ` ✅ *LUNAS*\n`) +
-    `\nTerima kasih atas kunjungan Anda! 🙏`
+      : ` [LUNAS]\n`) +
+    `\nTerima kasih atas kunjungan Anda!`
   );
 }
 
@@ -46,13 +46,13 @@ export function formatCashflowWA(cashflows: Cashflow[], branchName: string, peri
   const totalKeluar = keluar.reduce((s, c) => s + c.nominal, 0);
 
   const lines = [
-    `📊 *LAPORAN CASHFLOW*`,
+    `*LAPORAN CASHFLOW*`,
     ` Cabang: ${branchName}`,
     ` Periode: ${period}`,
     `\n${"─".repeat(30)}`,
-    `\n💰 *PEMASUKAN (${masuk.length} transaksi):*`,
+    `\n[PEMASUKAN] (${masuk.length} transaksi):`,
     ...masuk.slice(0, 10).map((c) => `  • ${c.catatan}: ${formatCurrency(c.nominal)}`),
-    `\n💸 *PENGELUARAN (${keluar.length} transaksi):*`,
+    `\n[PENGELUARAN] (${keluar.length} transaksi):`,
     ...keluar.slice(0, 10).map((c) => `  • ${c.catatan}: ${formatCurrency(c.nominal)}`),
     `\n${"─".repeat(30)}`,
     ` Total Masuk: ${formatCurrency(totalMasuk)}`,

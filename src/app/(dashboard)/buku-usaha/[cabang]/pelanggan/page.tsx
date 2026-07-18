@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type UnitId, type Customer } from "@/lib/db-v4";
 import * as XLSX from "xlsx";
+import { ArrowLeft, Download, UserPlus, Search, Smartphone, DollarSign, MessageCircle, Send, Check } from "lucide-react";
 
 const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi",
@@ -184,7 +185,7 @@ export default function PelangganCRMPage() {
           onClick={() => router.push(`/buku-usaha/${cabangSlug}`)}
           className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md scale-press"
         >
-          <span className="text-sm">←</span>
+          <ArrowLeft className="w-5 h-5 text-slate-500" />
         </button>
         <h1 className="text-lg font-extrabold tracking-tight capitalize">CRM Pelanggan</h1>
         <div className="flex items-center gap-2">
@@ -200,20 +201,20 @@ export default function PelangganCRMPage() {
             className="p-2 bg-amber-500 text-white rounded-full shadow-md scale-press"
             title="Impor dari file"
           >
-            <span className="text-sm">📥</span>
+            <Download className="w-5 h-5" />
           </button>
           <button
             onClick={() => setShowAddModal(true)}
             className="p-2 bg-[#008CEB] text-white rounded-full shadow-md scale-press"
           >
-            <span className="text-sm">👤</span>
+            <UserPlus className="w-5 h-5" />
           </button>
         </div>
       </div>
 
       {/* Search */}
       <div className="relative">
-        <span className="absolute left-3 top-2.5 text-sm text-slate-400">🔍</span>
+        <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
         <input
           type="text"
           placeholder="Cari nama atau nomor HP..."
@@ -245,14 +246,14 @@ export default function PelangganCRMPage() {
                   <div>
                     <h4 className="text-xs font-heading font-extrabold">{c.nama}</h4>
                     <p className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
-                      <span>📱</span> {c.noWA}
+                      <Smartphone className="w-3.5 h-3.5" /> {c.noWA}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <span className="text-[8px] uppercase font-bold text-slate-400 tracking-wider">Total Belanja</span>
                   <p className="text-xs font-heading font-extrabold text-[#00C9A7] flex items-center gap-1 justify-end">
-                    <span>💰</span> Rp{c.totalBelanja.toLocaleString()}
+                    <DollarSign className="w-3.5 h-3.5" /> Rp{c.totalBelanja.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -266,7 +267,7 @@ export default function PelangganCRMPage() {
                     }}
                     className="w-full py-2.5 bg-emerald-500 text-white rounded-xl flex items-center justify-center gap-1.5 font-bold text-[10px] hover:bg-emerald-600 active:scale-[0.97] transition-all duration-200"
                   >
-                    <span>💬</span> Kirim WA Promosi
+                    <MessageCircle className="w-4 h-4" /> Kirim WA Promosi
                   </button>
                 </div>
               )}
@@ -292,7 +293,7 @@ export default function PelangganCRMPage() {
               onClick={() => handleBroadcast(selectedCustomer)}
               className="px-3 py-1.5 bg-[#008CEB] text-white rounded-xl text-xs font-bold flex items-center gap-1"
             >
-              <span>📤</span> Kirim
+              <Send className="w-4 h-4" /> Kirim
             </button>
           </div>
         </div>
@@ -345,7 +346,7 @@ export default function PelangganCRMPage() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#131527] w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-xl animate-slide-up">
             <div className="flex items-center gap-2">
-              <span className="text-lg">📥</span>
+              <Download className="w-5 h-5 text-[#008CEB]" />
               <h3 className="text-sm font-extrabold text-slate-800 dark:text-white">
                 Impor Pelanggan
               </h3>
@@ -380,7 +381,7 @@ export default function PelangganCRMPage() {
                 onClick={handleImportConfirm}
                 className="flex-1 py-2.5 bg-[#008CEB] text-white rounded-xl flex items-center justify-center gap-1"
               >
-                <span>✅</span> Impor {importPreview.length} Pelanggan
+                <Check className="w-4 h-4" /> Impor {importPreview.length} Pelanggan
               </button>
             </div>
           </div>

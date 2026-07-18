@@ -4,6 +4,7 @@ import React, { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
 import { db } from "@/lib/db-v4";
+import { ArrowLeft, Camera, LogOut } from "lucide-react";
 
 function compressImage(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -119,7 +120,7 @@ export default function ProfilePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <button onClick={() => router.back()} className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md scale-press">
-          <span className="text-sm">←</span>
+          <ArrowLeft className="w-5 h-5 text-slate-500" />
         </button>
         <h1 className="text-lg font-extrabold tracking-tight">Profil Saya</h1>
         <div className="w-10" />
@@ -142,7 +143,7 @@ export default function ProfilePage() {
             className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer"
             onClick={() => fileRef.current?.click()}
           >
-            <span className="text-white text-xl">📷</span>
+            <Camera className="w-6 h-6 text-white" />
           </div>
           {isUploading && (
             <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
@@ -252,7 +253,7 @@ export default function ProfilePage() {
         onClick={handleLogout}
         className="premium-card p-4 text-center text-xs font-bold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 active:scale-[0.98] transition-all"
       >
-        🚪 Logout
+        <LogOut className="w-4 h-4 inline-block mr-1.5 -mt-0.5" /> Logout
       </button>
     </div>
   );

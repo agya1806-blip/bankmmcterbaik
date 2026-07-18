@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
 import { db } from "@/lib/db-v4";
+import { User, Lock, Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">👤</span>
+          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
             placeholder="Username"
@@ -63,7 +64,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔒</span>
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type={showPin ? "text" : "password"}
             placeholder="PIN (4-6 digit)"
@@ -73,12 +74,12 @@ export default function RegisterPage() {
             maxLength={6}
           />
           <button type="button" onClick={() => setShowPin(!showPin)} className="absolute right-3 top-1/2 -translate-y-1/2">
-            <span className="text-sm text-slate-400">{showPin ? "🙈" : "👁️"}</span>
+            {showPin ? <EyeOff className="w-4 h-4 text-slate-400" /> : <Eye className="w-4 h-4 text-slate-400" />}
           </button>
         </div>
 
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔒</span>
+          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="password"
             placeholder="Konfirmasi PIN"

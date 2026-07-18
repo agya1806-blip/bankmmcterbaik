@@ -51,7 +51,7 @@ export default function PinLock({ onSuccess, onCancel, title = "Masukkan PIN", s
     setError("");
   };
 
-  const digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "⌫"];
+  const digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"];
 
   return (
     <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center backdrop-blur-md">
@@ -94,7 +94,7 @@ export default function PinLock({ onSuccess, onCancel, title = "Masukkan PIN", s
         <div className="grid grid-cols-3 gap-2">
           {digits.map((d, i) => {
             if (d === "") return <div key={i} />;
-            if (d === "⌫") {
+            if (d === "del") {
               return (
                 <button
                   key={i}

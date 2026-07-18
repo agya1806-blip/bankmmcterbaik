@@ -119,7 +119,7 @@ export default function BukuUsahaPage() {
             {currentUser?.fotoUrl ? (
               <img src={currentUser.fotoUrl} alt="Profil" className="w-full h-full object-cover" />
             ) : (
-              currentUser?.nama?.charAt(0)?.toUpperCase() || "👤"
+              currentUser?.nama?.charAt(0)?.toUpperCase() || <User className="w-5 h-5" />
             )}
           </button>
         </div>

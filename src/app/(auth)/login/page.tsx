@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
 import { db } from "@/lib/db-v4";
+import { Shield, User, Lock } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,8 +31,8 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#F5F9FC] dark:bg-[#0A1628] flex items-center justify-center px-4">
       <form onSubmit={handleSubmit} className="w-full max-w-sm premium-card premium-card-glow p-8 flex flex-col gap-5 animate-fade-in">
         <div className="text-center space-y-2">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center mx-auto shadow-lg shadow-[#008CEB]/20 text-2xl">
-            🛡️
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center mx-auto shadow-lg shadow-[#008CEB]/20">
+            <Shield className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-heading font-extrabold tracking-tight gradient-text">
             MMCBANK
@@ -40,7 +41,7 @@ export default function LoginPage() {
         </div>
 
         <div className="relative group">
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 group-focus-within:text-[#008CEB] transition-colors duration-200">👤</span>
+          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#008CEB] transition-colors duration-200" />
           <input
             type="text"
             placeholder="Username"
@@ -51,7 +52,7 @@ export default function LoginPage() {
         </div>
 
         <div className="relative group">
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 group-focus-within:text-[#008CEB] transition-colors duration-200">🔒</span>
+          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#008CEB] transition-colors duration-200" />
           <input
             type="password"
             placeholder="PIN (4-6 digit)"

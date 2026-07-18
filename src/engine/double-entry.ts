@@ -145,7 +145,7 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
           walletNama: sourceWallet?.namaDompet ?? "",
           referensiId: transferId,
           referensiTipe: "adjustment",
-          catatan: `[TRANSFER] ${description} → ${toBranch}`,
+          catatan: `[TRANSFER] ${description} -> ${toBranch}`,
           createdAt: now,
         });
 
@@ -168,7 +168,7 @@ export async function executeTransfer(input: TransferInput): Promise<TransferRes
           walletNama: destWallet?.namaDompet ?? "",
           referensiId: transferId,
           referensiTipe: "adjustment",
-          catatan: `[TRANSFER] ${description} ← ${fromBranch}`,
+          catatan: `[TRANSFER] ${description} <- ${fromBranch}`,
           createdAt: now,
         });
 

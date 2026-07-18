@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/db-v4";
+import { Key, CheckCircle, User, Lock, ArrowLeft } from "lucide-react";
 
 export default function ForgotPinPage() {
   const router = useRouter();
@@ -38,8 +39,8 @@ export default function ForgotPinPage() {
     <div className="min-h-screen bg-[#F5F9FC] dark:bg-[#0A1628] flex items-center justify-center px-4">
       <div className="w-full max-w-sm premium-card p-8 flex flex-col gap-5 animate-fade-in">
         <div className="text-center">
-          <div className="w-12 h-12 rounded-full bg-[#E8F5FD] dark:bg-[#008CEB]/10 flex items-center justify-center mx-auto mb-3 text-xl">
-            🔑
+          <div className="w-12 h-12 rounded-full bg-[#E8F5FD] dark:bg-[#008CEB]/10 flex items-center justify-center mx-auto mb-3">
+            <Key className="w-6 h-6 text-[#008CEB]" />
           </div>
           <h1 className="text-xl font-extrabold tracking-tight">Reset PIN</h1>
           <p className="text-xs text-slate-500 mt-1">Masukkan username untuk reset PIN</p>
@@ -47,8 +48,8 @@ export default function ForgotPinPage() {
 
         {success ? (
           <div className="text-center py-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-3 text-xl">
-              ✅
+            <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-3">
+              <CheckCircle className="w-6 h-6 text-emerald-500" />
             </div>
             <p className="text-sm font-bold text-[#00C9A7]">PIN berhasil direset!</p>
             <p className="text-xs text-slate-400 mt-1">Mengalihkan ke halaman login...</p>
@@ -56,7 +57,7 @@ export default function ForgotPinPage() {
         ) : step === "verify" ? (
           <form onSubmit={handleVerify} className="flex flex-col gap-4">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">👤</span>
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Username"
@@ -76,7 +77,7 @@ export default function ForgotPinPage() {
         ) : (
           <form onSubmit={handleReset} className="flex flex-col gap-4">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔒</span>
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="password"
                 placeholder="PIN Baru (4-6 digit)"
@@ -87,7 +88,7 @@ export default function ForgotPinPage() {
               />
             </div>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔒</span>
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="password"
                 placeholder="Konfirmasi PIN Baru"
@@ -108,7 +109,7 @@ export default function ForgotPinPage() {
         )}
 
         <button onClick={() => router.push("/login")} className="flex items-center justify-center gap-1 text-xs text-slate-400 hover:text-[#008CEB]">
-          ← Kembali ke Login
+          <ArrowLeft className="w-4 h-4" /> Kembali ke Login
         </button>
       </div>
     </div>
