@@ -3,8 +3,9 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type UnitId, type Inventory, BRANCH_MAP, BRANCH_LABELS } from "@/lib/db-v4";
+import { db, type UnitId, type Inventory, BRANCH_MAP } from "@/lib/db-v4";
 import { showToast } from "@/lib/toast";
+import { productService, inventoryService } from "@/services";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -32,13 +33,13 @@ export default function MasterProdukPage() {
   const bookOrBranchId: UnitId = BRANCH_MAP[cabangSlug] || "usaha-warkop";
 
   const _products = useLiveQuery(
-    () => db.inventory.where("bookOrBranchId").equals(bookOrBranchId).toArray(),
+    () => productService.getByBranch(bookOrBranchId),
     [bookOrBranchId]
   );
   const products = _products || [];
 
   const mutations = useLiveQuery(
-    () => db.inventoryMutations.where("bookOrBranchId").equals(bookOrBranchId).reverse().toArray(),
+    () => inventoryService.getMutations(bookOrBranchId),
     [bookOrBranchId]
   ) || [];
 
@@ -163,7 +164,7 @@ export default function MasterProdukPage() {
 
     try {
       if (editingId) {
-        await db.inventory.update(editingId, {
+        await productService.update(editingId, {
           nama: formData.nama,
           sku: formData.sku,
           barcode: formData.barcode || "",
@@ -175,28 +176,10 @@ export default function MasterProdukPage() {
           satuan: formData.satuan,
           catatan: formData.catatan,
           fotoUrl: formData.fotoUrl || undefined,
-          updatedAt: now,
         });
         showToast.success("Produk berhasil diperbarui");
       } else {
-        await db.inventory.add({
-          id: crypto.randomUUID(),
-          bookOrBranchId,
-          unitId: bookOrBranchId,
-          sku: formData.sku,
-          barcode: formData.barcode || "",
-          nama: formData.nama,
-          kategori: formData.kategori,
-          stok: formData.stok,
-          stokMin: formData.stokMin,
-          hargaModal: formData.hargaModal,
-          hargaJual: formData.hargaJual,
-          satuan: formData.satuan,
-          catatan: formData.catatan,
-          fotoUrl: formData.fotoUrl || undefined,
-          createdAt: now,
-          updatedAt: now,
-        });
+        await productService.create(formData, bookOrBranchId);
         showToast.success("Produk berhasil ditambahkan");
       }
 
@@ -388,14 +371,9 @@ export default function MasterProdukPage() {
           onScan={(barcode) => {
             setFormData((prev) => ({ ...prev, barcode }));
             setShowBarcodeScanner(false);
-            db.inventory
-              .where("bookOrBranchId")
-              .equals(bookOrBranchId)
-              .filter((p) => p.barcode === barcode)
-              .first()
-              .then((existing) => {
-                if (existing) openEditForm(existing);
-              });
+            productService.getByBarcode(barcode, bookOrBranchId).then((existing) => {
+              if (existing) openEditForm(existing);
+            });
           }}
           onClose={() => setShowBarcodeScanner(false)}
         />
