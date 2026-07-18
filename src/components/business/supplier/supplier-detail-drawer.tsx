@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { X, Phone, MapPin, Building2, Calendar, FileText } from "lucide-react";
+import { X, Phone, MapPin, Building2, Calendar, FileText, Package } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { DbSupplier, DbPurchaseOrder } from "@/lib/db-v4";
 import { SupplierHistory } from "./supplier-history";

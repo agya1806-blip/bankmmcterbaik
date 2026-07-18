@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, type UnitId, BRANCH_MAP } from "@/lib/db-v4";
+import { db, type UnitId, type DbSupplier, BRANCH_MAP } from "@/lib/db-v4";
 import { showToast } from "@/lib/toast";
 import { SupplierHeader } from "@/components/business/supplier/supplier-header";
 import { SupplierSummaryCards } from "@/components/business/supplier/supplier-summary-cards";
@@ -30,9 +30,9 @@ export default function SupplierPage() {
   );
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [editingSupplier, setEditingSupplier] = useState<typeof suppliers extends (infer U)[] ? U : null>(null);
+  const [editingSupplier, setEditingSupplier] = useState<DbSupplier | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [detailSupplier, setDetailSupplier] = useState<typeof suppliers extends (infer U)[] ? U : null>(null);
+  const [detailSupplier, setDetailSupplier] = useState<DbSupplier | null>(null);
   const [showDrawer, setShowDrawer] = useState(false);
 
   const isLoaded = suppliers !== undefined && allPOs !== undefined;
@@ -99,9 +99,10 @@ export default function SupplierPage() {
   }, [supplierStats, searchQuery]);
 
   /* ─── Detail drawer products ─── */
+  const detailSupplierId = detailSupplier?.id;
   const detailProducts = useMemo(() => {
-    if (!detailSupplier) return [];
-    const orders = supplierStats.find((s) => s.supplier.id === detailSupplier.id)?.orders || [];
+    if (!detailSupplierId) return [];
+    const orders = supplierStats.find((s) => s.supplier.id === detailSupplierId)?.orders || [];
     const productMap = new Map<string, { namaItem: string; totalQty: number; totalHarga: number }>();
     for (const o of orders) {
       for (const item of o.items) {
@@ -145,7 +146,7 @@ export default function SupplierPage() {
     }
   };
 
-  const handleEdit = (s: typeof safeSuppliers[0]) => {
+  const handleEdit = (s: DbSupplier) => {
     setEditingSupplier(s);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -162,7 +163,7 @@ export default function SupplierPage() {
     }
   };
 
-  const handleDetail = (s: typeof safeSuppliers[0]) => {
+  const handleDetail = (s: DbSupplier) => {
     setDetailSupplier(s);
     setShowDrawer(true);
   };
