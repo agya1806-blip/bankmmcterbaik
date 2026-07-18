@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type UnitId } from "@/lib/db-v4";
 import { TrendingUp, TrendingDown, Wallet, Save, ArrowLeft, Plus, X } from "lucide-react";
+import { showToast } from "@/lib/toast";
 
 const BOOK_ID: UnitId = "keluarga";
 
@@ -37,8 +38,8 @@ export default function BukuKeluargaCashflowPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (nominal <= 0) return alert("Nominal harus lebih dari 0!");
-    if (!catatan.trim()) return alert("Catatan wajib diisi!");
+    if (nominal <= 0) return showToast.error("Nominal harus lebih dari 0!");
+    if (!catatan.trim()) return showToast.error("Catatan wajib diisi!");
 
     const selectedWallet = wallets.find(w => w.id === walletId);
     const saldoSebelum = selectedWallet?.saldo ?? 0;

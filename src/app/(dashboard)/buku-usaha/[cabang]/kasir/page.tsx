@@ -15,8 +15,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown, Plus, Trash2, Search, Wallet, FileText,
   ArrowLeft, Edit3, X, Clock, AlertTriangle,
-  User, StickyNote, Package, Banknote, Minus,
+  User, StickyNote, Package, Banknote, Minus, Heart,
 } from "lucide-react";
+import { showToast } from "@/lib/toast";
 import InvoiceA4 from "@/components/invoice-a4";
 
 const BRANCH_MAP: Record<string, UnitId> = {
@@ -69,6 +70,7 @@ export default function PosKasirPage() {
   const [walletIdTarget, setWalletIdTarget] = useState("");
   const [catatan, setCatatan] = useState("");
   const [dpDibayar, setDpDibayar] = useState(0);
+  const [sedekahNominal, setSedekahNominal] = useState(0);
   const [statusPesanan, setStatusPesanan] = useState<StatusPesanan>("baru");
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -150,15 +152,15 @@ export default function PosKasirPage() {
   const sisaTagihan = Math.max(0, grandTotal - dpDibayar);
 
   const handleCheckout = async () => {
-    if (isGridMode && gridCart.length === 0) return alert("Keranjang kosong!");
-    if (!isGridMode && manualCart.length === 0) return alert("Belum ada item!");
-    if (!isGridMode && manualCart.some(i => !i.namaItem.trim())) return alert("Nama item harus diisi!");
-    if (!walletIdTarget) return alert("Pilih dompet penerima!");
+    if (isGridMode && gridCart.length === 0) return showToast.error("Keranjang kosong!");
+    if (!isGridMode && manualCart.length === 0) return showToast.error("Belum ada item!");
+    if (!isGridMode && manualCart.some(i => !i.namaItem.trim())) return showToast.error("Nama item harus diisi!");
+    if (!walletIdTarget) return showToast.error("Pilih dompet penerima!");
     if (isProcessing) return;
 
     const namaPelanggan = isManual ? manualNama.trim() : currentCustomer?.nama || "";
     const waPelanggan = isManual ? manualWA.trim() : currentCustomer?.noWA || "";
-    if (!namaPelanggan) return alert("Nama pelanggan harus diisi!");
+    if (!namaPelanggan) return showToast.error("Nama pelanggan harus diisi!");
 
     setIsProcessing(true);
     try {
@@ -175,7 +177,7 @@ export default function PosKasirPage() {
         diskonGlobalPersen: 0,
         ppnPersen: 0,
         dpDibayar,
-        sedekahNominal: 0,
+        sedekahNominal,
         sedekahType: "infakTerikat",
         paymentMethod: "CASH",
         walletIdTarget,
@@ -220,13 +222,13 @@ export default function PosKasirPage() {
             });
           }
         }
-        alert(`Berhasil! Invoice: ${res.invoiceNumber}`);
+        showToast.success(`Berhasil! Invoice: ${res.invoiceNumber}`);
         resetForm();
       } else {
-        alert(`Gagal: ${res.error}`);
+        showToast.error(`Gagal: ${res.error}`);
       }
     } catch (err: unknown) {
-      alert(`Gagal: ${err instanceof Error ? err.message : "Unknown error"}`);
+      showToast.error(`Gagal: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setIsProcessing(false);
     }
@@ -238,6 +240,7 @@ export default function PosKasirPage() {
     setSpesifikasi("");
     setCatatan("");
     setDpDibayar(0);
+    setSedekahNominal(0);
     setWalletIdTarget("");
     setStatusPesanan("baru");
     setSelectedCustomerId("");
@@ -270,10 +273,10 @@ export default function PosKasirPage() {
         userName: currentUser?.nama || "System",
         alasan: "Dihapus dari kasir",
       });
-      if (res.ok) alert("Transaksi dibatalkan!");
-      else alert(`Gagal: ${res.error}`);
+      if (res.ok) showToast.success("Transaksi dibatalkan!");
+      else showToast.error(`Gagal: ${res.error}`);
     } catch (err: unknown) {
-      alert(`Gagal: ${err instanceof Error ? err.message : "Unknown error"}`);
+      showToast.error(`Gagal: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setIsProcessing(false);
     }
@@ -473,6 +476,13 @@ export default function PosKasirPage() {
                 <span className={`font-extrabold ${sisaTagihan > 0 ? "text-amber-500" : "text-emerald-500"}`}>{formatRp(sisaTagihan)}</span>
               </div>
             )}
+          </Section>
+
+          <Section title="Sedekah">
+            <div>
+              <label className="text-[9px] text-slate-400 font-bold uppercase flex items-center gap-1"><Heart className="w-3 h-3" /> Sedekah</label>
+              <input type="number" value={sedekahNominal || ""} onChange={(e) => setSedekahNominal(Math.max(0, Number(e.target.value)))} className="w-full input-premium text-xs mt-1" />
+            </div>
           </Section>
 
           <Section title="Status Pesanan">

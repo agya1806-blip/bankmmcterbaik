@@ -12,8 +12,9 @@ import {
   Bell, Wallet, TrendingUp, TrendingDown, Plus, Clock,
   BarChart3, AlertTriangle, ArrowUpRight, ArrowDownRight,
   Calendar, FileText, ChevronRight, X, Save, DollarSign,
-  Landmark, Smartphone, Pencil, Trash2,
+  Landmark, Smartphone,   Pencil, Trash2,
 } from "lucide-react";
+import { showToast } from "@/lib/toast";
 
 const BOOK_ID: UnitId = "pribadi";
 
@@ -81,7 +82,7 @@ export default function BukuPribadiPage() {
   const todayStr = new Date().toISOString().slice(0, 10);
 
   const handleSaveWallet = async () => {
-    if (!walletName.trim()) return alert("Nama dompet wajib diisi!");
+    if (!walletName.trim()) return showToast.error("Nama dompet wajib diisi!");
     const bankData = walletTipe === "Bank" ? { nomorRekening: walletNomorRekening.trim() || undefined, atasNama: walletAtasNama.trim() || undefined, namaBank: walletNamaBank.trim() || undefined } : {};
     if (editingWallet) {
       await db.wallets.update(editingWallet, { namaDompet: walletName.trim(), tipe: walletTipe, saldo: walletSaldo, catatan: walletCatatan, ...bankData });

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
 import { db } from "@/lib/db-v4";
+import { verifyPin } from "@/lib/crypto";
+import { showToast } from "@/lib/toast";
 import { Shield, User, Lock } from "lucide-react";
 
 export default function LoginPage() {
@@ -11,16 +13,14 @@ export default function LoginPage() {
   const { login, completeOnboarding } = useSessionStore();
   const [username, setUsername] = useState("");
   const [pin, setPin] = useState("");
-  const [error, setError] = useState("");
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim()) return setError("Username harus diisi");
-    if (pin.length < 4) return setError("PIN minimal 4 digit");
+    if (!username.trim()) return showToast.error("Username harus diisi");
+    if (pin.length < 4) return showToast.error("PIN minimal 4 digit");
 
     const user = await db.users.where("nama").equals(username.trim()).first();
-    if (!user) return setError("Username tidak ditemukan");
-    if (user.pinHash !== pin) return setError("PIN salah");
+    if (!user) return showToast.error("Username tidak ditemukan");
+    if (!(await verifyPin(pin, user.pinHash))) return showToast.error("PIN salah");
 
     login({ id: user.id, nama: user.nama, fotoUrl: user.fotoUrl });
     completeOnboarding();
@@ -46,7 +46,7 @@ export default function LoginPage() {
             type="text"
             placeholder="Username"
             value={username}
-            onChange={(e) => { setUsername(e.target.value); setError(""); }}
+            onChange={(e) => { setUsername(e.target.value); }}
             className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0F1926] text-sm focus:outline-none focus:ring-2 focus:ring-[#008CEB]/40 transition-all duration-200"
           />
         </div>
@@ -57,15 +57,11 @@ export default function LoginPage() {
             type="password"
             placeholder="PIN (4-6 digit)"
             value={pin}
-            onChange={(e) => { setPin(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }}
+            onChange={(e) => { setPin(e.target.value.replace(/\D/g, "").slice(0, 6)); }}
             className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0F1926] text-sm focus:outline-none focus:ring-2 focus:ring-[#008CEB]/40 tracking-[0.3em] transition-all duration-200"
             maxLength={6}
           />
         </div>
-
-        {error && (
-          <p className="text-xs text-[#FF3B5C] font-bold text-center bg-red-50 dark:bg-red-950/30 py-2 rounded-xl">{error}</p>
-        )}
 
         <button
           type="submit"

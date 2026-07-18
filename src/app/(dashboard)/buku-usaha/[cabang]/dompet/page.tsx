@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type UnitId } from "@/lib/db-v4";
 import { ArrowLeft, Wallet, Save, Pencil, Trash2, DollarSign, Landmark, Smartphone } from "lucide-react";
+import { showToast } from "@/lib/toast";
 
 const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi", keluarga: "keluarga",
@@ -36,7 +37,7 @@ export default function DompetPage() {
   };
 
   const handleSave = async () => {
-    if (!walletName.trim()) return alert("Nama dompet wajib diisi!");
+    if (!walletName.trim()) return showToast.error("Nama dompet wajib diisi!");
     const bankData = walletTipe === "Bank" ? { nomorRekening: walletNomorRekening.trim() || undefined, atasNama: walletAtasNama.trim() || undefined, namaBank: walletNamaBank.trim() || undefined } : {};
     if (editingWallet) {
       await db.wallets.update(editingWallet, { namaDompet: walletName.trim(), tipe: walletTipe, saldo: walletSaldo, catatan: walletCatatan, ...bankData });

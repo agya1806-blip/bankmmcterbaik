@@ -11,8 +11,9 @@ import { useSessionStore } from "@/store/useSessionStore";
 import {
   Bell, Wallet, TrendingUp, TrendingDown, Clock,
   BarChart3, AlertTriangle, ArrowUpRight, ArrowDownRight,
-  FileText, Save, Home, DollarSign, Landmark, Smartphone, Pencil, Trash2,
+  FileText, Save, Home, DollarSign, Landmark, Smartphone,   Pencil, Trash2,
 } from "lucide-react";
+import { showToast } from "@/lib/toast";
 
 const BOOK_ID: UnitId = "keluarga";
 
@@ -78,7 +79,7 @@ export default function BukuKeluargaPage() {
   }, [transactions]);
 
   const handleSaveWallet = async () => {
-    if (!walletName.trim()) return alert("Nama dompet wajib diisi!");
+    if (!walletName.trim()) return showToast.error("Nama dompet wajib diisi!");
     const bankData = walletTipe === "Bank" ? { nomorRekening: walletNomorRekening.trim() || undefined, atasNama: walletAtasNama.trim() || undefined, namaBank: walletNamaBank.trim() || undefined } : {};
     if (editingWallet) {
       await db.wallets.update(editingWallet, { namaDompet: walletName.trim(), tipe: walletTipe, saldo: walletSaldo, catatan: walletCatatan, ...bankData });

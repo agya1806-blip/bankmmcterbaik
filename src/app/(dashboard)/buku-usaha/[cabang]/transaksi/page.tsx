@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type UnitId, type Transaction, type ProductionStatus } from '@/lib/db-v4';
 import { ArrowLeft, ClipboardList, FileText, Printer, Image, Phone, BarChart3, X, Search } from "lucide-react";
+import { showToast } from "@/lib/toast";
 import InvoiceA4 from "@/components/invoice-a4";
 
 const BRANCH_MAP: Record<string, UnitId> = {
@@ -88,7 +89,7 @@ export default function TransaksiDanProduksiPage() {
 
   const initializeProduction = async (txId: string) => {
     const existing = await db.productions.where({ transactionId: txId }).first();
-    if (existing) return alert('Transaksi ini sudah masuk dalam antrean produksi!');
+    if (existing) return showToast.error('Transaksi ini sudah masuk dalam antrean produksi!');
 
     const now = new Date().toISOString();
     await db.productions.add({
@@ -102,7 +103,7 @@ export default function TransaksiDanProduksiPage() {
       updatedAt: now,
       createdAt: now,
     });
-    alert('Berhasil didaftarkan ke antrean produksi!');
+    showToast.success('Berhasil didaftarkan ke antrean produksi!');
   };
 
   const sendWhatsAppBilling = (tx: Transaction) => {
@@ -164,7 +165,7 @@ export default function TransaksiDanProduksiPage() {
       link.click();
       document.body.removeChild(tempDiv);
     } catch {
-      alert("Gagal export PNG. Pastikan html2canvas terinstall.");
+      showToast.error("Gagal export PNG. Pastikan html2canvas terinstall.");
     }
   };
 
@@ -194,7 +195,7 @@ export default function TransaksiDanProduksiPage() {
       write(`Sisa: Rp${tx.sisaTagihan.toLocaleString()}`);
       doc.save(`Invoice-${tx.invoiceNumber}.pdf`);
     } catch {
-      alert("Gagal export PDF. Pastikan jspdf terinstall.");
+      showToast.error("Gagal export PDF. Pastikan jspdf terinstall.");
     }
   };
 
@@ -218,7 +219,7 @@ export default function TransaksiDanProduksiPage() {
       XLSX.utils.book_append_sheet(wb, ws, "Invoice");
       XLSX.writeFile(wb, `Invoice-${tx.invoiceNumber}.xlsx`);
     } catch {
-      alert("Gagal export Excel. Pastikan xlsx terinstall.");
+      showToast.error("Gagal export Excel. Pastikan xlsx terinstall.");
     }
   };
 

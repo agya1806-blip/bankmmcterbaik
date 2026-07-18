@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 const interSans = Inter({
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="id" suppressHydrationWarning className={`${interSans.variable} ${jakartaSans.variable}`}>
       <body className="min-h-screen bg-[#F8F9FD] dark:bg-[#0B0C16] antialiased font-sans">
         {children}
+        <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
       </body>
     </html>
   );

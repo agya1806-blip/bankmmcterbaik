@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
 import { db } from "@/lib/db-v4";
+import { hashPin } from "@/lib/crypto";
+import { showToast } from "@/lib/toast";
 import { User, Lock, Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
@@ -13,23 +15,21 @@ export default function RegisterPage() {
   const [pin, setPin] = useState("");
   const [pinConfirm, setPinConfirm] = useState("");
   const [showPin, setShowPin] = useState(false);
-  const [error, setError] = useState("");
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim()) return setError("Username harus diisi!");
-    if (pin.length < 4) return setError("PIN minimal 4 digit!");
-    if (pin !== pinConfirm) return setError("PIN konfirmasi tidak cocok!");
+    if (!username.trim()) return showToast.error("Username harus diisi!");
+    if (pin.length < 4) return showToast.error("PIN minimal 4 digit!");
+    if (pin !== pinConfirm) return showToast.error("PIN konfirmasi tidak cocok!");
 
     const existing = await db.users.where("nama").equals(username.trim()).first();
-    if (existing) return setError("Username sudah digunakan!");
+    if (existing) return showToast.error("Username sudah digunakan!");
 
     const userId = crypto.randomUUID();
     await db.users.add({
       id: userId,
       bookOrBranchId: "pribadi",
       nama: username.trim(),
-      pinHash: pin,
+      pinHash: await hashPin(pin),
       fotoUrl: "",
       role: "admin",
       allowedUnits: [],
@@ -58,7 +58,7 @@ export default function RegisterPage() {
             type="text"
             placeholder="Username"
             value={username}
-            onChange={(e) => { setUsername(e.target.value); setError(""); }}
+            onChange={(e) => { setUsername(e.target.value); }}
             className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0F1926] text-sm focus:outline-none focus:ring-2 focus:ring-[#008CEB]/40"
           />
         </div>
@@ -69,7 +69,7 @@ export default function RegisterPage() {
             type={showPin ? "text" : "password"}
             placeholder="PIN (4-6 digit)"
             value={pin}
-            onChange={(e) => { setPin(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }}
+            onChange={(e) => { setPin(e.target.value.replace(/\D/g, "").slice(0, 6)); }}
             className="w-full h-11 pl-10 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0F1926] text-sm focus:outline-none focus:ring-2 focus:ring-[#008CEB]/40 tracking-[0.3em]"
             maxLength={6}
           />
@@ -84,13 +84,11 @@ export default function RegisterPage() {
             type="password"
             placeholder="Konfirmasi PIN"
             value={pinConfirm}
-            onChange={(e) => { setPinConfirm(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }}
+            onChange={(e) => { setPinConfirm(e.target.value.replace(/\D/g, "").slice(0, 6)); }}
             className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0F1926] text-sm focus:outline-none focus:ring-2 focus:ring-[#008CEB]/40 tracking-[0.3em]"
             maxLength={6}
           />
         </div>
-
-        {error && <p className="text-xs text-[#FF3B5C] text-center">{error}</p>}
 
         <button
           type="submit"

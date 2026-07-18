@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/db-v4";
+import { hashPin } from "@/lib/crypto";
+import { showToast } from "@/lib/toast";
 import { Key, CheckCircle, User, Lock, ArrowLeft } from "lucide-react";
 
 export default function ForgotPinPage() {
@@ -11,27 +13,26 @@ export default function ForgotPinPage() {
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [step, setStep] = useState<"verify" | "reset">("verify");
-  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     const user = await db.users.where("nama").equals(username.trim()).first();
-    if (!user) return setError("Username tidak ditemukan!");
+    if (!user) return showToast.error("Username tidak ditemukan!");
     setStep("reset");
-    setError("");
   };
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPin.length < 4) return setError("PIN minimal 4 digit!");
-    if (newPin !== confirmPin) return setError("PIN konfirmasi tidak cocok!");
+    if (newPin.length < 4) return showToast.error("PIN minimal 4 digit!");
+    if (newPin !== confirmPin) return showToast.error("PIN konfirmasi tidak cocok!");
 
     const user = await db.users.where("nama").equals(username.trim()).first();
-    if (!user) return setError("User tidak ditemukan!");
+    if (!user) return showToast.error("User tidak ditemukan!");
 
-    await db.users.update(user.id, { pinHash: newPin });
+    await db.users.update(user.id, { pinHash: await hashPin(newPin) });
     setSuccess(true);
+    showToast.success("PIN berhasil direset!");
     setTimeout(() => router.push("/login"), 2000);
   };
 
@@ -62,11 +63,10 @@ export default function ForgotPinPage() {
                 type="text"
                 placeholder="Username"
                 value={username}
-                onChange={(e) => { setUsername(e.target.value); setError(""); }}
+                onChange={(e) => { setUsername(e.target.value); }}
                 className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0F1926] text-sm focus:outline-none focus:ring-2 focus:ring-[#008CEB]/40"
               />
             </div>
-            {error && <p className="text-xs text-[#FF3B5C] text-center">{error}</p>}
             <button
               type="submit"
               className="w-full h-11 rounded-xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-bold text-sm active:scale-[0.97] transition-transform"
@@ -82,7 +82,7 @@ export default function ForgotPinPage() {
                 type="password"
                 placeholder="PIN Baru (4-6 digit)"
                 value={newPin}
-                onChange={(e) => { setNewPin(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }}
+                onChange={(e) => { setNewPin(e.target.value.replace(/\D/g, "").slice(0, 6)); }}
                 className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0F1926] text-sm focus:outline-none tracking-[0.3em]"
                 maxLength={6}
               />
@@ -93,12 +93,11 @@ export default function ForgotPinPage() {
                 type="password"
                 placeholder="Konfirmasi PIN Baru"
                 value={confirmPin}
-                onChange={(e) => { setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 6)); setError(""); }}
+                onChange={(e) => { setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 6)); }}
                 className="w-full h-11 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0F1926] text-sm focus:outline-none tracking-[0.3em]"
                 maxLength={6}
               />
             </div>
-            {error && <p className="text-xs text-[#FF3B5C] text-center">{error}</p>}
             <button
               type="submit"
               className="w-full h-11 rounded-xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-bold text-sm active:scale-[0.97] transition-transform"

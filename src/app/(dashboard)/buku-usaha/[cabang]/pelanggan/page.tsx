@@ -5,7 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type UnitId, type Customer } from "@/lib/db-v4";
 import * as XLSX from "xlsx";
-import { ArrowLeft, Download, UserPlus, Search, Smartphone, DollarSign, MessageCircle, Send, Check } from "lucide-react";
+import { ArrowLeft, Download, UserPlus, Search, Smartphone, DollarSign, MessageCircle, Send, Check, History } from "lucide-react";
+import { showToast } from "@/lib/toast";
 
 const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi",
@@ -80,10 +81,26 @@ export default function PelangganCRMPage() {
   const [promoMessage, setPromoMessage] = useState(
     "Halo [Nama], dapatkan penawaran spesial minggu ini hanya di toko kami!"
   );
+  const [expandedInstallment, setExpandedInstallment] = useState<string | null>(null);
 
   const customers =
     useLiveQuery(
       () => db.customers.where("bookOrBranchId").equals(bookOrBranchId).toArray(),
+      [bookOrBranchId]
+    ) || [];
+
+  const customerPiutang =
+    useLiveQuery(
+      () => {
+        if (!selectedCustomer?.id) return [];
+        return db.piutang.where("customerId").equals(selectedCustomer.id).toArray();
+      },
+      [selectedCustomer?.id]
+    ) || [];
+
+  const piutangInstallments =
+    useLiveQuery(
+      () => db.piutangInstallments.where("bookOrBranchId").equals(bookOrBranchId).toArray(),
       [bookOrBranchId]
     ) || [];
 
@@ -95,7 +112,7 @@ export default function PelangganCRMPage() {
 
   const handleAddCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !phone) return alert("Nama dan nomor HP wajib diisi!");
+    if (!name || !phone) return showToast.error("Nama dan nomor HP wajib diisi!");
     const formattedPhone = phone.replace(/[^0-9+]/g, "");
     await db.customers.add({
       id: crypto.randomUUID(),
@@ -130,17 +147,17 @@ export default function PelangganCRMPage() {
         const buffer = await file.arrayBuffer();
         parsed = parseExcel(buffer);
       } else {
-        alert("Format file tidak didukung. Gunakan CSV, VCF, atau Excel (.xlsx)");
+        showToast.error("Format file tidak didukung. Gunakan CSV, VCF, atau Excel (.xlsx)");
         return;
       }
       if (parsed.length === 0) {
-        alert("Tidak ditemukan kontak valid di file ini.");
+        showToast.error("Tidak ditemukan kontak valid di file ini.");
         return;
       }
       setImportPreview(parsed);
       setShowImportModal(true);
     } catch {
-      alert("Gagal membaca file. Pastikan format file benar.");
+      showToast.error("Gagal membaca file. Pastikan format file benar.");
     }
     if (fileRef.current) fileRef.current.value = "";
   };
@@ -167,7 +184,7 @@ export default function PelangganCRMPage() {
     }
     setImportPreview([]);
     setShowImportModal(false);
-    alert(`Berhasil impor ${imported} pelanggan.`);
+    showToast.success(`Berhasil impor ${imported} pelanggan.`);
   };
 
   const handleBroadcast = (customer: Customer) => {
@@ -269,6 +286,62 @@ export default function PelangganCRMPage() {
                   >
                     <MessageCircle className="w-4 h-4" /> Kirim WA Promosi
                   </button>
+
+                  {customerPiutang.length > 0 && (
+                    <div className="space-y-2 pt-1">
+                      <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Riwayat Piutang</h4>
+                      {customerPiutang.map((p) => {
+                        const installments = piutangInstallments.filter((i) => i.piutangId === p.id);
+                        return (
+                          <div key={p.id} className="bg-slate-50 dark:bg-zinc-900 rounded-xl p-3 space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-xs font-bold">
+                                  Rp{p.totalPiutang.toLocaleString()}
+                                </p>
+                                <p className={`text-[10px] font-semibold ${p.status === "LUNAS" ? "text-emerald-500" : "text-amber-500"}`}>
+                                  {p.status} • Sisa Rp{p.sisaPiutang.toLocaleString()}
+                                </p>
+                              </div>
+                              {installments.length > 0 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedInstallment(expandedInstallment === p.id ? null : p.id);
+                                  }}
+                                  className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-bold bg-white dark:bg-[#131527] rounded-lg border border-slate-200 dark:border-zinc-700 hover:bg-[#008CEB]/5 active:scale-[0.97] transition-all"
+                                >
+                                  <History className="w-3 h-3" /> {expandedInstallment === p.id ? "Tutup" : `${installments.length} Cicilan`}
+                                </button>
+                              )}
+                            </div>
+                            {expandedInstallment === p.id && installments.length > 0 && (
+                              <div className="pt-1 space-y-1">
+                                {installments.sort((a, b) => b.tanggal.localeCompare(a.tanggal)).map((inst) => (
+                                  <div key={inst.id} className="flex items-center justify-between text-[10px] py-1.5 px-2 bg-white dark:bg-[#131527] rounded-lg">
+                                    <div className="min-w-0">
+                                      <p className="font-bold text-[#008CEB]">
+                                        Rp{inst.jumlah.toLocaleString()}
+                                      </p>
+                                      <p className="text-slate-400">
+                                        {new Date(inst.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                                      </p>
+                                    </div>
+                                    <div className="text-right min-w-0">
+                                      <p className="font-semibold text-slate-600 dark:text-slate-300 capitalize">{inst.metode}</p>
+                                      {inst.catatan && (
+                                        <p className="text-slate-400 line-clamp-1">{inst.catatan}</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

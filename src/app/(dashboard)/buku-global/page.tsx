@@ -11,6 +11,7 @@ import { db, type BookOrBranch, type UnitId, BOOK_LABELS, ALL_UNITS, POS_UNITS }
 import { useLiveQuery } from "dexie-react-hooks";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart3, CreditCard, Users, ScrollText, Settings, Sun, Moon, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Search, Wallet, Download, Upload, ArrowRightLeft, Zap, Plus, Trash2, LogOut, X, Database, UserCircle, Landmark, Smartphone, Save, Edit3, Pencil, Building, RotateCcw } from "lucide-react";
+import { showToast } from "@/lib/toast";
 
 const BRANCH_LIST: UnitId[] = POS_UNITS;
 
@@ -166,15 +167,15 @@ export default function BukuGlobalPage() {
   /* ═══════════════════════════════════════════════════════ */
 
   const handleBackup = useCallback(async () => {
-    if (!backupPassword || backupPassword.length < 4) return alert("Password minimal 4 karakter!");
+    if (!backupPassword || backupPassword.length < 4) return showToast.error("Password minimal 4 karakter!");
     setIsProcessing(true);
     try {
       const blob = await createBackup(backupPassword);
       downloadBlob(blob, `mmcbank-backup-${Date.now()}.enc`);
-      alert("Backup berhasil diunduh!");
+      showToast.success("Backup berhasil diunduh!");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";
-      alert(`Backup gagal: ${message}`);
+      showToast.error(`Backup gagal: ${message}`);
     } finally {
       setIsProcessing(false);
     }
@@ -188,38 +189,38 @@ export default function BukuGlobalPage() {
     setIsProcessing(true);
     try {
       const result = await restoreBackup(file, password);
-      if (result.ok) { alert("Restore berhasil! Memuat ulang..."); window.location.reload(); }
-      else alert(`Restore gagal: ${result.error}`);
+      if (result.ok) { showToast.success("Restore berhasil! Memuat ulang..."); window.location.reload(); }
+      else showToast.error(`Restore gagal: ${result.error}`);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";
-      alert(`Restore gagal: ${message}`);
+      showToast.error(`Restore gagal: ${message}`);
     } finally {
       setIsProcessing(false);
     }
   }, []);
 
   const handleTransfer = useCallback(async () => {
-    if (transferAmount <= 0) return alert("Jumlah harus lebih dari 0!");
-    if (!transferDesc.trim()) return alert("Deskripsi wajib diisi!");
-    if (transferFrom === transferTo) return alert("Cabang asal dan tujuan harus berbeda!");
+    if (transferAmount <= 0) return showToast.error("Jumlah harus lebih dari 0!");
+    if (!transferDesc.trim()) return showToast.error("Deskripsi wajib diisi!");
+    if (transferFrom === transferTo) return showToast.error("Cabang asal dan tujuan harus berbeda!");
     setIsProcessing(true);
     try {
       const res = await executeTransfer({ fromBranch: transferFrom, toBranch: transferTo, amount: transferAmount, description: transferDesc.trim() });
-      if (res.ok) { alert("Transfer antar cabang berhasil!"); setTransferAmount(0); setTransferDesc(""); }
-      else alert(`Transfer gagal: ${res.error}`);
+      if (res.ok) { showToast.success("Transfer antar cabang berhasil!"); setTransferAmount(0); setTransferDesc(""); }
+      else showToast.error(`Transfer gagal: ${res.error}`);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";
-      alert(`Transfer gagal: ${message}`);
+      showToast.error(`Transfer gagal: ${message}`);
     } finally {
       setIsProcessing(false);
     }
   }, [transferFrom, transferTo, transferAmount, transferDesc]);
 
   const handleBayarPiutang = useCallback(async (piutangId: string) => {
-    if (bayarPiutangAmount <= 0) return alert("Jumlah harus lebih dari 0!");
+    if (bayarPiutangAmount <= 0) return showToast.error("Jumlah harus lebih dari 0!");
     const piutang = allPiutang.find((p) => p.id === piutangId);
     if (!piutang) return;
-    if (bayarPiutangAmount > piutang.sisaPiutang) return alert("Jumlah melebihi sisa piutang!");
+    if (bayarPiutangAmount > piutang.sisaPiutang) return showToast.error("Jumlah melebihi sisa piutang!");
     const newSisa = piutang.sisaPiutang - bayarPiutangAmount;
     await db.piutang.update(piutangId, { sisaPiutang: newSisa, status: newSisa <= 0 ? "LUNAS" : "AKTIF" });
 
@@ -246,7 +247,7 @@ export default function BukuGlobalPage() {
       tanggal: new Date().toISOString(),
       catatan: `Pembayaran dari Global`,
     });
-    alert(`Pembayaran Rp${bayarPiutangAmount.toLocaleString()} berhasil!`);
+    showToast.success(`Pembayaran Rp${bayarPiutangAmount.toLocaleString()} berhasil!`);
     setBayarPiutangAmount(0);
     setSelectedPiutang(null);
   }, [bayarPiutangAmount, allPiutang]);
@@ -259,7 +260,7 @@ export default function BukuGlobalPage() {
   }, [qoItemDesc, qoItemPrice]);
 
   const handleSaveQuickOrder = useCallback(async () => {
-    if (!quickOrderLabel || quickOrderItems.length === 0) return alert("Label dan item wajib diisi!");
+    if (!quickOrderLabel || quickOrderItems.length === 0) return showToast.error("Label dan item wajib diisi!");
     await db.quickOrders.add({
       id: crypto.randomUUID(),
       bookOrBranchId: quickOrderBranch,
@@ -267,7 +268,7 @@ export default function BukuGlobalPage() {
       items: quickOrderItems,
       createdAt: new Date().toISOString(),
     });
-    alert("Template Cepat disimpan!");
+    showToast.success("Template Cepat disimpan!");
     setShowQuickOrderModal(false);
     setQuickOrderLabel("");
     setQuickOrderItems([]);
@@ -279,12 +280,12 @@ export default function BukuGlobalPage() {
   }, []);
 
   const handleExportTransactions = () => {
-    if (allTransactions.length === 0) return alert("Tidak ada data transaksi!");
+    if (allTransactions.length === 0) return showToast.error("Tidak ada data transaksi!");
     exportTransactionsExcel(allTransactions, "Semua-Cabang");
   };
 
   const handleExportCashflow = () => {
-    if (allCashflows.length === 0) return alert("Tidak ada data cashflow!");
+    if (allCashflows.length === 0) return showToast.error("Tidak ada data cashflow!");
     exportCashflowExcel(allCashflows, "Semua-Cabang");
   };
 
@@ -295,7 +296,7 @@ export default function BukuGlobalPage() {
   };
 
   const handleSaveWallet = async () => {
-    if (!walletName.trim()) return alert("Nama dompet wajib diisi!");
+    if (!walletName.trim()) return showToast.error("Nama dompet wajib diisi!");
     if (editingWallet) {
       await db.wallets.update(editingWallet, {
         namaDompet: walletName.trim(),
@@ -318,7 +319,7 @@ export default function BukuGlobalPage() {
       });
     }
     setWalletName(""); setWalletSaldo(0); setWalletCatatan(""); setWalletTipe("Bank");
-    alert(editingWallet ? "Dompet diperbarui!" : "Dompet ditambahkan!");
+    showToast.success(editingWallet ? "Dompet diperbarui!" : "Dompet ditambahkan!");
   };
 
   const handleEditWallet = (w: typeof allWallets[0]) => {
@@ -338,7 +339,7 @@ export default function BukuGlobalPage() {
   const handleSaveProfile = () => {
     const profile = { nama: profileNama, noHP: profileNoHP, alamat: profileAlamat };
     localStorage.setItem("mmcbank_profile", JSON.stringify(profile));
-    alert("Profil tersimpan!");
+    showToast.success("Profil tersimpan!");
   };
 
   const handleLoadProfile = useCallback(() => {
@@ -361,7 +362,7 @@ export default function BukuGlobalPage() {
 
   const handleResetData = async () => {
     const selectedTypes = Object.entries(resetTypes).filter(([, v]) => v);
-    if (selectedTypes.length === 0) return alert("Pilih minimal satu jenis data!");
+    if (selectedTypes.length === 0) return showToast.error("Pilih minimal satu jenis data!");
     const scopeLabel = resetScope === "all" ? "SEMUA buku & cabang" : BOOK_LABELS[resetScope];
     if (!confirm(`Yakin reset ${selectedTypes.map(([k]) => k).join(", ")} pada ${scopeLabel}? Tindakan ini TIDAK bisa dibatalkan!`)) return;
     setIsProcessing(true);
@@ -380,12 +381,12 @@ export default function BukuGlobalPage() {
           await table.where("bookOrBranchId").equals(resetScope).delete();
         }
       }
-      alert(`Berhasil reset data pada ${scopeLabel}!`);
+      showToast.success(`Berhasil reset data pada ${scopeLabel}!`);
       setShowResetModal(false);
       setResetTypes({ transactions: false, cashflows: false, piutang: false, inventory: false, customers: false, wallets: false, auditLogs: false, quickOrders: false });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Unknown error";
-      alert(`Gagal reset: ${message}`);
+      showToast.error(`Gagal reset: ${message}`);
     } finally {
       setIsProcessing(false);
     }

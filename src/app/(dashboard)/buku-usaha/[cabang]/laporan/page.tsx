@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type UnitId } from "@/lib/db-v4";
 import { ArrowLeft, BarChart3, DollarSign, TrendingUp, ArrowDownToLine, ArrowUpFromLine, Clock, Package } from "lucide-react";
+import { showToast } from "@/lib/toast";
 
 const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi",
@@ -133,7 +134,7 @@ export default function LaporanPage() {
   }, [filteredTx, filteredCashflow, inventory]);
 
   const exportCSV = () => {
-    if (filteredTx.length === 0) return alert("Tidak ada data untuk diekspor!");
+    if (filteredTx.length === 0) return showToast.error("Tidak ada data untuk diekspor!");
     const headers = ["No Invoice", "Pelanggan", "Status", "Total", "DP", "Sisa Piutang", "Tanggal"];
     const rows = filteredTx.map((tx) => [
       tx.invoiceNumber,

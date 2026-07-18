@@ -3,9 +3,10 @@
 import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type UnitId, type Inventory } from "@/lib/db-v4";
+import { db, type UnitId, type Inventory, type DbInventoryMutation } from "@/lib/db-v4";
+import { showToast } from "@/lib/toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Plus, Package, Search, ArrowRightLeft, Pencil, Trash2, X, Save } from "lucide-react";
+import { ArrowLeft, Plus, Package, Search, ArrowRightLeft, Pencil, Trash2, X, Save, History, ArrowDown, ArrowUp } from "lucide-react";
 
 const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi",
@@ -55,12 +56,19 @@ export default function InventoryPage() {
       [bookOrBranchId]
     ) || [];
 
+  const mutations =
+    useLiveQuery(
+      () => db.inventoryMutations.where("bookOrBranchId").equals(bookOrBranchId).reverse().toArray(),
+      [bookOrBranchId]
+    ) || [];
+
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterMode, setFilterMode] = useState<"all" | "low" | "out">("all");
+  const [filterMode, setFilterMode] = useState<"all" | "low" | "out" | "mutasi">("all");
   const [sortField, setSortField] = useState<"nama" | "stok" | "hargaJual">("nama");
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>(emptyForm);
+  const [selectedMutasi, setSelectedMutasi] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     let result = products.filter((p) =>
@@ -79,6 +87,11 @@ export default function InventoryPage() {
   const totalValue = useMemo(() => {
     return products.reduce((sum, p) => sum + p.hargaModal * p.stok, 0);
   }, [products]);
+
+  const productMutations = useMemo(() => {
+    if (!selectedMutasi) return [];
+    return mutations.filter((m) => m.itemId === selectedMutasi);
+  }, [mutations, selectedMutasi]);
 
   const openAdd = () => {
     setEditingId(null);
@@ -150,6 +163,11 @@ export default function InventoryPage() {
     await db.inventory.delete(id);
   };
 
+  const selectedProduct = useMemo(() => {
+    if (!selectedMutasi) return null;
+    return products.find((p) => p.id === selectedMutasi) || null;
+  }, [selectedMutasi, products]);
+
   return (
     <div className="flex-1 flex flex-col pt-4 space-y-4">
       <div className="flex items-center justify-between">
@@ -197,71 +215,166 @@ export default function InventoryPage() {
         </div>
         <div className="flex gap-2">
           <div className="flex gap-1 flex-1">
-            {(["all", "low", "out"] as const).map((mode) => (
+            {(["all", "low", "out", "mutasi"] as const).map((mode) => (
               <button
                 key={mode}
-                onClick={() => setFilterMode(mode)}
+                onClick={() => { setFilterMode(mode); if (mode !== "mutasi") setSelectedMutasi(null); }}
                 className={`flex-1 py-1.5 rounded-xl text-[10px] font-bold transition-all ${
                   filterMode === mode
                     ? "bg-black text-white dark:bg-white dark:text-black"
                     : "bg-slate-100 dark:bg-zinc-800 text-slate-400"
                 }`}
               >
-                {mode === "all" ? "Semua" : mode === "low" ? "Stok Tipis" : "Habis"}
+                {mode === "all" ? "Semua" : mode === "low" ? "Stok Tipis" : mode === "out" ? "Habis" : "Riwayat Stok"}
               </button>
             ))}
           </div>
-          <button
-            onClick={() => setSortField(sortField === "nama" ? "stok" : sortField === "stok" ? "hargaJual" : "nama")}
-            className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center gap-1"
-          >
-            <ArrowRightLeft className="w-5 h-5 text-slate-400" />
-            <span className="text-[10px] font-bold text-slate-400">
-              {sortField === "nama" ? "Nama" : sortField === "stok" ? "Stok" : "Harga"}
-            </span>
-          </button>
+          {filterMode !== "mutasi" && (
+            <button
+              onClick={() => setSortField(sortField === "nama" ? "stok" : sortField === "stok" ? "hargaJual" : "nama")}
+              className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center gap-1"
+            >
+              <ArrowRightLeft className="w-5 h-5 text-slate-400" />
+              <span className="text-[10px] font-bold text-slate-400">
+                {sortField === "nama" ? "Nama" : sortField === "stok" ? "Stok" : "Harga"}
+              </span>
+            </button>
+          )}
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-2.5 max-h-[400px] pr-1">
-        {filtered.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 text-xs animate-fade-in">
-            <Package className="w-5 h-5 mx-auto mb-3 opacity-40" />
-            {products.length === 0 ? "Belum ada produk. Tap + untuk menambah." : "Tidak ditemukan."}
-          </div>
-        ) : (
-          filtered.map((p, i) => (
-            <div key={p.id} className="premium-card premium-card-glow p-3 flex items-center justify-between animate-slide-up" style={{ animationDelay: `${i * 50}ms`, animationFillMode: "backwards" }}>
-              <div className="flex-1 min-w-0">
-                <h4 className="text-xs font-heading font-bold line-clamp-1">{p.nama}</h4>
-                <div className="flex items-center gap-3 mt-1.5">
-                  <span className="text-[10px] text-[#008CEB] font-extrabold">
-                    Rp{p.hargaJual.toLocaleString()}
-                  </span>
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${p.stok <= p.stokMin ? "bg-amber-50 dark:bg-amber-950/30 text-amber-500" : "text-slate-400"}`}>
-                    Stok: {p.stok}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-medium">
-                    HPP: Rp{p.hargaModal.toLocaleString()}
-                  </span>
+        {filterMode === "mutasi" ? (
+          <>
+            {selectedMutasi && selectedProduct ? (
+              <div className="space-y-2">
+                <button
+                  onClick={() => setSelectedMutasi(null)}
+                  className="flex items-center gap-1.5 text-xs text-[#008CEB] font-bold mb-1"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Kembali ke semua riwayat
+                </button>
+                <div className="premium-card premium-card-glow p-3">
+                  <h4 className="text-xs font-heading font-bold">{selectedProduct.nama}</h4>
+                  <p className="text-[10px] text-slate-400">Stok saat ini: {selectedProduct.stok}</p>
                 </div>
               </div>
-              <div className="flex gap-1.5 shrink-0 ml-2">
-                <button
-                  onClick={() => openEdit(p)}
-                  className="p-1.5 bg-slate-100 dark:bg-zinc-800 rounded-lg hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors duration-200 active:scale-90"
-                >
-                  <Pencil className="w-4 h-4 text-slate-500" />
-                </button>
-                <button
-                  onClick={() => handleDelete(p.id)}
-                  className="p-1.5 bg-rose-50 dark:bg-rose-950/30 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950/50 transition-colors duration-200 active:scale-90"
-                >
-                  <Trash2 className="w-4 h-4 text-rose-500" />
-                </button>
-              </div>
+            ) : null}
+            {(() => {
+              const displayMutations = selectedMutasi ? productMutations : mutations;
+              if (displayMutations.length === 0) {
+                return (
+                  <div className="text-center py-12 text-slate-400 text-xs animate-fade-in">
+                    <History className="w-5 h-5 mx-auto mb-3 opacity-40" />
+                    Belum ada riwayat mutasi stok.
+                  </div>
+                );
+              }
+              return displayMutations.map((m, i) => {
+                const product = products.find((p) => p.id === m.itemId);
+                return (
+                  <div
+                    key={m.id}
+                    className="premium-card premium-card-glow p-3 animate-slide-up"
+                    style={{ animationDelay: `${i * 50}ms`, animationFillMode: "backwards" }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                          m.tipe === "masuk"
+                            ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500"
+                            : m.tipe === "keluar"
+                            ? "bg-rose-50 dark:bg-rose-950/30 text-rose-500"
+                            : "bg-amber-50 dark:bg-amber-950/30 text-amber-500"
+                        }`}>
+                          {m.tipe === "masuk" ? <ArrowDown className="w-3.5 h-3.5" /> : m.tipe === "keluar" ? <ArrowUp className="w-3.5 h-3.5" /> : <History className="w-3.5 h-3.5" />}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[10px] font-extrabold ${
+                              m.tipe === "masuk" ? "text-emerald-500" : m.tipe === "keluar" ? "text-rose-500" : "text-amber-500"
+                            }`}>
+                              {m.tipe === "masuk" ? "Masuk" : m.tipe === "keluar" ? "Keluar" : "Penyesuaian"}
+                            </span>
+                            {product && (
+                              <button
+                                onClick={() => setSelectedMutasi(m.itemId)}
+                                className="text-[10px] text-[#008CEB] font-bold truncate max-w-[120px] hover:underline"
+                              >
+                                {product.nama}
+                              </button>
+                            )}
+                          </div>
+                          <p className="text-[9px] text-slate-400">
+                            {new Date(m.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0 ml-2">
+                        <p className={`text-[11px] font-extrabold ${
+                          m.tipe === "masuk" ? "text-emerald-500" : "text-rose-500"
+                        }`}>
+                          {m.tipe === "masuk" ? "+" : "-"}{m.qty}
+                        </p>
+                        <p className="text-[9px] text-slate-400">
+                          Stok: {m.stokSesudah}
+                        </p>
+                      </div>
+                    </div>
+                    {m.alasan && (
+                      <p className="text-[9px] text-slate-400 mt-1.5 ml-9">
+                        {m.alasan}
+                      </p>
+                    )}
+                  </div>
+                );
+              });
+            })()}
+          </>
+        ) : (
+          filtered.length === 0 ? (
+            <div className="text-center py-12 text-slate-400 text-xs animate-fade-in">
+              <Package className="w-5 h-5 mx-auto mb-3 opacity-40" />
+              {products.length === 0 ? "Belum ada produk. Tap + untuk menambah." : "Tidak ditemukan."}
             </div>
-          ))
+          ) : (
+            filtered.map((p, i) => (
+              <div key={p.id} className="premium-card premium-card-glow p-3 flex items-center justify-between animate-slide-up" style={{ animationDelay: `${i * 50}ms`, animationFillMode: "backwards" }}>
+                <button
+                  onClick={() => setSelectedMutasi(p.id)}
+                  className="flex-1 min-w-0 text-left"
+                >
+                  <h4 className="text-xs font-heading font-bold line-clamp-1">{p.nama}</h4>
+                  <div className="flex items-center gap-3 mt-1.5">
+                    <span className="text-[10px] text-[#008CEB] font-extrabold">
+                      Rp{p.hargaJual.toLocaleString()}
+                    </span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${p.stok <= p.stokMin ? "bg-amber-50 dark:bg-amber-950/30 text-amber-500" : "text-slate-400"}`}>
+                      Stok: {p.stok}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      HPP: Rp{p.hargaModal.toLocaleString()}
+                    </span>
+                  </div>
+                </button>
+                <div className="flex gap-1.5 shrink-0 ml-2">
+                  <button
+                    onClick={() => openEdit(p)}
+                    className="p-1.5 bg-slate-100 dark:bg-zinc-800 rounded-lg hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors duration-200 active:scale-90"
+                  >
+                    <Pencil className="w-4 h-4 text-slate-500" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p.id)}
+                    className="p-1.5 bg-rose-50 dark:bg-rose-950/30 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950/50 transition-colors duration-200 active:scale-90"
+                  >
+                    <Trash2 className="w-4 h-4 text-rose-500" />
+                  </button>
+                </div>
+              </div>
+            ))
+          )
         )}
       </div>
 
@@ -390,6 +503,50 @@ export default function InventoryPage() {
                   {editingId ? "Simpan Perubahan" : "Tambah Produk"}
                 </button>
               </form>
+
+              {editingId && productMutations.length > 0 && (
+                <div className="border-t pt-4 border-slate-100 dark:border-slate-800">
+                  <h4 className="text-xs font-extrabold mb-3 flex items-center gap-1.5">
+                    <History className="w-3.5 h-3.5 text-slate-400" />
+                    Mutasi Stok
+                  </h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {productMutations.map((m) => (
+                      <div key={m.id} className="flex items-center justify-between bg-slate-50 dark:bg-zinc-800/50 rounded-xl px-3 py-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
+                            m.tipe === "masuk"
+                              ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500"
+                              : m.tipe === "keluar"
+                              ? "bg-rose-50 dark:bg-rose-950/30 text-rose-500"
+                              : "bg-amber-50 dark:bg-amber-950/30 text-amber-500"
+                          }`}>
+                            {m.tipe === "masuk" ? <ArrowDown className="w-3 h-3" /> : m.tipe === "keluar" ? <ArrowUp className="w-3 h-3" /> : <History className="w-3 h-3" />}
+                          </div>
+                          <div>
+                            <span className={`text-[10px] font-extrabold ${
+                              m.tipe === "masuk" ? "text-emerald-500" : m.tipe === "keluar" ? "text-rose-500" : "text-amber-500"
+                            }`}>
+                              {m.tipe === "masuk" ? "Masuk" : m.tipe === "keluar" ? "Keluar" : "Penyesuaian"}
+                            </span>
+                            <p className="text-[9px] text-slate-400">
+                              {new Date(m.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0 ml-2">
+                          <p className={`text-[10px] font-extrabold ${
+                            m.tipe === "masuk" ? "text-emerald-500" : "text-rose-500"
+                          }`}>
+                            {m.tipe === "masuk" ? "+" : "-"}{m.qty}
+                          </p>
+                          <p className="text-[9px] text-slate-400">Stok: {m.stokSesudah}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </motion.div>
           </div>
         )}

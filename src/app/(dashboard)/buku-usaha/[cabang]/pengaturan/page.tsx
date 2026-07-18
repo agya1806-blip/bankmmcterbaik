@@ -9,7 +9,7 @@ import {
   ArrowLeft, Save, Building2, Landmark, Smartphone, DollarSign,
   Trash2, AlertTriangle, Download, ExternalLink, Plus, Pencil,
   Wallet, Globe, Phone, MapPin, MessageSquare, Shield, Settings,
-  Package, Users,
+  Package, Users, History, ShieldCheck,
 } from "lucide-react";
 
 const BRANCH_MAP: Record<string, UnitId> = {
@@ -36,6 +36,7 @@ export default function PengaturanPage() {
   const wallets = useLiveQuery(() => db.wallets.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
   const transactions = useLiveQuery(() => db.transactions.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
   const cashflows = useLiveQuery(() => db.cashflows.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
+  const auditLogs = useLiveQuery(() => db.auditLogs.where("bookOrBranchId").equals(bookOrBranchId).reverse().limit(50).toArray(), [bookOrBranchId]) || [];
 
   const existingProfile = profile[0];
 
@@ -251,6 +252,33 @@ export default function PengaturanPage() {
             <Download className="w-4 h-4 text-purple-500 shrink-0" />
             <span className="text-[10px] font-bold">Backup JSON</span>
           </button>
+        </div>
+      </div>
+
+      {/* ─── Audit Log ─── */}
+      <div className="premium-card p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-xl bg-slate-500/10 flex items-center justify-center">
+            <History className="w-4 h-4 text-slate-500" />
+          </div>
+          <span className="text-xs font-heading font-extrabold">Aktivitas Terakhir</span>
+          <span className="ml-auto text-[10px] text-slate-400">{auditLogs.length} log</span>
+        </div>
+        <div className="space-y-1.5 max-h-60 overflow-y-auto">
+          {auditLogs.length === 0 ? (
+            <div className="text-center py-6 text-slate-400 text-xs">Belum ada aktivitas</div>
+          ) : (
+            auditLogs.map((log) => (
+              <div key={log.id} className="flex items-start gap-2 text-[10px] py-1.5 border-b border-slate-100 dark:border-zinc-800 last:border-0">
+                <ShieldCheck className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold capitalize">{log.action} <span className="font-normal text-slate-400">{log.entityType}</span></p>
+                  {log.entityId && <p className="text-[8px] text-slate-400 truncate">ID: {log.entityId}</p>}
+                </div>
+                <span className="text-[8px] text-slate-400 shrink-0">{new Date(log.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
