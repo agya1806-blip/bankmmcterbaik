@@ -15,9 +15,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown, Plus, Trash2, Search, Wallet, FileText,
   ArrowLeft, Edit3, X, Clock, AlertTriangle,
-  User, StickyNote, Package, Banknote, Minus, Heart,
+  User, StickyNote, Package, Banknote, Minus, Heart, Gift, Star, Calculator,
 } from "lucide-react";
 import { showToast } from "@/lib/toast";
+import KalkulatorHarga from "@/components/business/kalkulator-harga";
 import InvoiceA4 from "@/components/invoice-a4";
 
 const BRANCH_MAP: Record<string, UnitId> = {
@@ -70,6 +71,7 @@ export default function PosKasirPage() {
   const [walletIdTarget, setWalletIdTarget] = useState("");
   const [catatan, setCatatan] = useState("");
   const [dpDibayar, setDpDibayar] = useState(0);
+  const [poinDigunakan, setPoinDigunakan] = useState(0);
   const [sedekahNominal, setSedekahNominal] = useState(0);
   const [statusPesanan, setStatusPesanan] = useState<StatusPesanan>("baru");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -141,6 +143,7 @@ export default function PosKasirPage() {
   // ═══ MANUAL MODE STATE ═══
   const [manualCart, setManualCart] = useState<ManualCartItem[]>([]);
   const [spesifikasi, setSpesifikasi] = useState("");
+  const [calculatorItemId, setCalculatorItemId] = useState<string | null>(null);
 
   const addManualItem = () => setManualCart(prev => [...prev, { tempId: crypto.randomUUID(), namaItem: "", qty: 1, harga: 0, hargaModal: 0 }]);
   const updateManualItem = (tempId: string, field: keyof ManualCartItem, value: string | number) => setManualCart(prev => prev.map(i => i.tempId === tempId ? { ...i, [field]: value } : i));
@@ -148,7 +151,8 @@ export default function PosKasirPage() {
   const manualTotal = useMemo(() => manualCart.reduce((s, i) => s + i.qty * i.harga, 0), [manualCart]);
 
   // ═══ SHARED ═══
-  const grandTotal = isGridMode ? gridTotal : manualTotal;
+  const diskonPoin = poinDigunakan;
+  const grandTotal = Math.max(0, (isGridMode ? gridTotal : manualTotal) - diskonPoin);
   const sisaTagihan = Math.max(0, grandTotal - dpDibayar);
 
   const handleCheckout = async () => {
@@ -189,10 +193,11 @@ export default function PosKasirPage() {
       if (res.ok) {
         /* Update customer stats */
         if (currentCustomer) {
+          const poinBaru = Math.max(0, currentCustomer.poin - poinDigunakan) + Math.floor(grandTotal / 10000);
           await db.customers.update(currentCustomer.id, {
             totalTransaksi: currentCustomer.totalTransaksi + 1,
             totalBelanja: currentCustomer.totalBelanja + grandTotal,
-            poin: currentCustomer.poin + Math.floor(grandTotal / 10000),
+            poin: poinBaru,
             terakhirTransaksi: new Date().toISOString(),
           });
         } else if (isManual && manualNama.trim() && manualWA.trim()) {
@@ -202,10 +207,11 @@ export default function PosKasirPage() {
             .filter(c => c.noWA === manualWA.trim())
             .first();
           if (existing) {
+            const poinBaru = Math.max(0, existing.poin - poinDigunakan) + Math.floor(grandTotal / 10000);
             await db.customers.update(existing.id, {
               totalTransaksi: existing.totalTransaksi + 1,
               totalBelanja: existing.totalBelanja + grandTotal,
-              poin: existing.poin + Math.floor(grandTotal / 10000),
+              poin: poinBaru,
               terakhirTransaksi: new Date().toISOString(),
             });
           } else {
@@ -240,6 +246,7 @@ export default function PosKasirPage() {
     setSpesifikasi("");
     setCatatan("");
     setDpDibayar(0);
+    setPoinDigunakan(0);
     setSedekahNominal(0);
     setWalletIdTarget("");
     setStatusPesanan("baru");
@@ -433,7 +440,12 @@ export default function PosKasirPage() {
                         </div>
                         <div className="flex-1">
                           <label className="text-[8px] text-slate-400 font-bold uppercase">Harga</label>
-                          <input type="number" min="0" value={item.harga || ""} onChange={e => updateManualItem(item.tempId, "harga", Number(e.target.value))} placeholder="0" className="w-full input-premium text-xs text-right" />
+                          <div className="flex items-center gap-1">
+                            <input type="number" min="0" value={item.harga || ""} onChange={e => updateManualItem(item.tempId, "harga", Number(e.target.value))} placeholder="0" className="flex-1 input-premium text-xs text-right" />
+                            <button type="button" onClick={() => setCalculatorItemId(item.tempId)} className="p-1 rounded-lg bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-[#008CEB] shrink-0">
+                              <Calculator className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                         <div className="flex-1">
                           <label className="text-[8px] text-slate-400 font-bold uppercase">Subtotal</label>
@@ -477,6 +489,26 @@ export default function PosKasirPage() {
               </div>
             )}
           </Section>
+
+          {selectedCustomerId && (() => {
+            const cust = customers.find(c => c.id === selectedCustomerId);
+            if (!cust || cust.poin <= 0) return null;
+            const maxPoin = Math.min(cust.poin, Math.floor(grandTotal / 1000) * 100);
+            return (
+              <Section title="Poin Pelanggan">
+                <div className="flex items-center gap-2 mb-1">
+                  <Star className="w-3.5 h-3.5 text-amber-500" />
+                  <span className="text-[10px] font-bold text-amber-600">Poin: {cust.poin}</span>
+                </div>
+                <input type="number" placeholder={`Gunakan poin (maks: ${maxPoin.toLocaleString()})`} value={poinDigunakan || ""}
+                  onChange={(e) => setPoinDigunakan(Math.min(maxPoin, Math.max(0, Number(e.target.value))))}
+                  className="w-full input-premium text-xs mt-1" />
+                {poinDigunakan > 0 && (
+                  <p className="text-[9px] text-emerald-500 font-bold mt-1">Diskon poin: -Rp{poinDigunakan.toLocaleString()}</p>
+                )}
+              </Section>
+            );
+          })()}
 
           <Section title="Sedekah">
             <div>
@@ -583,6 +615,20 @@ export default function PosKasirPage() {
           onPrint={() => window.print()}
         />
       )}
+
+      {/* Kalkulator Harga Modal */}
+      <AnimatePresence>
+        {calculatorItemId && (
+          <KalkulatorHarga
+            onResult={(hargaJual) => {
+              updateManualItem(calculatorItemId, "harga", hargaJual);
+              setCalculatorItemId(null);
+            }}
+            onClose={() => setCalculatorItemId(null)}
+            hargaModal={manualCart.find(i => i.tempId === calculatorItemId)?.hargaModal}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

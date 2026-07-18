@@ -5,8 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type UnitId, type Inventory, type DbInventoryMutation } from "@/lib/db-v4";
 import { showToast } from "@/lib/toast";
+import KalkulatorHarga from "@/components/business/kalkulator-harga";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Plus, Package, Search, ArrowRightLeft, Pencil, Trash2, X, Save, History, ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowLeft, Plus, Package, Search, ArrowRightLeft, Pencil, Trash2, X, Save, History, ArrowDown, ArrowUp, Calculator } from "lucide-react";
 
 const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi",
@@ -69,6 +70,7 @@ export default function InventoryPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>(emptyForm);
   const [selectedMutasi, setSelectedMutasi] = useState<string | null>(null);
+  const [showCalculator, setShowCalculator] = useState(false);
 
   const filtered = useMemo(() => {
     let result = products.filter((p) =>
@@ -424,13 +426,18 @@ export default function InventoryPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block mb-1 font-bold text-slate-400">Harga Jual (Rp)</label>
-                    <input
-                      type="number"
-                      value={form.hargaJual || ""}
-                      onChange={(e) => setForm({ ...form, hargaJual: Number(e.target.value) })}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
-                      required
-                    />
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        value={form.hargaJual || ""}
+                        onChange={(e) => setForm({ ...form, hargaJual: Number(e.target.value) })}
+                        className="flex-1 px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
+                        required
+                      />
+                      <button type="button" onClick={() => setShowCalculator(true)} className="p-2 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-[#008CEB] shrink-0">
+                        <Calculator className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                   <div>
                     <label className="block mb-1 font-bold text-slate-400">HPP/Modal (Rp)</label>
@@ -549,6 +556,20 @@ export default function InventoryPage() {
               )}
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Kalkulator Harga Modal */}
+      <AnimatePresence>
+        {showCalculator && (
+          <KalkulatorHarga
+            onResult={(hargaJual) => {
+              setForm({ ...form, hargaJual });
+              setShowCalculator(false);
+            }}
+            onClose={() => setShowCalculator(false)}
+            hargaModal={form.hargaModal}
+          />
         )}
       </AnimatePresence>
     </div>

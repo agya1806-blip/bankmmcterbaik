@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type UnitId, type Transaction, type ProductionStatus } from '@/lib/db-v4';
-import { ArrowLeft, ClipboardList, FileText, Printer, Image, Phone, BarChart3, X, Search } from "lucide-react";
+import { ArrowLeft, ClipboardList, FileText, Printer, Image, Phone, BarChart3, X, Search, Tag } from "lucide-react";
 import { showToast } from "@/lib/toast";
 import InvoiceA4 from "@/components/invoice-a4";
 
@@ -26,11 +26,21 @@ export default function TransaksiDanProduksiPage() {
   const cabangSlug = (params?.cabang as string) || '';
   const bookOrBranchId = BRANCH_MAP[cabangSlug] || 'usaha-percetakan';
 
-  const transactions =
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 20;
+
+  const allTransactions =
     useLiveQuery(
       () => db.transactions.where('bookOrBranchId').equals(bookOrBranchId).reverse().toArray(),
       [bookOrBranchId]
     ) || [];
+
+  const paginatedTransactions = useMemo(() => {
+    const start = (page - 1) * PER_PAGE;
+    return allTransactions.slice(start, start + PER_PAGE);
+  }, [allTransactions, page]);
+
+  const totalPages = Math.max(1, Math.ceil(allTransactions.length / PER_PAGE));
 
   const productions =
     useLiveQuery(
@@ -41,6 +51,24 @@ export default function TransaksiDanProduksiPage() {
   const wallets = useLiveQuery(() => db.wallets.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
   const profiles = useLiveQuery(() => db.profiles.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
   const profile = profiles[0];
+
+  const labels = useLiveQuery(() => db.labels.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
+  const labelTags = useLiveQuery(() => db.labelTags.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
+
+  const labelMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    labels.forEach(l => { map[l.id] = l.warna; });
+    return map;
+  }, [labels]);
+
+  const txLabelIds = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    labelTags.forEach(lt => {
+      if (!map[lt.transaksiRef]) map[lt.transaksiRef] = [];
+      map[lt.transaksiRef].push(lt.labelId);
+    });
+    return map;
+  }, [labelTags]);
 
   const [activeTab, setActiveTab] = useState<'riwayat' | 'produksi'>('riwayat');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
@@ -54,14 +82,14 @@ export default function TransaksiDanProduksiPage() {
     };
 
     productions.forEach((prod) => {
-      const tx = transactions.find((t) => t.id === prod.transactionId);
+      const tx = allTransactions.find((t) => t.id === prod.transactionId);
       if (tx) {
         columns[prod.status].push({ tx, prodId: prod.id });
       }
     });
 
     return columns;
-  }, [productions, transactions]);
+  }, [productions, allTransactions]);
 
   const moveProductionStatus = async (prodId: string, currentStatus: ProductionStatus) => {
     let nextStatus: ProductionStatus = 'antre';
@@ -97,7 +125,7 @@ export default function TransaksiDanProduksiPage() {
       bookOrBranchId,
       unitId: bookOrBranchId,
       transactionId: txId,
-      invoiceNumber: transactions.find((t) => t.id === txId)?.invoiceNumber || '',
+      invoiceNumber: allTransactions.find((t) => t.id === txId)?.invoiceNumber || '',
       status: 'antre',
       catatan: '',
       updatedAt: now,
@@ -293,7 +321,7 @@ export default function TransaksiDanProduksiPage() {
 
       <div className="grid grid-cols-2 gap-2 bg-slate-100 dark:bg-zinc-800 p-1 rounded-2xl mb-4">
         <button
-          onClick={() => setActiveTab('riwayat')}
+          onClick={() => { setActiveTab('riwayat'); setPage(1); }}
           className={`py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
             activeTab === 'riwayat'
               ? 'bg-white dark:bg-[#131527] text-indigo-500 shadow-sm'
@@ -304,7 +332,7 @@ export default function TransaksiDanProduksiPage() {
           Riwayat Kasir
         </button>
         <button
-          onClick={() => setActiveTab('produksi')}
+          onClick={() => { setActiveTab('produksi'); setPage(1); }}
           className={`py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
             activeTab === 'produksi'
               ? 'bg-white dark:bg-[#131527] text-indigo-500 shadow-sm'
@@ -318,10 +346,10 @@ export default function TransaksiDanProduksiPage() {
 
       {activeTab === 'riwayat' && (
         <div className="flex-1 overflow-y-auto space-y-3 max-h-[500px] pr-1">
-          {transactions.length === 0 ? (
+          {paginatedTransactions.length === 0 ? (
             <div className="text-center py-12 text-slate-400 text-xs">Belum ada riwayat transaksi.</div>
           ) : (
-            transactions.map((tx, idx) => {
+            paginatedTransactions.map((tx, idx) => {
               const tanggal = new Date(tx.tanggal);
               return (
                 <div
@@ -365,6 +393,18 @@ export default function TransaksiDanProduksiPage() {
                       </span>
                     )}
                   </div>
+
+                  {txLabelIds[tx.id]?.length > 0 && (
+                    <div className="flex items-center gap-1">
+                      {txLabelIds[tx.id].map(labelId => (
+                        <div
+                          key={labelId}
+                          className="w-3 h-3 rounded-full border border-slate-300 dark:border-slate-600"
+                          style={{ backgroundColor: labelMap[labelId] }}
+                        />
+                      ))}
+                    </div>
+                  )}
 
                   {selectedTx?.id === tx.id && (
                     <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2 text-xs">
@@ -452,11 +492,64 @@ export default function TransaksiDanProduksiPage() {
                           XLSX
                         </button>
                       </div>
+                      {labels.length > 0 && (
+                        <div className="pt-1">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1.5 flex items-center gap-1">
+                            <Tag className="w-3 h-3" /> Label
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {labels.map(label => {
+                              const isActive = txLabelIds[tx.id]?.includes(label.id);
+                              return (
+                                <button
+                                  key={label.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (isActive) {
+                                      const tag = labelTags.find(lt => lt.transaksiRef === tx.id && lt.labelId === label.id);
+                                      if (tag) db.labelTags.delete(tag.id);
+                                    } else {
+                                      db.labelTags.add({
+                                        id: crypto.randomUUID(),
+                                        bookOrBranchId,
+                                        transaksiRef: tx.id,
+                                        labelId: label.id,
+                                      });
+                                    }
+                                  }}
+                                  className={`text-[9px] font-bold px-2 py-1 rounded-full border-2 transition-all active:scale-90 ${
+                                    isActive ? 'text-white' : 'text-slate-400 border-slate-200 dark:border-slate-700'
+                                  }`}
+                                  style={{
+                                    backgroundColor: isActive ? label.warna : 'transparent',
+                                    borderColor: isActive ? label.warna : undefined,
+                                  }}
+                                >
+                                  {label.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               );
             })
+          )}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-[10px] font-bold disabled:opacity-40">
+                Prev
+              </button>
+              <span className="text-[10px] text-slate-400 font-bold">{page} / {totalPages}</span>
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-[10px] font-bold disabled:opacity-40">
+                Next
+              </button>
+            </div>
           )}
         </div>
       )}

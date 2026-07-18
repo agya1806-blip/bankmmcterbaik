@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { type DbTransaction, type DbWallet, type DbProfile } from "@/lib/db-v4";
+import QRCode from "qrcode";
 
 const formatRp = (n: number) => `Rp${n.toLocaleString()}`;
 const formatDate = (iso: string) => new Date(iso).toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
@@ -16,6 +17,14 @@ interface InvoiceA4Props {
 }
 
 export default function InvoiceA4({ transaction: tx, wallet, profile, cabangSlug, onClose, onPrint }: InvoiceA4Props) {
+  const [qrDataUrl, setQrDataUrl] = useState("");
+
+  useEffect(() => {
+    QRCode.toDataURL(`mmcbank://invoice/${tx.invoiceNumber}`, { width: 120, margin: 1 }, (err, url) => {
+      if (!err) setQrDataUrl(url);
+    });
+  }, [tx.invoiceNumber]);
+
   return (
     <>
       <style>{`
@@ -38,8 +47,18 @@ export default function InvoiceA4({ transaction: tx, wallet, profile, cabangSlug
                 {profile?.noWhatsapp && <p style={{ fontSize: "8pt", color: "#6b7280", marginTop: 1 }}>WA: {profile.noWhatsapp}</p>}
               </div>
               <div className="text-right">
-                <p style={{ fontSize: "18pt", fontWeight: 900, letterSpacing: "2pt", color: "#1e40af", margin: 0 }}>INVOICE</p>
-                <p style={{ fontSize: "8pt", color: "#6b7280", marginTop: 2 }} className="capitalize">{cabangSlug}</p>
+                <div className="flex items-center gap-3 justify-end">
+                  <div>
+                    <p style={{ fontSize: "18pt", fontWeight: 900, letterSpacing: "2pt", color: "#1e40af", margin: 0 }}>INVOICE</p>
+                    <p style={{ fontSize: "8pt", color: "#6b7280", marginTop: 2 }} className="capitalize">{cabangSlug}</p>
+                  </div>
+                  {qrDataUrl && (
+                    <div className="flex flex-col items-center">
+                      <img src={qrDataUrl} alt="QR" className="w-16 h-16" />
+                      <span style={{ fontSize: "6pt", color: "#6b7280", marginTop: 1 }}>Scan to Pay</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

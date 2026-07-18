@@ -1,25 +1,48 @@
 "use client";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Ruler, Smartphone, Monitor, Coffee, Shirt, AlertTriangle } from "lucide-react";
+import { X, Ruler, Smartphone, Monitor, Coffee, Shirt, AlertTriangle, Calculator } from "lucide-react";
 
 
-interface KalkulatorProps {
-  cabangSlug: string;
-  open: boolean;
+export interface KalkulatorHargaProps {
+  onResult: (hargaJual: number) => void;
   onClose: () => void;
-  onResult: (namaItem: string, hargaJual: number, spesifikasi: string) => void;
+  hargaModal?: number;
 }
 
-export default function KalkulatorHarga({ cabangSlug, open, onClose, onResult }: KalkulatorProps) {
-  switch (cabangSlug) {
-    case "percetakan": return <PrintingCalc onClose={onClose} onResult={onResult} />;
-    case "gadget": return <GadgetCalc onClose={onClose} onResult={onResult} />;
-    case "laptop": return <LaptopCalc onClose={onClose} onResult={onResult} />;
-    case "warkop": return <CafeCalc onClose={onClose} onResult={onResult} />;
-    case "konveksi": return <FashionCalc onClose={onClose} onResult={onResult} />;
-    default: return null;
-  }
+export default function KalkulatorHarga({ onResult, onClose, hargaModal }: KalkulatorHargaProps) {
+  return <SimplePriceCalc onClose={onClose} onResult={onResult} hargaModal={hargaModal} />;
+}
+
+/* ─── Simple Price Calculator (Modal + Margin) ─── */
+function SimplePriceCalc({ onClose, onResult, hargaModal: initModal }: {
+  onClose: () => void;
+  onResult: (hargaJual: number) => void;
+  hargaModal?: number;
+}) {
+  const [modal, setModal] = useState(initModal || 0);
+  const [margin, setMargin] = useState(30);
+
+  const hasil = Math.round(modal * (1 + margin / 100));
+
+  return (
+    <ModalWrapper onClose={onClose} title="Kalkulator Harga" icon={<Calculator className="w-5 h-5 text-[#008CEB]" />}>
+      <div className="space-y-3 text-xs">
+        <InputRow label="Harga Modal (HPP)" value={modal} onChange={setModal} suffix="Rp" />
+        <InputRow label="Margin Keuntungan" value={margin} onChange={setMargin} suffix="%" />
+
+        <div className="bg-slate-50 dark:bg-zinc-900 p-3 rounded-xl space-y-1">
+          <p className="text-[10px] text-slate-400">Harga Jual ({margin}% margin)</p>
+          <p className="text-lg font-extrabold text-[#008CEB]">Rp{hasil.toLocaleString()}</p>
+        </div>
+
+        <button onClick={() => { onResult(hasil); onClose(); }}
+          className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs active:scale-[0.98] transition-transform">
+          Gunakan Harga Ini
+        </button>
+      </div>
+    </ModalWrapper>
+  );
 }
 
 function ModalWrapper({ children, onClose, title, icon }: { children: React.ReactNode; onClose: () => void; title: string; icon: React.ReactNode }) {
