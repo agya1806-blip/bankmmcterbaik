@@ -11,7 +11,6 @@ import {
   ClipboardList, Layers, BanknoteIcon,
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid } from "recharts";
-import { showToast } from "@/lib/toast";
 
 interface PerBranchItem {
   branch: string; label: string; pendapatan: number; labaBersih: number;
@@ -48,10 +47,10 @@ export default function GlobalKpiCards({ dashData, last7Days, branchRevenue, tod
     { label: "Transaksi Baru", icon: <ShoppingCart className="w-5 h-5" />, color: "from-blue-500 to-blue-600", onClick: () => router.push("/buku-usaha/usaha") },
     { label: "Produk Baru", icon: <Package className="w-5 h-5" />, color: "from-emerald-500 to-emerald-600", onClick: () => router.push("/buku-usaha/usaha") },
     { label: "Pelanggan Baru", icon: <Users className="w-5 h-5" />, color: "from-violet-500 to-violet-600", onClick: () => router.push("/buku-usaha/usaha") },
-    { label: "Supplier Baru", icon: <Truck className="w-5 h-5" />, color: "from-amber-500 to-amber-600", onClick: () => showToast.info("Fitur supplier segera hadir") },
+    { label: "Supplier Baru", icon: <Truck className="w-5 h-5" />, color: "from-amber-500 to-amber-600", onClick: () => alert("Fitur supplier segera hadir") },
     { label: "Cashflow", icon: <Wallet className="w-5 h-5" />, color: "from-cyan-500 to-cyan-600", onClick: () => router.push("/buku-usaha/usaha") },
-    { label: "Transfer", icon: <ArrowRightLeft className="w-5 h-5" />, color: "from-rose-500 to-rose-600", onClick: () => showToast.info("Fitur transfer segera hadir") },
-    { label: "Purchase Order", icon: <ClipboardList className="w-5 h-5" />, color: "from-orange-500 to-orange-600", onClick: () => showToast.info("Purchase order segera hadir") },
+    { label: "Transfer", icon: <ArrowRightLeft className="w-5 h-5" />, color: "from-rose-500 to-rose-600", onClick: () => alert("Fitur transfer segera hadir") },
+    { label: "Purchase Order", icon: <ClipboardList className="w-5 h-5" />, color: "from-orange-500 to-orange-600", onClick: () => alert("Purchase order segera hadir") },
     { label: "Produksi Baru", icon: <Layers className="w-5 h-5" />, color: "from-purple-500 to-purple-600", onClick: () => router.push("/buku-usaha/usaha") },
   ], [router]);
 
@@ -66,7 +65,7 @@ export default function GlobalKpiCards({ dashData, last7Days, branchRevenue, tod
   ], []);
 
   const handleShortcut = (path: string, label: string) => {
-    if (!path) { showToast.info(`${label} segera hadir`); return; }
+    if (!path) { alert(`${label} segera hadir`); return; }
     router.push(path);
   };
 
@@ -78,7 +77,7 @@ export default function GlobalKpiCards({ dashData, last7Days, branchRevenue, tod
     { label: "Total Piutang", value: dashData.totalPiutang, icon: <CreditCard className="w-5 h-5" />, color: "bg-amber-100 dark:bg-amber-900/30 text-amber-600", format: "currency", count: dashData.piutangAktifCount },
     { label: "Total Hutang", value: totalHutang, icon: <CreditCard className="w-5 h-5" />, color: "bg-orange-100 dark:bg-orange-900/30 text-orange-600", format: "currency" },
     { label: "Jumlah Transaksi", value: dashData.totalTransaksi, icon: <ShoppingCart className="w-5 h-5" />, color: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600", format: "number" },
-    { label: "Produk Hampir Habis", value: dashData.stokMenipis, icon: <AlertTriangle className="w-5 h-5" />, color: "bg-red-100 dark:bg-red-900/30 text-red-600", format: "number", warning: true },
+    { label: "Produk Hampir Habis", value: dashData.stokMenipisCount, icon: <AlertTriangle className="w-5 h-5" />, color: "bg-red-100 dark:bg-red-900/30 text-red-600", format: "number", warning: true },
   ];
 
   return (
