@@ -26,20 +26,25 @@ export default function DompetPage() {
   const [walletTipe, setWalletTipe] = useState<"KasTunai" | "Bank" | "EWallet">("KasTunai");
   const [walletSaldo, setWalletSaldo] = useState(0);
   const [walletCatatan, setWalletCatatan] = useState("");
+  const [walletNomorRekening, setWalletNomorRekening] = useState("");
+  const [walletAtasNama, setWalletAtasNama] = useState("");
+  const [walletNamaBank, setWalletNamaBank] = useState("");
 
   const resetForm = () => {
     setEditingWallet(null); setWalletName(""); setWalletSaldo(0); setWalletCatatan(""); setWalletTipe("KasTunai");
+    setWalletNomorRekening(""); setWalletAtasNama(""); setWalletNamaBank("");
   };
 
   const handleSave = async () => {
     if (!walletName.trim()) return alert("Nama dompet wajib diisi!");
+    const bankData = walletTipe === "Bank" ? { nomorRekening: walletNomorRekening.trim() || undefined, atasNama: walletAtasNama.trim() || undefined, namaBank: walletNamaBank.trim() || undefined } : {};
     if (editingWallet) {
-      await db.wallets.update(editingWallet, { namaDompet: walletName.trim(), tipe: walletTipe, saldo: walletSaldo, catatan: walletCatatan });
+      await db.wallets.update(editingWallet, { namaDompet: walletName.trim(), tipe: walletTipe, saldo: walletSaldo, catatan: walletCatatan, ...bankData });
     } else {
       await db.wallets.add({
         id: crypto.randomUUID(), bookOrBranchId, unitId: bookOrBranchId,
         namaDompet: walletName.trim(), saldo: walletSaldo, tipe: walletTipe,
-        catatan: walletCatatan, isActive: true, createdAt: new Date().toISOString(),
+        catatan: walletCatatan, isActive: true, createdAt: new Date().toISOString(), ...bankData,
       });
     }
     resetForm();
@@ -47,6 +52,7 @@ export default function DompetPage() {
 
   const handleEdit = (w: typeof wallets[0]) => {
     setEditingWallet(w.id); setWalletName(w.namaDompet); setWalletTipe(w.tipe); setWalletSaldo(w.saldo); setWalletCatatan(w.catatan);
+    setWalletNomorRekening(w.nomorRekening || ""); setWalletAtasNama(w.atasNama || ""); setWalletNamaBank(w.namaBank || "");
   };
 
   const handleDelete = async (id: string) => {
@@ -113,6 +119,17 @@ export default function DompetPage() {
               </button>
             ))}
           </div>
+          {walletTipe === "Bank" && <>
+            <input type="text" placeholder="Nama Bank (contoh: BCA, Mandiri)" value={walletNamaBank}
+              onChange={(e) => setWalletNamaBank(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
+            <input type="text" placeholder="Atas Nama" value={walletAtasNama}
+              onChange={(e) => setWalletAtasNama(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
+            <input type="text" placeholder="Nomor Rekening" value={walletNomorRekening}
+              onChange={(e) => setWalletNomorRekening(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
+          </>}
           <input type="number" placeholder="Saldo awal (Rp)" value={walletSaldo || ""}
             onChange={(e) => setWalletSaldo(Number(e.target.value))}
             className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
@@ -143,7 +160,11 @@ export default function DompetPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-heading font-bold truncate">{w.namaDompet}</p>
-                <p className="text-[9px] text-slate-400">{w.tipe}{w.catatan ? ` · ${w.catatan}` : ""}</p>
+                {w.tipe === "Bank" && w.namaBank ? (
+                  <p className="text-[9px] text-slate-400">{w.namaBank}{w.atasNama ? ` · ${w.atasNama}` : ""}{w.nomorRekening ? ` · ${w.nomorRekening}` : ""}</p>
+                ) : (
+                  <p className="text-[9px] text-slate-400">{w.tipe}{w.catatan ? ` · ${w.catatan}` : ""}</p>
+                )}
               </div>
               <div className="text-right shrink-0">
                 <p className="text-xs font-heading font-extrabold text-[#008CEB]">Rp{w.saldo.toLocaleString()}</p>

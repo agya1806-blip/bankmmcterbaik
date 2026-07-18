@@ -17,6 +17,7 @@ import {
   ArrowLeft, Edit3, X, Clock, AlertTriangle,
   User, StickyNote, Package, Banknote, Minus,
 } from "lucide-react";
+import InvoiceA4 from "@/components/invoice-a4";
 
 const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi", keluarga: "keluarga",
@@ -59,6 +60,8 @@ export default function PosKasirPage() {
   const wallets = useLiveQuery(() => db.wallets.where("bookOrBranchId").equals(bookOrBranchId).filter(w => w.isActive).toArray(), [bookOrBranchId]) || [];
   const transactions = useLiveQuery(() => db.transactions.where("bookOrBranchId").equals(bookOrBranchId).reverse().toArray(), [bookOrBranchId]) || [];
   const productions = useLiveQuery(() => db.productions.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
+  const profiles = useLiveQuery(() => db.profiles.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
+  const profile = profiles[0];
 
   const [tab, setTab] = useState<TabType>("order");
 
@@ -559,49 +562,17 @@ export default function PosKasirPage() {
         )}
       </AnimatePresence>
 
-      {/* Invoice Modal */}
-      <AnimatePresence>
-        {showInvoice && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowInvoice(null)}>
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} onClick={e => e.stopPropagation()} className="w-full max-w-md bg-white dark:bg-[#131527] rounded-2xl p-4 space-y-3 max-h-[80vh] overflow-y-auto">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-heading font-extrabold">Invoice</h3>
-                <button onClick={() => setShowInvoice(null)} className="p-1"><X className="w-4 h-4" /></button>
-              </div>
-              <div className="bg-slate-50 dark:bg-zinc-800 rounded-xl p-4 space-y-3 text-xs" id="invoice-print">
-                <div className="text-center border-b border-slate-200 dark:border-slate-700 pb-3">
-                  <p className="font-heading font-extrabold text-sm gradient-text">MMCBANK</p>
-                  <p className="text-[9px] text-slate-400 capitalize">{cabangSlug}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="flex justify-between"><span className="text-slate-400">Invoice</span><span className="font-bold">{showInvoice.invoiceNumber}</span></p>
-                  <p className="flex justify-between"><span className="text-slate-400">Tanggal</span><span className="font-bold">{formatDate(showInvoice.tanggal)}</span></p>
-                  <p className="flex justify-between"><span className="text-slate-400">Pelanggan</span><span className="font-bold">{showInvoice.customerNama}</span></p>
-                </div>
-                <div className="border-t border-slate-200 dark:border-slate-700 pt-2 space-y-1.5">
-                  {showInvoice.items.map((item, idx) => (
-                    <div key={idx}>
-                      <div className="flex justify-between"><span className="font-bold">{item.namaItem}</span><span>{formatRp(item.subtotal)}</span></div>
-                      <p className="text-[9px] text-slate-400">{item.qty} x {formatRp(item.hargaSatuan)}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="border-t border-slate-200 dark:border-slate-700 pt-2 space-y-1">
-                  <div className="flex justify-between"><span className="text-slate-400">Total</span><span className="font-extrabold text-sm">{formatRp(showInvoice.grandTotal)}</span></div>
-                  {showInvoice.dpDibayar > 0 && <>
-                    <div className="flex justify-between"><span className="text-slate-400">DP</span><span className="font-bold">{formatRp(showInvoice.dpDibayar)}</span></div>
-                    <div className="flex justify-between"><span className="text-slate-400">Sisa</span><span className="font-bold text-amber-500">{formatRp(showInvoice.sisaTagihan)}</span></div>
-                  </>}
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => setShowInvoice(null)} className="py-2.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-xs font-bold">Tutup</button>
-                <button onClick={() => { const el = document.getElementById("invoice-print"); if (el) { navigator.clipboard.writeText(el.innerText); alert("Disalin ke clipboard!"); } }} className="py-2.5 rounded-xl btn-primary text-xs font-bold">Salin Teks</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Invoice A4 Modal */}
+      {showInvoice && (
+        <InvoiceA4
+          transaction={showInvoice}
+          wallet={wallets.find(w => w.id === showInvoice.walletIdTarget)}
+          profile={profile}
+          cabangSlug={cabangSlug}
+          onClose={() => setShowInvoice(null)}
+          onPrint={() => window.print()}
+        />
+      )}
     </div>
   );
 }

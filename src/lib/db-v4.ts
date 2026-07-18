@@ -107,6 +107,9 @@ export interface DbWallet {
   namaDompet: string;
   saldo: number;
   tipe: WalletTipe;
+  nomorRekening?: string;
+  atasNama?: string;
+  namaBank?: string;
   catatan: string;
   isActive: boolean;
   createdAt: string;
