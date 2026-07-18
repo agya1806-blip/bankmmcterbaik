@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type UnitId, type DbCashflow, BRANCH_MAP } from "@/lib/db-v4";
+import { formatCurrency } from "@/lib/currency";
 import { TrendingUp, TrendingDown, Wallet, Save, ArrowLeft, Plus, X, Pencil, Trash2, Search } from "lucide-react";
 import { showToast } from "@/lib/toast";
 
@@ -139,7 +140,7 @@ export default function CashflowPage() {
               </button>
             </div>
             <div>
-              <label className="block mb-1 font-bold text-slate-400">Nominal (Rp)</label>
+              <label className="block mb-1 font-bold text-slate-400">Nominal</label>
               <input type="number" value={nominal || ""} onChange={(e) => setNominal(Number(e.target.value))} className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none text-sm font-bold" required />
             </div>
             <div>
@@ -155,7 +156,7 @@ export default function CashflowPage() {
               <select value={walletId} onChange={(e) => setWalletId(e.target.value)} className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold">
                 <option value="">Pilih dompet...</option>
                 {wallets.map((w) => (
-                  <option key={w.id} value={w.id}>{w.namaDompet} (Rp{w.saldo.toLocaleString()})</option>
+                  <option key={w.id} value={w.id}>{w.namaDompet} ({formatCurrency(w.saldo, w.mataUang || "IDR")})</option>
                 ))}
               </select>
             </div>
@@ -179,7 +180,7 @@ export default function CashflowPage() {
           <div key={s.label} className="premium-card premium-card-glow p-3 text-center space-y-1.5 animate-slide-up" style={{ animationDelay: `${i * 80}ms`, animationFillMode: "backwards" }}>
             <div className={`w-7 h-7 rounded-lg bg-${s.color}-100 dark:bg-${s.color}-900/30 flex items-center justify-center mx-auto`}>{s.iconNode}</div>
             <span className="text-[9px] font-heading font-bold text-slate-400 block uppercase tracking-wider">{s.label}</span>
-            <p className={`text-[11px] font-heading font-extrabold text-${s.color}-600 dark:text-${s.color}-400`}>Rp{s.value.toLocaleString()}</p>
+            <p className={`text-[11px] font-heading font-extrabold text-${s.color}-600 dark:text-${s.color}-400`}>{formatCurrency(s.value)}</p>
           </div>
         ))}
       </div>
@@ -209,16 +210,16 @@ export default function CashflowPage() {
       <div className="grid grid-cols-3 gap-2">
         <div className="premium-card p-2 text-center">
           <p className="text-[8px] text-slate-400 font-bold">Pemasukan</p>
-          <p className="text-xs font-bold text-emerald-500">Rp{totalPemasukan.toLocaleString()}</p>
+          <p className="text-xs font-bold text-emerald-500">{formatCurrency(totalPemasukan)}</p>
         </div>
         <div className="premium-card p-2 text-center">
           <p className="text-[8px] text-slate-400 font-bold">Pengeluaran</p>
-          <p className="text-xs font-bold text-rose-500">Rp{totalPengeluaran.toLocaleString()}</p>
+          <p className="text-xs font-bold text-rose-500">{formatCurrency(totalPengeluaran)}</p>
         </div>
         <div className="premium-card p-2 text-center">
           <p className="text-[8px] text-slate-400 font-bold">Neto</p>
           <p className={`text-xs font-bold ${neto >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-            Rp{neto.toLocaleString()}
+            {formatCurrency(neto)}
           </p>
         </div>
       </div>
@@ -244,7 +245,7 @@ export default function CashflowPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`text-xs font-heading font-extrabold tabular-nums ${cf.tipe === "masuk" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
-                    {cf.tipe === "masuk" ? "+" : "-"}Rp{cf.nominal.toLocaleString()}
+                    {cf.tipe === "masuk" ? "+" : "-"}{formatCurrency(cf.nominal, cf.mataUang || "IDR")}
                   </span>
                   <div className="flex gap-1">
                     <button onClick={() => handleEdit(cf)} className="p-1.5 rounded-lg bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors">

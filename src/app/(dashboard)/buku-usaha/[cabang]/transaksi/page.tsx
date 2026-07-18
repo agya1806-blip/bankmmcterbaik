@@ -4,6 +4,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type UnitId, type Transaction, type ProductionStatus, BRANCH_MAP, type DbPiutangInstallment } from '@/lib/db-v4';
+import { formatCurrency } from "@/lib/currency";
 import { SkeletonCard } from "@/components/skeleton";
 import { ArrowLeft, ClipboardList, FileText, Printer, Image, Phone, BarChart3, X, Search, Tag } from "lucide-react";
 import { showToast } from "@/lib/toast";
@@ -144,11 +145,11 @@ export default function TransaksiDanProduksiPage() {
       `----------------------------------------\n` +
       `*Daftar Item:*\n${itemsList}\n` +
       `----------------------------------------\n` +
-      `*Total Belanja:* Rp${tx.totalBruto.toLocaleString()}\n` +
+      `*Total Belanja:* ${formatCurrency(tx.totalBruto, tx.mataUang || "IDR")}\n` +
       `*Status:* ${tx.status}\n` +
       `${
         tx.sisaTagihan > 0
-          ? `*Sisa Piutang:* Rp${tx.sisaTagihan.toLocaleString()}`
+          ? `*Sisa Piutang:* ${formatCurrency(tx.sisaTagihan, tx.mataUang || "IDR")}`
           : 'Lunas Terbayar! Terima kasih.'
       }\n` +
       `----------------------------------------\n` +
@@ -417,7 +418,7 @@ export default function TransaksiDanProduksiPage() {
                     </div>
                     <div className="text-right">
                       <span className="text-xs font-heading font-extrabold text-[#008CEB]">
-                        Rp{tx.totalBruto.toLocaleString()}
+                        {formatCurrency(tx.totalBruto, tx.mataUang || "IDR")}
                       </span>
                       <p className="text-[9px] text-slate-400 font-medium mt-0.5">
                         {tanggal.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -437,7 +438,7 @@ export default function TransaksiDanProduksiPage() {
                     </span>
                     {tx.sisaTagihan > 0 && (
                       <span className="text-[9px] text-rose-500 font-extrabold bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 rounded-lg">
-                        Sisa: Rp{tx.sisaTagihan.toLocaleString()}
+                        Sisa: {formatCurrency(tx.sisaTagihan, tx.mataUang || "IDR")}
                       </span>
                     )}
                     {tx.status === "DP" && (
@@ -468,7 +469,7 @@ export default function TransaksiDanProduksiPage() {
                               {item.namaItem} (x{item.qty})
                             </span>
                             <span className="font-bold">
-                              Rp{item.subtotal.toLocaleString()}
+                              {formatCurrency(item.subtotal, tx.mataUang || "IDR")}
                             </span>
                           </div>
                         ))}
@@ -717,7 +718,7 @@ export default function TransaksiDanProduksiPage() {
                 {cicilanList.map(c => (
                   <div key={c.id} className="bg-slate-50 dark:bg-zinc-900 p-3 rounded-xl">
                     <div className="flex justify-between text-xs">
-                      <span className="font-bold">Rp{c.jumlah.toLocaleString()}</span>
+                      <span className="font-bold">{formatCurrency(c.jumlah)}</span>
                       <span className="text-slate-400">{new Date(c.tanggal).toLocaleDateString('id-ID')}</span>
                     </div>
                     <div className="flex justify-between text-[10px] text-slate-400 mt-1">

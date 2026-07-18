@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type UnitId, type DbWalletMutation, BRANCH_MAP } from "@/lib/db-v4";
+import { db, type UnitId, type MataUang, type DbWalletMutation, BRANCH_MAP } from "@/lib/db-v4";
+import { formatCurrency, CURRENCY_NAMES, CURRENCY_SYMBOLS } from "@/lib/currency";
 import { SkeletonCard } from "@/components/skeleton";
 import { ArrowLeft, Wallet, Save, Pencil, Trash2, DollarSign, Landmark, Smartphone } from "lucide-react";
 import { showToast } from "@/lib/toast";
@@ -31,6 +32,7 @@ function DompetPageContent() {
   const [walletNomorRekening, setWalletNomorRekening] = useState("");
   const [walletAtasNama, setWalletAtasNama] = useState("");
   const [walletNamaBank, setWalletNamaBank] = useState("");
+  const [walletMataUang, setWalletMataUang] = useState<MataUang>("IDR");
   const [topupWallet, setTopupWallet] = useState<string | null>(null);
   const [tarikWallet, setTarikWallet] = useState<string | null>(null);
   const [adjustNominal, setAdjustNominal] = useState(0);
@@ -46,18 +48,18 @@ function DompetPageContent() {
 
   const resetForm = () => {
     setEditingWallet(null); setWalletName(""); setWalletSaldo(0); setWalletCatatan(""); setWalletTipe("KasTunai");
-    setWalletNomorRekening(""); setWalletAtasNama(""); setWalletNamaBank("");
+    setWalletNomorRekening(""); setWalletAtasNama(""); setWalletNamaBank(""); setWalletMataUang("IDR");
   };
 
   const handleSave = async () => {
     if (!walletName.trim()) return showToast.error("Nama dompet wajib diisi!");
     const bankData = walletTipe === "Bank" ? { nomorRekening: walletNomorRekening.trim() || undefined, atasNama: walletAtasNama.trim() || undefined, namaBank: walletNamaBank.trim() || undefined } : {};
     if (editingWallet) {
-      await db.wallets.update(editingWallet, { namaDompet: walletName.trim(), tipe: walletTipe, saldo: walletSaldo, catatan: walletCatatan, ...bankData });
+      await db.wallets.update(editingWallet, { namaDompet: walletName.trim(), tipe: walletTipe, mataUang: walletMataUang, saldo: walletSaldo, catatan: walletCatatan, ...bankData });
     } else {
       await db.wallets.add({
         id: crypto.randomUUID(), bookOrBranchId, unitId: bookOrBranchId,
-        namaDompet: walletName.trim(), saldo: walletSaldo, tipe: walletTipe,
+        namaDompet: walletName.trim(), saldo: walletSaldo, tipe: walletTipe, mataUang: walletMataUang,
         catatan: walletCatatan, isActive: true, createdAt: new Date().toISOString(), ...bankData,
       });
     }
@@ -66,7 +68,7 @@ function DompetPageContent() {
 
   const handleEdit = (w: typeof wallets[0]) => {
     setEditingWallet(w.id); setWalletName(w.namaDompet); setWalletTipe(w.tipe); setWalletSaldo(w.saldo); setWalletCatatan(w.catatan);
-    setWalletNomorRekening(w.nomorRekening || ""); setWalletAtasNama(w.atasNama || ""); setWalletNamaBank(w.namaBank || "");
+    setWalletNomorRekening(w.nomorRekening || ""); setWalletAtasNama(w.atasNama || ""); setWalletNamaBank(w.namaBank || ""); setWalletMataUang(w.mataUang || "IDR");
   };
 
   const handleDelete = async (id: string) => {
@@ -88,7 +90,7 @@ function DompetPageContent() {
     if (!topupWallet || adjustNominal <= 0) return showToast.error("Nominal harus lebih dari 0!");
     const wallet = wallets.find((w) => w.id === topupWallet);
     if (!wallet) return;
-    if (!confirm(`Topup Rp${adjustNominal.toLocaleString()} ke ${wallet.namaDompet}?${adjustAlasan ? `\nAlasan: ${adjustAlasan}` : ""}`)) return;
+    if (!confirm(`Topup ${CURRENCY_SYMBOLS[wallet.mataUang || "IDR"]}${adjustNominal.toLocaleString()} ke ${wallet.namaDompet}?${adjustAlasan ? `\nAlasan: ${adjustAlasan}` : ""}`)) return;
     await db.transaction("rw", db.wallets, db.walletMutations, async () => {
       const w = await db.wallets.get(topupWallet);
       if (!w) throw new Error("Dompet tidak ditemukan");
@@ -109,7 +111,7 @@ function DompetPageContent() {
     const wallet = wallets.find((w) => w.id === tarikWallet);
     if (!wallet) return;
     if (adjustNominal > wallet.saldo) return showToast.error("Saldo tidak mencukupi!");
-    if (!confirm(`Tarik Tunai Rp${adjustNominal.toLocaleString()} dari ${wallet.namaDompet}?${adjustAlasan ? `\nAlasan: ${adjustAlasan}` : ""}`)) return;
+    if (!confirm(`Tarik Tunai ${CURRENCY_SYMBOLS[wallet.mataUang || "IDR"]}${adjustNominal.toLocaleString()} dari ${wallet.namaDompet}?${adjustAlasan ? `\nAlasan: ${adjustAlasan}` : ""}`)) return;
     await db.transaction("rw", db.wallets, db.walletMutations, async () => {
       const w = await db.wallets.get(tarikWallet);
       if (!w) throw new Error("Dompet tidak ditemukan");
@@ -147,7 +149,7 @@ function DompetPageContent() {
           <Wallet className="w-4 h-4 text-[#008CEB]" />
           <span className="text-[10px] text-slate-400 font-bold uppercase">Total Saldo</span>
         </div>
-        <p className="text-xl font-heading font-extrabold text-[#008CEB] dark:text-[#4DA3E0] tracking-tight">Rp{totalSaldo.toLocaleString()}</p>
+        <p className="text-xl font-heading font-extrabold text-[#008CEB] dark:text-[#4DA3E0] tracking-tight">{formatCurrency(totalSaldo)}</p>
         <p className="text-[9px] text-slate-400 mt-1">{wallets.length} dompet aktif</p>
       </div>
 
@@ -175,6 +177,11 @@ function DompetPageContent() {
               </button>
             ))}
           </div>
+          <select value={walletMataUang} onChange={(e) => setWalletMataUang(e.target.value as MataUang)}
+            className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 text-sm outline-none font-bold">
+            <option value="IDR">Rp - Rupiah</option>
+            <option value="USD">$ - US Dollar</option>
+          </select>
           {walletTipe === "Bank" && <>
             <input type="text" placeholder="Nama Bank (contoh: BCA, Mandiri)" value={walletNamaBank}
               onChange={(e) => setWalletNamaBank(e.target.value)}
@@ -225,7 +232,7 @@ function DompetPageContent() {
                     )}
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-xs font-heading font-extrabold text-[#008CEB]">Rp{w.saldo.toLocaleString()}</p>
+                    <p className="text-xs font-heading font-extrabold text-[#008CEB]">{formatCurrency(w.saldo, w.mataUang || "IDR")}</p>
                     <div className="flex gap-1 mt-0.5 justify-end">
                       <button onClick={() => handleEdit(w)} className="p-0.5 text-slate-400 hover:text-[#008CEB]">
                         <Pencil className="w-3.5 h-3.5" />
@@ -275,7 +282,7 @@ function DompetPageContent() {
                             </p>
                           </div>
                           <p className={`text-[10px] font-heading font-extrabold shrink-0 ${isTopup ? "text-emerald-600" : "text-rose-600"}`}>
-                            {isTopup ? "+" : "-"}Rp{m.nominal.toLocaleString()}
+                            {isTopup ? "+" : "-"}{formatCurrency(m.nominal)}
                           </p>
                         </div>
                       );
@@ -296,7 +303,7 @@ function DompetPageContent() {
             <div className="bg-white dark:bg-[#131527] rounded-2xl p-5 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <p className="text-xs font-heading font-extrabold mb-3">Top Up {w?.namaDompet}</p>
               <div className="space-y-3 text-xs">
-                <input type="number" placeholder="Jumlah (Rp)" value={adjustNominal || ""}
+                <input type="number" placeholder="Jumlah" value={adjustNominal || ""}
                   onChange={(e) => setAdjustNominal(Number(e.target.value))}
                   className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
                 <input type="text" placeholder="Alasan / Deskripsi (opsional)" value={adjustAlasan}
@@ -325,9 +332,9 @@ function DompetPageContent() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={() => { setTarikWallet(null); setAdjustNominal(0); setAdjustAlasan(""); }}>
             <div className="bg-white dark:bg-[#131527] rounded-2xl p-5 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <p className="text-xs font-heading font-extrabold mb-3">Tarik Tunai {w?.namaDompet}</p>
-              <p className="text-[10px] text-slate-400 mb-3">Saldo tersedia: Rp{w?.saldo.toLocaleString()}</p>
+              <p className="text-[10px] text-slate-400 mb-3">Saldo tersedia: {formatCurrency(w?.saldo || 0, w?.mataUang || "IDR")}</p>
               <div className="space-y-3 text-xs">
-                <input type="number" placeholder="Jumlah (Rp)" value={adjustNominal || ""}
+                <input type="number" placeholder="Jumlah" value={adjustNominal || ""}
                   onChange={(e) => setAdjustNominal(Number(e.target.value))}
                   className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
                 <input type="text" placeholder="Alasan / Deskripsi (opsional)" value={adjustAlasan}
