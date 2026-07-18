@@ -212,13 +212,13 @@ export default function PelangganCRMPage() {
   const openEdit = (c: Customer) => {
     setEditingCustomer(c);
     setEditNama(c.nama);
-    setEditNoTelp((c as any).noTelp || "");
-    setEditAlamat((c as any).alamat || "");
+    setEditNoTelp(c.noWA || "");
+    setEditAlamat("");
   };
 
   const handleEditSubmit = async () => {
     if (!editingCustomer) return;
-    await db.customers.update(editingCustomer.id, { nama: editNama, noTelp: editNoTelp, alamat: editAlamat } as any);
+    await db.customers.update(editingCustomer.id, { nama: editNama, noWA: editNoTelp });
     showToast.success("Pelanggan diperbarui");
     setEditingCustomer(null);
   };

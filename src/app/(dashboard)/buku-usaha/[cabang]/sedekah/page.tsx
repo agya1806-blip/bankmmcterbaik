@@ -17,6 +17,7 @@ const BRANCH_LABELS: Record<string, string> = {
   pribadi: "Buku Pribadi", keluarga: "Buku Keluarga",
   percetakan: "Percetakan", gadget: "Gadget", laptop: "Komputer & Laptop",
   warkop: "Kedai Kopi", konveksi: "Fashion & Konveksi", kelontong: "Kelontong",
+  "toko-pakaian": "Toko Pakaian",
 };
 
 const balanceTypes = [

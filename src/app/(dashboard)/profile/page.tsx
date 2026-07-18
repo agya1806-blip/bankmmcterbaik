@@ -4,6 +4,7 @@ import React, { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
 import { db } from "@/lib/db-v4";
+import { hashPin, verifyPin } from "@/lib/crypto";
 import { useThemeStore } from "@/store/useThemeStore";
 import { ArrowLeft, Camera, LogOut, Sun, Moon } from "lucide-react";
 
@@ -92,9 +93,9 @@ export default function ProfilePage() {
     if (newPin !== confirmPin) return setPinError("PIN konfirmasi tidak cocok!");
 
     const user = await db.users.get(currentUser.id);
-    if (!user || user.pinHash !== oldPin) return setPinError("PIN lama salah!");
+    if (!user || !(await verifyPin(oldPin, user.pinHash))) return setPinError("PIN lama salah!");
 
-    await db.users.update(currentUser.id, { pinHash: newPin });
+    await db.users.update(currentUser.id, { pinHash: await hashPin(newPin) });
     setPinSuccess(true);
     setOldPin("");
     setNewPin("");

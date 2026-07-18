@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { useSessionStore } from "@/store/useSessionStore";
 import {
-  db, type UnitId, type DbTransaction, type DbCustomer, type DbProduction, type DbInventoryItem,
+  db, type UnitId, type DbTransaction, type DbCustomer, type DbInventoryItem,
 } from "@/lib/db-v4";
 import {
   executeTransactionPipelineV4, type PosCartItem,
