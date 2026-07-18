@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type BookOrBranch } from "@/lib/db-v4";
 import { useSessionStore } from "@/store/useSessionStore";
-import { Printer, Smartphone, Monitor, Coffee, Shirt, ArrowLeft, ChevronRight, Building, ShoppingCart } from "lucide-react";
+import { Printer, Smartphone, Monitor, Coffee, Shirt, ArrowLeft, ChevronRight, Building, ShoppingCart, Settings } from "lucide-react";
 
 interface UnitUsaha {
   slug: string;
@@ -103,23 +103,27 @@ export default function BukuUsahaListPage() {
       {/* Unit Usaha Grid */}
       <div className="grid grid-cols-2 gap-2.5">
         {unitStats.map((u, i) => (
-          <button
+          <div
             key={u.slug}
-            onClick={() => handleSelectUnit(u.slug, u.bookId)}
-            className="premium-card premium-card-glow p-3 text-left scale-press animate-slide-up"
+            className="premium-card premium-card-glow p-3 text-left animate-slide-up relative"
             style={{ animationDelay: `${100 + i * 60}ms`, animationFillMode: "backwards" }}
           >
             <div className="flex items-center gap-2 mb-2">
               <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${u.color} flex items-center justify-center text-white shadow-md`}>
                 {u.icon}
               </div>
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 cursor-pointer" onClick={() => handleSelectUnit(u.slug, u.bookId)}>
                 <p className="text-[11px] font-heading font-bold line-clamp-1">{u.label}</p>
                 <p className="text-[9px] text-slate-400">{u.jumlahTx} transaksi</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-slate-300" />
+              <button onClick={() => router.push(`/buku-usaha/${u.slug}/pengaturan`)}
+                className="p-1.5 rounded-lg bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all shrink-0"
+                title="Pengaturan">
+                <Settings className="w-3.5 h-3.5 text-slate-400" />
+              </button>
             </div>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div onClick={() => handleSelectUnit(u.slug, u.bookId)} className="cursor-pointer">
+              <div className="grid grid-cols-2 gap-1.5">
               <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-lg px-2 py-1">
                 <p className="text-[8px] text-emerald-600 font-bold">Masuk</p>
                 <p className="text-[10px] font-heading font-extrabold text-emerald-600 dark:text-emerald-400">Rp{(u.masuk / 1000).toFixed(0)}rb</p>
@@ -135,7 +139,8 @@ export default function BukuUsahaListPage() {
                 {u.piutang > 0 && <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-600 font-bold">piutang</span>}
               </div>
             )}
-          </button>
+            </div>
+          </div>
         ))}
       </div>
     </div>

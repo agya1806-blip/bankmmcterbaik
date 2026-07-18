@@ -19,7 +19,7 @@ import { useSessionStore } from "@/store/useSessionStore";
 import {
   ChevronLeft, Bell, AlertTriangle, Clock, Wallet, Target,
   TrendingUp, TrendingDown, ShoppingCart, Calendar, FileText,
-  BarChart3, Trophy, Receipt, Package, Users, ArrowRight, Zap,
+  BarChart3, Trophy, Receipt, Package, Users, ArrowRight, Zap, Settings,
 } from "lucide-react";
 
 
@@ -348,6 +348,7 @@ export default function CabangDashboardPage() {
           { label: "Transaksi", slug: "transaksi", icon: <Receipt className="w-5 h-5 text-white" />, color: "from-pink-400 to-rose-500", badge: 0 },
           { label: "Dompet", slug: "dompet", icon: <Wallet className="w-5 h-5 text-white" />, color: "from-cyan-400 to-teal-500", badge: 0 },
           { label: "Laporan", slug: "laporan", icon: <BarChart3 className="w-5 h-5 text-white" />, color: "from-purple-400 to-violet-500", badge: 0 },
+          { label: "Pengaturan", slug: "pengaturan", icon: <Settings className="w-5 h-5 text-white" />, color: "from-slate-400 to-slate-500", badge: 0 },
         ].map((btn, i) => (
           <button key={btn.slug} onClick={() => router.push(`/buku-usaha/${cabangSlug}/${btn.slug}`)} className="premium-card premium-card-glow p-3 flex flex-col items-center gap-1.5 scale-press animate-slide-up relative" style={{ animationDelay: `${500 + i * 60}ms`, animationFillMode: "backwards" }}>
             {btn.badge > 0 && <span className="absolute top-1.5 right-1.5 badge-alert">{btn.badge}</span>}
