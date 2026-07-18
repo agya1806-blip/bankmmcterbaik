@@ -69,7 +69,7 @@ class AuthService implements IAuthService {
   }
 
   async updateUser(id: string, data: UpdateUserInput): Promise<void> {
-    await db.users.update(id, data);
+    await db.users.update(id, data as any);
   }
 
   async deleteUser(id: string): Promise<void> {
