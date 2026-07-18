@@ -86,7 +86,6 @@ export default function PelangganCRMPage() {
       [bookOrBranchId]
     );
   const customers = _customers || [];
-  if (_customers === undefined) return <SkeletonCard count={5} />;
 
   const customerPiutang =
     useLiveQuery(
@@ -235,6 +234,7 @@ export default function PelangganCRMPage() {
     setRedeemingCustomer(null);
   };
 
+  if (_customers === undefined) return <SkeletonCard count={5} />;
   return (
     <div className="flex-1 flex flex-col pt-4 space-y-4">
       {/* Header */}

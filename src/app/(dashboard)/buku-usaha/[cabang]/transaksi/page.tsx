@@ -25,7 +25,6 @@ export default function TransaksiDanProduksiPage() {
       [bookOrBranchId]
     );
   const allTransactions = _allTransactions || [];
-  if (_allTransactions === undefined) return <SkeletonCard count={5} />;
 
   const paginatedTransactions = useMemo(() => {
     const start = (page - 1) * PER_PAGE;
@@ -355,6 +354,7 @@ export default function TransaksiDanProduksiPage() {
     printWindow.document.close();
   };
 
+  if (_allTransactions === undefined) return <SkeletonCard count={5} />;
   return (
     <div className="flex-1 flex flex-col pt-4">
       <div className="flex items-center justify-between mb-4">

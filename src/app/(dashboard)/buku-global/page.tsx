@@ -86,6 +86,38 @@ export default function BukuGlobalPage() {
   const EXCLUDE_CF_KATEGORI = useMemo(() => new Set(["HPP", "Retur/Batal", "Transfer_Keluar", "Transfer_Masuk"]), []);
   const BRANCH_LIST: UnitId[] = ["usaha-warkop", "usaha-percetakan"];
 
+  const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
+
+  const todayData = useMemo(() => {
+    const todayPendapatan = allTransactions
+      .filter((tx) => tx.status !== "BATAL" && tx.tanggal.startsWith(todayStr))
+      .reduce((s, tx) => s + (tx.grandTotal - (tx.sedekahNominal || 0)), 0);
+    const todayPengeluaran = allCashflows
+      .filter((c) => c.tipe === "keluar" && c.createdAt.startsWith(todayStr))
+      .reduce((s, c) => s + c.nominal, 0);
+    const todayLaba = todayPendapatan - todayPengeluaran;
+    return { todayPendapatan, todayPengeluaran, todayLaba };
+  }, [allTransactions, allCashflows, todayStr]);
+
+  const saldoKas = useMemo(() => allWallets.reduce((s, w) => s + w.saldo, 0), [allWallets]);
+  const totalHutang = useMemo(() => allPiutang.filter((p) => p.status === "AKTIF").reduce((s, p) => s + p.sisaPiutang, 0), [allPiutang]);
+
+  const recentActivity = useMemo(() => {
+    const items: { id: string; tipe: string; desc: string; nominal: number; tanggal: string }[] = [];
+    allCashflows.slice(0, 15).forEach((c) => items.push({ id: c.id, tipe: c.tipe === "masuk" ? "Pemasukan" : "Pengeluaran", desc: c.kategori, nominal: c.nominal, tanggal: c.createdAt }));
+    allAuditLogs.slice(0, 15).forEach((l) => items.push({ id: l.id, tipe: l.action, desc: l.alasan || l.entityType, nominal: l.nominal || 0, tanggal: l.createdAt }));
+    items.sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+    return items.slice(0, 10);
+  }, [allCashflows, allAuditLogs]);
+
+  const notifications = useMemo(() => {
+    const now = new Date();
+    const piutangDueSoon = allPiutang.filter((p) => p.status === "AKTIF" && (new Date(p.jatuhTempo).getTime() - now.getTime()) <= 3 * 24 * 60 * 60 * 1000 && (new Date(p.jatuhTempo).getTime() - now.getTime()) >= 0).length;
+    const stokHabis = allInventory.filter((i) => i.stok === 0).length;
+    const stokMenipis = allInventory.filter((i) => i.stok <= i.stokMin && i.stok > 0).length;
+    return { piutangDueSoon, stokHabis, stokMenipis, backupDone: false };
+  }, [allPiutang, allInventory]);
+
   const dashData = useMemo(() => {
     let totalPendapatan = 0, totalHpp = 0, transaksiLunas = 0, transaksiPiutang = 0;
     allTransactions.forEach((tx) => {
@@ -353,7 +385,7 @@ export default function BukuGlobalPage() {
         ))}
       </div>
 
-      {activeTab === "dashboard" && <GlobalKpiCards dashData={dashData} last7Days={last7Days} branchRevenue={branchRevenue} />}
+      {activeTab === "dashboard" && <GlobalKpiCards dashData={dashData} last7Days={last7Days} branchRevenue={branchRevenue} todayData={todayData} saldoKas={saldoKas} totalHutang={totalHutang} recentActivity={recentActivity} notifications={notifications} allTransactions={allTransactions} allCashflows={allCashflows} allPiutang={allPiutang} allInventory={allInventory} allWallets={allWallets} allCustomers={allCustomers} currentUser={currentUser} />}
       {activeTab === "piutang" && <GlobalPiutangTab piutangSearch={piutangSearch} setPiutangSearch={setPiutangSearch} piutangBranchFilter={piutangBranchFilter} setPiutangBranchFilter={setPiutangBranchFilter} selectedPiutang={selectedPiutang} setSelectedPiutang={setSelectedPiutang} bayarPiutangAmount={bayarPiutangAmount} setBayarPiutangAmount={setBayarPiutangAmount} filteredPiutang={filteredPiutang} handleBayarPiutang={handleBayarPiutang} />}
       {activeTab === "pelanggan" && <GlobalPelangganTab pelangganSearch={pelangganSearch} setPelangganSearch={setPelangganSearch} pelangganBranch={pelangganBranch} setPelangganBranch={setPelangganBranch} filteredPelanggan={filteredPelanggan} />}
       {activeTab === "audit" && <GlobalAuditTab auditSearch={auditSearch} setAuditSearch={setAuditSearch} auditBranch={auditBranch} setAuditBranch={setAuditBranch} auditType={auditType} setAuditType={setAuditType} filteredAudit={filteredAudit} />}

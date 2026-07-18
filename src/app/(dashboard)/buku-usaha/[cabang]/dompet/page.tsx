@@ -22,7 +22,6 @@ function DompetPageContent() {
 
   const _wallets = useLiveQuery(() => db.wallets.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]);
   const wallets = _wallets || [];
-  if (_wallets === undefined) return <SkeletonCard count={5} />;
 
   const [editingWallet, setEditingWallet] = useState<string | null>(null);
   const [walletName, setWalletName] = useState("");
@@ -128,6 +127,7 @@ function DompetPageContent() {
     setTarikWallet(null); setAdjustNominal(0); setAdjustAlasan("");
   };
 
+  if (_wallets === undefined) return <SkeletonCard count={5} />;
   return (
     <div className="flex flex-col gap-4 pt-2 pb-4 animate-fade-in">
       <div className="flex items-center justify-between">

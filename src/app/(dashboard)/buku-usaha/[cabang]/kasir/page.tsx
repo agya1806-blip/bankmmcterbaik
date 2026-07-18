@@ -48,8 +48,6 @@ export default function PosKasirPage() {
   const profiles = useLiveQuery(() => db.profiles.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
   const profile = profiles[0];
 
-  if (_products === undefined || _customers === undefined || _wallets === undefined) return <SkeletonCard count={5} />;
-
   // ─── Tab ───
   const [tab, setTab] = useState<"order" | "riwayat">("order");
 
@@ -300,6 +298,7 @@ export default function PosKasirPage() {
   }, [isGridMode, gridCart, manualCart, grandTotal, hasItems]);
 
   // ═══ RENDER ═══
+  if (_products === undefined || _customers === undefined || _wallets === undefined) return <SkeletonCard count={5} />;
   return (
     <div className="flex-1 flex flex-col pt-4 gap-3">
       {/* Header */}

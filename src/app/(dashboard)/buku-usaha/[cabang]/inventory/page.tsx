@@ -49,7 +49,6 @@ export default function InventoryPage() {
       [bookOrBranchId]
     );
   const products = _products || [];
-  if (_products === undefined) return <SkeletonCard count={5} />;
 
   const mutations =
     useLiveQuery(
@@ -213,6 +212,7 @@ export default function InventoryPage() {
     return products.find((p) => p.id === selectedMutasi) || null;
   }, [selectedMutasi, products]);
 
+  if (_products === undefined) return <SkeletonCard count={5} />;
   return (
     <div className="flex-1 flex flex-col pt-4 space-y-4">
       <div className="flex items-center justify-between">
