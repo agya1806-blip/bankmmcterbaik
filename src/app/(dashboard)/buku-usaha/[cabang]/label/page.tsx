@@ -3,21 +3,9 @@
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, type UnitId } from "@/lib/db-v4";
+import { db, type UnitId, BRANCH_MAP } from "@/lib/db-v4";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import { showToast } from "@/lib/toast";
-
-const BRANCH_MAP: Record<string, UnitId> = {
-  pribadi: "pribadi",
-  keluarga: "keluarga",
-  percetakan: "usaha-percetakan",
-  laptop: "usaha-laptop",
-  gadget: "usaha-gadget",
-  warkop: "usaha-warkop",
-  konveksi: "usaha-konveksi",
-  kelontong: "usaha-kelontong",
-  "toko-pakaian": "usaha-toko-pakaian",
-};
 
 const PREDEFINED_COLORS = [
   "#EF4444", "#F97316", "#EAB308", "#22C55E",

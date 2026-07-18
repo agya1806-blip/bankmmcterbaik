@@ -3,23 +3,11 @@
 import React, { useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, type UnitId, type Customer, type DbTransaction } from "@/lib/db-v4";
+import { db, type UnitId, type Customer, type DbTransaction, BRANCH_MAP } from "@/lib/db-v4";
 import * as XLSX from "xlsx";
 import { SkeletonCard } from "@/components/skeleton";
-import { ArrowLeft, Download, UserPlus, Search, Smartphone, DollarSign, MessageCircle, Send, Check, History, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, UserPlus, Search, Smartphone, DollarSign, MessageCircle, Send, Check, History, Pencil, Trash2, Star, Gift } from "lucide-react";
 import { showToast } from "@/lib/toast";
-
-const BRANCH_MAP: Record<string, UnitId> = {
-  pribadi: "pribadi",
-  keluarga: "keluarga",
-  percetakan: "usaha-percetakan",
-  laptop: "usaha-laptop",
-  gadget: "usaha-gadget",
-  warkop: "usaha-warkop",
-  konveksi: "usaha-konveksi",
-  kelontong: "usaha-kelontong",
-  "toko-pakaian": "usaha-toko-pakaian",
-};
 
 interface ParsedContact {
   nama: string;
@@ -88,6 +76,9 @@ export default function PelangganCRMPage() {
   const [editNoTelp, setEditNoTelp] = useState("");
   const [editAlamat, setEditAlamat] = useState("");
   const [selectedCustomerTx, setSelectedCustomerTx] = useState<string | null>(null);
+  const [showRedeemModal, setShowRedeemModal] = useState(false);
+  const [redeemPoin, setRedeemPoin] = useState(0);
+  const [redeemingCustomer, setRedeemingCustomer] = useState<Customer | null>(null);
 
   const _customers =
     useLiveQuery(
@@ -231,6 +222,19 @@ export default function PelangganCRMPage() {
     showToast.success("Pelanggan dihapus");
   };
 
+  const handleRedeemPoin = async () => {
+    if (!redeemingCustomer || redeemPoin <= 0) return;
+    const customer = await db.customers.get(redeemingCustomer.id);
+    if (!customer || customer.poin < redeemPoin) return showToast.error("Poin tidak cukup!");
+
+    const newPoin = customer.poin - redeemPoin;
+    await db.customers.update(redeemingCustomer.id, { poin: newPoin });
+    showToast.success(`${redeemPoin} poin berhasil ditukar!`);
+    setShowRedeemModal(false);
+    setRedeemPoin(0);
+    setRedeemingCustomer(null);
+  };
+
   return (
     <div className="flex-1 flex flex-col pt-4 space-y-4">
       {/* Header */}
@@ -310,6 +314,9 @@ export default function PelangganCRMPage() {
                     <p className="text-xs font-heading font-extrabold text-[#00C9A7] flex items-center gap-1 justify-end">
                       <DollarSign className="w-3.5 h-3.5" /> Rp{c.totalBelanja.toLocaleString()}
                     </p>
+                    <p className="text-[10px] font-heading font-extrabold text-amber-500 flex items-center gap-1 justify-end mt-0.5">
+                      <Star className="w-3 h-3" /> Poin: {c.poin.toLocaleString()}
+                    </p>
                   </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); openEdit(c); }}
@@ -341,6 +348,13 @@ export default function PelangganCRMPage() {
                   </button>
 
                   <button
+                    onClick={(e) => { e.stopPropagation(); setRedeemingCustomer(c); setRedeemPoin(0); setShowRedeemModal(true); }}
+                    className="w-full py-2 rounded-xl bg-amber-500/10 text-amber-600 border border-amber-500/20 flex items-center justify-center gap-1.5 font-bold text-[10px] hover:bg-amber-500/20 active:scale-[0.97] transition-all duration-200"
+                  >
+                    <Gift className="w-4 h-4" /> Tukar Poin
+                  </button>
+
+                  <button
                     onClick={(e) => { e.stopPropagation(); setSelectedCustomerTx(selectedCustomerTx === c.id ? null : c.id); }}
                     className={`w-full py-2 rounded-xl flex items-center justify-center gap-1.5 font-bold text-[10px] transition-all duration-200 ${
                       selectedCustomerTx === c.id
@@ -362,6 +376,9 @@ export default function PelangganCRMPage() {
                             </p>
                             <p className="text-slate-400">
                               {new Date(tx.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                            </p>
+                            <p className="text-[9px] text-amber-500 font-semibold mt-0.5">
+                              +{Math.floor(tx.grandTotal / 10000)} poin
                             </p>
                           </div>
                           <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
@@ -592,6 +609,55 @@ export default function PelangganCRMPage() {
                 className="flex-1 py-2.5 bg-[#008CEB] text-white rounded-xl flex items-center justify-center gap-1"
               >
                 <Check className="w-4 h-4" /> Impor {importPreview.length} Pelanggan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Redeem Modal */}
+      {showRedeemModal && redeemingCustomer && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#131527] w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-xl animate-slide-up">
+            <div className="flex items-center gap-2">
+              <Gift className="w-5 h-5 text-amber-500" />
+              <h3 className="text-sm font-extrabold text-slate-800 dark:text-white">
+                Tukar Poin - {redeemingCustomer.nama}
+              </h3>
+            </div>
+            <p className="text-[10px] text-slate-400">
+              Poin tersedia: <span className="font-bold text-amber-500">{redeemingCustomer.poin.toLocaleString()}</span>
+            </p>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Jumlah Poin</label>
+              <input
+                type="number"
+                min="0"
+                max={redeemingCustomer.poin}
+                value={redeemPoin || ""}
+                onChange={(e) => setRedeemPoin(Math.min(redeemingCustomer.poin, Math.max(0, Number(e.target.value))))}
+                placeholder="0"
+                className="w-full px-3 py-2 bg-slate-100 dark:bg-zinc-900 rounded-xl border-none outline-none text-xs"
+              />
+            </div>
+            {redeemPoin > 0 && (
+              <div className="bg-amber-50 dark:bg-amber-950/20 rounded-xl p-3 text-center">
+                <p className="text-xs text-slate-500">Nilai diskon setara</p>
+                <p className="text-lg font-extrabold text-amber-500">Rp{(redeemPoin * 100).toLocaleString()}</p>
+              </div>
+            )}
+            <div className="flex gap-2 text-xs font-bold pt-2">
+              <button
+                onClick={() => { setShowRedeemModal(false); setRedeemingCustomer(null); setRedeemPoin(0); }}
+                className="flex-1 py-2.5 bg-slate-100 dark:bg-zinc-800 rounded-xl"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleRedeemPoin}
+                disabled={redeemPoin <= 0}
+                className="flex-1 py-2.5 bg-amber-500 text-white rounded-xl disabled:opacity-50"
+              >
+                Tukar
               </button>
             </div>
           </div>

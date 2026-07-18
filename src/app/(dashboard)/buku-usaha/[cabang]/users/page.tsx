@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type UnitId, type UserRole } from "@/lib/db-v4";
+import { db, type UnitId, type UserRole, BRANCH_MAP, BRANCH_LABELS } from "@/lib/db-v4";
 import { useSessionStore } from "@/store/useSessionStore";
 import { hashPin } from "@/lib/crypto";
 import { showToast } from "@/lib/toast";
@@ -12,19 +12,7 @@ import {
   UserCog, UserPlus, Calendar, AlertTriangle,
   ShieldCheck, ShieldHalf, Eye,
 } from "lucide-react";
-
-const BRANCH_MAP: Record<string, UnitId> = {
-  pribadi: "pribadi", keluarga: "keluarga",
-  percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
-  warkop: "usaha-warkop", konveksi: "usaha-konveksi", kelontong: "usaha-kelontong",
-  "toko-pakaian": "usaha-toko-pakaian",
-};
-const BRANCH_LABELS: Record<string, string> = {
-  pribadi: "Buku Pribadi", keluarga: "Buku Keluarga",
-  percetakan: "Percetakan", gadget: "Gadget", laptop: "Komputer & Laptop",
-  warkop: "Kedai Kopi", konveksi: "Fashion & Konveksi", kelontong: "Kelontong",
-  "toko-pakaian": "Toko Pakaian",
-};
+import { RoleGuard } from "@/components/layout/role-guard";
 
 const ROLE_CONFIG: Record<UserRole, { label: string; color: string; icon: React.ReactNode }> = {
   admin: { label: "Admin", color: "text-[#008CEB] bg-[#008CEB]/10", icon: <ShieldCheck className="w-3 h-3" /> },
@@ -33,6 +21,10 @@ const ROLE_CONFIG: Record<UserRole, { label: string; color: string; icon: React.
 };
 
 export default function UsersPage() {
+  return <RoleGuard requiredRole="admin"><UsersPageContent /></RoleGuard>;
+}
+
+function UsersPageContent() {
   const params = useParams();
   const router = useRouter();
   const { currentUser } = useSessionStore();

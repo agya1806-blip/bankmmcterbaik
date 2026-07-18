@@ -2,23 +2,10 @@
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type UnitId } from "@/lib/db-v4";
+import { db, type UnitId, BRANCH_MAP, BRANCH_LABELS } from "@/lib/db-v4";
 import { showToast } from "@/lib/toast";
 import { ArrowLeft, Heart, HandCoins, DollarSign, PiggyBank, Gift, Save, BadgePercent } from "lucide-react";
-
-const BRANCH_MAP: Record<string, UnitId> = {
-  pribadi: "pribadi", keluarga: "keluarga",
-  percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
-  warkop: "usaha-warkop", konveksi: "usaha-konveksi", kelontong: "usaha-kelontong",
-  "toko-pakaian": "usaha-toko-pakaian",
-};
-
-const BRANCH_LABELS: Record<string, string> = {
-  pribadi: "Buku Pribadi", keluarga: "Buku Keluarga",
-  percetakan: "Percetakan", gadget: "Gadget", laptop: "Komputer & Laptop",
-  warkop: "Kedai Kopi", konveksi: "Fashion & Konveksi", kelontong: "Kelontong",
-  "toko-pakaian": "Toko Pakaian",
-};
+import { RoleGuard } from "@/components/layout/role-guard";
 
 const balanceTypes = [
   { key: "zakatMal" as const, label: "Zakat Mal", icon: <BadgePercent className="w-5 h-5" />, color: "emerald" },
@@ -28,6 +15,10 @@ const balanceTypes = [
 ];
 
 export default function SedekahPage() {
+  return <RoleGuard requiredRole="admin"><SedekahPageContent /></RoleGuard>;
+}
+
+function SedekahPageContent() {
   const params = useParams();
   const router = useRouter();
   const cabangSlug = (params?.cabang as string) || "";

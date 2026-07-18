@@ -15,6 +15,7 @@ interface SessionState {
   isPinVerified: boolean;
   isInitializing: boolean;
   kioskTarget: string | null;
+  lastActivity: number;
   login: (user: UserInfo) => void;
   logout: () => void;
   setBranch: (branch: string) => void;
@@ -26,6 +27,7 @@ interface SessionState {
   updateProfile: (patch: Partial<Pick<UserInfo, "nama" | "fotoUrl">>) => void;
   isLoggedIn: () => boolean;
   isKiosk: () => boolean;
+  updateActivity: () => void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -37,6 +39,7 @@ export const useSessionStore = create<SessionState>()(
       isPinVerified: false,
       isInitializing: false,
       kioskTarget: null,
+      lastActivity: Date.now(),
       login: (user) => set({ currentUser: user }),
       logout: () => set({ currentUser: null, currentBranch: null, isPinVerified: false, kioskTarget: null }),
       setBranch: (branch) => set({ currentBranch: branch }),
@@ -51,6 +54,7 @@ export const useSessionStore = create<SessionState>()(
       },
       isLoggedIn: () => get().currentUser !== null,
       isKiosk: () => get().kioskTarget !== null,
+      updateActivity: () => set({ lastActivity: Date.now() }),
     }),
     { name: 'mmc-session-store' }
   )

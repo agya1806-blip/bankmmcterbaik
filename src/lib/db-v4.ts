@@ -60,6 +60,33 @@ export const ALL_UNITS: UnitId[] = [
 export const BRANCH_SLUGS = POS_UNITS;
 export const BRANCH_LIST = POS_UNITS;
 
+/* ─── Shared Constants for Cabang Pages ─── */
+
+/** slug → UnitId */
+export const BRANCH_MAP: Record<string, UnitId> = {
+  pribadi: "pribadi", keluarga: "keluarga",
+  percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
+  warkop: "usaha-warkop", konveksi: "usaha-konveksi", kelontong: "usaha-kelontong",
+  "toko-pakaian": "usaha-toko-pakaian",
+};
+
+/** slug → display label */
+export const BRANCH_LABELS: Record<string, string> = {
+  pribadi: "Buku Pribadi", keluarga: "Buku Keluarga",
+  percetakan: "Percetakan", gadget: "Gadget", laptop: "Komputer & Laptop",
+  warkop: "Kedai Kopi", konveksi: "Fashion & Konveksi", kelontong: "Kelontong",
+  "toko-pakaian": "Toko Pakaian",
+};
+
+/** slug → Tailwind gradient color */
+export const BRANCH_COLORS: Record<string, string> = {
+  pribadi: "from-slate-500 to-slate-600", keluarga: "from-rose-400 to-rose-500",
+  percetakan: "from-blue-500 to-blue-600", laptop: "from-violet-500 to-purple-600",
+  gadget: "from-indigo-500 to-indigo-600", warkop: "from-orange-400 to-orange-500",
+  konveksi: "from-pink-400 to-pink-500", kelontong: "from-emerald-400 to-emerald-500",
+  "toko-pakaian": "from-teal-400 to-teal-500",
+};
+
 /* ─── Enums ─── */
 
 export type WalletTipe = "KasTunai" | "Bank" | "EWallet";
@@ -69,6 +96,7 @@ export type PiutangStatus = "AKTIF" | "LUNAS" | "DIHAPUS";
 export type InvTipe = "masuk" | "keluar" | "penyesuaian";
 export type ProductionStatus = "antre" | "diproduksi" | "selesai";
 export type SedekahType = "zakatMal" | "zakatFitrah" | "infakTerikat" | "sedekahSubuh";
+export type RecurringFrequency = "daily" | "weekly" | "monthly" | "yearly";
 
 /* ───────────────────────────────────────────────────────── */
 /* 18 TABLE INTERFACES                                      */
@@ -217,6 +245,7 @@ export interface DbInventoryItem {
   bookOrBranchId: UnitId;
   unitId: UnitId;
   sku: string;
+  barcode?: string;
   nama: string;
   kategori: string;
   stok: number;
@@ -225,6 +254,7 @@ export interface DbInventoryItem {
   hargaJual: number;
   satuan: string;
   catatan: string;
+  fotoUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -299,7 +329,7 @@ export interface DbCashflow {
   walletId: string;
   walletNama: string;
   referensiId: string;
-  referensiTipe: "transaction" | "mutasi" | "adjustment" | "retur" | "sedekah";
+  referensiTipe: "transaction" | "mutasi" | "adjustment" | "retur" | "sedekah" | "recurring";
   catatan: string;
   createdAt: string;
 }
@@ -338,6 +368,75 @@ export interface DbInvoiceCounter {
   counter: number;
 }
 
+/* ─── BUDGET ─── */
+
+export interface DbBudget {
+  id: string;
+  bookOrBranchId: UnitId;
+  unitId: UnitId;
+  kategori: string;
+  jumlah: number;
+  periode: string; // "YYYY-MM" format
+  createdAt: string;
+}
+
+/* ─── SUPPLIER & PURCHASE ORDER ─── */
+
+export interface DbSupplier {
+  id: string;
+  bookOrBranchId: UnitId;
+  unitId: UnitId;
+  nama: string;
+  kontak: string;
+  alamat: string;
+  catatan: string;
+  createdAt: string;
+}
+
+export interface DbPurchaseOrderItem {
+  id: string;
+  namaItem: string;
+  qty: number;
+  harga: number;
+  subtotal: number;
+}
+
+export interface DbPurchaseOrder {
+  id: string;
+  bookOrBranchId: UnitId;
+  unitId: UnitId;
+  poNumber: string;
+  supplierId: string;
+  supplierNama: string;
+  items: DbPurchaseOrderItem[];
+  total: number;
+  status: "draft" | "dikirim" | "diterima" | "selesai" | "batal";
+  catatan: string;
+  createdAt: string;
+}
+
+/* ─── RECURRING TEMPLATE ─── */
+
+export interface DbRecurringTemplate {
+  id: string;
+  bookOrBranchId: UnitId;
+  unitId: UnitId;
+  nama: string;
+  tipe: "pemasukan" | "pengeluaran";
+  jumlah: number;
+  kategori: string;
+  catatan: string;
+  frequency: RecurringFrequency;
+  dayOfWeek?: number;
+  dayOfMonth?: number;
+  startDate: string;
+  endDate?: string;
+  walletId: string;
+  isActive: boolean;
+  lastGenerated: string;
+  createdAt: string;
+}
+
 /* ───────────────────────────────────────────────────────── */
 /* DEXIE DATABASE                                           */
 /* ───────────────────────────────────────────────────────── */
@@ -361,11 +460,15 @@ class MmcBankDB extends Dexie {
   auditLogs!: Table<DbAuditLog, string>;
   cashflows!: Table<DbCashflow, string>;
   productions!: Table<DbProduction, string>;
+  suppliers!: Table<DbSupplier, string>;
+  purchaseOrders!: Table<DbPurchaseOrder, string>;
+  recurringTemplates!: Table<DbRecurringTemplate, string>;
+  budgets!: Table<DbBudget, string>;
 
   constructor() {
-    super("mmcbank-v4");
+    super("mmcbank-v5");
 
-    this.version(2).stores({
+    this.version(5).stores({
       users: "id, &nama, role, bookOrBranchId",
       profiles: "id, bookOrBranchId",
       wallets: "id, bookOrBranchId, unitId, tipe, isActive",
@@ -384,6 +487,56 @@ class MmcBankDB extends Dexie {
       auditLogs: "id, bookOrBranchId, action, entityType, entityId, createdAt",
       cashflows: "id, bookOrBranchId, unitId, tipe, kategori, walletId, referensiId, createdAt",
       productions: "id, bookOrBranchId, unitId, transactionId, status, updatedAt",
+      suppliers: "id, bookOrBranchId, unitId, nama",
+      purchaseOrders: "id, bookOrBranchId, unitId, poNumber, supplierId, status",
+      budgets: "id, bookOrBranchId, unitId, kategori, periode",
+    });
+
+    this.version(4).stores({
+      users: "id, &nama, role, bookOrBranchId",
+      profiles: "id, bookOrBranchId",
+      wallets: "id, bookOrBranchId, unitId, tipe, isActive",
+      walletMutations: "id, bookOrBranchId, dariWalletId, keWalletId, createdAt",
+      customers: "id, bookOrBranchId, &[bookOrBranchId+noWA], nama",
+      transactions: "id, bookOrBranchId, unitId, userId, customerId, tanggal, status, walletIdTarget, invoiceNumber",
+      piutang: "id, bookOrBranchId, unitId, customerId, status, jatuhTempo, transactionId",
+      piutangInstallments: "id, bookOrBranchId, piutangId, tanggal",
+      inventory: "id, bookOrBranchId, unitId, sku, kategori",
+      inventoryMutations: "id, bookOrBranchId, itemId, tipe, createdAt",
+      labels: "id, bookOrBranchId",
+      labelTags: "id, bookOrBranchId, transaksiRef, labelId",
+      quickOrders: "id, bookOrBranchId",
+      sedekahBalances: "id, bookOrBranchId",
+      invoiceCounters: "id, bookOrBranchId, prefix",
+      auditLogs: "id, bookOrBranchId, action, entityType, entityId, createdAt",
+      cashflows: "id, bookOrBranchId, unitId, tipe, kategori, walletId, referensiId, createdAt",
+      productions: "id, bookOrBranchId, unitId, transactionId, status, updatedAt",
+      suppliers: "id, bookOrBranchId, unitId, nama",
+      purchaseOrders: "id, bookOrBranchId, unitId, poNumber, supplierId, status",
+      recurringTemplates: "id, bookOrBranchId, unitId, isActive, tipe",
+    });
+
+    this.version(3).stores({
+      users: "id, &nama, role, bookOrBranchId",
+      profiles: "id, bookOrBranchId",
+      wallets: "id, bookOrBranchId, unitId, tipe, isActive",
+      walletMutations: "id, bookOrBranchId, dariWalletId, keWalletId, createdAt",
+      customers: "id, bookOrBranchId, &[bookOrBranchId+noWA], nama",
+      transactions: "id, bookOrBranchId, unitId, userId, customerId, tanggal, status, walletIdTarget, invoiceNumber",
+      piutang: "id, bookOrBranchId, unitId, customerId, status, jatuhTempo, transactionId",
+      piutangInstallments: "id, bookOrBranchId, piutangId, tanggal",
+      inventory: "id, bookOrBranchId, unitId, sku, kategori",
+      inventoryMutations: "id, bookOrBranchId, itemId, tipe, createdAt",
+      labels: "id, bookOrBranchId",
+      labelTags: "id, bookOrBranchId, transaksiRef, labelId",
+      quickOrders: "id, bookOrBranchId",
+      sedekahBalances: "id, bookOrBranchId",
+      invoiceCounters: "id, bookOrBranchId, prefix",
+      auditLogs: "id, bookOrBranchId, action, entityType, entityId, createdAt",
+      cashflows: "id, bookOrBranchId, unitId, tipe, kategori, walletId, referensiId, createdAt",
+      productions: "id, bookOrBranchId, unitId, transactionId, status, updatedAt",
+      suppliers: "id, bookOrBranchId, unitId, nama",
+      purchaseOrders: "id, bookOrBranchId, unitId, poNumber, supplierId, status",
     });
 
     this.on("populate", (tx) => this.seedDefaultData(tx as unknown as DexieTx));

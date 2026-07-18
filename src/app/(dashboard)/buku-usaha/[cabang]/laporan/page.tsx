@@ -3,21 +3,10 @@
 import React, { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type UnitId } from "@/lib/db-v4";
+import { db, type UnitId, BRANCH_MAP, BRANCH_LABELS } from "@/lib/db-v4";
+import jsPDF from "jspdf";
 import { ArrowLeft, BarChart3, DollarSign, TrendingUp, ArrowDownToLine, ArrowUpFromLine, Clock, Package } from "lucide-react";
 import { showToast } from "@/lib/toast";
-
-const BRANCH_MAP: Record<string, UnitId> = {
-  pribadi: "pribadi",
-  keluarga: "keluarga",
-  percetakan: "usaha-percetakan",
-  laptop: "usaha-laptop",
-  gadget: "usaha-gadget",
-  warkop: "usaha-warkop",
-  konveksi: "usaha-konveksi",
-  kelontong: "usaha-kelontong",
-  "toko-pakaian": "usaha-toko-pakaian",
-};
 
 type Period = "all" | "today" | "week" | "month";
 
@@ -158,6 +147,58 @@ export default function LaporanPage() {
     document.body.removeChild(link);
   };
 
+  const handleExportPdf = () => {
+    if (filteredTx.length === 0) return showToast.error("Tidak ada data untuk diekspor!");
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const branchLabel = BRANCH_LABELS[cabangSlug] || cabangSlug;
+    const periodLabel = PERIODS.find(p => p.key === period)?.label || "Semua";
+
+    const itemSummary = new Map<string, { qty: number; total: number }>();
+    filteredTx.forEach(tx => {
+      if (tx.status === "BATAL") return;
+      tx.items.forEach(item => {
+        const existing = itemSummary.get(item.namaItem) || { qty: 0, total: 0 };
+        existing.qty += item.qty;
+        existing.total += item.subtotal;
+        itemSummary.set(item.namaItem, existing);
+      });
+    });
+
+    doc.setFontSize(16);
+    doc.text(`Laporan ${branchLabel}`, pageWidth / 2, 20, { align: "center" });
+    doc.setFontSize(10);
+    doc.text(`Periode: ${periodLabel}`, pageWidth / 2, 28, { align: "center" });
+
+    doc.setFontSize(12);
+    doc.text("Ringkasan Keuangan", 14, 40);
+    doc.setFontSize(10);
+    doc.text(`Total Pendapatan: Rp ${report.totalPendapatan.toLocaleString()}`, 14, 50);
+    doc.text(`Total HPP: Rp ${report.totalHpp.toLocaleString()}`, 14, 58);
+    doc.text(`Laba Kotor: Rp ${report.labaKotor.toLocaleString()}`, 14, 66);
+    doc.text(`Total Pengeluaran: Rp (${report.cashflowKeluar.toLocaleString()})`, 14, 74);
+    doc.text(`Laba Bersih: Rp ${report.labaBersih.toLocaleString()}`, 14, 82);
+
+    const sortedItems = Array.from(itemSummary.entries()).sort((a, b) => b[1].total - a[1].total).slice(0, 10);
+    if (sortedItems.length > 0) {
+      doc.setFontSize(12);
+      doc.text("Top Items", 14, 98);
+      doc.setFontSize(9);
+      let y = 108;
+      sortedItems.forEach(([nama, data]) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(`${nama} - ${data.qty} x Rp ${(data.total / data.qty).toLocaleString()} = Rp ${data.total.toLocaleString()}`, 14, y);
+        y += 8;
+      });
+    }
+
+    doc.save(`Laporan_${branchLabel}_${new Date().toISOString().slice(0, 10)}.pdf`);
+    showToast.success("PDF berhasil diunduh");
+  };
+
   const PERIODS: { key: Period; label: string }[] = [
     { key: "all", label: "Semua" },
     { key: "today", label: "Hari Ini" },
@@ -177,9 +218,15 @@ export default function LaporanPage() {
         <h1 className="text-lg font-heading font-extrabold tracking-tight">Laporan Keuangan</h1>
         <button
           onClick={exportCSV}
-          className="px-4 py-2 bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white rounded-xl text-[10px] font-bold shadow-md hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 transition-all duration-200"
+          className="px-3 py-2 bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white rounded-xl text-[10px] font-bold shadow-md hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 transition-all duration-200"
         >
           Export CSV
+        </button>
+        <button
+          onClick={handleExportPdf}
+          className="px-3 py-2 bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white rounded-xl text-[10px] font-bold shadow-md hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 transition-all duration-200"
+        >
+          Export PDF
         </button>
       </div>
 

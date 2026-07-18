@@ -11,6 +11,7 @@ import { db, type BookOrBranch, type UnitId, BOOK_LABELS, ALL_UNITS, POS_UNITS }
 import { useLiveQuery } from "dexie-react-hooks";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart3, CreditCard, Users, ScrollText, Settings, Sun, Moon, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Search, Wallet, Download, Upload, ArrowRightLeft, Zap, Plus, Trash2, LogOut, X, Database, UserCircle, Landmark, Smartphone, Save, Edit3, Pencil, Building, RotateCcw } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, Legend } from "recharts";
 import { showToast } from "@/lib/toast";
 
 const BRANCH_LIST: UnitId[] = POS_UNITS;
@@ -161,6 +162,34 @@ export default function BukuGlobalPage() {
       perBranch,
     };
   }, [allTransactions, allCashflows, allPiutang, allCustomers, allInventory]);
+
+  const last7Days = useMemo(() => {
+    const days: { date: string; pemasukan: number; pengeluaran: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      const dayLabel = d.toLocaleDateString("id-ID", { weekday: "short", day: "numeric" });
+      const pemasukan = allCashflows
+        .filter((cf) => cf.tipe === "masuk" && cf.createdAt.startsWith(dateStr))
+        .reduce((sum, cf) => sum + cf.nominal, 0);
+      const pengeluaran = allCashflows
+        .filter((cf) => cf.tipe === "keluar" && cf.createdAt.startsWith(dateStr))
+        .reduce((sum, cf) => sum + cf.nominal, 0);
+      days.push({ date: dayLabel, pemasukan, pengeluaran });
+    }
+    return days;
+  }, [allCashflows]);
+
+  const branchRevenue = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const tx of allTransactions) {
+      if (tx.status === "BATAL") continue;
+      const label = BOOK_LABELS[tx.unitId] || tx.unitId;
+      map.set(label, (map.get(label) || 0) + (tx.grandTotal - (tx.sedekahNominal || 0)));
+    }
+    return Array.from(map.entries()).map(([name, revenue]) => ({ name, revenue }));
+  }, [allTransactions]);
 
   /* ═══════════════════════════════════════════════════════ */
   /* HANDLERS                                               */
@@ -609,6 +638,44 @@ export default function BukuGlobalPage() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Chart: 7-Day Revenue */}
+          <div className="bg-white dark:bg-[#1a1b2e] rounded-xl p-4 shadow-sm">
+            <h3 className="font-semibold text-sm mb-3">Grafik 7 Hari</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={last7Days}>
+                <defs>
+                  <linearGradient id="colorPemasukan" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorPengeluaran" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip />
+                <Area type="monotone" dataKey="pemasukan" stroke="#10b981" fill="url(#colorPemasukan)" name="Pemasukan" />
+                <Area type="monotone" dataKey="pengeluaran" stroke="#ef4444" fill="url(#colorPengeluaran)" name="Pengeluaran" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Chart: Per-Branch Revenue */}
+          <div className="bg-white dark:bg-[#1a1b2e] rounded-xl p-4 shadow-sm">
+            <h3 className="font-semibold text-sm mb-3">Pendapatan per Cabang</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={branchRevenue}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" tick={{ fontSize: 9 }} />
+                <YAxis tick={{ fontSize: 10 }} />
+                <Tooltip />
+                <Bar dataKey="revenue" fill="#7B61FF" radius={[4, 4, 0, 0]} name="Pendapatan" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       )}

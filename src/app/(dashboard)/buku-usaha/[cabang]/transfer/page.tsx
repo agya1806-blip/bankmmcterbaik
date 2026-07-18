@@ -3,16 +3,9 @@
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type UnitId } from "@/lib/db-v4";
+import { db, type UnitId, BRANCH_MAP } from "@/lib/db-v4";
 import { ArrowLeft, ArrowRightLeft, Send, AlertCircle } from "lucide-react";
 import { showToast } from "@/lib/toast";
-
-const BRANCH_MAP: Record<string, UnitId> = {
-  pribadi: "pribadi", keluarga: "keluarga",
-  percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
-  warkop: "usaha-warkop", konveksi: "usaha-konveksi", kelontong: "usaha-kelontong",
-  "toko-pakaian": "usaha-toko-pakaian",
-};
 
 export default function TransferPage() {
   const params = useParams();

@@ -1,20 +1,33 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type UnitId, type DbCashflow, BRANCH_MAP } from "@/lib/db-v4";
-import { TrendingUp, TrendingDown, Wallet, Save, ArrowLeft, Plus, X, Pencil, Trash2, Search } from "lucide-react";
+import { db, type DbCashflow } from "@/lib/db-v4";
+import { TrendingUp, TrendingDown, Wallet, Save, ArrowLeft, Plus, X, Pencil, Trash2 } from "lucide-react";
 import { showToast } from "@/lib/toast";
 
-export default function CashflowPage() {
-  const params = useParams();
-  const router = useRouter();
-  const cabangSlug = (params?.cabang as string) || "";
-  const bookOrBranchId: UnitId = BRANCH_MAP[cabangSlug] || "usaha-warkop";
+interface Props {
+  unitId: "pribadi" | "keluarga";
+  label: string;
+}
 
-  const cashflows = useLiveQuery(() => db.cashflows.where("bookOrBranchId").equals(bookOrBranchId).reverse().toArray(), [bookOrBranchId]) || [];
-  const wallets = useLiveQuery(() => db.wallets.where("bookOrBranchId").equals(bookOrBranchId).filter(w => w.isActive).toArray(), [bookOrBranchId]) || [];
+export default function PribadiKeluargaCashflow({ unitId, label }: Props) {
+  const router = useRouter();
+
+  const isPribadi = unitId === "pribadi";
+  const accentGradient = isPribadi ? "from-[#008CEB] to-[#00C9A7]" : "from-rose-400 to-pink-500";
+  const accentText = isPribadi ? "text-[#008CEB]" : "text-rose-500";
+  const kategoriOptions = isPribadi
+    ? ["Umum", "Makanan", "Transport", "Belanja", "Tagihan", "Hiburan", "Gaji", "Lainnya"]
+    : ["Umum", "Makanan", "Transport", "Belanja", "Tagihan", "Sekolah", "Kesehatan", "Lainnya"];
+  const catatanPlaceholder = isPribadi
+    ? "Contoh: Beli sembako, Gaji bulanan..."
+    : "Contoh: Belanja bulanan, Uang jajan...";
+  const backRoute = `/buku-${unitId}`;
+
+  const cashflows = useLiveQuery(() => db.cashflows.where("bookOrBranchId").equals(unitId).reverse().toArray(), []) || [];
+  const wallets = useLiveQuery(() => db.wallets.where("bookOrBranchId").equals(unitId).filter(w => w.isActive).toArray(), []) || [];
 
   const [showForm, setShowForm] = useState(false);
   const [tipe, setTipe] = useState<"masuk" | "keluar">("masuk");
@@ -88,8 +101,8 @@ export default function CashflowPage() {
     } else {
       await db.cashflows.add({
         id: crypto.randomUUID(),
-        bookOrBranchId,
-        unitId: bookOrBranchId,
+        bookOrBranchId: unitId,
+        unitId,
         tipe, kategori, nominal, saldoSebelum, saldoSesudah,
         walletId: walletId || "",
         walletNama: selectedWallet?.namaDompet ?? "",
@@ -111,12 +124,12 @@ export default function CashflowPage() {
   return (
     <div className="flex flex-col gap-4 pt-2 pb-4 animate-fade-in">
       <div className="flex items-center justify-between">
-        <button onClick={() => router.push(`/buku-usaha/${cabangSlug}`)} className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md active:scale-95 transition-transform">
+        <button onClick={() => router.push(backRoute)} className="p-2 bg-white dark:bg-[#131527] rounded-full shadow-md active:scale-95 transition-transform">
           <ArrowLeft className="w-5 h-5 text-slate-500" />
         </button>
-        <h1 className="text-lg font-heading font-extrabold tracking-tight">Cashflow</h1>
+        <h1 className="text-lg font-heading font-extrabold tracking-tight">Cashflow {label.replace("Buku ", "")}</h1>
         <button onClick={() => setShowForm(!showForm)}
-          className="p-2 bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white rounded-full shadow-md active:scale-95 transition-transform">
+          className={`p-2 bg-gradient-to-r ${accentGradient} text-white rounded-full shadow-md active:scale-95 transition-transform`}>
           {showForm ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
         </button>
       </div>
@@ -124,8 +137,8 @@ export default function CashflowPage() {
       {showForm && (
         <div className="premium-card p-4 animate-fade-in">
           <div className="flex items-center gap-2 mb-3">
-            <Wallet className="w-4 h-4 text-[#008CEB]" />
-            <span className="text-xs font-heading font-extrabold">{editingCashflow ? "Edit Cashflow" : "Tambah Cashflow"}</span>
+            <Wallet className={`w-4 h-4 ${accentText}`} />
+            <span className="text-xs font-heading font-extrabold">{editingCashflow ? "Edit Cashflow" : "Catat Cashflow"}</span>
           </div>
           <form onSubmit={handleSave} className="space-y-3 text-xs">
             <div className="grid grid-cols-2 gap-2">
@@ -145,7 +158,7 @@ export default function CashflowPage() {
             <div>
               <label className="block mb-1 font-bold text-slate-400">Kategori</label>
               <select value={kategori} onChange={(e) => setKategori(e.target.value)} className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold">
-                {["Umum", "Operasional", "Gaji", "Sewa", "Listrik", "Bahan Baku", "Lainnya"].map((k) => (
+                {kategoriOptions.map((k) => (
                   <option key={k} value={k}>{k}</option>
                 ))}
               </select>
@@ -161,9 +174,9 @@ export default function CashflowPage() {
             </div>
             <div>
               <label className="block mb-1 font-bold text-slate-400">Catatan</label>
-              <input type="text" value={catatan} onChange={(e) => setCatatan(e.target.value)} placeholder="Contoh: Beli bahan baku, Bayar listrik..." className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" required />
+              <input type="text" value={catatan} onChange={(e) => setCatatan(e.target.value)} placeholder={catatanPlaceholder} className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" required />
             </div>
-            <button type="submit" className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
+            <button type="submit" className={`w-full py-3 rounded-2xl bg-gradient-to-r ${accentGradient} text-white font-extrabold text-xs shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2`}>
               <Save className="w-4 h-4" /> {editingCashflow ? "Update" : "Simpan"}
             </button>
           </form>
@@ -225,7 +238,7 @@ export default function CashflowPage() {
 
       <div className="flex-1 overflow-y-auto space-y-2 max-h-[350px] pr-1">
         {filtered.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 text-xs animate-fade-in">{cashflows.length === 0 ? <><TrendingUp className="w-6 h-6 mx-auto mb-2 opacity-40" />Belum ada cashflow. Tap + untuk menambah.</> : <><Search className="w-6 h-6 mx-auto mb-2 opacity-40" />Tidak ada data.</>}</div>
+          <div className="text-center py-12 text-slate-400 text-xs">{cashflows.length === 0 ? "Belum ada cashflow. Tap + untuk menambah." : "Tidak ada data."}</div>
         ) : (
           filtered.map((cf, i) => {
             const tanggal = cf.createdAt ? new Date(cf.createdAt) : new Date();

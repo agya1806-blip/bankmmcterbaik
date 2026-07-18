@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { useSessionStore } from "@/store/useSessionStore";
 import {
-  db, type UnitId, type DbTransaction, type DbCustomer, type DbInventoryItem,
+  db, type UnitId, type DbTransaction, type DbCustomer, type DbInventoryItem, BRANCH_MAP,
 } from "@/lib/db-v4";
 import {
   executeTransactionPipelineV4, type PosCartItem,
@@ -15,19 +15,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown, Plus, Trash2, Search, Wallet, FileText,
   ArrowLeft, Edit3, X, Clock, AlertTriangle,
-  User, StickyNote, Package, Banknote, Minus, Heart, Gift, Star, Calculator, ShoppingCart,
+  User, StickyNote, Package, Banknote, Minus, Heart, Gift, Star, Calculator, ShoppingCart, Scan,
 } from "lucide-react";
 import { showToast } from "@/lib/toast";
 import KalkulatorHarga from "@/components/business/kalkulator-harga";
+import BarcodeScanner from "@/components/business/barcode-scanner";
 import InvoiceA4 from "@/components/invoice-a4";
 import { SkeletonCard } from "@/components/skeleton";
-
-const BRANCH_MAP: Record<string, UnitId> = {
-  pribadi: "pribadi", keluarga: "keluarga",
-  percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
-  warkop: "usaha-warkop", konveksi: "usaha-konveksi", kelontong: "usaha-kelontong",
-  "toko-pakaian": "usaha-toko-pakaian",
-};
 
 const GRID_BRANCHES = ["warkop", "kelontong"];
 
@@ -150,6 +144,7 @@ export default function PosKasirPage() {
   const [manualCart, setManualCart] = useState<ManualCartItem[]>([]);
   const [spesifikasi, setSpesifikasi] = useState("");
   const [calculatorItemId, setCalculatorItemId] = useState<string | null>(null);
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
 
   const addManualItem = () => setManualCart(prev => [...prev, { tempId: crypto.randomUUID(), namaItem: "", qty: 1, harga: 0, hargaModal: 0 }]);
   const updateManualItem = (tempId: string, field: keyof ManualCartItem, value: string | number) => setManualCart(prev => prev.map(i => i.tempId === tempId ? { ...i, [field]: value } : i));
@@ -198,7 +193,7 @@ export default function PosKasirPage() {
   }, [isGridMode, gridCart, manualCart, spesifikasi, selectedCustomerId, dpDibayar, catatan]);
 
   // ═══ SHARED ═══
-  const diskonPoin = poinDigunakan;
+  const diskonPoin = poinDigunakan * 100;
   const grandTotal = Math.max(0, (isGridMode ? gridTotal : manualTotal) - diskonPoin);
   const sisaTagihan = Math.max(0, grandTotal - dpDibayar);
 
@@ -408,6 +403,11 @@ export default function PosKasirPage() {
                 <div>
                   <p className="text-xs font-heading font-bold">{currentCustomer.nama}</p>
                   <p className="text-[9px] text-slate-400">{currentCustomer.noWA || "Tanpa WA"}</p>
+                  {currentCustomer.poin > 0 && (
+                    <p className="text-[9px] text-amber-500 font-bold flex items-center gap-1 mt-0.5">
+                      <Star className="w-3 h-3" /> Poin: {currentCustomer.poin.toLocaleString()}
+                    </p>
+                  )}
                 </div>
                 <button onClick={() => { setSelectedCustomerId(""); setCustomerSearch(""); }} className="text-rose-500 p-1"><X className="w-4 h-4" /></button>
               </div>
@@ -440,9 +440,14 @@ export default function PosKasirPage() {
             /* ═══ GRID MODE (Warkop / Kelontong) ═══ */
             <>
               <Section title="Produk">
-                <div className="relative mb-2">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input type="text" placeholder="Cari produk..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-9 pr-4 input-premium text-xs" />
+                <div className="relative mb-2 flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input type="text" placeholder="Cari produk..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-9 pr-4 input-premium text-xs" />
+                  </div>
+                  <button onClick={() => setShowBarcodeScanner(true)} className="p-2 rounded-xl bg-[#7B61FF]/10 text-[#7B61FF] shrink-0">
+                    <Scan className="w-4 h-4" />
+                  </button>
                 </div>
                 <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar mb-2">
                   {kategoriList.map(kat => (
@@ -566,8 +571,8 @@ export default function PosKasirPage() {
 
           {selectedCustomerId && (() => {
             const cust = customers.find(c => c.id === selectedCustomerId);
-            if (!cust || cust.poin <= 0) return null;
-            const maxPoin = Math.min(cust.poin, Math.floor(grandTotal / 1000) * 100);
+            if (!cust) return null;
+            const maxPoin = Math.min(cust.poin, Math.floor(grandTotal / 100));
             return (
               <Section title="Poin Pelanggan">
                 <div className="flex items-center gap-2 mb-1">
@@ -578,7 +583,7 @@ export default function PosKasirPage() {
                   onChange={(e) => setPoinDigunakan(Math.min(maxPoin, Math.max(0, Number(e.target.value))))}
                   className="w-full input-premium text-xs mt-1" />
                 {poinDigunakan > 0 && (
-                  <p className="text-[9px] text-emerald-500 font-bold mt-1">Diskon poin: -Rp{poinDigunakan.toLocaleString()}</p>
+                  <p className="text-[9px] text-emerald-500 font-bold mt-1">Diskon poin: -Rp{(poinDigunakan * 100).toLocaleString()}</p>
                 )}
               </Section>
             );
@@ -695,6 +700,28 @@ export default function PosKasirPage() {
           cabangSlug={cabangSlug}
           onClose={() => setShowInvoice(null)}
           onPrint={() => window.print()}
+        />
+      )}
+
+      {/* Barcode Scanner Modal */}
+      {showBarcodeScanner && (
+        <BarcodeScanner
+          onScan={(barcode) => {
+            setShowBarcodeScanner(false);
+            db.inventory.where("bookOrBranchId").equals(bookOrBranchId).filter(p => p.barcode === barcode).first().then(found => {
+              if (found) {
+                if (isGridMode) {
+                  addProductToGrid(found);
+                } else {
+                  setManualCart(prev => [...prev, { tempId: crypto.randomUUID(), namaItem: found.nama, qty: 1, harga: found.hargaJual, hargaModal: found.hargaModal }]);
+                }
+                showToast.success(`Produk ditemukan: ${found.nama}`);
+              } else {
+                showToast.error("Produk dengan barcode tersebut tidak ditemukan");
+              }
+            });
+          }}
+          onClose={() => setShowBarcodeScanner(false)}
         />
       )}
 

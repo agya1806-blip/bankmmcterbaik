@@ -14,33 +14,16 @@ import {
 } from "recharts";
 import { format, subDays, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { db, type UnitId } from "@/lib/db-v4";
+import { db, type UnitId, BRANCH_MAP, BRANCH_LABELS, BRANCH_COLORS } from "@/lib/db-v4";
 import { useSessionStore } from "@/store/useSessionStore";
 import {
   ChevronLeft, Bell, AlertTriangle, Clock, Wallet, Target,
   TrendingUp, TrendingDown, ShoppingCart, Tag, Calendar, FileText,
   BarChart3, Trophy, Receipt, Package, Users, ArrowRight, Zap, Settings,
-  Heart, ArrowLeftRight,
+  Heart, ArrowLeftRight, Truck, ClipboardList, Repeat,
 } from "lucide-react";
 
 
-const BRANCH_MAP: Record<string, UnitId> = {
-  pribadi: "pribadi", keluarga: "keluarga",
-  percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
-  warkop: "usaha-warkop", konveksi: "usaha-konveksi", kelontong: "usaha-kelontong",
-  "toko-pakaian": "usaha-toko-pakaian",
-};
-const BRANCH_LABELS: Record<string, string> = {
-  pribadi: "Buku Pribadi", keluarga: "Buku Keluarga",
-  percetakan: "Percetakan", gadget: "Gadget", laptop: "Komputer & Laptop",
-  warkop: "Kedai Kopi", konveksi: "Fashion & Konveksi", kelontong: "Kelontong",
-};
-const BRANCH_COLORS: Record<string, string> = {
-  pribadi: "from-slate-500 to-slate-600", keluarga: "from-rose-400 to-rose-500",
-  percetakan: "from-blue-500 to-blue-600", laptop: "from-violet-500 to-purple-600",
-  gadget: "from-indigo-500 to-indigo-600", warkop: "from-orange-400 to-orange-500",
-  konveksi: "from-pink-400 to-pink-500", kelontong: "from-emerald-400 to-emerald-500",
-};
 const TARGET_PENJUALAN = 10_000_000;
 
 function getGreeting(): string {
@@ -346,11 +329,15 @@ export default function CabangDashboardPage() {
           { label: "Barang", slug: "inventory", icon: <Package className="w-5 h-5 text-white" />, color: "from-blue-500 to-indigo-500", badge: stats.stokMenipisCount },
           { label: "CRM", slug: "pelanggan", icon: <Users className="w-5 h-5 text-white" />, color: "from-emerald-400 to-teal-500", badge: 0 },
           { label: "Cashflow", slug: "cashflow", icon: <Wallet className="w-5 h-5 text-white" />, color: "from-amber-400 to-orange-500", badge: 0 },
+          { label: "Anggaran", slug: "budget", icon: <TrendingDown className="w-5 h-5 text-white" />, color: "from-emerald-400 to-teal-500", badge: 0 },
           { label: "Transaksi", slug: "transaksi", icon: <Receipt className="w-5 h-5 text-white" />, color: "from-pink-400 to-rose-500", badge: 0 },
           { label: "Dompet", slug: "dompet", icon: <Wallet className="w-5 h-5 text-white" />, color: "from-cyan-400 to-teal-500", badge: 0 },
           { label: "Laporan", slug: "laporan", icon: <BarChart3 className="w-5 h-5 text-white" />, color: "from-purple-400 to-violet-500", badge: 0 },
           { label: "Sedekah", slug: "sedekah", icon: <Heart className="w-5 h-5 text-white" />, color: "from-emerald-500 to-green-600", badge: 0 },
+          { label: "Transaksi Berulang", slug: "recurring", icon: <Repeat className="w-5 h-5 text-white" />, color: "from-cyan-400 to-teal-500", badge: 0 },
           { label: "Transfer", slug: "transfer", icon: <ArrowLeftRight className="w-5 h-5 text-white" />, color: "from-violet-400 to-purple-500", badge: 0 },
+          { label: "Supplier", slug: "supplier", icon: <Truck className="w-5 h-5 text-white" />, color: "from-orange-400 to-amber-500", badge: 0 },
+          { label: "Pembelian (PO)", slug: "purchase-order", icon: <ClipboardList className="w-5 h-5 text-white" />, color: "from-sky-400 to-blue-500", badge: 0 },
           { label: "Label", slug: "label", icon: <Tag className="w-5 h-5 text-white" />, color: "from-pink-400 to-rose-500", badge: 0 },
           { label: "Users", slug: "users", icon: <Users className="w-5 h-5 text-white" />, color: "from-teal-400 to-cyan-500", badge: 0 },
           { label: "Pengaturan", slug: "pengaturan", icon: <Settings className="w-5 h-5 text-white" />, color: "from-slate-400 to-slate-500", badge: 0 },

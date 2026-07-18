@@ -3,24 +3,13 @@
 import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type UnitId, type Inventory, type DbInventoryMutation } from "@/lib/db-v4";
+import { db, type UnitId, type Inventory, type DbInventoryMutation, BRANCH_MAP } from "@/lib/db-v4";
 import { showToast } from "@/lib/toast";
 import KalkulatorHarga from "@/components/business/kalkulator-harga";
+import BarcodeScanner from "@/components/business/barcode-scanner";
 import { SkeletonCard } from "@/components/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Plus, Package, Search, ArrowRightLeft, Pencil, Trash2, X, Save, History, ArrowDown, ArrowUp, Calculator, AlertTriangle, RotateCcw } from "lucide-react";
-
-const BRANCH_MAP: Record<string, UnitId> = {
-  pribadi: "pribadi",
-  keluarga: "keluarga",
-  percetakan: "usaha-percetakan",
-  laptop: "usaha-laptop",
-  gadget: "usaha-gadget",
-  warkop: "usaha-warkop",
-  konveksi: "usaha-konveksi",
-  kelontong: "usaha-kelontong",
-  "toko-pakaian": "usaha-toko-pakaian",
-};
+import { ArrowLeft, Plus, Package, Search, ArrowRightLeft, Pencil, Trash2, X, Save, History, ArrowDown, ArrowUp, Calculator, AlertTriangle, RotateCcw, Scan } from "lucide-react";
 
 interface FormData {
   nama: string;
@@ -31,6 +20,7 @@ interface FormData {
   kategori: string;
   catatan: string;
   sku: string;
+  barcode: string;
   satuan: string;
 }
 
@@ -43,6 +33,7 @@ const emptyForm: FormData = {
   kategori: "",
   catatan: "",
   sku: "",
+  barcode: "",
   satuan: "pcs",
 };
 
@@ -77,6 +68,8 @@ export default function InventoryPage() {
   const [stockAdjustProduct, setStockAdjustProduct] = useState<Inventory | null>(null);
   const [stockForm, setStockForm] = useState<{ tipe: "masuk" | "keluar"; qty: number; alasan: string }>({ tipe: "masuk", qty: 1, alasan: "" });
   const [showCalculator, setShowCalculator] = useState(false);
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+  const [itemFoto, setItemFoto] = useState("");
 
   const filtered = useMemo(() => {
     let result = products.filter((p) =>
@@ -108,6 +101,7 @@ export default function InventoryPage() {
   const openAdd = () => {
     setEditingId(null);
     setForm(emptyForm);
+    setItemFoto("");
     setShowModal(true);
   };
 
@@ -122,9 +116,20 @@ export default function InventoryPage() {
       kategori: p.kategori,
       catatan: p.catatan,
       sku: p.sku,
+      barcode: p.barcode || "",
       satuan: p.satuan,
     });
+    setItemFoto(p.fotoUrl || "");
     setShowModal(true);
+  };
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 500 * 1024) return showToast.error("Maks 500KB");
+    const reader = new FileReader();
+    reader.onload = () => setItemFoto(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -142,7 +147,9 @@ export default function InventoryPage() {
         stokMin: form.stokMin,
         kategori: form.kategori,
         catatan: form.catatan,
+        fotoUrl: itemFoto || undefined,
         sku: form.sku,
+        barcode: form.barcode || "",
         satuan: form.satuan,
         updatedAt: now,
       });
@@ -152,6 +159,7 @@ export default function InventoryPage() {
         bookOrBranchId,
         unitId: bookOrBranchId,
         sku: form.sku,
+        barcode: form.barcode || "",
         nama: form.nama,
         kategori: form.kategori,
         stok: form.stok,
@@ -160,6 +168,7 @@ export default function InventoryPage() {
         hargaJual: form.hargaJual,
         satuan: form.satuan,
         catatan: form.catatan,
+        fotoUrl: itemFoto || undefined,
         createdAt: now,
         updatedAt: now,
       });
@@ -459,15 +468,20 @@ export default function InventoryPage() {
               </div>
 
               <form onSubmit={handleSave} className="space-y-3 text-xs">
-                <div>
-                  <label className="block mb-1 font-bold text-slate-400">SKU</label>
-                  <input
-                    type="text"
-                    value={form.sku}
-                    onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
-                    required
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block mb-1 font-bold text-slate-400">SKU</label>
+                    <input type="text" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" required />
+                  </div>
+                  <div>
+                    <label className="block mb-1 font-bold text-slate-400">Barcode</label>
+                    <div className="flex items-center gap-2">
+                      <input type="text" value={form.barcode} onChange={(e) => setForm({ ...form, barcode: e.target.value })} className="flex-1 px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" placeholder="Scan atau ketik" />
+                      <button type="button" onClick={() => setShowBarcodeScanner(true)} className="p-2 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-[#7B61FF] shrink-0">
+                        <Scan className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label className="block mb-1 font-bold text-slate-400">Nama Produk</label>
@@ -558,6 +572,21 @@ export default function InventoryPage() {
                     placeholder="SN, warna, ukuran, dll..."
                   />
                 </div>
+                <div className="space-y-1">
+                  <label className="text-xs text-slate-400">Foto Produk</label>
+                  <div className="flex items-center gap-3">
+                    {itemFoto && (
+                      <div className="relative w-16 h-16 rounded-xl overflow-hidden">
+                        <img src={itemFoto} alt="Preview" className="w-full h-full object-cover" />
+                        <button onClick={() => setItemFoto("")} className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 text-[10px]">×</button>
+                      </div>
+                    )}
+                    <label className="px-3 py-2 bg-[#F8F9FD] dark:bg-[#0B0C16] rounded-xl text-xs cursor-pointer">
+                      Pilih Foto
+                      <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                    </label>
+                  </div>
+                </div>
                 <button
                   type="submit"
                   className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2"
@@ -614,6 +643,22 @@ export default function InventoryPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Barcode Scanner Modal */}
+      {showBarcodeScanner && (
+        <BarcodeScanner
+          onScan={(barcode) => {
+            setForm({ ...form, barcode });
+            setShowBarcodeScanner(false);
+            db.inventory.where("bookOrBranchId").equals(bookOrBranchId).filter(p => p.barcode === barcode).first().then(existing => {
+              if (existing) {
+                openEdit(existing);
+              }
+            });
+          }}
+          onClose={() => setShowBarcodeScanner(false)}
+        />
+      )}
 
       {/* Kalkulator Harga Modal */}
       <AnimatePresence>

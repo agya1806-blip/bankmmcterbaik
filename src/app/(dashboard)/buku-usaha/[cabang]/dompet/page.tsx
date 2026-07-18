@@ -3,19 +3,17 @@
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type UnitId, type DbWalletMutation } from "@/lib/db-v4";
+import { db, type UnitId, type DbWalletMutation, BRANCH_MAP } from "@/lib/db-v4";
 import { SkeletonCard } from "@/components/skeleton";
 import { ArrowLeft, Wallet, Save, Pencil, Trash2, DollarSign, Landmark, Smartphone } from "lucide-react";
 import { showToast } from "@/lib/toast";
-
-const BRANCH_MAP: Record<string, UnitId> = {
-  pribadi: "pribadi", keluarga: "keluarga",
-  percetakan: "usaha-percetakan", laptop: "usaha-laptop", gadget: "usaha-gadget",
-  warkop: "usaha-warkop", konveksi: "usaha-konveksi", kelontong: "usaha-kelontong",
-  "toko-pakaian": "usaha-toko-pakaian",
-};
+import { RoleGuard } from "@/components/layout/role-guard";
 
 export default function DompetPage() {
+  return <RoleGuard requiredRole="kasir"><DompetPageContent /></RoleGuard>;
+}
+
+function DompetPageContent() {
   const params = useParams();
   const router = useRouter();
   const cabangSlug = (params?.cabang as string) || "";

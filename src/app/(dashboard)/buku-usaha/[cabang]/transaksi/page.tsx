@@ -3,23 +3,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type UnitId, type Transaction, type ProductionStatus } from '@/lib/db-v4';
+import { db, type UnitId, type Transaction, type ProductionStatus, BRANCH_MAP, type DbPiutangInstallment } from '@/lib/db-v4';
 import { SkeletonCard } from "@/components/skeleton";
 import { ArrowLeft, ClipboardList, FileText, Printer, Image, Phone, BarChart3, X, Search, Tag } from "lucide-react";
 import { showToast } from "@/lib/toast";
 import InvoiceA4 from "@/components/invoice-a4";
-
-const BRANCH_MAP: Record<string, UnitId> = {
-  pribadi: 'pribadi',
-  keluarga: 'keluarga',
-  percetakan: 'usaha-percetakan',
-  laptop: 'usaha-laptop',
-  gadget: 'usaha-gadget',
-  warkop: 'usaha-warkop',
-  konveksi: 'usaha-konveksi',
-  kelontong: 'usaha-kelontong',
-  'toko-pakaian': 'usaha-toko-pakaian',
-};
 
 export default function TransaksiDanProduksiPage() {
   const params = useParams();
@@ -76,6 +64,13 @@ export default function TransaksiDanProduksiPage() {
   const [activeTab, setActiveTab] = useState<'riwayat' | 'produksi'>('riwayat');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [showInvoice, setShowInvoice] = useState<Transaction | null>(null);
+  const [showCicilanModal, setShowCicilanModal] = useState(false);
+  const [cicilanTxId, setCicilanTxId] = useState<string | null>(null);
+  const [cicilanList, setCicilanList] = useState<DbPiutangInstallment[]>([]);
+  const [showAddCicilan, setShowAddCicilan] = useState(false);
+  const [newCicilanJumlah, setNewCicilanJumlah] = useState(0);
+  const [newCicilanMetode, setNewCicilanMetode] = useState("CASH");
+  const [newCicilanCatatan, setNewCicilanCatatan] = useState("");
 
   const kanbanData = useMemo(() => {
     const columns: Record<ProductionStatus, { tx: Transaction; prodId: string }[]> = {
@@ -162,6 +157,56 @@ export default function TransaksiDanProduksiPage() {
     const phone = tx.customerWA || '628123456789';
     const waUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}`;
     window.open(waUrl, '_blank');
+  };
+
+  const openCicilanModal = async (txId: string) => {
+    setCicilanTxId(txId);
+    const piutang = await db.piutang.where("transactionId").equals(txId).first();
+    if (piutang) {
+      const installments = await db.piutangInstallments
+        .where("piutangId").equals(piutang.id)
+        .toArray();
+      setCicilanList(installments);
+    } else {
+      setCicilanList([]);
+    }
+    setShowCicilanModal(true);
+  };
+
+  const handleAddCicilan = async () => {
+    if (!cicilanTxId || newCicilanJumlah <= 0) return;
+    const piutang = await db.piutang.where("transactionId").equals(cicilanTxId).first();
+    if (!piutang) return;
+
+    await db.piutangInstallments.add({
+      id: crypto.randomUUID(),
+      bookOrBranchId: bookOrBranchId,
+      piutangId: piutang.id,
+      jumlah: newCicilanJumlah,
+      metode: newCicilanMetode,
+      tanggal: new Date().toISOString(),
+      catatan: newCicilanCatatan,
+    });
+
+    const newSisa = Math.max(0, piutang.sisaPiutang - newCicilanJumlah);
+    const newStatus = newSisa <= 0 ? "LUNAS" : "AKTIF";
+    await db.piutang.update(piutang.id, { sisaPiutang: newSisa, status: newStatus });
+
+    const tx = await db.transactions.get(cicilanTxId);
+    if (tx) {
+      const newDpDibayar = tx.dpDibayar + newCicilanJumlah;
+      const newSisaTagihan = Math.max(0, tx.grandTotal - newDpDibayar);
+      const newTxStatus = newSisaTagihan <= 0 ? "LUNAS" : "DP";
+      await db.transactions.update(cicilanTxId, { dpDibayar: newDpDibayar, sisaTagihan: newSisaTagihan, status: newTxStatus });
+    }
+
+    const updated = await db.piutangInstallments.where("piutangId").equals(piutang.id).toArray();
+    setCicilanList(updated);
+    setNewCicilanJumlah(0);
+    setNewCicilanMetode("CASH");
+    setNewCicilanCatatan("");
+    setShowAddCicilan(false);
+    showToast.success("Cicilan berhasil dicatat!");
   };
 
   const handleExportPng = async (tx: Transaction) => {
@@ -394,6 +439,10 @@ export default function TransaksiDanProduksiPage() {
                       <span className="text-[9px] text-rose-500 font-extrabold bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 rounded-lg">
                         Sisa: Rp{tx.sisaTagihan.toLocaleString()}
                       </span>
+                    )}
+                    {tx.status === "DP" && (
+                      <button onClick={(e) => { e.stopPropagation(); openCicilanModal(tx.id); }}
+                        className="text-[10px] text-blue-500 underline">Cicilan</button>
                     )}
                   </div>
 
@@ -651,6 +700,61 @@ export default function TransaksiDanProduksiPage() {
           onClose={() => setShowInvoice(null)}
           onPrint={() => window.print()}
         />
+      )}
+
+      {/* Cicilan Modal */}
+      {showCicilanModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setShowCicilanModal(false)}>
+          <div className="bg-white dark:bg-[#131527] rounded-2xl w-full max-w-md p-5 max-h-[80vh] overflow-y-auto"
+            onClick={e => e.stopPropagation()}>
+            <h3 className="text-sm font-extrabold mb-3">Riwayat Cicilan</h3>
+
+            {cicilanList.length === 0 ? (
+              <p className="text-xs text-slate-400 text-center py-6">Belum ada cicilan</p>
+            ) : (
+              <div className="space-y-2 mb-4">
+                {cicilanList.map(c => (
+                  <div key={c.id} className="bg-slate-50 dark:bg-zinc-900 p-3 rounded-xl">
+                    <div className="flex justify-between text-xs">
+                      <span className="font-bold">Rp{c.jumlah.toLocaleString()}</span>
+                      <span className="text-slate-400">{new Date(c.tanggal).toLocaleDateString('id-ID')}</span>
+                    </div>
+                    <div className="flex justify-between text-[10px] text-slate-400 mt-1">
+                      <span>{c.metode}</span>
+                      {c.catatan && <span>{c.catatan}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {showAddCicilan ? (
+              <div className="space-y-2 border-t border-slate-200 dark:border-slate-700 pt-3">
+                <input type="number" value={newCicilanJumlah || ''} onChange={e => setNewCicilanJumlah(Number(e.target.value))}
+                  className="w-full p-2 text-xs border rounded-xl bg-slate-50 dark:bg-zinc-900" placeholder="Jumlah cicilan..." />
+                <select value={newCicilanMetode} onChange={e => setNewCicilanMetode(e.target.value)}
+                  className="w-full p-2 text-xs border rounded-xl bg-slate-50 dark:bg-zinc-900">
+                  <option value="CASH">CASH</option>
+                  <option value="TRANSFER">TRANSFER</option>
+                  <option value="QRIS">QRIS</option>
+                </select>
+                <input value={newCicilanCatatan} onChange={e => setNewCicilanCatatan(e.target.value)}
+                  className="w-full p-2 text-xs border rounded-xl bg-slate-50 dark:bg-zinc-900" placeholder="Catatan (opsional)..." />
+                <div className="flex gap-2">
+                  <button onClick={handleAddCicilan} className="flex-1 py-2 bg-emerald-500 text-white text-xs font-bold rounded-xl">Simpan</button>
+                  <button onClick={() => setShowAddCicilan(false)} className="flex-1 py-2 bg-slate-100 dark:bg-zinc-800 text-xs font-bold rounded-xl">Batal</button>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => setShowAddCicilan(true)}
+                className="w-full py-2 bg-[#008CEB] text-white text-xs font-bold rounded-xl mb-2">+ Tambah Cicilan</button>
+            )}
+
+            <button onClick={() => setShowCicilanModal(false)}
+              className="w-full py-2 bg-slate-100 dark:bg-zinc-800 text-xs font-bold rounded-xl">Tutup</button>
+          </div>
+        </div>
       )}
     </div>
   );
