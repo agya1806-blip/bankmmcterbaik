@@ -22,7 +22,7 @@ export default function LoginPage() {
     if (!user) return showToast.error("Username tidak ditemukan");
     if (!(await verifyPin(pin, user.pinHash))) return showToast.error("PIN salah");
 
-    login({ id: user.id, nama: user.nama, fotoUrl: user.fotoUrl });
+    login({ id: user.id, nama: user.nama, fotoUrl: user.fotoUrl, role: user.role });
     completeOnboarding();
     router.push("/buku-usaha");
   };

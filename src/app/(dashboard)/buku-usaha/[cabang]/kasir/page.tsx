@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { useSessionStore } from "@/store/useSessionStore";
@@ -15,11 +15,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown, Plus, Trash2, Search, Wallet, FileText,
   ArrowLeft, Edit3, X, Clock, AlertTriangle,
-  User, StickyNote, Package, Banknote, Minus, Heart, Gift, Star, Calculator,
+  User, StickyNote, Package, Banknote, Minus, Heart, Gift, Star, Calculator, ShoppingCart,
 } from "lucide-react";
 import { showToast } from "@/lib/toast";
 import KalkulatorHarga from "@/components/business/kalkulator-harga";
 import InvoiceA4 from "@/components/invoice-a4";
+import { SkeletonCard } from "@/components/skeleton";
 
 const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi", keluarga: "keluarga",
@@ -57,13 +58,18 @@ export default function PosKasirPage() {
   const bookOrBranchId: UnitId = BRANCH_MAP[cabangSlug] || "usaha-warkop";
   const isGridMode = GRID_BRANCHES.includes(cabangSlug);
 
-  const products = useLiveQuery(() => db.inventory.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
-  const customers = useLiveQuery(() => db.customers.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
-  const wallets = useLiveQuery(() => db.wallets.where("bookOrBranchId").equals(bookOrBranchId).filter(w => w.isActive).toArray(), [bookOrBranchId]) || [];
+  const _products = useLiveQuery(() => db.inventory.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]);
+  const _customers = useLiveQuery(() => db.customers.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]);
+  const _wallets = useLiveQuery(() => db.wallets.where("bookOrBranchId").equals(bookOrBranchId).filter(w => w.isActive).toArray(), [bookOrBranchId]);
+  const products = _products || [];
+  const customers = _customers || [];
+  const wallets = _wallets || [];
   const transactions = useLiveQuery(() => db.transactions.where("bookOrBranchId").equals(bookOrBranchId).reverse().toArray(), [bookOrBranchId]) || [];
   const productions = useLiveQuery(() => db.productions.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
   const profiles = useLiveQuery(() => db.profiles.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
   const profile = profiles[0];
+
+  if (_products === undefined || _customers === undefined || _wallets === undefined) return <SkeletonCard count={5} />;
 
   const [tab, setTab] = useState<TabType>("order");
 
@@ -150,6 +156,47 @@ export default function PosKasirPage() {
   const removeManualItem = (tempId: string) => setManualCart(prev => prev.filter(i => i.tempId !== tempId));
   const manualTotal = useMemo(() => manualCart.reduce((s, i) => s + i.qty * i.harga, 0), [manualCart]);
 
+  // ─── Draft persistence ───
+  const DRAFT_KEY = `kasir_draft_${bookOrBranchId}`;
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        const draft = JSON.parse(saved);
+        if (draft.gridCart?.length > 0 || draft.manualCart?.length > 0) {
+          if (draft.isGridMode) {
+            setGridCart(draft.gridCart || []);
+          } else {
+            setManualCart(draft.manualCart || []);
+            setSpesifikasi(draft.spesifikasi || "");
+          }
+          setSelectedCustomerId(draft.selectedCustomerId || "");
+          setDpDibayar(draft.dpDibayar || 0);
+          setCatatan(draft.catatan || "");
+          showToast.success("Draft dipulihkan");
+        }
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const hasItems = isGridMode ? gridCart.length > 0 : manualCart.length > 0;
+    if (hasItems) {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        isGridMode,
+        gridCart,
+        manualCart,
+        spesifikasi,
+        selectedCustomerId,
+        dpDibayar,
+        catatan,
+      }));
+    } else {
+      localStorage.removeItem(DRAFT_KEY);
+    }
+  }, [isGridMode, gridCart, manualCart, spesifikasi, selectedCustomerId, dpDibayar, catatan]);
+
   // ═══ SHARED ═══
   const diskonPoin = poinDigunakan;
   const grandTotal = Math.max(0, (isGridMode ? gridTotal : manualTotal) - diskonPoin);
@@ -215,6 +262,11 @@ export default function PosKasirPage() {
               terakhirTransaksi: new Date().toISOString(),
             });
           } else {
+            const existingName = customers.find(c => c.nama.toLowerCase() === manualNama.trim().toLowerCase());
+            if (existingName) {
+              showToast.error("Nama pelanggan sudah ada");
+              return;
+            }
             await db.customers.add({
               id: crypto.randomUUID(),
               bookOrBranchId,
@@ -253,6 +305,13 @@ export default function PosKasirPage() {
     setSelectedCustomerId("");
     setIsManual(false);
     setManualNama(""); setManualWA(""); setManualAlamat("");
+  };
+
+  const handleCancelOrder = () => {
+    if ((isGridMode ? gridCart.length : manualCart.length) === 0) return;
+    if (!confirm("Batalkan pesanan? Semua item akan hilang.")) return;
+    resetForm();
+    localStorage.removeItem(DRAFT_KEY);
   };
 
   // ─── Edit / Delete ───
@@ -299,6 +358,21 @@ export default function PosKasirPage() {
   const formatDate = (iso: string) => new Date(iso).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
 
   const [showInvoice, setShowInvoice] = useState<DbTransaction | null>(null);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        const cartItems = isGridMode ? gridCart : manualCart;
+        if (cartItems.length > 0 && grandTotal > 0) handleCheckout();
+      }
+      if (e.key === "Escape") {
+        resetForm();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [isGridMode, gridCart, manualCart, grandTotal, handleCheckout, resetForm]);
 
   return (
     <div className="flex-1 flex flex-col pt-4 gap-3">
@@ -391,7 +465,7 @@ export default function PosKasirPage() {
                       </button>
                     );
                   })}
-                  {filteredProducts.length === 0 && <p className="col-span-3 text-center py-6 text-slate-400 text-xs">Tidak ada produk</p>}
+                  {filteredProducts.length === 0 && <div className="col-span-3 text-center py-6 text-slate-400 text-xs animate-fade-in"><Package className="w-5 h-5 mx-auto mb-2 opacity-40" />Tidak ada produk</div>}
                 </div>
               </Section>
 
@@ -533,19 +607,27 @@ export default function PosKasirPage() {
                   <p className="text-[9px] text-slate-400">{formatRp(w.saldo)}</p>
                 </button>
               ))}
-              {wallets.length === 0 && <p className="col-span-2 text-center text-[10px] text-slate-400 py-2">Belum ada dompet</p>}
+              {wallets.length === 0 && <div className="col-span-2 text-center py-6 text-slate-400 text-xs animate-fade-in"><Wallet className="w-5 h-5 mx-auto mb-2 opacity-40" />Belum ada dompet</div>}
             </div>
           </Section>
 
-          <button onClick={handleCheckout} disabled={isProcessing || grandTotal === 0} className="w-full py-3.5 rounded-2xl btn-primary text-sm font-heading font-extrabold disabled:opacity-50 active:scale-[0.97] transition-transform">
-            {isProcessing ? "Memproses..." : `Simpan Orderan${grandTotal > 0 ? ` • ${formatRp(grandTotal)}` : ""}`}
-          </button>
+          <div className="flex gap-2">
+            {(isGridMode ? gridCart.length : manualCart.length) > 0 && (
+              <button onClick={handleCancelOrder}
+                className="flex-1 py-2.5 rounded-xl bg-rose-500/10 text-rose-500 font-bold text-xs active:scale-[0.98] transition-transform flex items-center justify-center gap-1">
+                <X className="w-4 h-4" /> Batal
+              </button>
+            )}
+            <button onClick={handleCheckout} disabled={isProcessing || grandTotal === 0} className="flex-1 py-3.5 rounded-2xl btn-primary text-sm font-heading font-extrabold disabled:opacity-50 active:scale-[0.97] transition-transform">
+              {isProcessing ? "Memproses..." : `Simpan Orderan${grandTotal > 0 ? ` • ${formatRp(grandTotal)}` : ""}`}
+            </button>
+          </div>
         </div>
       ) : (
         /* ═══ RIWAYAT TAB ═══ */
         <div className="flex-1 overflow-y-auto pb-24 space-y-2">
           {transactions.length === 0 ? (
-            <div className="text-center py-12 text-slate-400 text-xs">Belum ada transaksi</div>
+            <div className="text-center py-12 text-slate-400 text-xs animate-fade-in"><ShoppingCart className="w-6 h-6 mx-auto mb-2 opacity-40" />Belum ada transaksi</div>
           ) : transactions.map(tx => (
             <div key={tx.id} className="premium-card p-3 space-y-2">
               <div className="flex items-start justify-between">

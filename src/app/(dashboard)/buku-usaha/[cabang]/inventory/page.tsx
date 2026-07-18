@@ -6,8 +6,9 @@ import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type UnitId, type Inventory, type DbInventoryMutation } from "@/lib/db-v4";
 import { showToast } from "@/lib/toast";
 import KalkulatorHarga from "@/components/business/kalkulator-harga";
+import { SkeletonCard } from "@/components/skeleton";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Plus, Package, Search, ArrowRightLeft, Pencil, Trash2, X, Save, History, ArrowDown, ArrowUp, Calculator } from "lucide-react";
+import { ArrowLeft, Plus, Package, Search, ArrowRightLeft, Pencil, Trash2, X, Save, History, ArrowDown, ArrowUp, Calculator, AlertTriangle, RotateCcw } from "lucide-react";
 
 const BRANCH_MAP: Record<string, UnitId> = {
   pribadi: "pribadi",
@@ -51,11 +52,13 @@ export default function InventoryPage() {
   const cabangSlug = (params?.cabang as string) || "";
   const bookOrBranchId: UnitId = BRANCH_MAP[cabangSlug] || "usaha-warkop";
 
-  const products =
+  const _products =
     useLiveQuery(
       () => db.inventory.where("bookOrBranchId").equals(bookOrBranchId).toArray(),
       [bookOrBranchId]
-    ) || [];
+    );
+  const products = _products || [];
+  if (_products === undefined) return <SkeletonCard count={5} />;
 
   const mutations =
     useLiveQuery(
@@ -70,6 +73,9 @@ export default function InventoryPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>(emptyForm);
   const [selectedMutasi, setSelectedMutasi] = useState<string | null>(null);
+  const [showStockModal, setShowStockModal] = useState(false);
+  const [stockAdjustProduct, setStockAdjustProduct] = useState<Inventory | null>(null);
+  const [stockForm, setStockForm] = useState<{ tipe: "masuk" | "keluar"; qty: number; alasan: string }>({ tipe: "masuk", qty: 1, alasan: "" });
   const [showCalculator, setShowCalculator] = useState(false);
 
   const filtered = useMemo(() => {
@@ -88,6 +94,10 @@ export default function InventoryPage() {
 
   const totalValue = useMemo(() => {
     return products.reduce((sum, p) => sum + p.hargaModal * p.stok, 0);
+  }, [products]);
+
+  const lowStockProducts = useMemo(() => {
+    return products.filter((p) => p.stok <= p.stokMin);
   }, [products]);
 
   const productMutations = useMemo(() => {
@@ -165,6 +175,30 @@ export default function InventoryPage() {
     await db.inventory.delete(id);
   };
 
+  const handleAdjustStock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stockAdjustProduct || stockForm.qty <= 0) return;
+    const now = new Date().toISOString();
+    const qty = stockForm.tipe === "masuk" ? stockForm.qty : -stockForm.qty;
+    const stokSebelum = stockAdjustProduct.stok;
+    const stokSesudah = Math.max(0, stokSebelum + qty);
+    await db.inventory.update(stockAdjustProduct.id, { stok: stokSesudah, updatedAt: now });
+    await db.inventoryMutations.add({
+      id: crypto.randomUUID(),
+      bookOrBranchId,
+      itemId: stockAdjustProduct.id,
+      tipe: stockForm.tipe,
+      qty: stockForm.qty,
+      stokSebelum,
+      stokSesudah,
+      alasan: stockForm.alasan,
+      createdAt: now,
+    });
+    showToast.success("Stok berhasil disesuaikan");
+    setShowStockModal(false);
+    setStockAdjustProduct(null);
+  };
+
   const selectedProduct = useMemo(() => {
     if (!selectedMutasi) return null;
     return products.find((p) => p.id === selectedMutasi) || null;
@@ -203,6 +237,22 @@ export default function InventoryPage() {
           <p className="text-xs font-heading font-extrabold text-[#008CEB]">Rp{totalValue.toLocaleString()}</p>
         </div>
       </div>
+
+      {lowStockProducts.length > 0 && (
+        <div className="premium-card p-3 border-amber-300/50 bg-amber-50/50 dark:bg-amber-950/20">
+          <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-bold">
+            <AlertTriangle className="w-4 h-4" />
+            {lowStockProducts.length} produk dengan stok menipis
+          </div>
+          <div className="flex flex-wrap gap-1 mt-2">
+            {lowStockProducts.slice(0, 5).map(p => (
+              <span key={p.id} className="text-[9px] bg-amber-100 dark:bg-amber-900/30 px-1.5 py-0.5 rounded-full font-bold">
+                {p.nama}: {p.stok}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="space-y-2">
         <div className="relative">
@@ -366,6 +416,12 @@ export default function InventoryPage() {
                     className="p-1.5 bg-slate-100 dark:bg-zinc-800 rounded-lg hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors duration-200 active:scale-90"
                   >
                     <Pencil className="w-4 h-4 text-slate-500" />
+                  </button>
+                  <button
+                    onClick={() => { setStockAdjustProduct(p); setStockForm({ tipe: "masuk", qty: 1, alasan: "" }); setShowStockModal(true); }}
+                    className="p-1.5 bg-slate-100 dark:bg-zinc-800 rounded-lg hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors duration-200 active:scale-90"
+                  >
+                    <RotateCcw className="w-4 h-4 text-slate-500" />
                   </button>
                   <button
                     onClick={() => handleDelete(p.id)}
@@ -570,6 +626,82 @@ export default function InventoryPage() {
             onClose={() => setShowCalculator(false)}
             hargaModal={form.hargaModal}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Modal Sesuaikan Stok */}
+      <AnimatePresence>
+        {showStockModal && stockAdjustProduct && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="w-full max-w-sm bg-white dark:bg-[#131527] rounded-2xl p-5 space-y-4 shadow-2xl"
+            >
+              <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
+                <h3 className="text-sm font-extrabold">Sesuaikan Stok</h3>
+                <button
+                  onClick={() => { setShowStockModal(false); setStockAdjustProduct(null); }}
+                  className="p-1 rounded-full bg-slate-100 dark:bg-zinc-800"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="text-xs">
+                <p className="font-bold">{stockAdjustProduct.nama}</p>
+                <p className="text-slate-400 mt-0.5">Stok saat ini: {stockAdjustProduct.stok}</p>
+              </div>
+              <form onSubmit={handleAdjustStock} className="space-y-3 text-xs">
+                <div className="flex gap-2">
+                  {(["masuk", "keluar"] as const).map((tipe) => (
+                    <button
+                      key={tipe}
+                      type="button"
+                      onClick={() => setStockForm({ ...stockForm, tipe })}
+                      className={`flex-1 py-2 rounded-xl text-[10px] font-bold transition-all ${
+                        stockForm.tipe === tipe
+                          ? tipe === "masuk"
+                            ? "bg-emerald-500 text-white"
+                            : "bg-rose-500 text-white"
+                          : "bg-slate-100 dark:bg-zinc-800 text-slate-400"
+                      }`}
+                    >
+                      {tipe === "masuk" ? "Masuk" : "Keluar"}
+                    </button>
+                  ))}
+                </div>
+                <div>
+                  <label className="block mb-1 font-bold text-slate-400">Jumlah</label>
+                  <input
+                    type="number"
+                    value={stockForm.qty || ""}
+                    onChange={(e) => setStockForm({ ...stockForm, qty: Math.max(0, Number(e.target.value)) })}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
+                    required
+                    min="1"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 font-bold text-slate-400">Alasan (opsional)</label>
+                  <input
+                    type="text"
+                    value={stockForm.alasan}
+                    onChange={(e) => setStockForm({ ...stockForm, alasan: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none"
+                    placeholder="Stok opname, retur, dll..."
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs shadow-lg active:scale-[0.98] transition-transform"
+                >
+                  Simpan
+                </button>
+              </form>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

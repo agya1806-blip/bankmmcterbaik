@@ -3,9 +3,10 @@
 import React, { useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db, type UnitId, type Customer } from "@/lib/db-v4";
+import { db, type UnitId, type Customer, type DbTransaction } from "@/lib/db-v4";
 import * as XLSX from "xlsx";
-import { ArrowLeft, Download, UserPlus, Search, Smartphone, DollarSign, MessageCircle, Send, Check, History } from "lucide-react";
+import { SkeletonCard } from "@/components/skeleton";
+import { ArrowLeft, Download, UserPlus, Search, Smartphone, DollarSign, MessageCircle, Send, Check, History, Pencil, Trash2 } from "lucide-react";
 import { showToast } from "@/lib/toast";
 
 const BRANCH_MAP: Record<string, UnitId> = {
@@ -82,12 +83,19 @@ export default function PelangganCRMPage() {
     "Halo [Nama], dapatkan penawaran spesial minggu ini hanya di toko kami!"
   );
   const [expandedInstallment, setExpandedInstallment] = useState<string | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<any>(null);
+  const [editNama, setEditNama] = useState("");
+  const [editNoTelp, setEditNoTelp] = useState("");
+  const [editAlamat, setEditAlamat] = useState("");
+  const [selectedCustomerTx, setSelectedCustomerTx] = useState<string | null>(null);
 
-  const customers =
+  const _customers =
     useLiveQuery(
       () => db.customers.where("bookOrBranchId").equals(bookOrBranchId).toArray(),
       [bookOrBranchId]
-    ) || [];
+    );
+  const customers = _customers || [];
+  if (_customers === undefined) return <SkeletonCard count={5} />;
 
   const customerPiutang =
     useLiveQuery(
@@ -103,6 +111,13 @@ export default function PelangganCRMPage() {
       () => db.piutangInstallments.where("bookOrBranchId").equals(bookOrBranchId).toArray(),
       [bookOrBranchId]
     ) || [];
+
+  const customerTransactions = useLiveQuery(
+    () => selectedCustomerTx
+      ? db.transactions.where("customerId").equals(selectedCustomerTx).reverse().limit(10).toArray()
+      : Promise.resolve<DbTransaction[]>([]),
+    [selectedCustomerTx]
+  ) || [];
 
   const filteredCustomers = customers.filter(
     (c) =>
@@ -194,6 +209,28 @@ export default function PelangganCRMPage() {
     window.open(waUrl, "_blank");
   };
 
+  const openEdit = (c: Customer) => {
+    setEditingCustomer(c);
+    setEditNama(c.nama);
+    setEditNoTelp((c as any).noTelp || "");
+    setEditAlamat((c as any).alamat || "");
+  };
+
+  const handleEditSubmit = async () => {
+    if (!editingCustomer) return;
+    await db.customers.update(editingCustomer.id, { nama: editNama, noTelp: editNoTelp, alamat: editAlamat } as any);
+    showToast.success("Pelanggan diperbarui");
+    setEditingCustomer(null);
+  };
+
+  const handleDeleteCustomer = async (id: string) => {
+    if (!confirm("Hapus pelanggan ini?")) return;
+    await db.customers.delete(id);
+    if (selectedCustomer?.id === id) setSelectedCustomer(null);
+    if (selectedCustomerTx === id) setSelectedCustomerTx(null);
+    showToast.success("Pelanggan dihapus");
+  };
+
   return (
     <div className="flex-1 flex flex-col pt-4 space-y-4">
       {/* Header */}
@@ -244,7 +281,7 @@ export default function PelangganCRMPage() {
       {/* Customer List */}
       <div className="flex-1 overflow-y-auto space-y-3 max-h-[300px] pr-1">
         {filteredCustomers.length === 0 ? (
-          <div className="text-center py-8 text-slate-400 text-xs">Belum ada data pelanggan.</div>
+          <div className="text-center py-8 text-slate-400 text-xs animate-fade-in"><UserPlus className="w-6 h-6 mx-auto mb-2 opacity-40" />Belum ada data pelanggan.</div>
         ) : (
           filteredCustomers.map((c, i) => (
             <div
@@ -267,11 +304,27 @@ export default function PelangganCRMPage() {
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className="text-[8px] uppercase font-bold text-slate-400 tracking-wider">Total Belanja</span>
-                  <p className="text-xs font-heading font-extrabold text-[#00C9A7] flex items-center gap-1 justify-end">
-                    <DollarSign className="w-3.5 h-3.5" /> Rp{c.totalBelanja.toLocaleString()}
-                  </p>
+                <div className="flex items-center gap-1.5">
+                  <div className="text-right">
+                    <span className="text-[8px] uppercase font-bold text-slate-400 tracking-wider">Total Belanja</span>
+                    <p className="text-xs font-heading font-extrabold text-[#00C9A7] flex items-center gap-1 justify-end">
+                      <DollarSign className="w-3.5 h-3.5" /> Rp{c.totalBelanja.toLocaleString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); openEdit(c); }}
+                    className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-[#008CEB] transition-colors"
+                    title="Edit pelanggan"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDeleteCustomer(c.id); }}
+                    className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-red-500 transition-colors"
+                    title="Hapus pelanggan"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
 
@@ -286,6 +339,42 @@ export default function PelangganCRMPage() {
                   >
                     <MessageCircle className="w-4 h-4" /> Kirim WA Promosi
                   </button>
+
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSelectedCustomerTx(selectedCustomerTx === c.id ? null : c.id); }}
+                    className={`w-full py-2 rounded-xl flex items-center justify-center gap-1.5 font-bold text-[10px] transition-all duration-200 ${
+                      selectedCustomerTx === c.id
+                        ? "bg-[#008CEB]/10 text-[#008CEB] border border-[#008CEB]/30"
+                        : "bg-slate-50 dark:bg-zinc-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-zinc-800"
+                    }`}
+                  >
+                    <History className="w-4 h-4" /> {selectedCustomerTx === c.id ? "Tutup Riwayat" : "Riwayat Transaksi"}
+                  </button>
+
+                  {selectedCustomerTx === c.id && customerTransactions.length > 0 && (
+                    <div className="space-y-1.5 pt-1">
+                      <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Transaksi Terakhir</h4>
+                      {customerTransactions.map((tx) => (
+                        <div key={tx.id} className="flex items-center justify-between text-[10px] py-2 px-2.5 bg-slate-50 dark:bg-zinc-900 rounded-xl">
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-700 dark:text-slate-200">
+                              Rp{tx.grandTotal.toLocaleString()}
+                            </p>
+                            <p className="text-slate-400">
+                              {new Date(tx.tanggal).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                            </p>
+                          </div>
+                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                            tx.status === "LUNAS" ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600" :
+                            tx.status === "DP" ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600" :
+                            "bg-red-100 dark:bg-red-900/30 text-red-600"
+                          }`}>
+                            {tx.status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   {customerPiutang.length > 0 && (
                     <div className="space-y-2 pt-1">
@@ -408,6 +497,54 @@ export default function PelangganCRMPage() {
             </div>
             <div className="flex gap-2 text-xs font-bold pt-2">
               <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-2.5 bg-slate-100 dark:bg-zinc-800 rounded-xl">Batal</button>
+              <button type="submit" className="flex-1 py-2.5 bg-[#008CEB] text-white rounded-xl">Simpan</button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingCustomer && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <form
+            onSubmit={(e) => { e.preventDefault(); handleEditSubmit(); }}
+            className="bg-white dark:bg-[#131527] w-full max-w-sm rounded-3xl p-5 space-y-4 shadow-xl animate-slide-up"
+          >
+            <h3 className="text-sm font-extrabold text-slate-800 dark:text-white">
+              Edit Pelanggan
+            </h3>
+            <div className="space-y-3 text-xs">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nama Pelanggan</label>
+                <input
+                  type="text"
+                  required
+                  value={editNama}
+                  onChange={(e) => setEditNama(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-100 dark:bg-zinc-900 rounded-xl border-none outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">No. Telepon</label>
+                <input
+                  type="text"
+                  value={editNoTelp}
+                  onChange={(e) => setEditNoTelp(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-100 dark:bg-zinc-900 rounded-xl border-none outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Alamat</label>
+                <textarea
+                  value={editAlamat}
+                  onChange={(e) => setEditAlamat(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 bg-slate-100 dark:bg-zinc-900 rounded-xl border-none outline-none resize-none"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 text-xs font-bold pt-2">
+              <button type="button" onClick={() => setEditingCustomer(null)} className="flex-1 py-2.5 bg-slate-100 dark:bg-zinc-800 rounded-xl">Batal</button>
               <button type="submit" className="flex-1 py-2.5 bg-[#008CEB] text-white rounded-xl">Simpan</button>
             </div>
           </form>

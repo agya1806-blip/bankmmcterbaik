@@ -2,8 +2,11 @@
 
 import React, { useState, useCallback } from "react";
 import { Lock, Delete } from "lucide-react";
-
 import { motion, AnimatePresence } from "framer-motion";
+
+import { db } from "@/lib/db-v4";
+import { verifyPin } from "@/lib/crypto";
+import { useSessionStore } from "@/store/useSessionStore";
 
 interface PinLockProps {
   onSuccess: () => void;
@@ -15,17 +18,21 @@ interface PinLockProps {
 export default function PinLock({ onSuccess, onCancel, title = "Masukkan PIN", subtitle = "PIN akses diperlukan" }: PinLockProps) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
+  const currentUser = useSessionStore((s) => s.currentUser);
 
-  const handleVerify = useCallback(() => {
-    const users = JSON.parse(localStorage.getItem("mmc_users") || "[]");
-    const matched = users.some((u: any) => u.pin === pin);
-    if (matched) {
+  const verifyCurrentPin = useCallback(async (pinToCheck: string) => {
+    const user = currentUser ? await db.users.get(currentUser.id) : null;
+    if (user && await verifyPin(pinToCheck, user.pinHash)) {
       onSuccess();
     } else {
       setError("PIN salah!");
       setPin("");
     }
-  }, [pin, onSuccess]);
+  }, [currentUser, onSuccess]);
+
+  const handleVerify = useCallback(() => {
+    verifyCurrentPin(pin);
+  }, [pin, verifyCurrentPin]);
 
   const handleDigit = (d: string) => {
     if (pin.length >= 6) return;
@@ -33,16 +40,7 @@ export default function PinLock({ onSuccess, onCancel, title = "Masukkan PIN", s
     setPin(newPin);
     setError("");
     if (newPin.length >= 4) {
-      setTimeout(() => {
-        const users = JSON.parse(localStorage.getItem("mmc_users") || "[]");
-        const matched = users.some((u: any) => u.pin === newPin);
-        if (matched) {
-          onSuccess();
-        } else {
-          setError("PIN salah!");
-          setPin("");
-        }
-      }, 200);
+      setTimeout(() => verifyCurrentPin(newPin), 200);
     }
   };
 

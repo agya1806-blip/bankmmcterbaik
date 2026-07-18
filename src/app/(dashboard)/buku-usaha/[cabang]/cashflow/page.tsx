@@ -3,8 +3,8 @@
 import React, { useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type UnitId } from "@/lib/db-v4";
-import { TrendingUp, TrendingDown, Wallet, Save, ArrowLeft, Plus, X } from "lucide-react";
+import { db, type UnitId, type DbCashflow } from "@/lib/db-v4";
+import { TrendingUp, TrendingDown, Wallet, Save, ArrowLeft, Plus, X, Pencil, Trash2, Search } from "lucide-react";
 import { showToast } from "@/lib/toast";
 
 const BRANCH_MAP: Record<string, UnitId> = {
@@ -30,11 +30,23 @@ export default function CashflowPage() {
   const [kategori, setKategori] = useState("Umum");
   const [walletId, setWalletId] = useState("");
   const [filterType, setFilterType] = useState<"all" | "masuk" | "keluar">("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [editingCashflow, setEditingCashflow] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
-    if (filterType === "all") return cashflows;
-    return cashflows.filter((c) => c.tipe === filterType);
-  }, [cashflows, filterType]);
+    let items = cashflows;
+    if (filterType !== "all") items = items.filter((c) => c.tipe === filterType);
+    if (dateFrom || dateTo) {
+      items = items.filter((item) => {
+        const tgl = item.createdAt?.substring(0, 10) || "";
+        if (dateFrom && tgl < dateFrom) return false;
+        if (dateTo && tgl > dateTo) return false;
+        return true;
+      });
+    }
+    return items;
+  }, [cashflows, filterType, dateFrom, dateTo]);
 
   const stats = useMemo(() => {
     const masuk = cashflows.filter((c) => c.tipe === "masuk").reduce((s, c) => s + c.nominal, 0);
@@ -42,7 +54,27 @@ export default function CashflowPage() {
     return { masuk, keluar, selisih: masuk - keluar };
   }, [cashflows]);
 
-  const resetForm = () => { setTipe("masuk"); setNominal(0); setCatatan(""); setKategori("Umum"); setWalletId(""); };
+  const totalPemasukan = filtered.filter(i => i.tipe === "masuk").reduce((s, i) => s + i.nominal, 0);
+  const totalPengeluaran = filtered.filter(i => i.tipe === "keluar").reduce((s, i) => s + i.nominal, 0);
+  const neto = totalPemasukan - totalPengeluaran;
+
+  const resetForm = () => { setTipe("masuk"); setNominal(0); setCatatan(""); setKategori("Umum"); setWalletId(""); setEditingCashflow(null); };
+
+  const handleEdit = (cf: DbCashflow) => {
+    setEditingCashflow(cf.id);
+    setTipe(cf.tipe);
+    setNominal(cf.nominal);
+    setCatatan(cf.catatan);
+    setKategori(cf.kategori);
+    setWalletId(cf.walletId);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Hapus cashflow ini?")) return;
+    await db.cashflows.delete(id);
+    showToast.success("Cashflow dihapus");
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,18 +85,27 @@ export default function CashflowPage() {
     const saldoSebelum = selectedWallet?.saldo ?? 0;
     const saldoSesudah = tipe === "masuk" ? saldoSebelum + nominal : saldoSebelum - nominal;
 
-    await db.cashflows.add({
-      id: crypto.randomUUID(),
-      bookOrBranchId,
-      unitId: bookOrBranchId,
-      tipe, kategori, nominal, saldoSebelum, saldoSesudah,
-      walletId: walletId || "",
-      walletNama: selectedWallet?.namaDompet ?? "",
-      referensiId: "",
-      referensiTipe: "adjustment",
-      catatan: catatan.trim(),
-      createdAt: new Date().toISOString(),
-    });
+    if (editingCashflow) {
+      await db.cashflows.update(editingCashflow, {
+        tipe, kategori, nominal, saldoSebelum, saldoSesudah,
+        walletId: walletId || "",
+        walletNama: selectedWallet?.namaDompet ?? "",
+        catatan: catatan.trim(),
+      });
+    } else {
+      await db.cashflows.add({
+        id: crypto.randomUUID(),
+        bookOrBranchId,
+        unitId: bookOrBranchId,
+        tipe, kategori, nominal, saldoSebelum, saldoSesudah,
+        walletId: walletId || "",
+        walletNama: selectedWallet?.namaDompet ?? "",
+        referensiId: "",
+        referensiTipe: "adjustment",
+        catatan: catatan.trim(),
+        createdAt: new Date().toISOString(),
+      });
+    }
 
     if (walletId && selectedWallet) {
       await db.wallets.update(walletId, { saldo: saldoSesudah });
@@ -91,7 +132,7 @@ export default function CashflowPage() {
         <div className="premium-card p-4 animate-fade-in">
           <div className="flex items-center gap-2 mb-3">
             <Wallet className="w-4 h-4 text-[#008CEB]" />
-            <span className="text-xs font-heading font-extrabold">Tambah Cashflow</span>
+            <span className="text-xs font-heading font-extrabold">{editingCashflow ? "Edit Cashflow" : "Tambah Cashflow"}</span>
           </div>
           <form onSubmit={handleSave} className="space-y-3 text-xs">
             <div className="grid grid-cols-2 gap-2">
@@ -130,7 +171,7 @@ export default function CashflowPage() {
               <input type="text" value={catatan} onChange={(e) => setCatatan(e.target.value)} placeholder="Contoh: Beli bahan baku, Bayar listrik..." className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" required />
             </div>
             <button type="submit" className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-extrabold text-xs shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
-              <Save className="w-4 h-4" /> Simpan
+              <Save className="w-4 h-4" /> {editingCashflow ? "Update" : "Simpan"}
             </button>
           </form>
         </div>
@@ -159,9 +200,39 @@ export default function CashflowPage() {
         ))}
       </div>
 
+      <div className="flex gap-2">
+        <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
+          className="flex-1 input-premium text-[10px]" />
+        <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
+          className="flex-1 input-premium text-[10px]" />
+        {(dateFrom || dateTo) && (
+          <button onClick={() => { setDateFrom(""); setDateTo(""); }}
+            className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-zinc-800 text-[10px] font-bold">
+            Clear
+          </button>
+        )}
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        <div className="premium-card p-2 text-center">
+          <p className="text-[8px] text-slate-400 font-bold">Pemasukan</p>
+          <p className="text-xs font-bold text-emerald-500">Rp{totalPemasukan.toLocaleString()}</p>
+        </div>
+        <div className="premium-card p-2 text-center">
+          <p className="text-[8px] text-slate-400 font-bold">Pengeluaran</p>
+          <p className="text-xs font-bold text-rose-500">Rp{totalPengeluaran.toLocaleString()}</p>
+        </div>
+        <div className="premium-card p-2 text-center">
+          <p className="text-[8px] text-slate-400 font-bold">Neto</p>
+          <p className={`text-xs font-bold ${neto >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+            Rp{neto.toLocaleString()}
+          </p>
+        </div>
+      </div>
+
       <div className="flex-1 overflow-y-auto space-y-2 max-h-[350px] pr-1">
         {filtered.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 text-xs">{cashflows.length === 0 ? "Belum ada cashflow. Tap + untuk menambah." : "Tidak ada data."}</div>
+          <div className="text-center py-12 text-slate-400 text-xs animate-fade-in">{cashflows.length === 0 ? <><TrendingUp className="w-6 h-6 mx-auto mb-2 opacity-40" />Belum ada cashflow. Tap + untuk menambah.</> : <><Search className="w-6 h-6 mx-auto mb-2 opacity-40" />Tidak ada data.</>}</div>
         ) : (
           filtered.map((cf, i) => {
             const tanggal = cf.createdAt ? new Date(cf.createdAt) : new Date();
@@ -178,9 +249,19 @@ export default function CashflowPage() {
                     </p>
                   </div>
                 </div>
-                <span className={`text-xs font-heading font-extrabold tabular-nums ${cf.tipe === "masuk" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
-                  {cf.tipe === "masuk" ? "+" : "-"}Rp{cf.nominal.toLocaleString()}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-heading font-extrabold tabular-nums ${cf.tipe === "masuk" ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                    {cf.tipe === "masuk" ? "+" : "-"}Rp{cf.nominal.toLocaleString()}
+                  </span>
+                  <div className="flex gap-1">
+                    <button onClick={() => handleEdit(cf)} className="p-1.5 rounded-lg bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors">
+                      <Pencil className="w-3.5 h-3.5 text-slate-400" />
+                    </button>
+                    <button onClick={() => handleDelete(cf.id)} className="p-1.5 rounded-lg bg-slate-100 dark:bg-zinc-800 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+                      <Trash2 className="w-3.5 h-3.5 text-slate-400" />
+                    </button>
+                  </div>
+                </div>
               </div>
             );
           })

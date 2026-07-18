@@ -4,6 +4,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type UnitId, type Transaction, type ProductionStatus } from '@/lib/db-v4';
+import { SkeletonCard } from "@/components/skeleton";
 import { ArrowLeft, ClipboardList, FileText, Printer, Image, Phone, BarChart3, X, Search, Tag } from "lucide-react";
 import { showToast } from "@/lib/toast";
 import InvoiceA4 from "@/components/invoice-a4";
@@ -29,11 +30,13 @@ export default function TransaksiDanProduksiPage() {
   const [page, setPage] = useState(1);
   const PER_PAGE = 20;
 
-  const allTransactions =
+  const _allTransactions =
     useLiveQuery(
       () => db.transactions.where('bookOrBranchId').equals(bookOrBranchId).reverse().toArray(),
       [bookOrBranchId]
-    ) || [];
+    );
+  const allTransactions = _allTransactions || [];
+  if (_allTransactions === undefined) return <SkeletonCard count={5} />;
 
   const paginatedTransactions = useMemo(() => {
     const start = (page - 1) * PER_PAGE;
@@ -347,7 +350,7 @@ export default function TransaksiDanProduksiPage() {
       {activeTab === 'riwayat' && (
         <div className="flex-1 overflow-y-auto space-y-3 max-h-[500px] pr-1">
           {paginatedTransactions.length === 0 ? (
-            <div className="text-center py-12 text-slate-400 text-xs">Belum ada riwayat transaksi.</div>
+            <div className="text-center py-12 text-slate-400 text-xs animate-fade-in"><ClipboardList className="w-6 h-6 mx-auto mb-2 opacity-40" />Belum ada riwayat transaksi.</div>
           ) : (
             paginatedTransactions.map((tx, idx) => {
               const tanggal = new Date(tx.tanggal);

@@ -5,6 +5,7 @@ export interface UserInfo {
   id: string;
   nama: string;
   fotoUrl: string;
+  role: string;
 }
 
 interface SessionState {

@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
-import { db, type UnitId } from "@/lib/db-v4";
+import { db, type UnitId, type DbWalletMutation } from "@/lib/db-v4";
+import { SkeletonCard } from "@/components/skeleton";
 import { ArrowLeft, Wallet, Save, Pencil, Trash2, DollarSign, Landmark, Smartphone } from "lucide-react";
 import { showToast } from "@/lib/toast";
 
@@ -20,7 +21,9 @@ export default function DompetPage() {
   const cabangSlug = (params?.cabang as string) || "";
   const bookOrBranchId: UnitId = BRANCH_MAP[cabangSlug] || "usaha-warkop";
 
-  const wallets = useLiveQuery(() => db.wallets.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]) || [];
+  const _wallets = useLiveQuery(() => db.wallets.where("bookOrBranchId").equals(bookOrBranchId).toArray(), [bookOrBranchId]);
+  const wallets = _wallets || [];
+  if (_wallets === undefined) return <SkeletonCard count={5} />;
 
   const [editingWallet, setEditingWallet] = useState<string | null>(null);
   const [walletName, setWalletName] = useState("");
@@ -30,6 +33,18 @@ export default function DompetPage() {
   const [walletNomorRekening, setWalletNomorRekening] = useState("");
   const [walletAtasNama, setWalletAtasNama] = useState("");
   const [walletNamaBank, setWalletNamaBank] = useState("");
+  const [topupWallet, setTopupWallet] = useState<string | null>(null);
+  const [tarikWallet, setTarikWallet] = useState<string | null>(null);
+  const [adjustNominal, setAdjustNominal] = useState(0);
+  const [adjustAlasan, setAdjustAlasan] = useState("");
+  const [showMutations, setShowMutations] = useState<string | null>(null);
+
+  const walletMap = new Map(wallets.map((w) => [w.id, w]));
+
+  const walletMutations = useLiveQuery<DbWalletMutation>(
+    () => showMutations ? db.walletMutations.where("dariWalletId").equals(showMutations).or("keWalletId").equals(showMutations).reverse().toArray() : Promise.resolve<DbWalletMutation[]>([]),
+    [showMutations]
+  ) || [];
 
   const resetForm = () => {
     setEditingWallet(null); setWalletName(""); setWalletSaldo(0); setWalletCatatan(""); setWalletTipe("KasTunai");
@@ -70,6 +85,48 @@ export default function DompetPage() {
 
   const totalSaldo = wallets.reduce((s, w) => s + w.saldo, 0);
   const isEditing = !!editingWallet;
+
+  const handleTopup = async () => {
+    if (!topupWallet || adjustNominal <= 0) return showToast.error("Nominal harus lebih dari 0!");
+    const wallet = wallets.find((w) => w.id === topupWallet);
+    if (!wallet) return;
+    if (!confirm(`Topup Rp${adjustNominal.toLocaleString()} ke ${wallet.namaDompet}?${adjustAlasan ? `\nAlasan: ${adjustAlasan}` : ""}`)) return;
+    await db.transaction("rw", db.wallets, db.walletMutations, async () => {
+      const w = await db.wallets.get(topupWallet);
+      if (!w) throw new Error("Dompet tidak ditemukan");
+      await db.wallets.update(topupWallet, { saldo: w.saldo + adjustNominal });
+      await db.walletMutations.add({
+        id: crypto.randomUUID(), bookOrBranchId,
+        dariWalletId: "topup", keWalletId: topupWallet,
+        nominal: adjustNominal, alasan: adjustAlasan.trim() || "Top Up",
+        createdAt: new Date().toISOString(),
+      });
+    });
+    showToast.success("TopUp berhasil!");
+    setTopupWallet(null); setAdjustNominal(0); setAdjustAlasan("");
+  };
+
+  const handleTarik = async () => {
+    if (!tarikWallet || adjustNominal <= 0) return showToast.error("Nominal harus lebih dari 0!");
+    const wallet = wallets.find((w) => w.id === tarikWallet);
+    if (!wallet) return;
+    if (adjustNominal > wallet.saldo) return showToast.error("Saldo tidak mencukupi!");
+    if (!confirm(`Tarik Tunai Rp${adjustNominal.toLocaleString()} dari ${wallet.namaDompet}?${adjustAlasan ? `\nAlasan: ${adjustAlasan}` : ""}`)) return;
+    await db.transaction("rw", db.wallets, db.walletMutations, async () => {
+      const w = await db.wallets.get(tarikWallet);
+      if (!w) throw new Error("Dompet tidak ditemukan");
+      if (w.saldo < adjustNominal) throw new Error("Saldo tidak mencukupi");
+      await db.wallets.update(tarikWallet, { saldo: w.saldo - adjustNominal });
+      await db.walletMutations.add({
+        id: crypto.randomUUID(), bookOrBranchId,
+        dariWalletId: tarikWallet, keWalletId: "tarik",
+        nominal: adjustNominal, alasan: adjustAlasan.trim() || "Tarik Tunai",
+        createdAt: new Date().toISOString(),
+      });
+    });
+    showToast.success("Tarik Tunai berhasil!");
+    setTarikWallet(null); setAdjustNominal(0); setAdjustAlasan("");
+  };
 
   return (
     <div className="flex flex-col gap-4 pt-2 pb-4 animate-fade-in">
@@ -151,37 +208,148 @@ export default function DompetPage() {
           <span className="text-xs font-heading font-extrabold">Daftar Dompet</span>
           <span className="text-[10px] text-slate-400 ml-auto">({wallets.length})</span>
         </div>
-        {wallets.length === 0 ? (
-          <div className="text-center py-8 text-slate-400 text-xs">Belum ada dompet. Isi form di atas untuk menambah.</div>
+          {wallets.length === 0 ? (
+          <div className="text-center py-8 text-slate-400 text-xs animate-fade-in"><Wallet className="w-6 h-6 mx-auto mb-2 opacity-40" />Belum ada dompet. Isi form di atas untuk menambah.</div>
         ) : (
           wallets.map((w) => (
-            <div key={w.id} className="premium-card p-3 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#008CEB]/10 flex items-center justify-center text-[#008CEB]">
-                {tipeIcons[w.tipe] || <Wallet className="w-4 h-4" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-heading font-bold truncate">{w.namaDompet}</p>
-                {w.tipe === "Bank" && w.namaBank ? (
-                  <p className="text-[9px] text-slate-400">{w.namaBank}{w.atasNama ? ` · ${w.atasNama}` : ""}{w.nomorRekening ? ` · ${w.nomorRekening}` : ""}</p>
-                ) : (
-                  <p className="text-[9px] text-slate-400">{w.tipe}{w.catatan ? ` · ${w.catatan}` : ""}</p>
-                )}
-              </div>
-              <div className="text-right shrink-0">
-                <p className="text-xs font-heading font-extrabold text-[#008CEB]">Rp{w.saldo.toLocaleString()}</p>
-                <div className="flex gap-1 mt-0.5 justify-end">
-                  <button onClick={() => handleEdit(w)} className="p-0.5 text-slate-400 hover:text-[#008CEB]">
-                    <Pencil className="w-3.5 h-3.5" />
+            <div key={w.id}>
+              <div className="premium-card p-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[#008CEB]/10 flex items-center justify-center text-[#008CEB]">
+                    {tipeIcons[w.tipe] || <Wallet className="w-4 h-4" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-heading font-bold truncate">{w.namaDompet}</p>
+                    {w.tipe === "Bank" && w.namaBank ? (
+                      <p className="text-[9px] text-slate-400">{w.namaBank}{w.atasNama ? ` · ${w.atasNama}` : ""}{w.nomorRekening ? ` · ${w.nomorRekening}` : ""}</p>
+                    ) : (
+                      <p className="text-[9px] text-slate-400">{w.tipe}{w.catatan ? ` · ${w.catatan}` : ""}</p>
+                    )}
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-xs font-heading font-extrabold text-[#008CEB]">Rp{w.saldo.toLocaleString()}</p>
+                    <div className="flex gap-1 mt-0.5 justify-end">
+                      <button onClick={() => handleEdit(w)} className="p-0.5 text-slate-400 hover:text-[#008CEB]">
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={() => handleDelete(w.id)} className="p-0.5 text-slate-400 hover:text-rose-500">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-1.5 mt-2">
+                  <button onClick={() => { setTopupWallet(w.id); setAdjustNominal(0); setAdjustAlasan(""); }}
+                    className="text-[9px] text-emerald-600 font-bold px-2 py-1 rounded-lg bg-emerald-500/10 active:scale-95 transition-transform">
+                    Top Up
                   </button>
-                  <button onClick={() => handleDelete(w.id)} className="p-0.5 text-slate-400 hover:text-rose-500">
-                    <Trash2 className="w-3.5 h-3.5" />
+                  <button onClick={() => { setTarikWallet(w.id); setAdjustNominal(0); setAdjustAlasan(""); }}
+                    className="text-[9px] text-rose-600 font-bold px-2 py-1 rounded-lg bg-rose-500/10 active:scale-95 transition-transform">
+                    Tarik Tunai
+                  </button>
+                  <button onClick={() => setShowMutations(showMutations === w.id ? null : w.id)}
+                    className="text-[9px] text-[#008CEB] font-bold px-2 py-1 rounded-lg bg-[#008CEB]/10 active:scale-95 transition-transform">
+                    {showMutations === w.id ? "Tutup" : "Riwayat"}
                   </button>
                 </div>
               </div>
+              {showMutations === w.id && (
+                <div className="mt-1 space-y-1">
+                  {walletMutations.length === 0 ? (
+                    <p className="text-[9px] text-slate-400 text-center py-2">Belum ada mutasi.</p>
+                  ) : (
+                    walletMutations.map((m) => {
+                      const isTopup = m.dariWalletId === "topup";
+                      const isTarik = m.keWalletId === "tarik";
+                      return (
+                        <div key={m.id} className="premium-card p-2.5 flex items-center gap-2 ml-4">
+                          <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${isTopup ? "bg-emerald-500/10 text-emerald-600" : isTarik ? "bg-rose-500/10 text-rose-600" : "bg-[#008CEB]/10 text-[#008CEB]"}`}>
+                            {isTopup ? "+" : isTarik ? "-" : "↔"}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] font-heading font-bold">
+                              {isTopup ? "Top Up" : isTarik ? "Tarik Tunai" : `Transfer ${walletMap.get(m.keWalletId)?.namaDompet || ""}`}
+                            </p>
+                            <p className="text-[8px] text-slate-400">
+                              {m.alasan}
+                              <span className="mx-1">·</span>
+                              {new Date(m.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                            </p>
+                          </div>
+                          <p className={`text-[10px] font-heading font-extrabold shrink-0 ${isTopup ? "text-emerald-600" : "text-rose-600"}`}>
+                            {isTopup ? "+" : "-"}Rp{m.nominal.toLocaleString()}
+                          </p>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
             </div>
           ))
         )}
       </div>
+
+      {/* Modal Topup */}
+      {topupWallet && (() => {
+        const w = walletMap.get(topupWallet);
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={() => { setTopupWallet(null); setAdjustNominal(0); setAdjustAlasan(""); }}>
+            <div className="bg-white dark:bg-[#131527] rounded-2xl p-5 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <p className="text-xs font-heading font-extrabold mb-3">Top Up {w?.namaDompet}</p>
+              <div className="space-y-3 text-xs">
+                <input type="number" placeholder="Jumlah (Rp)" value={adjustNominal || ""}
+                  onChange={(e) => setAdjustNominal(Number(e.target.value))}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
+                <input type="text" placeholder="Alasan / Deskripsi (opsional)" value={adjustAlasan}
+                  onChange={(e) => setAdjustAlasan(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
+                <div className="flex gap-2">
+                  <button onClick={() => { setTopupWallet(null); setAdjustNominal(0); setAdjustAlasan(""); }}
+                    className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-500 font-bold text-xs active:scale-[0.98] transition-transform">
+                    Batal
+                  </button>
+                  <button onClick={handleTopup}
+                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold text-xs active:scale-[0.98] transition-transform">
+                    Top Up
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Modal Tarik Tunai */}
+      {tarikWallet && (() => {
+        const w = walletMap.get(tarikWallet);
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={() => { setTarikWallet(null); setAdjustNominal(0); setAdjustAlasan(""); }}>
+            <div className="bg-white dark:bg-[#131527] rounded-2xl p-5 w-full max-w-sm shadow-2xl" onClick={(e) => e.stopPropagation()}>
+              <p className="text-xs font-heading font-extrabold mb-3">Tarik Tunai {w?.namaDompet}</p>
+              <p className="text-[10px] text-slate-400 mb-3">Saldo tersedia: Rp{w?.saldo.toLocaleString()}</p>
+              <div className="space-y-3 text-xs">
+                <input type="number" placeholder="Jumlah (Rp)" value={adjustNominal || ""}
+                  onChange={(e) => setAdjustNominal(Number(e.target.value))}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
+                <input type="text" placeholder="Alasan / Deskripsi (opsional)" value={adjustAlasan}
+                  onChange={(e) => setAdjustAlasan(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none" />
+                <div className="flex gap-2">
+                  <button onClick={() => { setTarikWallet(null); setAdjustNominal(0); setAdjustAlasan(""); }}
+                    className="flex-1 py-2.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-500 font-bold text-xs active:scale-[0.98] transition-transform">
+                    Batal
+                  </button>
+                  <button onClick={handleTarik}
+                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-400 text-white font-bold text-xs active:scale-[0.98] transition-transform">
+                    Tarik Tunai
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

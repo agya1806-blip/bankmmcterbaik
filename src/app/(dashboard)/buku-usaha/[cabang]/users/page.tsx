@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type UnitId, type UserRole } from "@/lib/db-v4";
@@ -38,6 +38,13 @@ export default function UsersPage() {
   const { currentUser } = useSessionStore();
   const cabangSlug = (params?.cabang as string) || "";
   const bookOrBranchId: UnitId = BRANCH_MAP[cabangSlug] || "usaha-warkop";
+
+  useEffect(() => {
+    if (currentUser && currentUser.role !== "admin") {
+      showToast.error("Hanya admin yang bisa mengakses halaman ini");
+      router.back();
+    }
+  }, [currentUser, router]);
 
   const allUsers = useLiveQuery(() => db.users.toArray(), []) || [];
 

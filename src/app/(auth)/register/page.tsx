@@ -37,7 +37,7 @@ export default function RegisterPage() {
       createdAt: new Date().toISOString(),
     });
 
-    login({ id: userId, nama: username.trim(), fotoUrl: "" });
+    login({ id: userId, nama: username.trim(), fotoUrl: "", role: "admin" });
     completeOnboarding();
     router.push("/buku-usaha");
   };

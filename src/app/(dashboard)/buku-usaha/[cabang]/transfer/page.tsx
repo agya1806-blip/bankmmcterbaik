@@ -44,6 +44,11 @@ export default function TransferPage() {
 
   const handleSubmit = async () => {
     if (!isValid) return;
+    const dariWallet = walletMap.get(dariWalletId);
+    const keWallet = walletMap.get(keWalletId);
+    if (!dariWallet || !keWallet) return showToast.error("Dompet tidak ditemukan");
+    if (dariWallet.saldo < nominal) return showToast.error("Saldo dompet asal tidak mencukupi!");
+    if (!confirm(`Transfer Rp${nominal.toLocaleString()} dari ${dariWallet.namaDompet} ke ${keWallet.namaDompet}?${alasan ? `\nAlasan: ${alasan}` : ""}`)) return;
     setLoading(true);
     try {
       await db.transaction("rw", db.wallets, db.walletMutations, async () => {
@@ -131,9 +136,15 @@ export default function TransferPage() {
           {/* Amount */}
           <div>
             <label className="text-[10px] font-bold text-slate-400 mb-1 block">Nominal (Rp)</label>
-            <input type="number" placeholder="0" value={nominal || ""}
-              onChange={(e) => setNominal(Number(e.target.value))}
-              className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
+            <div className="flex gap-2">
+              <input type="number" placeholder="0" value={nominal || ""}
+                onChange={(e) => setNominal(Number(e.target.value))}
+                className="flex-1 px-3 py-2 rounded-xl bg-slate-100 dark:bg-zinc-800 focus:outline-none font-bold" />
+              <button onClick={() => setNominal(selectedFromWallet?.saldo || 0)}
+                className="text-[9px] text-[#008CEB] font-bold px-3 py-1 rounded-lg bg-[#008CEB]/10 active:scale-95 transition-transform shrink-0">
+                Max
+              </button>
+            </div>
           </div>
           {/* Reason */}
           <div>
@@ -168,7 +179,7 @@ export default function TransferPage() {
           <span className="text-[10px] text-slate-400 ml-auto">({mutations.length})</span>
         </div>
         {recentMutations.length === 0 ? (
-          <div className="text-center py-8 text-slate-400 text-xs">Belum ada transfer dompet.</div>
+          <div className="text-center py-8 text-slate-400 text-xs animate-fade-in"><ArrowRightLeft className="w-6 h-6 mx-auto mb-2 opacity-40" />Belum ada transfer dompet.</div>
         ) : (
           recentMutations.map((m) => {
             const dari = walletMap.get(m.dariWalletId);

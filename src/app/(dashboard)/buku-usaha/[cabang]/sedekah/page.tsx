@@ -145,7 +145,7 @@ export default function SedekahPage() {
           <span className="text-xs font-heading font-extrabold">Riwayat Sedekah</span>
         </div>
         {txList.length === 0 ? (
-          <div className="text-center py-8 text-slate-400 text-xs">Belum ada riwayat sedekah</div>
+          <div className="text-center py-8 text-slate-400 text-xs animate-fade-in"><Heart className="w-6 h-6 mx-auto mb-2 opacity-40" />Belum ada riwayat sedekah</div>
         ) : (
           <div className="space-y-2 max-h-[320px] overflow-y-auto pr-1">
             {txList.map((tx, i) => {

@@ -4,7 +4,8 @@ import React, { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
 import { db } from "@/lib/db-v4";
-import { ArrowLeft, Camera, LogOut } from "lucide-react";
+import { useThemeStore } from "@/store/useThemeStore";
+import { ArrowLeft, Camera, LogOut, Sun, Moon } from "lucide-react";
 
 function compressImage(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -35,6 +36,7 @@ function compressImage(file: File): Promise<string> {
 export default function ProfilePage() {
   const router = useRouter();
   const { currentUser, updateProfile, logout } = useSessionStore();
+  const { theme, setTheme } = useThemeStore();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [nama, setNama] = useState(currentUser?.nama || "");
@@ -237,6 +239,25 @@ export default function ProfilePage() {
             </button>
           </form>
         )}
+      </div>
+
+      {/* Dark Mode Toggle */}
+      <div className="premium-card p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {theme === "dark" ? <Moon className="w-4 h-4 text-[#008CEB]" /> : <Sun className="w-4 h-4 text-amber-500" />}
+            <div>
+              <p className="text-xs font-heading font-bold">Tampilan Gelap</p>
+              <p className="text-[9px] text-slate-400">Beralih antara terang dan gelap</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className={`w-12 h-6 rounded-full transition-colors ${theme === "dark" ? "bg-[#008CEB]" : "bg-slate-300"} relative`}
+          >
+            <div className={`w-5 h-5 rounded-full bg-white shadow-md absolute top-0.5 transition-transform ${theme === "dark" ? "translate-x-6" : "translate-x-0.5"}`} />
+          </button>
+        </div>
       </div>
 
       {/* Info */}
