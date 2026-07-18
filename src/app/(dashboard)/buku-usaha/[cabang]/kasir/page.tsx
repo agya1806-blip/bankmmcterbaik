@@ -538,8 +538,8 @@ export default function PosKasirPage() {
       {/* Edit Modal */}
       <AnimatePresence>
         {editingTx && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4" onClick={() => setEditingTx(null)}>
-            <motion.div initial={{ y: 200 }} animate={{ y: 0 }} exit={{ y: 200 }} onClick={e => e.stopPropagation()} className="w-full max-w-md bg-white dark:bg-[#131527] rounded-2xl p-4 space-y-3">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setEditingTx(null)}>
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} onClick={e => e.stopPropagation()} className="w-full max-w-md bg-white dark:bg-[#131527] rounded-2xl p-4 space-y-3">
               <h3 className="text-sm font-heading font-extrabold">Edit Transaksi</h3>
               <p className="text-[10px] text-slate-400">{editingTx.invoiceNumber}</p>
               <div>
@@ -562,8 +562,8 @@ export default function PosKasirPage() {
       {/* Invoice Modal */}
       <AnimatePresence>
         {showInvoice && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4" onClick={() => setShowInvoice(null)}>
-            <motion.div initial={{ y: 200 }} animate={{ y: 0 }} exit={{ y: 200 }} onClick={e => e.stopPropagation()} className="w-full max-w-md bg-white dark:bg-[#131527] rounded-2xl p-4 space-y-3 max-h-[80vh] overflow-y-auto">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowInvoice(null)}>
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} onClick={e => e.stopPropagation()} className="w-full max-w-md bg-white dark:bg-[#131527] rounded-2xl p-4 space-y-3 max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-heading font-extrabold">Invoice</h3>
                 <button onClick={() => setShowInvoice(null)} className="p-1"><X className="w-4 h-4" /></button>

@@ -267,13 +267,13 @@ export default function InventoryPage() {
 
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center backdrop-blur-sm">
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
             <motion.div
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 250 }}
-              className="w-full max-w-md bg-white dark:bg-[#131527] rounded-t-[32px] p-5 pb-8 space-y-4 shadow-2xl"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="w-full max-w-md bg-white dark:bg-[#131527] rounded-2xl p-5 pb-8 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-800">
                 <h3 className="text-sm font-extrabold">
