@@ -27,8 +27,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[#F8F9FD] dark:bg-[#0B0C16] text-slate-900 dark:text-slate-100 flex flex-col items-center justify-start overflow-x-hidden">
-      <div className="w-full max-w-md min-h-screen flex flex-col bg-[#F8F9FD] dark:bg-[#0B0C16] shadow-2xl relative border-x border-slate-100 dark:border-zinc-900">
-        <main className="flex-1 w-full pt-[calc(env(safe-area-inset-top)+1rem)] pb-[110px] flex flex-col px-4">
+      <div className="w-full max-w-md lg:max-w-5xl xl:max-w-6xl min-h-screen flex flex-col bg-[#F8F9FD] dark:bg-[#0B0C16] lg:shadow-2xl relative lg:border-x border-slate-100 dark:border-zinc-900 lg:my-4 lg:rounded-2xl">
+        <main className="flex-1 w-full pt-[calc(env(safe-area-inset-top)+1rem)] lg:pt-4 pb-[110px] lg:pb-6 flex flex-col px-4">
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
@@ -44,7 +44,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </main>
 
         {!isAuthPage && onboardingCompleted && currentUser && (
-          <BottomNav />
+          <div className="lg:hidden">
+            <BottomNav />
+          </div>
         )}
       </div>
     </div>
