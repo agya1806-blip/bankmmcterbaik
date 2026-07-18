@@ -174,6 +174,7 @@ export interface DbTransaction {
   dpDibayar: number;
   sisaTagihan: number;
   sedekahNominal: number;
+  sedekahType?: SedekahType;
   status: TransStatus;
   walletIdTarget: string;
   catatan: string;

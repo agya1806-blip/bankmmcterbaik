@@ -196,6 +196,7 @@ export async function executeTransactionPipelineV4(
       dpDibayar,
       sisaTagihan,
       sedekahNominal,
+      sedekahType: sedekahNominal > 0 ? sedekahType : undefined,
       status,
       walletIdTarget,
       catatan: catatan ?? "",

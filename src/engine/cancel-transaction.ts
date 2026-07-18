@@ -138,9 +138,10 @@ export async function executeCancelTransaction(
         .equals(unitId)
         .first();
       if (sedekahRecord) {
-        /* We don't know the sedekahType from old tx, so subtract from zakatMal as default */
+        const field = tx.sedekahType || "zakatMal";
+        const current = sedekahRecord[field] || 0;
         await db.sedekahBalances.update(sedekahRecord.id, {
-          zakatMal: Math.max(0, (sedekahRecord.zakatMal || 0) - tx.sedekahNominal),
+          [field]: Math.max(0, current - tx.sedekahNominal),
         });
       }
     }
