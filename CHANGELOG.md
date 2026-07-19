@@ -1,4 +1,40 @@
-# CHANGELOG — Refactor Navigasi & Menu
+# CHANGELOG
+
+## v0.2.0 — Production Hardening & Security Audit (2026-07-19)
+
+### 🔐 Security Fixes
+- **PIN hashing upgrade**: SHA-256 (tanpa salt) → PBKDF2 + salt 16-byte + 100.000 iterasi. Backward compatible dengan legacy hash.
+- **Forgot PIN verification**: Sekarang membutuhkan verifikasi PIN lama sebelum reset.
+- **AuthService bug fixes**: 3 bugs diperbaiki — plaintext comparison (`pinHash !== pin`), plaintext storage di register dan changePin.
+- **Route protection**: AppShell sekarang redirect unauthenticated users ke `/login`.
+- **Hydration-safe initialization**: Zustand `onRehydrateStorage` + `isInitializing` state mencegah flash-of-unauthenticated-content.
+
+### 🗄️ Database Fixes
+- **Version ordering**: v6→v5→v4→v3→v7 → v3→v4→v5→v6→v7 (ascending).
+- **recurringTemplates**: Ditambahkan ke v7 schema (sebelumnya hanya ada di v4, tidak dibuat untuk instalasi baru).
+
+### ⚡ Performance
+- **useLiveQuery**: Polling 2s → reactive changes-based + fallback 10s polling.
+- **Activity throttle**: Inactivity wrapper update dibatasi 30s (sebelumnya setiap event).
+- **Unused dependencies**: Hapus @base-ui/react, idb, shadcn, class-variance-authority (195 packages removed).
+
+### 🧹 Code Quality
+- **Skeleton component**: Konsolidasi `components/skeleton.tsx` → `components/ui/skeleton.tsx`. Tambah SkeletonLine, SkeletonCircle exports.
+- **Barrel exports**: Semua varian skeleton di-export dari `components/ui/index.ts`.
+- **Empty utils/**: Direktori `src/utils/` dihapus.
+
+### 🌐 PWA
+- **Icons**: SVG icons 192x192 dan 512x512 untuk manifest.
+- **Service Worker**: Cache statis + offline fallback.
+- **Error pages**: Custom 404, global-error (500), dan `/offline` page.
+- **Service Worker register**: Auto-register di root layout.
+
+### 📦 Dependency Cleanup
+- Removed: `@base-ui/react`, `idb`, `shadcn`, `class-variance-authority`
+
+---
+
+## v0.1.0 — Refactor Navigasi & Menu
 
 ## Arsitektur Navigasi Baru
 
