@@ -2,16 +2,6 @@
 import React, { useState } from "react";
 import { cn } from "./cn";
 
-/**
- * Simple tooltip that appears on hover/focus.
- *
- * @example
- * ```tsx
- * <Tooltip content="Hapus item">
- *   <button>X</button>
- * </Tooltip>
- * ```
- */
 interface TooltipProps {
   content: string;
   children: React.ReactNode;
@@ -28,24 +18,11 @@ const positionStyles: Record<string, string> = {
 
 export function Tooltip({ content, children, position = "top", className }: TooltipProps) {
   const [visible, setVisible] = useState(false);
-
   return (
-    <div
-      className={cn("relative inline-flex", className)}
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
-      onFocus={() => setVisible(true)}
-      onBlur={() => setVisible(false)}
-    >
+    <div className={cn("relative inline-flex", className)} onMouseEnter={() => setVisible(true)} onMouseLeave={() => setVisible(false)} onFocus={() => setVisible(true)} onBlur={() => setVisible(false)}>
       {children}
       {visible && (
-        <div
-          className={cn(
-            "absolute z-[200] px-2 py-1 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-[9px] font-bold whitespace-nowrap pointer-events-none animate-fade-in",
-            positionStyles[position]
-          )}
-          role="tooltip"
-        >
+        <div className={cn("absolute z-[200] px-2.5 py-1.5 rounded-xl bg-zinc-900 dark:bg-slate-100 text-white dark:text-zinc-900 text-[9px] font-bold whitespace-nowrap pointer-events-none shadow-lg", positionStyles[position])} role="tooltip">
           {content}
         </div>
       )}

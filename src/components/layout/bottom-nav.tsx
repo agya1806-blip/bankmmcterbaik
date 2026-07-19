@@ -1,74 +1,53 @@
 "use client";
-
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { LayoutDashboard, BookOpen, Receipt, BarChart3, User } from "lucide-react";
-import { cn } from "@/components/ui/cn";
+
+const NAV_ITEMS = [
+  { href: "/", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/buku", icon: BookOpen, label: "Buku" },
+  { href: "/buku", icon: Receipt, label: "Transaksi", dynamic: true },
+  { href: "/buku", icon: BarChart3, label: "Laporan", dynamic: true },
+  { href: "/profile", icon: User, label: "Profil" },
+];
 
 export default function BottomNav() {
   const pathname = usePathname();
 
-  const getTransaksiUrl = () => {
+  const getHref = (item: typeof NAV_ITEMS[0]) => {
+    if (!item.dynamic) return item.href;
     if (pathname.startsWith("/buku-pribadi")) return "/buku-pribadi/cashflow";
     if (pathname.startsWith("/buku-keluarga")) return "/buku-keluarga/cashflow";
-    const match = pathname.match(/^\/buku-bisnis\/([^\/]+)/);
-    if (match) return `/buku-bisnis/${match[1]}/transaksi`;
+    const match = pathname.match(/^\/buku-bisnis\/([^/]+)/);
+    if (match) {
+      if (item.label === "Transaksi") return `/buku-bisnis/${match[1]}/transaksi`;
+      if (item.label === "Laporan") return `/buku-bisnis/${match[1]}/laporan`;
+    }
     return "/buku";
   };
 
-  const getLaporanUrl = () => {
-    if (pathname.startsWith("/buku-pribadi")) return "/buku-pribadi";
-    if (pathname.startsWith("/buku-keluarga")) return "/buku-keluarga";
-    const match = pathname.match(/^\/buku-bisnis\/([^\/]+)/);
-    if (match) return `/buku-bisnis/${match[1]}/laporan`;
-    return "/buku";
-  };
-
-  const items = [
-    { label: "Dashboard", icon: LayoutDashboard, href: "/" },
-    { label: "Buku", icon: BookOpen, href: "/buku" },
-    { label: "Transaksi", icon: Receipt, href: getTransaksiUrl() },
-    { label: "Laporan", icon: BarChart3, href: getLaporanUrl() },
-    { label: "Profil", icon: User, href: "/profile" },
-  ];
-
-  const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
+  const isActive = (href: string) => pathname === href || (href !== "/" && pathname.startsWith(href));
 
   return (
-    <div className="fixed bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-[500px] h-16 bg-white/90 dark:bg-[#131527]/90 backdrop-blur-xl rounded-2xl border border-slate-100 dark:border-slate-800/60 shadow-2xl z-40 flex items-center justify-around px-1 transition-all duration-300 pb-safe">
-      {items.map((item) => {
-        const active = isActive(item.href);
-        return (
-          <Link
-            key={item.label}
-            href={item.href}
-            className="relative flex flex-col items-center justify-center w-14 h-14 active:scale-90 transition-transform"
-          >
-            <item.icon
-              className={cn(
-                "w-5 h-5 transition-colors duration-200",
-                active ? "text-[#008CEB]" : "text-slate-400 dark:text-slate-500"
-              )}
-            />
-            <span
-              className={cn(
-                "text-[9px] mt-0.5 font-semibold transition-colors duration-200",
-                active ? "text-[#008CEB]" : "text-slate-400 dark:text-slate-500"
-              )}
-            >
-              {item.label}
-            </span>
-            {active && (
-              <motion.div
-                layoutId="nav-dot"
-                className="absolute -bottom-0.5 w-1.5 h-1.5 bg-[#008CEB] rounded-full"
-              />
-            )}
-          </Link>
-        );
-      })}
-    </div>
+    <nav className="glass-nav safe-area-inset-bottom">
+      <div className="max-w-lg mx-auto flex items-center justify-around h-16 px-2">
+        {NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const href = getHref(item);
+          const active = item.dynamic ? false : isActive(href);
+          return (
+            <Link key={item.label} href={href} className="relative flex flex-col items-center justify-center w-14 h-full gap-0.5">
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-200 ${active ? "bg-emerald-50 dark:bg-emerald-950/30" : ""}`}>
+                <Icon className={`w-5 h-5 transition-colors duration-200 ${active ? "text-emerald-500" : "text-slate-400 dark:text-slate-500"}`} />
+              </div>
+              <span className={`text-[9px] font-bold transition-colors duration-200 ${active ? "text-emerald-500" : "text-slate-400 dark:text-slate-500"}`}>{item.label}</span>
+              {active && <motion.div layoutId="nav-active" className="absolute -top-0.5 w-6 h-0.5 rounded-full bg-emerald-500" />}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }

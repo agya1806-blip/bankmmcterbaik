@@ -18,7 +18,7 @@ export { Drawer } from "./drawer";
 export { SearchInput } from "./search-input";
 export { CurrencyInput } from "./currency-input";
 export { DateInput } from "./date-input";
-export { Tabs, Tab } from "./tabs";
+export { Tabs, TabContent as Tab } from "./tabs";
 export { Dropdown } from "./dropdown";
 export { Tooltip } from "./tooltip";
 export { Breadcrumb } from "./breadcrumb";

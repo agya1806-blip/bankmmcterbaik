@@ -2,21 +2,6 @@
 import React from "react";
 import { cn } from "./cn";
 
-/**
- * Tabs container that manages active tab state.
- *
- * @example
- * ```tsx
- * <Tabs
- *   tabs={[
- *     { key: "detail", label: "Detail" },
- *     { key: "riwayat", label: "Riwayat" },
- *   ]}
- *   activeTab={activeTab}
- *   onChange={setActiveTab}
- * />
- * ```
- */
 interface Tab {
   key: string;
   label: string;
@@ -28,32 +13,21 @@ interface TabsProps {
   activeTab: string;
   onChange: (key: string) => void;
   className?: string;
-  variant?: "pill" | "underline";
 }
 
-export function Tabs({ tabs, activeTab, onChange, className, variant = "pill" }: TabsProps) {
+export function Tabs({ tabs, activeTab, onChange, className }: TabsProps) {
   return (
-    <div className={cn(
-      "flex gap-1 overflow-x-auto scrollbar-hide -mx-1 px-1",
-      variant === "underline" && "border-b border-slate-200 dark:border-slate-800 gap-0",
-      className
-    )}>
+    <div className={cn("flex gap-1 p-1 bg-slate-100 dark:bg-zinc-800 rounded-2xl", className)}>
       {tabs.map((tab) => (
         <button
           key={tab.key}
           type="button"
           onClick={() => onChange(tab.key)}
           className={cn(
-            "flex items-center gap-1.5 whitespace-nowrap transition-all scale-press",
-            variant === "pill" ? (
-              activeTab === tab.key
-                ? "tab-pill tab-pill-active"
-                : "tab-pill tab-pill-inactive"
-            ) : (
-              activeTab === tab.key
-                ? "px-3 py-2 text-[11px] font-bold text-[#008CEB] border-b-2 border-[#008CEB] -mb-[1px]"
-                : "px-3 py-2 text-[11px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-            )
+            "flex items-center gap-1.5 px-4 py-2 text-[11px] font-bold rounded-xl whitespace-nowrap transition-all",
+            activeTab === tab.key
+              ? "bg-white dark:bg-zinc-900 text-emerald-600 dark:text-emerald-400 shadow-sm"
+              : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
           )}
           role="tab"
           aria-selected={activeTab === tab.key}
@@ -66,27 +40,13 @@ export function Tabs({ tabs, activeTab, onChange, className, variant = "pill" }:
   );
 }
 
-/**
- * Individual Tab content panel (shown when active).
- *
- * @example
- * ```tsx
- * <Tab active={activeTab === "detail"}>
- *   Konten detail...
- * </Tab>
- * ```
- */
-interface TabProps {
+interface TabContentProps {
   children: React.ReactNode;
   active: boolean;
   className?: string;
 }
 
-export function Tab({ children, active, className }: TabProps) {
+export function TabContent({ children, active, className }: TabContentProps) {
   if (!active) return null;
-  return (
-    <div className={cn("animate-fade-in", className)} role="tabpanel">
-      {children}
-    </div>
-  );
+  return <div className={cn("mt-4", className)} role="tabpanel">{children}</div>;
 }

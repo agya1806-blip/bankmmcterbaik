@@ -31,7 +31,7 @@ function formatCabang(slug: string): string {
 function useSidebarMenu(): SidebarGroup[] {
   const pathname = usePathname();
 
-  const match = pathname.match(/^\/buku-bisnis\/([^\/]+)/);
+  const match = pathname.match(/^\/buku-bisnis\/([^/]+)/);
   const cabang = match ? match[1] : null;
   const isUnitPage = cabang !== null;
 
@@ -219,7 +219,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
   const sidebarContent = (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-3 h-16 px-5 border-b border-slate-100 dark:border-slate-800/60 shrink-0">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center text-white text-sm font-extrabold shadow-lg shadow-[#008CEB]/20">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-400 flex items-center justify-center text-white text-sm font-extrabold shadow-lg shadow-emerald-500/20">
           M
         </div>
         <div>
@@ -248,16 +248,16 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                     className={cn(
                       "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 group",
                       active
-                        ? "bg-[#008CEB]/10 text-[#008CEB] dark:text-[#60B5FF] font-bold"
+                        ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 font-bold"
                         : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-700 dark:hover:text-slate-300"
                     )}
                   >
-                    <span className={cn("shrink-0", active ? "text-[#008CEB]" : "text-slate-400 group-hover:text-slate-500")}>
+                    <span className={cn("shrink-0", active ? "text-emerald-500" : "text-slate-400 group-hover:text-slate-500")}>
                       {item.icon}
                     </span>
                     <span className="truncate">{item.label}</span>
                     {active && (
-                      <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#008CEB]" />
+                      <div className="ml-auto w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     )}
                   </button>
                 );
@@ -278,7 +278,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-          <div className="absolute left-0 top-0 bottom-0 w-[280px] bg-white dark:bg-[#0F1926] shadow-2xl animate-slide-up">
+          <div className="absolute left-0 top-0 bottom-0 w-[280px] bg-white/90 dark:bg-[#0F1926]/90 backdrop-blur-xl shadow-2xl">
             <button
               onClick={onClose}
               className="absolute top-3 right-3 w-8 h-8 rounded-xl flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"

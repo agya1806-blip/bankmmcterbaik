@@ -3,39 +3,30 @@ import { cn } from "./cn";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  helper?: string;
   error?: string;
-  icon?: React.ReactNode;
 }
 
-export function Input({ className, label, error, icon, ...props }: InputProps) {
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(({ label, helper, error, className, id, ...props }, ref) => {
+  const inputId = id || label?.toLowerCase().replace(/\s+/g, "-");
   return (
-    <div className="flex flex-col gap-1">
-      {label && (
-        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-          {label}
-        </label>
-      )}
-      <div className="relative">
-        {icon && (
-          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
-            {icon}
-          </div>
+    <div className="space-y-1.5">
+      {label && <label htmlFor={inputId} className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 tracking-wide uppercase">{label}</label>}
+      <input
+        ref={ref}
+        id={inputId}
+        className={cn(
+          "w-full h-10 px-4 rounded-2xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-slate-800 dark:text-slate-200",
+          "focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500",
+          "placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all duration-200",
+          error && "border-red-400 focus:border-red-500 focus:ring-red-500/30",
+          className
         )}
-        <input
-          className={cn(
-            "w-full h-10 rounded-xl border border-slate-200 dark:border-slate-700",
-            "bg-white dark:bg-[#0F1926] text-sm",
-            "focus:outline-none focus:ring-2 focus:ring-[#008CEB]/40 focus:border-transparent",
-            "placeholder:text-slate-400 dark:placeholder:text-slate-500",
-            "transition-all duration-200",
-            icon ? "pl-10 pr-4" : "px-4",
-            error && "border-rose-300 focus:ring-rose-500/40",
-            className
-          )}
-          {...props}
-        />
-      </div>
-      {error && <p className="text-[10px] text-rose-500 font-medium">{error}</p>}
+        {...props}
+      />
+      {helper && !error && <p className="text-[10px] text-slate-400">{helper}</p>}
+      {error && <p className="text-[10px] text-red-500 font-medium">{error}</p>}
     </div>
   );
-}
+});
+Input.displayName = "Input";

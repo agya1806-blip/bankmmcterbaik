@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
@@ -8,6 +7,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
 import BottomNav from "./bottom-nav";
+import NotificationChecker from "./notification-checker";
+import RecurringScheduler from "./recurring-scheduler";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,61 +17,36 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-      root.style.colorScheme = "dark";
-    } else {
-      root.classList.remove("dark");
-      root.style.colorScheme = "light";
-    }
+    const root = document.documentElement;
+    if (theme === "dark") { root.classList.add("dark"); root.style.colorScheme = "dark"; }
+    else { root.classList.remove("dark"); root.style.colorScheme = "light"; }
   }, [theme]);
 
-  const isAuthPage =
-    pathname.includes("/login") ||
-    pathname.includes("/register") ||
-    pathname.includes("/forgot-pin");
-
-  if (isAuthPage) {
-    return <>{children}</>;
-  }
+  const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/forgot-pin");
+  if (isAuthPage) return <>{children}</>;
 
   const showNav = onboardingCompleted && currentUser;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FD] dark:bg-[#0B0C16] text-slate-900 dark:text-slate-100 flex">
-      {/* Sidebar — desktop only */}
+    <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex">
       {showNav && <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />}
-
-      {/* Main area */}
       <div className="flex-1 flex flex-col min-h-screen max-w-full">
-        {/* Header — all screens */}
-        {showNav && (
-          <Header onMenuToggle={() => setSidebarOpen(true)} />
-        )}
-
-        {/* Page content */}
-        <main className="flex-1 flex flex-col w-full">
+        {showNav && <Header onMenuToggle={() => setSidebarOpen(true)} />}
+        <main className="flex-1 flex flex-col w-full px-4 sm:px-6 lg:px-8 pt-4 pb-24 lg:pb-8 max-w-7xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
-              initial={{ opacity: 0, y: 6 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.15, ease: "easeInOut" }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18, ease: "easeInOut" }}
               className="w-full flex-1 flex flex-col"
             >
               {children}
             </motion.div>
           </AnimatePresence>
         </main>
-
-        {/* Bottom Nav — mobile only */}
-        {showNav && (
-          <div className="lg:hidden">
-            <BottomNav />
-          </div>
-        )}
+        {showNav && <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40"><BottomNav /></div>}
       </div>
     </div>
   );

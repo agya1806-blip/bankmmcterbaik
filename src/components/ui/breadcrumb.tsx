@@ -3,24 +3,9 @@ import React from "react";
 import { ChevronRight, Home } from "lucide-react";
 import { cn } from "./cn";
 
-/**
- * Breadcrumb navigation component.
- *
- * @example
- * ```tsx
- * <Breadcrumb
- *   items={[
- *     { label: "Beranda", href: "/" },
- *     { label: "Produk", href: "/products" },
- *     { label: "Detail" },
- *   ]}
- * />
- * ```
- */
 interface BreadcrumbItem {
   label: string;
   href?: string;
-  icon?: React.ReactNode;
 }
 
 interface BreadcrumbProps {
@@ -43,24 +28,11 @@ export function Breadcrumb({ items, className, homeIcon = true }: BreadcrumbProp
         return (
           <React.Fragment key={i}>
             {item.href ? (
-              <a
-                href={item.href}
-                className={cn(
-                  "text-[10px] font-bold whitespace-nowrap transition-colors",
-                  isLast
-                    ? "text-slate-800 dark:text-slate-200 pointer-events-none"
-                    : "text-slate-400 hover:text-[#008CEB]"
-                )}
-              >
+              <a href={item.href} className={cn("text-[10px] font-bold whitespace-nowrap transition-colors", isLast ? "text-slate-800 dark:text-slate-200 pointer-events-none" : "text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400")}>
                 {item.label}
               </a>
             ) : (
-              <span
-                className={cn(
-                  "text-[10px] font-bold whitespace-nowrap",
-                  isLast ? "text-slate-800 dark:text-slate-200" : "text-slate-400"
-                )}
-              >
+              <span className={cn("text-[10px] font-bold whitespace-nowrap", isLast ? "text-slate-800 dark:text-slate-200" : "text-slate-400")}>
                 {item.label}
               </span>
             )}
