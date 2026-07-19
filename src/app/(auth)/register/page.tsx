@@ -39,7 +39,7 @@ export default function RegisterPage() {
 
     login({ id: userId, nama: username.trim(), fotoUrl: "", role: "admin" });
     completeOnboarding();
-    router.push("/buku-usaha");
+    router.push("/");
   };
 
   return (

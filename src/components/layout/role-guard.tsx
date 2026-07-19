@@ -49,7 +49,7 @@ export function RoleGuard({ requiredRole, children, fallback }: RoleGuardProps) 
           Anda tidak memiliki izin untuk mengakses halaman ini.
         </p>
         <button
-          onClick={() => router.push("/buku-usaha")}
+          onClick={() => router.push("/")}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#008CEB] to-[#00C9A7] text-white font-bold text-xs active:scale-[0.98] transition-transform"
         >
           <ArrowLeft className="w-4 h-4" />

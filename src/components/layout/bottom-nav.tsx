@@ -4,8 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { useSessionStore } from "@/store/useSessionStore";
-import { LayoutDashboard, ShoppingCart, Package, Wallet, Menu } from "lucide-react";
+import { LayoutDashboard, User, Home, Building2, Menu } from "lucide-react";
 import { cn } from "@/components/ui/cn";
 
 interface BottomNavProps {
@@ -14,16 +13,13 @@ interface BottomNavProps {
 
 export default function BottomNav({ onMenuClick }: BottomNavProps) {
   const pathname = usePathname();
-  const { currentBranch } = useSessionStore();
-  const cabang = currentBranch || "percetakan";
-
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + "/");
 
   const items = [
-    { label: "Dashboard", icon: LayoutDashboard, href: "/buku-usaha", color: "#008CEB" },
-    { label: "Kasir", icon: ShoppingCart, href: `/buku-usaha/${cabang}/kasir`, color: "#008CEB" },
-    { label: "Inventory", icon: Package, href: `/buku-usaha/${cabang}/inventory`, color: "#008CEB" },
-    { label: "Keuangan", icon: Wallet, href: `/buku-usaha/${cabang}/cashflow`, color: "#008CEB" },
+    { label: "Dashboard", icon: LayoutDashboard, href: "/" },
+    { label: "Pribadi", icon: User, href: "/buku-pribadi" },
+    { label: "Keluarga", icon: Home, href: "/buku-keluarga" },
+    { label: "Bisnis", icon: Building2, href: "/buku-bisnis" },
   ];
 
   return (

@@ -38,7 +38,7 @@ export function Header({ className, onMenuToggle, notifCount = 0, hideSearch }: 
 
         {/* Logo */}
         <button
-          onClick={() => router.push("/buku-usaha")}
+          onClick={() => router.push("/")}
           className="flex items-center gap-2 shrink-0"
         >
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center text-white text-[10px] font-extrabold shadow-md">

@@ -24,7 +24,7 @@ export default function LoginPage() {
 
     login({ id: user.id, nama: user.nama, fotoUrl: user.fotoUrl, role: user.role });
     completeOnboarding();
-    router.push("/buku-usaha");
+    router.push("/");
   };
 
   return (
