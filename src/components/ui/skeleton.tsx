@@ -1,59 +1,19 @@
-"use client";
 import React from "react";
 import { cn } from "./cn";
 
-/**
- * Skeleton loading placeholders for content that hasn't loaded yet.
- *
- * @example
- * ```tsx
- * <Skeleton className="h-4 w-3/4" />
- * <Skeleton variant="card" count={3} />
- * <Skeleton variant="circle" size="w-12 h-12" />
- * ```
- */
-interface SkeletonProps {
-  variant?: "text" | "card" | "circle" | "avatar";
-  count?: number;
-  size?: string;
-  className?: string;
+export function Skeleton({ className }: { className?: string }) {
+  return <div className={cn("h-3 rounded-xl bg-slate-200 dark:bg-zinc-800 animate-pulse", className)} />;
 }
 
-export function Skeleton({ variant = "text", count = 1, size, className }: SkeletonProps) {
-  if (variant === "circle") {
-    return <div className={cn("skeleton rounded-full", size || "w-10 h-10", className)} />;
-  }
-
-  if (variant === "avatar") {
-    return (
-      <div className="flex items-center gap-3">
-        <div className={cn("skeleton rounded-full w-10 h-10", className)} />
-        <div className="flex flex-col gap-2 flex-1">
-          <div className="skeleton h-3 w-1/2" />
-          <div className="skeleton h-2 w-1/4" />
-        </div>
-      </div>
-    );
-  }
-
-  if (variant === "card") {
-    return (
-      <div className="space-y-3">
-        {Array.from({ length: count }).map((_, i) => (
-          <div key={i} className={cn("premium-card p-4 space-y-2", className)}>
-            <div className="skeleton h-4 w-3/4" />
-            <div className="skeleton h-3 w-1/2" />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
+export function SkeletonCard({ count = 3 }: { count?: number }) {
   return (
-    <>
+    <div className="space-y-3">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className={cn("skeleton h-3", className)} />
+        <div key={i} className="bg-white dark:bg-zinc-900/90 rounded-3xl border border-slate-100 dark:border-zinc-800 p-4 space-y-2">
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-3 w-1/2" />
+        </div>
       ))}
-    </>
+    </div>
   );
 }

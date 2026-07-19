@@ -12,7 +12,7 @@ import { SupplierForm } from "@/components/business/supplier/supplier-form";
 import { SupplierTable } from "@/components/business/supplier/supplier-table";
 import { SupplierEmptyState } from "@/components/business/supplier/supplier-empty-state";
 import { SupplierDetailDrawer } from "@/components/business/supplier/supplier-detail-drawer";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonCard } from "@/components/ui/skeleton";
 
 export default function SupplierPage() {
   const params = useParams();
@@ -177,7 +177,7 @@ export default function SupplierPage() {
     return (
       <div className="flex flex-col gap-4 pt-2 pb-4">
         <div className="h-10" />
-        <Skeleton variant="card" count={4} />
+        <SkeletonCard count={4} />
       </div>
     );
   }

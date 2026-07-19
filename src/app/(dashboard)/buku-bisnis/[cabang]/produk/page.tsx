@@ -6,7 +6,7 @@ import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type UnitId, type Inventory, BRANCH_MAP } from "@/lib/db-v4";
 import { showToast } from "@/lib/toast";
 import { productService, inventoryService } from "@/services";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
@@ -299,7 +299,7 @@ export default function MasterProdukPage() {
   if (_products === undefined) {
     return (
       <div className="flex-1 flex flex-col pt-4 space-y-4 p-4">
-        <Skeleton variant="card" count={3} />
+        <SkeletonCard count={3} />
       </div>
     );
   }

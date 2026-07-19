@@ -4,7 +4,6 @@ import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { User, Smartphone } from "lucide-react";
 
 interface CustomerFormProps {
   open: boolean;
@@ -66,7 +65,6 @@ export function CustomerForm({ open, onClose, onSubmit, title, initialData }: Cu
           placeholder="Contoh: Budi"
           value={nama}
           onChange={(e) => setNama(e.target.value)}
-          icon={<User className="w-4 h-4" />}
           required
         />
         <Input
@@ -74,7 +72,6 @@ export function CustomerForm({ open, onClose, onSubmit, title, initialData }: Cu
           placeholder="Contoh: 62812345678"
           value={noWA}
           onChange={(e) => setNoWA(e.target.value)}
-          icon={<Smartphone className="w-4 h-4" />}
           required
         />
         {initialData && (

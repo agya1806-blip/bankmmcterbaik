@@ -7,7 +7,7 @@ import { db, type Customer, BRANCH_MAP } from "@/lib/db-v4";
 import * as XLSX from "xlsx";
 import { showToast } from "@/lib/toast";
 import { PageContainer } from "@/components/layout/page-container";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Check, Gift } from "lucide-react";
@@ -214,7 +214,7 @@ export default function PelangganCRMPage() {
 
   if (_customers === undefined) return (
     <PageContainer>
-      <Skeleton variant="card" count={5} />
+       <SkeletonCard count={5} />
     </PageContainer>
   );
 

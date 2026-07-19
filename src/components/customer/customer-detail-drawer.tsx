@@ -127,7 +127,7 @@ export function CustomerDetailDrawer({
         {/* Riwayat Transaksi Toggle */}
         <div>
           <Button
-            variant={showHistory ? "default" : "outline"}
+            variant={showHistory ? "primary" : "outline"}
             size="sm"
             className="w-full"
             onClick={() => setShowHistory(!showHistory)}

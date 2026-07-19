@@ -1,118 +1,37 @@
 "use client";
-import React, { useEffect, useCallback } from "react";
-import { X } from "lucide-react";
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 import { cn } from "./cn";
-import { Button } from "./button";
 
-/**
- * Modal dialog with overlay, close button, title, description, and footer actions.
- *
- * @example
- * ```tsx
- * <Modal
- *   open={isOpen}
- *   onClose={() => setIsOpen(false)}
- *   title="Hapus Produk"
- *   description="Apakah Anda yakin ingin menghapus produk ini?"
- *   footer={
- *     <div className="flex gap-2">
- *       <Button variant="ghost" onClick={() => setIsOpen(false)}>Batal</Button>
- *       <Button variant="danger" onClick={handleDelete}>Hapus</Button>
- *     </div>
- *   }
- * >
- *   <p>Isi modal body...</p>
- * </Modal>
- * ```
- */
 interface ModalProps {
   open: boolean;
   onClose: () => void;
   title?: string;
-  description?: string;
-  children?: React.ReactNode;
-  footer?: React.ReactNode;
-  className?: string;
   size?: "sm" | "md" | "lg";
+  footer?: React.ReactNode;
+  children: React.ReactNode;
 }
 
-const sizeStyles: Record<string, string> = {
-  sm: "max-w-sm",
-  md: "max-w-md",
-  lg: "max-w-lg",
-};
-
-export function Modal({ open, onClose, title, description, children, footer, className, size = "sm" }: ModalProps) {
-  const handleEscape = useCallback((e: KeyboardEvent) => {
-    if (e.key === "Escape") onClose();
-  }, [onClose]);
-
-  useEffect(() => {
-    if (open) {
-      document.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "";
-    };
-  }, [open, handleEscape]);
-
+export function Modal({ open, onClose, title, size = "md", footer, children }: ModalProps) {
+  useEffect(() => { if (open) { document.body.style.overflow = "hidden"; } else { document.body.style.overflow = ""; } return () => { document.body.style.overflow = ""; }; }, [open]);
+  const widths = { sm: "max-w-sm", md: "max-w-md", lg: "max-w-lg" };
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={onClose}
-            aria-hidden="true"
-          />
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className={cn(
-              "relative w-full bg-white dark:bg-[#0F1926] rounded-3xl p-5 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[85vh] overflow-y-auto",
-              sizeStyles[size],
-              className
-            )}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={title ? "modal-title" : undefined}
-          >
-            <button
-              type="button"
-              onClick={onClose}
-              className="absolute top-4 right-4 w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors scale-press"
-              aria-label="Tutup"
-            >
-              <X className="w-4 h-4 text-slate-500" />
-            </button>
-
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={onClose}>
+          <motion.div initial={{ scale: 0.95, opacity: 0, y: 10 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 10 }} transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className={cn("bg-white dark:bg-zinc-900/95 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-2xl w-full max-h-[85vh] overflow-y-auto", widths[size])} onClick={e => e.stopPropagation()}>
             {title && (
-              <h2 id="modal-title" className="text-base font-bold text-slate-800 dark:text-slate-200 pr-8 font-heading">
-                {title}
-              </h2>
-            )}
-            {description && (
-              <p className="text-[11px] text-slate-400 mt-1">{description}</p>
-            )}
-
-            {children && <div className="mt-4">{children}</div>}
-
-            {footer && (
-              <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800">
-                {footer}
+              <div className="flex items-center justify-between px-5 pt-5 pb-0">
+                <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200">{title}</h2>
+                <button onClick={onClose} className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"><X className="w-4 h-4 text-slate-500" /></button>
               </div>
             )}
+            <div className="p-5">{children}</div>
+            {footer && <div className="px-5 pb-5 pt-0">{footer}</div>}
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
