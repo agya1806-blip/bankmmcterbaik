@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type UnitId, type MataUang, type DbWalletMutation, BRANCH_MAP } from "@/lib/db-v4";
 import { formatCurrency, CURRENCY_NAMES, CURRENCY_SYMBOLS } from "@/lib/currency";
-import { SkeletonCard } from "@/components/skeleton";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { ArrowLeft, Wallet, Save, Pencil, Trash2, DollarSign, Landmark, Smartphone } from "lucide-react";
 import { showToast } from "@/lib/toast";
 import { RoleGuard } from "@/components/layout/role-guard";

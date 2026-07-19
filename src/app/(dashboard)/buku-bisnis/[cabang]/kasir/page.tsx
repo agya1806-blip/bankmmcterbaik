@@ -17,7 +17,7 @@ import { showToast } from "@/lib/toast";
 import KalkulatorHarga from "@/components/business/kalkulator-harga";
 import BarcodeScanner from "@/components/business/barcode-scanner";
 import InvoiceA4 from "@/components/invoice-a4";
-import { SkeletonCard } from "@/components/skeleton";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import PosProductGrid from "@/components/business/pos-product-grid";
 import type { GridCartItem } from "@/components/business/pos-product-grid";
 import PosManualForm from "@/components/business/pos-manual-form";

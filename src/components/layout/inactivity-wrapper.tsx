@@ -12,8 +12,12 @@ export function InactivityWrapper({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const events = ['mousedown', 'keydown', 'touchstart'] as const;
+    let lastUpdate = 0;
 
     const handleActivity = () => {
+      const now = Date.now();
+      if (now - lastUpdate < 30_000) return;
+      lastUpdate = now;
       useSessionStore.getState().updateActivity();
     };
 

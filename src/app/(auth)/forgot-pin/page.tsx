@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/db-v4";
-import { hashPin } from "@/lib/crypto";
+import { hashPin, verifyPin } from "@/lib/crypto";
 import { showToast } from "@/lib/toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Key, CheckCircle, User, Lock, ArrowLeft, Shield, ArrowRight } from "lucide-react";
@@ -11,6 +11,7 @@ import { Key, CheckCircle, User, Lock, ArrowLeft, Shield, ArrowRight } from "luc
 export default function ForgotPinPage() {
   const router = useRouter();
   const [username, setUsername] = useState("");
+  const [oldPin, setOldPin] = useState("");
   const [newPin, setNewPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [step, setStep] = useState<"verify" | "reset">("verify");
@@ -20,10 +21,13 @@ export default function ForgotPinPage() {
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim()) return showToast.error("Username harus diisi!");
+    if (!oldPin || oldPin.length < 4) return showToast.error("PIN saat ini harus diisi!");
     setLoading(true);
     const user = await db.users.where("nama").equals(username.trim()).first();
     setLoading(false);
     if (!user) return showToast.error("Username tidak ditemukan!");
+    const valid = await verifyPin(oldPin, user.pinHash);
+    if (!valid) return showToast.error("PIN saat ini salah!");
     setStep("reset");
   };
 
@@ -102,6 +106,21 @@ export default function ForgotPinPage() {
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       className="input-modern pl-10"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider px-1">PIN Saat Ini</label>
+                  <div className="relative group">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-secondary)] group-focus-within:text-amber-500 transition-colors duration-200" />
+                    <input
+                      type="password"
+                      placeholder="Masukkan PIN saat ini"
+                      value={oldPin}
+                      onChange={(e) => setOldPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      className="input-modern pl-10 tracking-[0.3em]"
+                      maxLength={6}
+                      inputMode="numeric"
                     />
                   </div>
                 </div>

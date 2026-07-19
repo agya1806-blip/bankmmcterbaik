@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, type UnitId, type Transaction, type ProductionStatus, BRANCH_MAP, type DbPiutangInstallment } from '@/lib/db-v4';
 import { formatCurrency } from "@/lib/currency";
-import { SkeletonCard } from "@/components/skeleton";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { ArrowLeft, ClipboardList, FileText, Printer, Image, Phone, BarChart3, X, Search, Tag } from "lucide-react";
 import { showToast } from "@/lib/toast";
 import InvoiceA4 from "@/components/invoice-a4";

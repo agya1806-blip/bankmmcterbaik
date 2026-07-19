@@ -1,5 +1,6 @@
 import { db, type DbUser, type UserRole, type UnitId } from "@/lib/db-v4";
 import { validResult, ValidationResult, requiredError } from "@/services/types";
+import { hashPin, verifyPin } from "@/lib/crypto";
 
 export interface IAuthService {
   login(nama: string, pin: string): Promise<DbUser | null>;
@@ -34,7 +35,7 @@ class AuthService implements IAuthService {
   async login(nama: string, pin: string): Promise<DbUser | null> {
     const user = await db.users.where("nama").equals(nama).first();
     if (!user) return null;
-    if (user.pinHash !== pin) return null;
+    if (!(await verifyPin(pin, user.pinHash))) return null;
     if (!user.isActive) return null;
     return user;
   }
@@ -45,7 +46,7 @@ class AuthService implements IAuthService {
       id: crypto.randomUUID(),
       bookOrBranchId: "usaha-warkop" as UnitId,
       nama: data.nama,
-      pinHash: data.pin,
+      pinHash: await hashPin(data.pin),
       fotoUrl: "",
       role: data.role || "admin",
       allowedUnits: data.allowedUnits || [],
@@ -77,7 +78,7 @@ class AuthService implements IAuthService {
   }
 
   async changePin(id: string, newPin: string): Promise<void> {
-    await db.users.update(id, { pinHash: newPin });
+    await db.users.update(id, { pinHash: await hashPin(newPin) });
   }
 
   validatePin(pin: string): boolean {

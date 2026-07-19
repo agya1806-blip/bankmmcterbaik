@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSessionStore } from "@/store/useSessionStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { AnimatePresence, motion } from "framer-motion";
@@ -12,7 +12,8 @@ import RecurringScheduler from "./recurring-scheduler";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { currentUser, onboardingCompleted } = useSessionStore();
+  const router = useRouter();
+  const { currentUser, onboardingCompleted, isInitializing } = useSessionStore();
   const { theme } = useThemeStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -23,9 +24,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/forgot-pin");
+
+  useEffect(() => {
+    if (isInitializing) return;
+    if (!isAuthPage && !currentUser) router.replace("/login");
+    if (isAuthPage && currentUser) router.replace("/");
+  }, [currentUser, isAuthPage, isInitializing, router]);
+
+  if (isInitializing) return <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center"><div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" /></div>;
+
   if (isAuthPage) return <>{children}</>;
 
-  const showNav = onboardingCompleted && currentUser;
+  if (!currentUser) return null;
+
+  const showNav = onboardingCompleted;
 
   return (
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] flex">

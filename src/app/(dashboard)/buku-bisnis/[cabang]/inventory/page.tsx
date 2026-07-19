@@ -6,7 +6,7 @@ import { useLiveQuery } from "@/hooks/useLiveQuery";
 import { db, type UnitId, type Inventory, type DbInventoryMutation, BRANCH_MAP } from "@/lib/db-v4";
 import { showToast } from "@/lib/toast";
 import { AnimatePresence } from "framer-motion";
-import { SkeletonCard } from "@/components/skeleton";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import { Package, Eye, History, X, AlertTriangle } from "lucide-react";
 import {
   InventoryHeader,

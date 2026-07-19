@@ -499,7 +499,7 @@ class MmcBankDB extends Dexie {
   constructor() {
     super("mmcbank-v6");
 
-    this.version(6).stores({
+    this.version(3).stores({
       users: "id, &nama, role, bookOrBranchId",
       profiles: "id, bookOrBranchId",
       wallets: "id, bookOrBranchId, unitId, tipe, isActive",
@@ -520,32 +520,6 @@ class MmcBankDB extends Dexie {
       productions: "id, bookOrBranchId, unitId, transactionId, status, updatedAt",
       suppliers: "id, bookOrBranchId, unitId, nama",
       purchaseOrders: "id, bookOrBranchId, unitId, poNumber, supplierId, status",
-      budgets: "id, bookOrBranchId, unitId, kategori, periode",
-      periods: "id, bookOrBranchId, unitId, periode, status",
-    });
-
-    this.version(5).stores({
-      users: "id, &nama, role, bookOrBranchId",
-      profiles: "id, bookOrBranchId",
-      wallets: "id, bookOrBranchId, unitId, tipe, isActive",
-      walletMutations: "id, bookOrBranchId, dariWalletId, keWalletId, createdAt",
-      customers: "id, bookOrBranchId, &[bookOrBranchId+noWA], nama",
-      transactions: "id, bookOrBranchId, unitId, userId, customerId, tanggal, status, walletIdTarget, invoiceNumber",
-      piutang: "id, bookOrBranchId, unitId, customerId, status, jatuhTempo, transactionId",
-      piutangInstallments: "id, bookOrBranchId, piutangId, tanggal",
-      inventory: "id, bookOrBranchId, unitId, sku, kategori",
-      inventoryMutations: "id, bookOrBranchId, itemId, tipe, createdAt",
-      labels: "id, bookOrBranchId",
-      labelTags: "id, bookOrBranchId, transaksiRef, labelId",
-      quickOrders: "id, bookOrBranchId",
-      sedekahBalances: "id, bookOrBranchId",
-      invoiceCounters: "id, bookOrBranchId, prefix",
-      auditLogs: "id, bookOrBranchId, action, entityType, entityId, createdAt",
-      cashflows: "id, bookOrBranchId, unitId, tipe, kategori, walletId, referensiId, createdAt",
-      productions: "id, bookOrBranchId, unitId, transactionId, status, updatedAt",
-      suppliers: "id, bookOrBranchId, unitId, nama",
-      purchaseOrders: "id, bookOrBranchId, unitId, poNumber, supplierId, status",
-      budgets: "id, bookOrBranchId, unitId, kategori, periode",
     });
 
     this.version(4).stores({
@@ -572,7 +546,7 @@ class MmcBankDB extends Dexie {
       recurringTemplates: "id, bookOrBranchId, unitId, isActive, tipe",
     });
 
-    this.version(3).stores({
+    this.version(5).stores({
       users: "id, &nama, role, bookOrBranchId",
       profiles: "id, bookOrBranchId",
       wallets: "id, bookOrBranchId, unitId, tipe, isActive",
@@ -593,6 +567,32 @@ class MmcBankDB extends Dexie {
       productions: "id, bookOrBranchId, unitId, transactionId, status, updatedAt",
       suppliers: "id, bookOrBranchId, unitId, nama",
       purchaseOrders: "id, bookOrBranchId, unitId, poNumber, supplierId, status",
+      budgets: "id, bookOrBranchId, unitId, kategori, periode",
+    });
+
+    this.version(6).stores({
+      users: "id, &nama, role, bookOrBranchId",
+      profiles: "id, bookOrBranchId",
+      wallets: "id, bookOrBranchId, unitId, tipe, isActive",
+      walletMutations: "id, bookOrBranchId, dariWalletId, keWalletId, createdAt",
+      customers: "id, bookOrBranchId, &[bookOrBranchId+noWA], nama",
+      transactions: "id, bookOrBranchId, unitId, userId, customerId, tanggal, status, walletIdTarget, invoiceNumber",
+      piutang: "id, bookOrBranchId, unitId, customerId, status, jatuhTempo, transactionId",
+      piutangInstallments: "id, bookOrBranchId, piutangId, tanggal",
+      inventory: "id, bookOrBranchId, unitId, sku, kategori",
+      inventoryMutations: "id, bookOrBranchId, itemId, tipe, createdAt",
+      labels: "id, bookOrBranchId",
+      labelTags: "id, bookOrBranchId, transaksiRef, labelId",
+      quickOrders: "id, bookOrBranchId",
+      sedekahBalances: "id, bookOrBranchId",
+      invoiceCounters: "id, bookOrBranchId, prefix",
+      auditLogs: "id, bookOrBranchId, action, entityType, entityId, createdAt",
+      cashflows: "id, bookOrBranchId, unitId, tipe, kategori, walletId, referensiId, createdAt",
+      productions: "id, bookOrBranchId, unitId, transactionId, status, updatedAt",
+      suppliers: "id, bookOrBranchId, unitId, nama",
+      purchaseOrders: "id, bookOrBranchId, unitId, poNumber, supplierId, status",
+      budgets: "id, bookOrBranchId, unitId, kategori, periode",
+      periods: "id, bookOrBranchId, unitId, periode, status",
     });
 
     this.version(7).stores({
@@ -619,6 +619,7 @@ class MmcBankDB extends Dexie {
       budgets: "id, bookOrBranchId, unitId, kategori, periode",
       periods: "id, bookOrBranchId, unitId, periode, status",
       exchangeRates: "id, from, to",
+      recurringTemplates: "id, bookOrBranchId, unitId, isActive, tipe",
     });
 
     this.on("populate", (tx) => this.seedDefaultData(tx as unknown as DexieTx));

@@ -17,3 +17,11 @@ export function SkeletonCard({ count = 3 }: { count?: number }) {
     </div>
   );
 }
+
+export function SkeletonLine({ className }: { className?: string }) {
+  return <div className={cn("bg-slate-200 dark:bg-zinc-800 rounded animate-pulse", className)} />;
+}
+
+export function SkeletonCircle({ size = "w-10 h-10" }: { size?: string }) {
+  return <div className={cn("bg-slate-200 dark:bg-zinc-800 rounded-full animate-pulse", size)} />;
+}

@@ -37,7 +37,7 @@ export const useSessionStore = create<SessionState>()(
       currentBranch: null,
       onboardingCompleted: false,
       isPinVerified: false,
-      isInitializing: false,
+      isInitializing: true,
       kioskTarget: null,
       lastActivity: Date.now(),
       login: (user) => set({ currentUser: user }),
@@ -56,6 +56,11 @@ export const useSessionStore = create<SessionState>()(
       isKiosk: () => get().kioskTarget !== null,
       updateActivity: () => set({ lastActivity: Date.now() }),
     }),
-    { name: 'mmc-session-store' }
+    {
+      name: 'mmc-session-store',
+      onRehydrateStorage: () => (state) => {
+        if (state) state.setIsInitializing(false);
+      },
+    }
   )
 );

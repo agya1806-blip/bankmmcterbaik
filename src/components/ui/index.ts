@@ -8,7 +8,7 @@ export { Avatar } from "./avatar";
 export { Divider } from "./divider";
 export { EmptyState } from "./empty-state";
 export { LoadingState } from "./loading-state";
-export { Skeleton } from "./skeleton";
+export { Skeleton, SkeletonCard, SkeletonLine, SkeletonCircle } from "./skeleton";
 export { PageHeader } from "./page-header";
 export { SectionHeader } from "./section-header";
 export { StatCard } from "./stat-card";

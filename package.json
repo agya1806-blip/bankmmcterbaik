@@ -12,15 +12,12 @@
     "test:coverage": "jest --coverage --passWithNoTests"
   },
   "dependencies": {
-    "@base-ui/react": "^1.6.0",
-    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "dexie": "^4.4.4",
     "dexie-react-hooks": "^4.4.0",
     "framer-motion": "^12.42.2",
     "html2canvas": "^1.4.1",
-    "idb": "^8.0.3",
     "jspdf": "^4.2.1",
     "jsqr": "^1.4.0",
     "lucide-react": "^0.460.0",
@@ -30,7 +27,6 @@
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.6.0",
     "recharts": "^3.9.2",
-    "shadcn": "^4.13.0",
     "tailwind-merge": "^3.6.0",
     "xlsx": "^0.18.5",
     "zustand": "^5.0.14"
