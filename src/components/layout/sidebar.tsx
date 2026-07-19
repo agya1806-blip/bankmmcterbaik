@@ -2,12 +2,11 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useSessionStore } from "@/store/useSessionStore";
 import { cn } from "@/components/ui/cn";
 import {
-  LayoutDashboard, ShoppingCart, Package, Settings, Users, Truck,
+  LayoutDashboard, ShoppingCart, Package, Settings, Users,
   Wallet, ArrowRightLeft, Receipt, Handshake, Building2, UserCog,
-  BarChart3, X, ChevronRight, CircleUser, Factory,
+  BarChart3, X, CircleUser, BookOpen, User, FileText, Calendar, RefreshCw,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -22,14 +21,139 @@ interface SidebarGroup {
   items: SidebarItem[];
 }
 
+function formatCabang(slug: string): string {
+  return slug
+    .split(/[-_]/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
 function useSidebarMenu(): SidebarGroup[] {
   const pathname = usePathname();
-  const { currentBranch } = useSessionStore();
-  const cabang = currentBranch || "percetakan";
 
-  const groups: SidebarGroup[] = [
+  const match = pathname.match(/^\/buku-bisnis\/([^\/]+)/);
+  const cabang = match ? match[1] : null;
+  const isUnitPage = cabang !== null;
+
+  if (isUnitPage) {
+    return [
+      {
+        label: formatCabang(cabang),
+        items: [
+          {
+            label: "Dashboard",
+            icon: <LayoutDashboard className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}`,
+            isActive: (p) => p === `/buku-bisnis/${cabang}`,
+          },
+          {
+            label: "Kasir",
+            icon: <ShoppingCart className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}/kasir`,
+            isActive: (p) => p.includes("/kasir"),
+          },
+          {
+            label: "Transaksi",
+            icon: <Receipt className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}/transaksi`,
+            isActive: (p) => p.includes("/transaksi"),
+          },
+          {
+            label: "Invoice",
+            icon: <FileText className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}/transaksi`,
+            isActive: (p) => p.includes("/transaksi"),
+          },
+          {
+            label: "Produk",
+            icon: <Package className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}/produk`,
+            isActive: (p) => p.includes("/produk"),
+          },
+          {
+            label: "Pelanggan",
+            icon: <Users className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}/pelanggan`,
+            isActive: (p) => p.includes("/pelanggan"),
+          },
+          {
+            label: "Laporan",
+            icon: <BarChart3 className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}/laporan`,
+            isActive: (p) => p.includes("/laporan"),
+          },
+        ],
+      },
+      {
+        label: "PENGATURAN",
+        items: [
+          {
+            label: "Pengaturan Unit",
+            icon: <Settings className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}/pengaturan`,
+            isActive: (p) => p.includes("/pengaturan"),
+          },
+          {
+            label: "Budget",
+            icon: <Wallet className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}/budget`,
+            isActive: (p) => p.includes("/budget"),
+          },
+          {
+            label: "Period Closing",
+            icon: <Calendar className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}/period`,
+            isActive: (p) => p.includes("/period"),
+          },
+          {
+            label: "Users",
+            icon: <UserCog className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}/users`,
+            isActive: (p) => p.includes("/users"),
+          },
+          {
+            label: "Sedekah",
+            icon: <Handshake className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}/sedekah`,
+            isActive: (p) => p.includes("/sedekah"),
+          },
+          {
+            label: "Exchange Rate",
+            icon: <ArrowRightLeft className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}/exchange-rate`,
+            isActive: (p) => p.includes("/exchange-rate"),
+          },
+          {
+            label: "Recurring",
+            icon: <RefreshCw className="w-4 h-4" />,
+            href: `/buku-bisnis/${cabang}/recurring`,
+            isActive: (p) => p.includes("/recurring"),
+          },
+        ],
+      },
+      {
+        label: "",
+        items: [
+          {
+            label: "Dashboard Utama",
+            icon: <LayoutDashboard className="w-4 h-4" />,
+            href: "/",
+            isActive: (p) => p === "/",
+          },
+          {
+            label: "Buku",
+            icon: <BookOpen className="w-4 h-4" />,
+            href: "/buku",
+            isActive: (p) => p === "/buku",
+          },
+        ],
+      },
+    ];
+  }
+
+  return [
     {
-      label: "",
+      label: "UTAMA",
       items: [
         {
           label: "Dashboard",
@@ -37,115 +161,44 @@ function useSidebarMenu(): SidebarGroup[] {
           href: "/",
           isActive: (p) => p === "/",
         },
-      ],
-    },
-    {
-      label: "OPERASIONAL",
-      items: [
         {
-          label: "Kasir",
-          icon: <ShoppingCart className="w-4 h-4" />,
-          href: `/buku-bisnis/${cabang}/kasir`,
-          isActive: (p) => p.includes("/kasir"),
+          label: "Buku",
+          icon: <BookOpen className="w-4 h-4" />,
+          href: "/buku",
+          isActive: (p) => p === "/buku",
         },
         {
-          label: "Produk",
-          icon: <Package className="w-4 h-4" />,
-          href: `/buku-bisnis/${cabang}/inventory`,
-          isActive: (p) => p.includes("/inventory"),
-        },
-        {
-          label: "Produksi",
-          icon: <Factory className="w-4 h-4" />,
-          href: `/buku-bisnis/${cabang}/produksi`,
-          isActive: (p) => p.includes("/produksi"),
-        },
-        {
-          label: "Pelanggan",
-          icon: <Users className="w-4 h-4" />,
-          href: `/buku-bisnis/${cabang}/pelanggan`,
-          isActive: (p) => p.includes("/pelanggan"),
-        },
-        {
-          label: "Supplier",
-          icon: <Truck className="w-4 h-4" />,
-          href: `/buku-bisnis/${cabang}/supplier`,
-          isActive: (p) => p.includes("/supplier"),
-        },
-      ],
-    },
-    {
-      label: "KEUANGAN",
-      items: [
-        {
-          label: "Dompet",
-          icon: <Wallet className="w-4 h-4" />,
-          href: `/buku-bisnis/${cabang}/dompet`,
-          isActive: (p) => p.includes("/dompet"),
-        },
-        {
-          label: "Cashflow",
-          icon: <Receipt className="w-4 h-4" />,
-          href: `/buku-bisnis/${cabang}/cashflow`,
-          isActive: (p) => p.includes("/cashflow"),
-        },
-        {
-          label: "Transfer",
-          icon: <ArrowRightLeft className="w-4 h-4" />,
-          href: `/buku-bisnis/${cabang}/transfer`,
-          isActive: (p) => p.includes("/transfer"),
-        },
-        {
-          label: "Piutang",
-          icon: <Handshake className="w-4 h-4" />,
-          href: `/buku-bisnis/${cabang}/transaksi`,
-          isActive: (p) => p.includes("/transaksi"),
-        },
-      ],
-    },
-    {
-      label: "OWNER",
-      items: [
-        {
-          label: "Dashboard Utama",
-          icon: <BarChart3 className="w-4 h-4" />,
-          href: "/",
-          isActive: (p) => p === "/",
-        },
-        {
-          label: "Cabang",
-          icon: <Building2 className="w-4 h-4" />,
-          href: "/buku-bisnis",
-          isActive: (p) => p.includes("/buku-bisnis"),
-        },
-        {
-          label: "User",
-          icon: <UserCog className="w-4 h-4" />,
-          href: `/buku-bisnis/${cabang}/users`,
-          isActive: (p) => p.includes("/users"),
-        },
-      ],
-    },
-    {
-      label: "PENGATURAN",
-      items: [
-        {
-          label: "Pengaturan",
-          icon: <Settings className="w-4 h-4" />,
-          href: `/buku-bisnis/${cabang}/pengaturan`,
-          isActive: (p) => p.includes("/pengaturan"),
-        },
-        {
-          label: "Profile",
+          label: "Profil",
           icon: <CircleUser className="w-4 h-4" />,
           href: "/profile",
           isActive: (p) => p === "/profile",
         },
       ],
     },
+    {
+      label: "BUKU",
+      items: [
+        {
+          label: "Pribadi",
+          icon: <User className="w-4 h-4" />,
+          href: "/buku-pribadi",
+          isActive: (p) => p === "/buku-pribadi",
+        },
+        {
+          label: "Keluarga",
+          icon: <Users className="w-4 h-4" />,
+          href: "/buku-keluarga",
+          isActive: (p) => p === "/buku-keluarga",
+        },
+        {
+          label: "Bisnis",
+          icon: <Building2 className="w-4 h-4" />,
+          href: "/buku-bisnis",
+          isActive: (p) => p.startsWith("/buku-bisnis"),
+        },
+      ],
+    },
   ];
-
-  return groups;
 }
 
 interface SidebarProps {
@@ -165,7 +218,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
-      {/* Logo area */}
       <div className="flex items-center gap-3 h-16 px-5 border-b border-slate-100 dark:border-slate-800/60 shrink-0">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center text-white text-sm font-extrabold shadow-lg shadow-[#008CEB]/20">
           M
@@ -178,10 +230,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         </div>
       </div>
 
-      {/* Menu groups */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5 scrollbar-thin">
         {groups.map((group) => (
-          <div key={group.label || "main"}>
+          <div key={group.label || "links"}>
             {group.label && (
               <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400 px-3 mb-2">
                 {group.label}
@@ -220,12 +271,10 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
   return (
     <>
-      {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:flex-col lg:w-[240px] xl:w-[260px] h-screen sticky top-0 bg-white dark:bg-[#0F1926] border-r border-slate-100 dark:border-slate-800/60 shrink-0">
         {sidebarContent}
       </aside>
 
-      {/* Mobile drawer overlay */}
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />

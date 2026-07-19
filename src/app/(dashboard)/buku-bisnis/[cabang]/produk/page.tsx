@@ -24,7 +24,25 @@ import {
 } from "@/components/product";
 import KalkulatorHarga from "@/components/business/kalkulator-harga";
 import BarcodeScanner from "@/components/business/barcode-scanner";
-import { Plus, ArrowLeft } from "lucide-react";
+import { Plus, ArrowLeft, Truck, ClipboardList, QrCode, Tag } from "lucide-react";
+
+function SubFeatureCard({ icon: Icon, label, desc, href }: { icon: any; label: string; desc: string; href: string }) {
+  const router = useRouter();
+  return (
+    <div
+      onClick={() => router.push(href)}
+      className="premium-card p-3 flex items-center gap-3 active:scale-[0.97] transition-transform cursor-pointer"
+    >
+      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center text-white shadow-md shrink-0">
+        <Icon className="w-4 h-4" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-heading font-bold">{label}</p>
+        <p className="text-[8px] text-slate-400">{desc}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function MasterProdukPage() {
   const params = useParams();
@@ -302,6 +320,14 @@ export default function MasterProdukPage() {
         <Button variant="primary" size="icon-sm" onClick={openAddForm}>
           <Plus className="w-5 h-5" />
         </Button>
+      </div>
+
+      {/* Sub-features */}
+      <div className="grid grid-cols-2 gap-2.5">
+        <SubFeatureCard icon={Truck} label="Supplier" desc="Kelola pemasok" href={`/buku-bisnis/${cabangSlug}/supplier`} />
+        <SubFeatureCard icon={ClipboardList} label="Purchase Order" desc="Pesanan pembelian" href={`/buku-bisnis/${cabangSlug}/purchase-order`} />
+        <SubFeatureCard icon={QrCode} label="Barcode" desc="Scan & generate barcode" href={`/buku-bisnis/${cabangSlug}/produk`} />
+        <SubFeatureCard icon={Tag} label="Label & Kategori" desc="Atur label produk" href={`/buku-bisnis/${cabangSlug}/label`} />
       </div>
 
       {/* Summary Cards */}

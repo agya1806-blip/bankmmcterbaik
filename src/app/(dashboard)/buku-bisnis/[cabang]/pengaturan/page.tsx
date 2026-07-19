@@ -10,6 +10,7 @@ import {
   Trash2, AlertTriangle, Download, ExternalLink, Plus, Pencil,
   Wallet, Globe, Phone, MapPin, MessageSquare, Shield, Settings,
   Package, Users, History, ShieldCheck,
+  CalendarRange, RefreshCw, Calendar, Heart,
 } from "lucide-react";
 import { RoleGuard } from "@/components/layout/role-guard";
 
@@ -118,6 +119,19 @@ function PengaturanPageContent() {
           <p className="text-[9px] text-slate-400 capitalize">{BRANCH_LABELS[cabangSlug] || cabangSlug}</p>
         </div>
         <div className="w-9 h-9" />
+      </div>
+
+      {/* ─── Sub-feature Grid ─── */}
+      <div>
+        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-2">Fitur Lainnya</p>
+        <div className="grid grid-cols-2 gap-2.5">
+          <SubFeatureCard icon={CalendarRange} label="Budget" desc="Atur anggaran" href={`/buku-bisnis/${cabangSlug}/budget`} />
+          <SubFeatureCard icon={RefreshCw} label="Transaksi Berulang" desc="Recurring" href={`/buku-bisnis/${cabangSlug}/recurring`} />
+          <SubFeatureCard icon={Users} label="Pengguna" desc="Manajemen user & role" href={`/buku-bisnis/${cabangSlug}/users`} />
+          <SubFeatureCard icon={Calendar} label="Periode Akuntansi" desc="Period closing" href={`/buku-bisnis/${cabangSlug}/period`} />
+          <SubFeatureCard icon={Heart} label="Sedekah" desc="Kelola dana sedekah" href={`/buku-bisnis/${cabangSlug}/sedekah`} />
+          <SubFeatureCard icon={DollarSign} label="Kurs Mata Uang" desc="Exchange rate" href={`/buku-bisnis/${cabangSlug}/exchange-rate`} />
+        </div>
       </div>
 
       {/* ─── Quick Stats ─── */}
@@ -319,4 +333,19 @@ function PengaturanPageContent() {
   );
 }
 
+function SubFeatureCard({ icon: Icon, label, desc, href }: { icon: any, label: string, desc: string, href: string }) {
+  const router = useRouter();
+  return (
+    <div onClick={() => router.push(href)}
+      className="premium-card p-3 flex items-center gap-3 active:scale-[0.97] transition-transform cursor-pointer">
+      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#008CEB] to-[#00C9A7] flex items-center justify-center text-white shadow-md shrink-0">
+        <Icon className="w-4 h-4" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-heading font-bold">{label}</p>
+        <p className="text-[8px] text-slate-400">{desc}</p>
+      </div>
+    </div>
+  );
+}
 

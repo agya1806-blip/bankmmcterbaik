@@ -68,7 +68,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {/* Bottom Nav — mobile only */}
         {showNav && (
           <div className="lg:hidden">
-            <BottomNav onMenuClick={() => setSidebarOpen(true)} />
+            <BottomNav />
           </div>
         )}
       </div>
